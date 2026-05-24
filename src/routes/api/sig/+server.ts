@@ -29,7 +29,7 @@ export const GET: RequestHandler = async ({ request, platform }) => {
 }
 
 async function handler(request: Request, platform: App.Platform | undefined) {
-  const apiKey = platform?.env?.TORN_API_KEY
+  const apiKey = platform?.env?.TORN_PUBLIC_API_KEY
   if (!apiKey) {
     return new Response('TORN_API_KEY not configured', { status: 500 })
   }

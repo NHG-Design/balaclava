@@ -4,7 +4,8 @@ declare global {
   namespace App {
     interface Platform {
       env: {
-        TORN_API_KEY: string
+        TORN_PUBLIC_API_KEY: string
+        TORN_MINIMAL_API_KEY: string
         ASSETS: Fetcher
       }
       context: {
