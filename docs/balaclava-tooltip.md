@@ -9,7 +9,7 @@ unsafeWindow.BalaclavaTooltip
 It is intended to be used by external userscripts via `@require`. The lowest-cost hosting option is GitHub raw content, because it does not depend on this SvelteKit app or Cloudflare Pages bandwidth.
 
 ```javascript
-// @require https://raw.githubusercontent.com/robcsaszar/balaclava/BRANCH_OR_TAG/dist/balaclava-tooltip.user.js
+// @require https://raw.githubusercontent.com/robcsaszar/balaclava/v1.0.0/dist/balaclava-tooltip.user.js
 // @grant   unsafeWindow
 ```
 
