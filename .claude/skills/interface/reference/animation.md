@@ -124,6 +124,21 @@ Replaces the `useEffect(() => setMounted(true))` pattern. Use when browser suppo
 /* Image reveal on scroll: start inset(0 0 100% 0), animate to inset(0 0 0 0) */
 ```
 
+### 3D transforms for depth
+
+`rotateX()` / `rotateY()` with `transform-style: preserve-3d` create real 3D CSS effects. Orbiting animations, coin flips, and depth effects need no JavaScript.
+
+```css
+.wrapper { transform-style: preserve-3d; }
+
+@keyframes orbit {
+  from { transform: translate(-50%, -50%) rotateY(0deg)   translateZ(72px) rotateY(360deg); }
+  to   { transform: translate(-50%, -50%) rotateY(360deg) translateZ(72px) rotateY(0deg); }
+}
+```
+
+`transform-origin` governs every transform's anchor. Default is `center`. Set it to match where the trigger lives — this is what makes popovers feel physically attached to their trigger.
+
 ### translateY percentages
 
 `translateY(100%)` moves an element by its own height regardless of dimensions. Prefer over hardcoded px.

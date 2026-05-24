@@ -107,6 +107,22 @@ Enter can be deliberate (slow), exit must always be snappy.
 .button:active .overlay { transition: clip-path 2s linear; } /* enter: deliberate */
 ```
 
+## Component Personality
+
+Match motion to the component's mood. A professional dashboard should be crisp and fast. A playful tool can be bouncier. Cohesion matters: the easing, duration, visual design, and name should all feel like the same thing.
+
+The Sonner principles (from building a component with 13M+ weekly downloads) apply broadly:
+
+1. **DX over features.** The less friction to adopt, the more people use it. No hooks, no context, no ceremony if avoidable.
+2. **Good defaults beat options.** Most users never customize. Ship beautiful out of the box.
+3. **Naming creates identity.** A memorable name ("Sonner", French for "to ring") beats a discoverable one ("react-toast"). Sacrifice discoverability for memorability when appropriate.
+4. **Handle edge cases invisibly.** Pause timers when the tab hides. Fill gaps with pseudo-elements to maintain hover state. Users never notice — that is exactly right.
+5. **Review your work the next day.** Imperfections you missed during development are obvious with fresh eyes. Play animations at 0.25× speed to catch timing issues invisible at full speed.
+
+## scale() Scales Children
+
+Unlike `width`/`height`, `scale()` also scales an element's children proportionally — font size, icons, and content all scale together. When scaling a button on press, this is a feature, not a bug.
+
 ## Animation Isolation
 
 Isolate CPU-heavy perpetual animations (infinite loops, continuous motion) at the component boundary — never let them trigger re-renders in parent layout components. The pattern applies regardless of framework: a memoized leaf component in React, a standalone `<script>` island in Astro, an isolated component in Vue.

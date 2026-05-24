@@ -84,6 +84,29 @@ These are the highest-signal AI design signatures. Each one fails the slop test 
 **Restated headings** (body copy that repeats what the heading just said)
 → Every word earns its place. The body continues; it doesn't restate.
 
+## Emojis in UI Code
+
+**Emojis in markup, alt text, or text content**
+→ Replace with high-quality icons (Phosphor, Radix Icons, Lucide) or clean SVG primitives. Emojis render inconsistently across platforms, degrade accessibility, and read as unpolished.
+
+## Creative Arsenal (When to Push Beyond Conventional)
+
+When a design needs to feel technically extraordinary, pull from these patterns. Don't use them by default — match ambition to context.
+
+**Navigation:** Mac OS dock magnification hover; magnetic buttons that pull toward the cursor; dynamic island pill that morphs to show status; contextual radial menu expanding at click coordinates.
+
+**Layout:** Bento grid (asymmetric tile-based grouping); masonry (staggered rows without fixed height); split-screen scroll (two halves sliding in opposite directions); curtain reveal (hero parting on scroll).
+
+**Cards:** Parallax tilt tracking mouse coordinates; spotlight border illuminating under cursor; holographic foil with iridescent shift on hover; morphing modal (button expands into full-screen dialog).
+
+**Scroll:** Sticky scroll stack (cards stick and layer); horizontal scroll hijack (vertical → horizontal gallery pan); zoom parallax (central image zooms with scroll); SVG path drawing on scroll.
+
+**Typography:** Kinetic marquee reversing direction on scroll; text mask reveal (large type as window into video background); text scramble (matrix character decode on load); circular text path.
+
+**Micro-interactions:** Directional hover fill (enters from the side the mouse came from); ripple click effect (waves from exact coordinates); mesh gradient background (animated lava-lamp color blobs); skeleton shimmer (light moving across placeholders).
+
+**Performance note:** Never mix animation libraries (e.g. GSAP + Framer Motion) in the same component tree. Use one library per animation context. For isolated canvas or full-page scrolltelling, GSAP/Three.js are appropriate; wrap in strict cleanup on unmount.
+
 ## The AI Slop Test
 
 Run at two altitudes. Both must fail.

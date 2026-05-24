@@ -37,30 +37,33 @@ Every design task is **brand** (marketing, landing, portfolio — design IS the 
 | Code review, "what's wrong with this", "make this better", UX critique | MANDATORY READ [reference/review.md](reference/review.md) |
 | Generating or substantially rewriting UI | MANDATORY READ [reference/forbidden.md](reference/forbidden.md) |
 
-### Extended reference (from impeccable skill — load on demand, do not load by default)
+### Extended reference (load on demand, do not load by default)
 
-The `impeccable` skill ships deeper reference files at `../impeccable/reference/`. Load these when the task needs more than this skill's distilled references cover:
+For deeper content beyond the primary references above:
 
 | Topic | File |
 |---|---|
-| Full heuristics scoring rubric | `../impeccable/reference/heuristics-scoring.md` |
-| Detailed motion design principles | `../impeccable/reference/motion-design.md` |
-| Cognitive load and IA patterns | `../impeccable/reference/cognitive-load.md` |
-| Color and contrast deep-dive | `../impeccable/reference/color-and-contrast.md` |
-| UX writing and microcopy | `../impeccable/reference/ux-writing.md` |
-| Typography deep-dive | `../impeccable/reference/typography.md` |
-| Responsive design | `../impeccable/reference/responsive-design.md` |
-| Interaction design patterns | `../impeccable/reference/interaction-design.md` |
-| Spatial design | `../impeccable/reference/spatial-design.md` |
-| Amplifying bland designs | `../impeccable/reference/bolder.md` |
-| Quieting overstimulating designs | `../impeccable/reference/quieter.md` |
-| Polish pass before shipping | `../impeccable/reference/polish.md` |
-| Delight and personality | `../impeccable/reference/delight.md` |
-| First-run / onboarding flows | `../impeccable/reference/onboard.md` |
-| Error states, i18n, edge cases | `../impeccable/reference/harden.md` |
-| Live browser iteration (with scripts) | `../impeccable/reference/live.md` |
-
-The `impeccable` skill also provides a live browser iteration toolkit at `../impeccable/scripts/` — invoke `node ../impeccable/scripts/live.mjs` to enter visual variant mode for in-browser UI iteration.
+| Brand register deep-dive | MANDATORY READ [reference/brand.md](reference/brand.md) |
+| Product register deep-dive | MANDATORY READ [reference/product.md](reference/product.md) |
+| Heuristics scoring rubric | [reference/heuristics-scoring.md](reference/heuristics-scoring.md) |
+| Motion design principles | [reference/motion-design.md](reference/motion-design.md) |
+| Cognitive load and IA | [reference/cognitive-load.md](reference/cognitive-load.md) |
+| Color and contrast deep-dive | [reference/color-and-contrast.md](reference/color-and-contrast.md) |
+| UX writing and microcopy | [reference/ux-writing.md](reference/ux-writing.md) |
+| Typography deep-dive | [reference/typography.md](reference/typography.md) |
+| Responsive design | [reference/responsive-design.md](reference/responsive-design.md) |
+| Interaction design patterns | [reference/interaction-design.md](reference/interaction-design.md) |
+| Spatial design | [reference/spatial-design.md](reference/spatial-design.md) |
+| Amplifying bland designs | [reference/bolder.md](reference/bolder.md) |
+| Quieting overstimulating designs | [reference/quieter.md](reference/quieter.md) |
+| Polish pass before shipping | [reference/polish.md](reference/polish.md) |
+| Delight and personality | [reference/delight.md](reference/delight.md) |
+| First-run / onboarding flows | [reference/onboard.md](reference/onboard.md) |
+| Error states, i18n, edge cases | [reference/harden.md](reference/harden.md) |
+| Shape: plan UX/UI before coding | [reference/shape.md](reference/shape.md) |
+| Craft: build a feature end-to-end | [reference/craft.md](reference/craft.md) |
+| Overdrive: push past conventional limits | [reference/overdrive.md](reference/overdrive.md) |
+| Live browser iteration | MANDATORY READ [reference/live.md](reference/live.md) — invoke `node scripts/live.mjs` |
 
 If the request doesn't map clearly to any reference ("make this feel better", "this isn't working") — treat it as a UX critique: load `review.md` first, diagnose, then load additional references based on what you find. Multiple references may be loaded simultaneously when a task genuinely spans domains (e.g., "review this animated component" → load both `animation.md` and `review.md`). When generating any UI — not just reviewing — always load `reference/forbidden.md` regardless of which other reference the task maps to.
 
