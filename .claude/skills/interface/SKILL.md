@@ -1,9 +1,9 @@
 ---
-name: ui-craft
+name: interface
 description: Definitive UI/UX design engineering. Use when writing, reviewing, critiquing, animating, or polishing any frontend interface — components, layouts, motion, color, typography, interaction states. Framework-agnostic: applies to any stack (React, Vue, Svelte, plain CSS, etc.). Trigger phrases: "review this UI", "add animations", "polish this", "critique the design", "what easing should I use", "this feels generic", "make this look better", "how should I animate", "color palette", "this looks like AI made it", "what's wrong with this design". Not for backend-only or non-UI tasks.
 ---
 
-# UI Craft
+# Interface
 
 You are a design engineer. The interfaces you build have invisible details that compound into experiences people love without knowing why. In a parity market, taste is the differentiator.
 
@@ -37,6 +37,31 @@ Every design task is **brand** (marketing, landing, portfolio — design IS the 
 | Code review, "what's wrong with this", "make this better", UX critique | MANDATORY READ [reference/review.md](reference/review.md) |
 | Generating or substantially rewriting UI | MANDATORY READ [reference/forbidden.md](reference/forbidden.md) |
 
+### Extended reference (from impeccable skill — load on demand, do not load by default)
+
+The `impeccable` skill ships deeper reference files at `../impeccable/reference/`. Load these when the task needs more than this skill's distilled references cover:
+
+| Topic | File |
+|---|---|
+| Full heuristics scoring rubric | `../impeccable/reference/heuristics-scoring.md` |
+| Detailed motion design principles | `../impeccable/reference/motion-design.md` |
+| Cognitive load and IA patterns | `../impeccable/reference/cognitive-load.md` |
+| Color and contrast deep-dive | `../impeccable/reference/color-and-contrast.md` |
+| UX writing and microcopy | `../impeccable/reference/ux-writing.md` |
+| Typography deep-dive | `../impeccable/reference/typography.md` |
+| Responsive design | `../impeccable/reference/responsive-design.md` |
+| Interaction design patterns | `../impeccable/reference/interaction-design.md` |
+| Spatial design | `../impeccable/reference/spatial-design.md` |
+| Amplifying bland designs | `../impeccable/reference/bolder.md` |
+| Quieting overstimulating designs | `../impeccable/reference/quieter.md` |
+| Polish pass before shipping | `../impeccable/reference/polish.md` |
+| Delight and personality | `../impeccable/reference/delight.md` |
+| First-run / onboarding flows | `../impeccable/reference/onboard.md` |
+| Error states, i18n, edge cases | `../impeccable/reference/harden.md` |
+| Live browser iteration (with scripts) | `../impeccable/reference/live.md` |
+
+The `impeccable` skill also provides a live browser iteration toolkit at `../impeccable/scripts/` — invoke `node ../impeccable/scripts/live.mjs` to enter visual variant mode for in-browser UI iteration.
+
 If the request doesn't map clearly to any reference ("make this feel better", "this isn't working") — treat it as a UX critique: load `review.md` first, diagnose, then load additional references based on what you find. Multiple references may be loaded simultaneously when a task genuinely spans domains (e.g., "review this animated component" → load both `animation.md` and `review.md`). When generating any UI — not just reviewing — always load `reference/forbidden.md` regardless of which other reference the task maps to.
 
 ## NEVER
@@ -65,9 +90,9 @@ If the request doesn't map clearly to any reference ("make this feel better", "t
   **Instead:** Zero animation on command palettes, keyboard shortcuts, or any action triggered 100+ times/day.
   **Why:** Animation accumulates into felt latency. At high frequency, 150ms of "polish" becomes minutes of lost time per workday.
 
-- **NEVER use Framer Motion `x`/`y` shorthand for performance-critical animations**
-  **Instead:** Full transform string: `animate={{ transform: "translateX(100px)" }}`.
-  **Why:** `x`/`y` use `requestAnimationFrame` on the main thread. Under page load they drop frames. The transform string form runs off-thread.
+- **NEVER use a JS motion library's shorthand value props for performance-critical animations**
+  **Instead:** Use the full CSS `transform` string form so the browser can run it off the main thread. In Framer Motion: `animate={{ transform: "translateX(100px)" }}` instead of `animate={{ x: 100 }}`.
+  **Why:** Shorthand props (e.g. `x`, `y`, `scale` in Framer Motion) use `requestAnimationFrame` on the main thread. Under concurrent page load they drop frames. The full `transform` string form — in any library — delegates to the compositor thread and stays smooth.
 
 - **NEVER use `transition: all`**
   **Instead:** Specify exact properties: `transition: transform 200ms ease-out`.
