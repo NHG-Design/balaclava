@@ -26,5 +26,8 @@
       "esbuild",
       "workerd"
     ]
+  },
+  "dependencies": {
+    "workers-og": "^0.0.27"
   }
 }
