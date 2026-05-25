@@ -31,6 +31,13 @@ export const SEL = {
     TITLE_SECTION: '[class*="crimeOptionSection___"]',
 
     /**
+     * Desktop-only status section (large icons). Absent on mobile/tablet layout.
+     * Used to distinguish desktop cards (where the inline $ppn label fits) from
+     * compact mobile cards (where it doesn't).
+     */
+    DESKTOP_STATUS_SECTION: '[class*="desktopStatusSection___"]',
+
+    /**
      * Title bar at the top of the current crime panel.
      */
     TITLE_BAR: '[class*="titleBar___"]',

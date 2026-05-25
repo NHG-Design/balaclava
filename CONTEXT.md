@@ -2,7 +2,7 @@
 
 ## Overview
 
-Balaclava (`balaclava.app`) is a platform of Torn tools built by a player, for players. Operated by Yukio, it is publicly accessible and community-focused — serving live-updating image signatures, Tampermonkey userscripts, and Torn-related web apps. Access to certain features (faction signatures) is gated by a whitelist controlled solely by Yukio.
+Balaclava (`balaclava.app`) is a platform of Torn tools built by a player, for players. Operated by Yukio, it is publicly accessible and community-focused — serving live-updating image signatures, userscripts, and Torn-related web apps. Access to certain features (faction signatures) is gated by a whitelist controlled solely by Yukio.
 
 ## Language
 
@@ -20,7 +20,7 @@ Balaclava (`balaclava.app`) is a platform of Torn tools built by a player, for p
 - **Company**: A player-owned business in Torn with a numeric ID and a roster of Employees. _Avoid_: "guild", "org"
 - **Employee**: A Player who works at a Company. Has a position, effectiveness score, `days_in_company`, wage, and last action.
 - **Company Signature**: A Signature for an Employee, showing effectiveness, position, days in company, and last action. Requires a Limited API key provided by the Company owner. Currently scoped to a single company (Yukio's former company) — not a general multi-company service. _Avoid_: "company image"
-- **Userscript**: A JavaScript file installed via Tampermonkey that modifies the Torn game UI in the browser. Balaclava hosts and distributes userscripts with landing pages, install links, and changelogs. The first userscript targets the Arson crime workflow.
+- **Userscript**: A JavaScript file installed via a userscript manager that modifies the Torn game UI in the browser. Balaclava hosts and distributes userscripts with landing pages, install links, and changelogs. The first userscript targets the Arson crime workflow.
 - **Torn API**: The official HTTP API for Torn. Used by balaclava at request time — there is no local database. All data is fetched live.
 
 ### Arson Crime Domain
@@ -43,13 +43,13 @@ Balaclava (`balaclava.app`) is a platform of Torn tools built by a player, for p
 
 ### Userscript Infrastructure
 
-- **BalaclavaTooltip**: A foundational Tampermonkey userscript library (`balaclava-tooltip.user.js`) providing a universal, viewport-aware tooltip system via Shadow DOM. Distributed as a `@require` dependency for other balaclava userscripts. Exposes `unsafeWindow.BalaclavaTooltip` with `.show()`, `.hide()`, `.configure()`, `.attach()`, `.rescan()`, and `.destroy()`.
+- **BalaclavaTooltip**: A foundational userscript library (`balaclava-tooltip.user.js`) providing a universal, viewport-aware tooltip system via Shadow DOM. Distributed as a `@require` dependency for other balaclava userscripts. Exposes `unsafeWindow.BalaclavaTooltip` with `.show()`, `.hide()`, `.configure()`, `.attach()`, `.rescan()`, and `.destroy()`.
 - **Consumer Script**: A balaclava userscript that depends on BalaclavaTooltip via `@require`. Accesses the tooltip API through `unsafeWindow.BalaclavaTooltip`.
 
 ### Pyromaniac's Ledger
 
 - **Strategy**: A recipe for completing a specific Arson Job scenario — which accelerants to place, ignite, stoke, or dampen, optional evidence to plant, and the expected base payout. Multiple strategies may exist per scenario (e.g. Flamethrower vs. non-FT variants); these share the same payout and are alternatives based on CS level. _Avoid_: "recipe", "build", "loadout"
-- **Strategy Dataset**: The canonical collection of Strategies for all known scenarios, served as a static JSON file from `balaclava.app` and delivered to the userscript via Tampermonkey's `@resource` mechanism. Cached locally by Tampermonkey; refreshed on script update.
+- **Strategy Dataset**: The canonical collection of Strategies for all known scenarios, served as a static JSON file from `balaclava.app` and delivered to the userscript via the userscript manager's `@resource` mechanism. Cached locally by the userscript manager; refreshed on script update.
 - **Strategy Override**: A locally stored author-only patch keyed by `scenarioName` that corrects payout or verification status for all matching Strategy entries. Stored via `GM_setValue`. Applied on top of the Strategy Dataset at runtime. Only accessible in debug mode. _Avoid_: "edit", "correction", "fix"
 - **Profit Per Nerve (PPN)**: The primary ranking metric for Strategies. Calculated as `(payout − material cost) / nerve`. Used to surface the most efficient strategy for a given scenario. _Avoid_: "efficiency", "value"
 

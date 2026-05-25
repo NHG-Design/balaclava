@@ -458,7 +458,7 @@ function buildApiTab(ctx: SettingsCtx): HTMLElement {
     keyGroup.appendChild(keyNote);
 
     const storageNote = el('p', 'pyro-s-section-note');
-    storageNote.textContent = 'Key is stored in Tampermonkey only — never sent to any server other than Torn\'s API.';
+    storageNote.textContent = 'Key is stored by your userscript manager only — never sent to any server other than Torn\'s API.';
     keyGroup.appendChild(storageNote);
 
     const keyRow = el('div', 'pyro-s-key-row');

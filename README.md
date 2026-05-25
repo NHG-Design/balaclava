@@ -1,6 +1,6 @@
 # Balaclava
 
-Balaclava is a Torn-focused platform for live image signatures, web apps, and Tampermonkey userscripts.
+Balaclava is a Torn-focused platform for live image signatures, web apps, and userscripts.
 
 Stack: SvelteKit 2, Svelte 5, TypeScript, Cloudflare Pages, pnpm. See [CONTEXT.md](CONTEXT.md) for the domain model and repository architecture.
 
@@ -21,7 +21,7 @@ There is no dedicated test suite yet. A change is considered verified when both 
 ### Balaclava Tooltip
 
 Source lives in `src/userscripts/balaclava-tooltip/index.ts` and builds to
-`dist/balaclava-tooltip.user.js`, a dependency-free Tampermonkey helper that exposes:
+`dist/balaclava-tooltip.user.js`, a dependency-free userscript that exposes:
 
 ```javascript
 unsafeWindow.BalaclavaTooltip

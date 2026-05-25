@@ -256,7 +256,7 @@ function applyToSection(section: HTMLElement, allRanked: RankedStrategy[], scena
     const bestUnconfirmed = best ? null : (allRanked[0] ?? null);
 
     if (!best && !bestUnconfirmed) {
-        if (debugMode) {
+        if (debugMode && !!section.querySelector(SEL.DESKTOP_STATUS_SECTION)) {
             const label = document.createElement('span');
             label.className = 'pyro-label pyro-label--unconfirmed';
             label.textContent = '?';
@@ -269,7 +269,10 @@ function applyToSection(section: HTMLElement, allRanked: RankedStrategy[], scena
     const display = best ?? bestUnconfirmed!;
     section.classList.add(`pyro-band--${display.band}`);
 
-    if (scenarioEl) {
+    // Desktop cards have room for an inline label; mobile/tablet cards are too
+    // compact (51px height) — band colour + tap-to-tooltip is sufficient there.
+    const isDesktop = !!section.querySelector(SEL.DESKTOP_STATUS_SECTION);
+    if (isDesktop && scenarioEl) {
         const label = document.createElement('span');
         label.className = best ? 'pyro-label' : 'pyro-label pyro-label--unconfirmed';
         label.textContent = formatPpn(display.profitPerNerve);

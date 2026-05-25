@@ -1,6 +1,6 @@
-# Strategy Dataset delivered via Tampermonkey @resource
+# Strategy Dataset delivered via userscript @resource
 
-The Pyromaniac's Ledger Strategy Dataset (~90% of the bundle by bytes) is served as a static JSON file from `balaclava.app` and declared in the userscript header via `@resource`. Tampermonkey fetches and caches it locally at install/update time; at runtime it is read synchronously via `GM_getResourceText` — no network request, no async loading path, no server pressure during gameplay.
+The Pyromaniac's Ledger Strategy Dataset (~90% of the bundle by bytes) is served as a static JSON file from `balaclava.app` and declared in the userscript header via `@resource`. The userscript manager fetches and caches it locally at install/update time; at runtime it is read synchronously via `GM_getResourceText` — no network request, no async loading path, no server pressure during gameplay.
 
 ## Considered options
 
@@ -10,4 +10,4 @@ The Pyromaniac's Ledger Strategy Dataset (~90% of the bundle by bytes) is served
 
 ## Consequences
 
-Strategy data updates are tied to script releases — pushing a new JSON file to `balaclava.app` does nothing for existing installs until the script version is bumped and Tampermonkey re-fetches. This is acceptable because data corrections are infrequent and can be staged locally via Strategy Overrides (see `pyroLedger.v1.strategyOverrides`) before being published in the next release.
+Strategy data updates are tied to script releases — pushing a new JSON file to `balaclava.app` does nothing for existing installs until the script version is bumped and the userscript manager re-fetches. This is acceptable because data corrections are infrequent and can be staged locally via Strategy Overrides (see `pyroLedger.v1.strategyOverrides`) before being published in the next release.

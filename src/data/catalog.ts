@@ -20,15 +20,15 @@ export interface Resource {
 }
 
 export const RESOURCE = {
-    // Liquid fuels
+    // Liquids
     GASOLINE:          'gasoline',
     DIESEL:            'diesel',
     KEROSENE:          'kerosene',
-    // Solid fuels
+    // Solids
     MAGNESIUM:         'magnesium',
     THERMITE:          'thermite',
     POTASSIUM_NITRATE: 'potassium_nitrate',
-    // Gaseous fuels
+    // Gases
     OXYGEN:            'oxygen',
     METHANE:           'methane',
     HYDROGEN:          'hydrogen',
@@ -69,15 +69,15 @@ export const RESOURCE = {
 export type ResourceId = (typeof RESOURCE)[keyof typeof RESOURCE];
 
 export const CATALOG: Readonly<Record<ResourceId, Resource>> = {
-    // Liquid fuels
+    // Liquids
     [RESOURCE.GASOLINE]:          { id: RESOURCE.GASOLINE,          name: 'Gasoline',           kind: 'fuel',     category: 'liquid',   isTool: false, defaultPrice: 1_500,   tornId: 172   },
     [RESOURCE.DIESEL]:            { id: RESOURCE.DIESEL,            name: 'Diesel',             kind: 'fuel',     category: 'liquid',   isTool: false, defaultPrice: 2_500,   tornId: 1458  },
     [RESOURCE.KEROSENE]:          { id: RESOURCE.KEROSENE,          name: 'Kerosene',           kind: 'fuel',     category: 'liquid',   isTool: false, defaultPrice: 4_000,   tornId: 1457  },
-    // Solid fuels
+    // Solids
     [RESOURCE.MAGNESIUM]:         { id: RESOURCE.MAGNESIUM,         name: 'Magnesium Shavings', kind: 'fuel',     category: 'solid',    isTool: false, defaultPrice: 5_000,   tornId: 1462  },
     [RESOURCE.THERMITE]:          { id: RESOURCE.THERMITE,          name: 'Thermite',           kind: 'fuel',     category: 'solid',    isTool: false, defaultPrice: 80_000,  tornId: 1461  },
     [RESOURCE.POTASSIUM_NITRATE]: { id: RESOURCE.POTASSIUM_NITRATE, name: 'Potassium Nitrate',  kind: 'fuel',     category: 'solid',    isTool: false, defaultPrice: 5_000,   tornId: 1264  },
-    // Gaseous fuels
+    // Gases
     [RESOURCE.OXYGEN]:            { id: RESOURCE.OXYGEN,            name: 'Oxygen Tank',        kind: 'fuel',     category: 'gaseous',  isTool: false, defaultPrice: 3_000,   tornId: 1219  },
     [RESOURCE.METHANE]:           { id: RESOURCE.METHANE,           name: 'Methane Tank',       kind: 'fuel',     category: 'gaseous',  isTool: false, defaultPrice: 8_000,   tornId: 1460  },
     [RESOURCE.HYDROGEN]:          { id: RESOURCE.HYDROGEN,          name: 'Hydrogen Tank',      kind: 'fuel',     category: 'gaseous',  isTool: false, defaultPrice: 15_000,  tornId: 1459  },
@@ -89,7 +89,7 @@ export const CATALOG: Readonly<Record<ResourceId, Resource>> = {
     [RESOURCE.BLANKET]:           { id: RESOURCE.BLANKET,           name: 'Blanket',            kind: 'tool',     category: 'dampener', isTool: true,  defaultPrice: 0                      },
     [RESOURCE.SAND]:              { id: RESOURCE.SAND,              name: 'Sand',               kind: 'tool',     category: 'dampener', isTool: false, defaultPrice: 1_000,   tornId: 833   },
     [RESOURCE.FIRE_EXTINGUISHER]: { id: RESOURCE.FIRE_EXTINGUISHER, name: 'Fire Extinguisher',  kind: 'tool',     category: 'dampener', isTool: true,  defaultPrice: 0,       tornId: 1463  },
-    // Evidence (alphabetical)
+    // Evidence
     [RESOURCE.AMMONIA]:           { id: RESOURCE.AMMONIA,           name: 'Ammonia',            kind: 'evidence', category: 'misc',     isTool: false, defaultPrice: 2_000,   tornId: 1248  },
     [RESOURCE.CANNABIS]:          { id: RESOURCE.CANNABIS,          name: 'Cannabis',           kind: 'evidence', category: 'misc',     isTool: false, defaultPrice: 1_500,   tornId: 196   },
     [RESOURCE.COMPASS]:           { id: RESOURCE.COMPASS,           name: 'Compass',            kind: 'evidence', category: 'misc',     isTool: false, defaultPrice: 2_000,   tornId: 407   },

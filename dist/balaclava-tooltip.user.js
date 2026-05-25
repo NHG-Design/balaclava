@@ -2,7 +2,7 @@
 // @name        Balaclava Tooltip
 // @namespace   https://github.com/NHG-Design/balaclava
 // @version     1.0.1
-// @description Universal tooltip injection via Tampermonkey
+// @description Universal tooltip injection for userscript managers
 // @author      Yukio [906148]
 // @license     MIT
 // @supportURL  https://github.com/NHG-Design/balaclava/issues

@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        Torn Pyromaniac's Ledger
 // @namespace   https://github.com/NHG-Design/balaclava
-// @version     0.1.0
+// @version     0.2.0
 // @description Arson profit-per-nerve calculator and strategy guide for Torn's Crimes page
 // @icon        https://www.google.com/s2/favicons?sz=64&domain=torn.com
 // @author      Yukio [906148]
@@ -24,15 +24,15 @@
   // src/data/catalog.ts
   var CATALOG_UPDATED = "2026-05-25";
   var RESOURCE = {
-    // Liquid fuels
+    // Liquids
     GASOLINE: "gasoline",
     DIESEL: "diesel",
     KEROSENE: "kerosene",
-    // Solid fuels
+    // Solids
     MAGNESIUM: "magnesium",
     THERMITE: "thermite",
     POTASSIUM_NITRATE: "potassium_nitrate",
-    // Gaseous fuels
+    // Gases
     OXYGEN: "oxygen",
     METHANE: "methane",
     HYDROGEN: "hydrogen",
@@ -70,15 +70,15 @@
     TOOTHBRUSH: "toothbrush"
   };
   var CATALOG = {
-    // Liquid fuels
+    // Liquids
     [RESOURCE.GASOLINE]: { id: RESOURCE.GASOLINE, name: "Gasoline", kind: "fuel", category: "liquid", isTool: false, defaultPrice: 1500, tornId: 172 },
     [RESOURCE.DIESEL]: { id: RESOURCE.DIESEL, name: "Diesel", kind: "fuel", category: "liquid", isTool: false, defaultPrice: 2500, tornId: 1458 },
     [RESOURCE.KEROSENE]: { id: RESOURCE.KEROSENE, name: "Kerosene", kind: "fuel", category: "liquid", isTool: false, defaultPrice: 4e3, tornId: 1457 },
-    // Solid fuels
+    // Solids
     [RESOURCE.MAGNESIUM]: { id: RESOURCE.MAGNESIUM, name: "Magnesium Shavings", kind: "fuel", category: "solid", isTool: false, defaultPrice: 5e3, tornId: 1462 },
     [RESOURCE.THERMITE]: { id: RESOURCE.THERMITE, name: "Thermite", kind: "fuel", category: "solid", isTool: false, defaultPrice: 8e4, tornId: 1461 },
     [RESOURCE.POTASSIUM_NITRATE]: { id: RESOURCE.POTASSIUM_NITRATE, name: "Potassium Nitrate", kind: "fuel", category: "solid", isTool: false, defaultPrice: 5e3, tornId: 1264 },
-    // Gaseous fuels
+    // Gases
     [RESOURCE.OXYGEN]: { id: RESOURCE.OXYGEN, name: "Oxygen Tank", kind: "fuel", category: "gaseous", isTool: false, defaultPrice: 3e3, tornId: 1219 },
     [RESOURCE.METHANE]: { id: RESOURCE.METHANE, name: "Methane Tank", kind: "fuel", category: "gaseous", isTool: false, defaultPrice: 8e3, tornId: 1460 },
     [RESOURCE.HYDROGEN]: { id: RESOURCE.HYDROGEN, name: "Hydrogen Tank", kind: "fuel", category: "gaseous", isTool: false, defaultPrice: 15e3, tornId: 1459 },
@@ -90,7 +90,7 @@
     [RESOURCE.BLANKET]: { id: RESOURCE.BLANKET, name: "Blanket", kind: "tool", category: "dampener", isTool: true, defaultPrice: 0 },
     [RESOURCE.SAND]: { id: RESOURCE.SAND, name: "Sand", kind: "tool", category: "dampener", isTool: false, defaultPrice: 1e3, tornId: 833 },
     [RESOURCE.FIRE_EXTINGUISHER]: { id: RESOURCE.FIRE_EXTINGUISHER, name: "Fire Extinguisher", kind: "tool", category: "dampener", isTool: true, defaultPrice: 0, tornId: 1463 },
-    // Evidence (alphabetical)
+    // Evidence
     [RESOURCE.AMMONIA]: { id: RESOURCE.AMMONIA, name: "Ammonia", kind: "evidence", category: "misc", isTool: false, defaultPrice: 2e3, tornId: 1248 },
     [RESOURCE.CANNABIS]: { id: RESOURCE.CANNABIS, name: "Cannabis", kind: "evidence", category: "misc", isTool: false, defaultPrice: 1500, tornId: 196 },
     [RESOURCE.COMPASS]: { id: RESOURCE.COMPASS, name: "Compass", kind: "evidence", category: "misc", isTool: false, defaultPrice: 2e3, tornId: 407 },
@@ -426,6 +426,12 @@
      * the previous triple-class selector.
      */
     TITLE_SECTION: '[class*="crimeOptionSection___"]',
+    /**
+     * Desktop-only status section (large icons). Absent on mobile/tablet layout.
+     * Used to distinguish desktop cards (where the inline $ppn label fits) from
+     * compact mobile cards (where it doesn't).
+     */
+    DESKTOP_STATUS_SECTION: '[class*="desktopStatusSection___"]',
     /**
      * Title bar at the top of the current crime panel.
      */
@@ -826,7 +832,7 @@
     keyNote.appendChild(keyLink);
     keyGroup.appendChild(keyNote);
     const storageNote = el2("p", "pyro-s-section-note");
-    storageNote.textContent = "Key is stored in Tampermonkey only \u2014 never sent to any server other than Torn's API.";
+    storageNote.textContent = "Key is stored by your userscript manager only \u2014 never sent to any server other than Torn's API.";
     keyGroup.appendChild(storageNote);
     const keyRow = el2("div", "pyro-s-key-row");
     const keyInput = el2("input", "pyro-s-key-input");
@@ -1181,7 +1187,7 @@
     const best = allRanked.find((r) => !r.strategy.needsVerification) ?? null;
     const bestUnconfirmed = best ? null : allRanked[0] ?? null;
     if (!best && !bestUnconfirmed) {
-      if (debugMode) {
+      if (debugMode && !!section.querySelector(SEL.DESKTOP_STATUS_SECTION)) {
         const label = document.createElement("span");
         label.className = "pyro-label pyro-label--unconfirmed";
         label.textContent = "?";
@@ -1192,7 +1198,8 @@
     }
     const display = best ?? bestUnconfirmed;
     section.classList.add(`pyro-band--${display.band}`);
-    if (scenarioEl) {
+    const isDesktop = !!section.querySelector(SEL.DESKTOP_STATUS_SECTION);
+    if (isDesktop && scenarioEl) {
       const label = document.createElement("span");
       label.className = best ? "pyro-label" : "pyro-label pyro-label--unconfirmed";
       label.textContent = formatPpn(display.profitPerNerve);

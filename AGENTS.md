@@ -2,7 +2,7 @@
 
 ## Project
 
-Balaclava is a Torn-focused platform serving live image signatures, web apps, and Tampermonkey userscripts. Stack: SvelteKit 2 + Svelte 5, Cloudflare Pages, TypeScript, pnpm. See `CONTEXT.md` for domain model.
+Balaclava is a Torn-focused platform serving live image signatures, web apps, and userscripts. Stack: SvelteKit 2 + Svelte 5, Cloudflare Pages, TypeScript, pnpm. See `CONTEXT.md` for domain model.
 
 ## Toolchain
 

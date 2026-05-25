@@ -43,3 +43,7 @@ yarn-error.log*
 
 # sveltekit
 .svelte-kit/
+
+# Docs & plans
+/plans/**/references/
+/docs/**/references/

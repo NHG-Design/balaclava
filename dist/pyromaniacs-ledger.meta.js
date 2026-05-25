@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        Torn Pyromaniac's Ledger
 // @namespace   https://github.com/NHG-Design/balaclava
-// @version     0.1.0
+// @version     0.2.0
 // @description Arson profit-per-nerve calculator and strategy guide for Torn's Crimes page
 // @icon        https://www.google.com/s2/favicons?sz=64&domain=torn.com
 // @author      Yukio [906148]
