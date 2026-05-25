@@ -1059,6 +1059,8 @@
 }
 .pyro-s-check-row input[type=checkbox] { cursor: pointer; }
 .pyro-s-section-note { font-size: 10px; color: #555; margin-bottom: 6px; }
+.pyro-s-section-note a { color: #4ef; text-decoration: none; }
+.pyro-s-section-note a:hover { text-decoration: underline; }
 .pyro-s-missing-header { font-size: 10px; color: #666; margin: 8px 0 4px; }
 .pyro-s-missing-list { font-size: 10px; color: #777; padding-left: 14px; margin: 0; }
 .pyro-s-missing-list li { margin-bottom: 2px; font-family: monospace; }
@@ -1199,7 +1201,13 @@
     keyTitle.textContent = "Torn API key";
     keyGroup.appendChild(keyTitle);
     const keyNote = el2("p", "pyro-s-section-note");
-    keyNote.textContent = "Public access only \u2014 used solely to fetch item market prices.";
+    keyNote.textContent = "Public access only \u2014 used solely to fetch item market prices. ";
+    const keyLink = el2("a");
+    keyLink.href = "https://www.torn.com/preferences.php#tab=api?step=addNewKey&title=Pyromaniac%27s+Ledger&torn=items";
+    keyLink.textContent = "Create one \u2192";
+    keyLink.target = "_blank";
+    keyLink.rel = "noopener noreferrer";
+    keyNote.appendChild(keyLink);
     keyGroup.appendChild(keyNote);
     const keyRow = el2("div", "pyro-s-key-row");
     const keyInput = el2("input", "pyro-s-key-input");

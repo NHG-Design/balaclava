@@ -198,6 +198,8 @@ export function injectSettingsStyles(): void {
 }
 .pyro-s-check-row input[type=checkbox] { cursor: pointer; }
 .pyro-s-section-note { font-size: 10px; color: #555; margin-bottom: 6px; }
+.pyro-s-section-note a { color: #4ef; text-decoration: none; }
+.pyro-s-section-note a:hover { text-decoration: underline; }
 .pyro-s-missing-header { font-size: 10px; color: #666; margin: 8px 0 4px; }
 .pyro-s-missing-list { font-size: 10px; color: #777; padding-left: 14px; margin: 0; }
 .pyro-s-missing-list li { margin-bottom: 2px; font-family: monospace; }
@@ -381,7 +383,13 @@ function buildApiTab(ctx: SettingsCtx, panel: HTMLElement): HTMLElement {
     keyGroup.appendChild(keyTitle);
 
     const keyNote = el('p', 'pyro-s-section-note');
-    keyNote.textContent = 'Public access only — used solely to fetch item market prices.';
+    keyNote.textContent = 'Public access only — used solely to fetch item market prices. ';
+    const keyLink = el('a');
+    keyLink.href = 'https://www.torn.com/preferences.php#tab=api?step=addNewKey&title=Pyromaniac%27s+Ledger&torn=items';
+    keyLink.textContent = 'Create one →';
+    keyLink.target = '_blank';
+    keyLink.rel = 'noopener noreferrer';
+    keyNote.appendChild(keyLink);
     keyGroup.appendChild(keyNote);
 
     const keyRow = el('div', 'pyro-s-key-row');
