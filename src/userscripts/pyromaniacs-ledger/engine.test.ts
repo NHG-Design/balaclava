@@ -40,7 +40,6 @@ describe('catalog', () => {
     });
 
     it('permanent reusable items have isTool=true (excluded from market cost)', () => {
-        // isTool=true means the item is never purchased — no market cost
         const permanent = [RESOURCE.FLAMETHROWER, RESOURCE.BLANKET, RESOURCE.FIRE_EXTINGUISHER];
         for (const id of permanent) {
             assert.equal(CATALOG[id].isTool, true, `Expected isTool=true for ${id}`);
@@ -48,10 +47,23 @@ describe('catalog', () => {
     });
 
     it('consumable igniters/dampeners have isTool=false (included in market cost)', () => {
-        // Lighter, molotov, sand are consumed per crime and have a market price
+        // Windproof Lighter, molotov, sand are consumed per crime
         const consumable = [RESOURCE.LIGHTER, RESOURCE.MOLOTOV, RESOURCE.SAND];
         for (const id of consumable) {
             assert.equal(CATALOG[id].isTool, false, `Expected isTool=false for ${id}`);
+        }
+    });
+
+    it('Windproof Lighter has correct tornId', () => {
+        assert.equal(CATALOG[RESOURCE.LIGHTER].tornId, 544);
+        assert.equal(CATALOG[RESOURCE.LIGHTER].name, 'Windproof Lighter');
+    });
+
+    it('all catalog entries with tornId have a positive integer tornId', () => {
+        for (const [id, resource] of Object.entries(CATALOG)) {
+            if (resource.tornId === undefined) continue;
+            assert.ok(resource.tornId > 0, `${id} tornId is not positive`);
+            assert.equal(resource.tornId, Math.floor(resource.tornId), `${id} tornId is not an integer`);
         }
     });
 
