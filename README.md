@@ -1,28 +1,54 @@
-# Create T3 App
+# Balaclava
 
-This is a [T3 Stack](https://create.t3.gg/) project bootstrapped with `create-t3-app`.
+Balaclava is a Torn-focused platform for live image signatures, web apps, and Tampermonkey userscripts.
 
-## What's next? How do I make an app with this?
+Stack: SvelteKit 2, Svelte 5, TypeScript, Cloudflare Pages, pnpm. See [CONTEXT.md](CONTEXT.md) for the domain model and repository architecture.
 
-We try to keep this project as simple as possible, so you can start with just the scaffolding we set up for you, and add additional things later when they become necessary.
+## Tooling
 
-If you are not familiar with the different technologies used in this project, please refer to the respective docs. If you still are in the wind, please join our [Discord](https://t3.gg/discord) and ask for help.
+| Task | Command |
+|------|---------|
+| Install dependencies | `pnpm install` |
+| Start dev server | `pnpm dev` |
+| Type check | `pnpm check` |
+| Build | `pnpm build` |
+| Deploy | `pnpm cf:deploy` |
 
-- [Next.js](https://nextjs.org)
-- [NextAuth.js](https://next-auth.js.org)
-- [Prisma](https://prisma.io)
-- [Tailwind CSS](https://tailwindcss.com)
-- [tRPC](https://trpc.io)
+There is no dedicated test suite yet. A change is considered verified when both `pnpm check` and `pnpm build` exit 0.
 
-## Learn More
+## Userscripts
 
-To learn more about the [T3 Stack](https://create.t3.gg/), take a look at the following resources:
+### Balaclava Tooltip
 
-- [Documentation](https://create.t3.gg/)
-- [Learn the T3 Stack](https://create.t3.gg/en/faq#what-learning-resources-are-currently-available) — Check out these awesome tutorials
+`dist/balaclava-tooltip.user.js` is a dependency-free Tampermonkey helper that exposes:
 
-You can check out the [create-t3-app GitHub repository](https://github.com/t3-oss/create-t3-app) — your feedback and contributions are welcome!
+```javascript
+unsafeWindow.BalaclavaTooltip
+```
 
-## How do I deploy this?
+Use the pinned release URL in consumer userscripts:
 
-Follow our deployment guides for [Vercel](https://create.t3.gg/en/deployment/vercel) and [Docker](https://create.t3.gg/en/deployment/docker) for more information.
+```javascript
+// @require https://raw.githubusercontent.com/robcsaszar/balaclava/v1.0.1/dist/balaclava-tooltip.user.js
+// @grant   unsafeWindow
+```
+
+The tooltip supports declarative attributes, imperative `show()` / `attach()` calls, global configuration, viewport-aware positioning, and `system` / `dark` / `light` / `custom` themes. See [docs/balaclava-tooltip.md](docs/balaclava-tooltip.md).
+
+### Arson Helper
+
+[docs/arson-helper.js](docs/arson-helper.js) is the current reference source for the arson userscript. Keep it in docs until it is promoted into a distributable userscript path.
+
+## Signature Features
+
+Personal signatures are configured in [src/lib/players.ts](src/lib/players.ts), with background images in `static/[tornId].png`.
+
+Faction signatures use the whitelist in [src/lib/factions.ts](src/lib/factions.ts), plus faction assets under `static/factions/[id]/`.
+
+Stats are centralized in [src/lib/personal-stats.ts](src/lib/personal-stats.ts). Raw Torn stats belong in `personalStats`; computed stats belong in `specialStats` with a `calculate` function.
+
+## Runtime Notes
+
+Routes run on the Cloudflare Workers runtime. Avoid Node-only APIs in `src/routes/`, and access private environment variables through SvelteKit's `$env/static/private`.
+
+`workers-og` must be imported dynamically because its WASM cannot initialize at module scope in the Cloudflare Workers runtime.
