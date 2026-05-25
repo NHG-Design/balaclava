@@ -1012,6 +1012,7 @@
 .pyro-s-input::-webkit-inner-spin-button,
 .pyro-s-input::-webkit-outer-spin-button { -webkit-appearance: none; }
 .pyro-s-input:focus { outline: none; border-color: #4ef; }
+.pyro-s-input.from-api   { border-color: #48a; color: #7af; }
 .pyro-s-input.overridden { border-color: #4a4; color: #6d6; }
 .pyro-s-divider { border: none; border-top: 1px solid #2a2a2a; margin: 8px 0; }
 .pyro-s-key-row { display: flex; gap: 6px; margin-bottom: 6px; }
@@ -1069,29 +1070,41 @@
 `;
     document.head.appendChild(style);
   }
+  function applyPriceStyle(input, source) {
+    input.classList.remove("overridden", "from-api");
+    if (source === "manual") input.classList.add("overridden");
+    else if (source === "api") input.classList.add("from-api");
+  }
   function priceInput(id, ctx) {
-    const manual = ctx.getManualPrices()[id];
     const input = el2("input", "pyro-s-input");
     input.type = "number";
     input.min = "0";
-    input.placeholder = String(ctx.getApiPrices()[id] ?? CATALOG[id]?.defaultPrice ?? 0);
-    if (manual !== void 0) {
-      input.value = String(manual);
-      input.classList.add("overridden");
-    }
+    const refresh = () => {
+      const manual = ctx.getManualPrices()[id];
+      const api = ctx.getApiPrices()[id];
+      const db = CATALOG[id]?.defaultPrice ?? 0;
+      if (manual !== void 0) {
+        input.value = String(manual);
+        applyPriceStyle(input, "manual");
+      } else if (api !== void 0) {
+        input.value = String(api);
+        applyPriceStyle(input, "api");
+      } else {
+        input.value = "";
+        input.placeholder = String(db);
+        applyPriceStyle(input, "db");
+      }
+    };
+    refresh();
     const commit = () => {
       const raw = input.value.trim();
       if (raw === "") {
         ctx.clearManualPrice(id);
-        input.classList.remove("overridden");
-        input.placeholder = String(ctx.getApiPrices()[id] ?? CATALOG[id]?.defaultPrice ?? 0);
       } else {
         const val = Math.round(parseFloat(raw));
-        if (!isNaN(val) && val >= 0) {
-          ctx.setManualPrice(id, val);
-          input.classList.add("overridden");
-        }
+        if (!isNaN(val) && val >= 0) ctx.setManualPrice(id, val);
       }
+      refresh();
     };
     input.addEventListener("blur", commit);
     input.addEventListener("keydown", (e) => {
@@ -1138,7 +1151,7 @@
       root.appendChild(g);
     }
     const note = el2("p", "pyro-s-section-note");
-    note.textContent = `Built-in prices as of ${CATALOG_UPDATED}. Clear a field to restore API or default price. Tool prices are excluded.`;
+    note.textContent = `DB prices as of ${CATALOG_UPDATED}. Blue = API price active. Green = manual override. Clear a field to revert to the next tier.`;
     root.appendChild(note);
     return root;
   }
