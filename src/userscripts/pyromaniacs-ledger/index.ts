@@ -1,4 +1,4 @@
-import type { Strategy } from '../../data/strategies.js';
+import { STRATEGIES, type Strategy } from '../../data/strategies.js';
 import {
     rankForScenario,
     formatPpn,
@@ -28,7 +28,6 @@ const KEY_ACTIVE_TAB     = 'pyroLedger.v1.activeTab';
 // ---------------------------------------------------------------------------
 declare const GM_getValue: ((key: string, def?: string) => string) | undefined;
 declare const GM_setValue: ((key: string, val: string) => void) | undefined;
-declare const GM_getResourceText: ((name: string) => string) | undefined;
 declare const unsafeWindow: typeof window | undefined;
 
 function store_get(key: string, def = ''): string {
@@ -185,18 +184,7 @@ function getSkillValue(): number {
 const strategyIndex = new Map<string, Strategy[]>();
 
 function loadStrategies(): void {
-    if (typeof GM_getResourceText === 'undefined') {
-        console.error('[PyroLedger] GM_getResourceText unavailable — strategies not loaded.');
-        return;
-    }
-    let strategies: Strategy[];
-    try {
-        strategies = JSON.parse(GM_getResourceText('pyroStrategies')) as Strategy[];
-    } catch (e) {
-        console.error('[PyroLedger] Failed to parse strategies resource:', e);
-        return;
-    }
-    for (const s of strategies) {
+    for (const s of STRATEGIES) {
         const key = s.scenarioName.toLowerCase();
         const existing = strategyIndex.get(key);
         if (existing) {

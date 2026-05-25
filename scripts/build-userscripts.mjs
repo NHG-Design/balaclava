@@ -39,9 +39,8 @@ const USERSCRIPTS = [
             updateURL: `${DIST_BASE}/pyromaniacs-ledger.meta.js`,
             downloadURL: `${DIST_BASE}/pyromaniacs-ledger.user.js`,
             match: 'https://www.torn.com/page.php?sid=crimes*',
-            grant: ['GM_setValue', 'GM_getValue', 'GM_getResourceText', 'unsafeWindow', 'GM_xmlhttpRequest'],
+            grant: ['GM_setValue', 'GM_getValue', 'unsafeWindow', 'GM_xmlhttpRequest'],
             require: `${DIST_BASE}/balaclava-tooltip.user.js`,
-            resource: `pyroStrategies ${BALACLAVA_BASE}/pyromaniacs-ledger/strategies.json`,
         },
     },
 ];

@@ -12,10 +12,8 @@
 // @match       https://www.torn.com/page.php?sid=crimes*
 // @grant       GM_setValue
 // @grant       GM_getValue
-// @grant       GM_getResourceText
 // @grant       unsafeWindow
 // @grant       GM_xmlhttpRequest
 // @require     https://raw.githubusercontent.com/NHG-Design/balaclava/main/dist/balaclava-tooltip.user.js
-// @resource    pyroStrategies https://balaclava.app/pyromaniacs-ledger/strategies.json
 // @run-at      document-idle
 // ==/UserScript==
