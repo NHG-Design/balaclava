@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        Torn Pyromaniac's Ledger
 // @namespace   https://github.com/NHG-Design/balaclava
-// @version     0.3.0
+// @version     0.4.0
 // @description Arson profit-per-nerve calculator and strategy guide for Torn's Crimes page
 // @icon        https://www.google.com/s2/favicons?sz=64&domain=torn.com
 // @author      Yukio [906148]
@@ -1171,10 +1171,10 @@
         .arson-root .pyro-band--good:has([class*="desktopStatusSection___"]) { background: rgba(40,140,60,0.15) !important; }
         .arson-root .pyro-band--jackpot:has([class*="desktopStatusSection___"]) { background: rgba(0,200,200,0.15) !important; }
 
-        .arson-root .pyro-band--negative:not(:has([class*="desktopStatusSection___"])) { box-shadow: inset -3px 0 0 #c44 !important; }
-        .arson-root .pyro-band--low:not(:has([class*="desktopStatusSection___"])) { box-shadow: inset -3px 0 0 #b90 !important; }
-        .arson-root .pyro-band--good:not(:has([class*="desktopStatusSection___"])) { box-shadow: inset -3px 0 0 #4a4 !important; }
-        .arson-root .pyro-band--jackpot:not(:has([class*="desktopStatusSection___"])) { box-shadow: inset -3px 0 0 #0cc !important; }
+        .arson-root .pyro-band--negative:not(:has([class*="desktopStatusSection___"])) { box-shadow: inset -5px 0 0 #c44 !important; }
+        .arson-root .pyro-band--low:not(:has([class*="desktopStatusSection___"])) { box-shadow: inset -5px 0 0 #b90 !important; }
+        .arson-root .pyro-band--good:not(:has([class*="desktopStatusSection___"])) { box-shadow: inset -5px 0 0 #4a4 !important; }
+        .arson-root .pyro-band--jackpot:not(:has([class*="desktopStatusSection___"])) { box-shadow: inset -5px 0 0 #0cc !important; }
     `;
     document.head.appendChild(style);
     injectTooltipContentStyles();
