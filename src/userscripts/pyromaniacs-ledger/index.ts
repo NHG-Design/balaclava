@@ -1,34 +1,27 @@
-// ==UserScript==
-// @name        Torn Pyromaniac's Ledger
-// @namespace   https://github.com/NHG-Design/balaclava
-// @version     0.1.0
-// @description Arson profit-per-nerve calculator and strategy guide for Torn's Crimes page
-// @icon        https://www.google.com/s2/favicons?sz=64&domain=torn.com
-// @author      Balaclava
-// @match       https://www.torn.com/page.php?sid=crimes*
-// @grant       GM_setValue
-// @grant       GM_getValue
-// @grant       unsafeWindow
-// @require     https://raw.githubusercontent.com/NHG-Design/balaclava/main/dist/balaclava-tooltip.user.js
-// @run-at      document-idle
-// ==/UserScript==
-
 import { STRATEGIES, type Strategy } from '../../data/strategies.js';
 import {
     rankForScenario,
     formatPpn,
     DEFAULT_THRESHOLDS,
     type PriceMap,
+    type ProfitThresholds,
     type RankedStrategy,
 } from './engine.js';
 import { buildTooltipContent, buildTooltipStyles } from './tooltip.js';
 import { SEL } from './selectors.js';
+import { injectSettings, type SettingsCtx } from './settings.js';
+import type { ResourceId } from '../../data/catalog.js';
 
 // ---------------------------------------------------------------------------
-// Storage keys — all under the pyroLedger.v1 namespace
+// Storage keys
 // ---------------------------------------------------------------------------
-const KEY_DEBUG   = 'pyroLedger.v1.debug';
-const KEY_PRICES  = 'pyroLedger.v1.prices';
+const KEY_DEBUG          = 'pyroLedger.v1.debug';
+const KEY_MANUAL_PRICES  = 'pyroLedger.v1.manualPrices';
+const KEY_API_PRICES     = 'pyroLedger.v1.apiPrices';
+const KEY_API_KEY        = 'pyroLedger.v1.apiKey';
+const KEY_API_REFRESH    = 'pyroLedger.v1.apiRefresh';
+const KEY_THRESHOLDS     = 'pyroLedger.v1.thresholds';
+const KEY_ACTIVE_TAB     = 'pyroLedger.v1.activeTab';
 
 // ---------------------------------------------------------------------------
 // Minimal GM storage shim (falls back to localStorage in dev/non-GM contexts)
@@ -81,25 +74,90 @@ function tryTooltip(callback: (api: BalaclavaTooltipAPI) => void): void {
 // ---------------------------------------------------------------------------
 // State
 // ---------------------------------------------------------------------------
-let prices: PriceMap = {};
+let manualPrices: PriceMap = {};
+let apiPrices: PriceMap = {};
+let apiKey = '';
+let apiLastRefresh = 0;
+let thresholds: ProfitThresholds = { ...DEFAULT_THRESHOLDS };
 let debugMode = false;
+let activeTab = 'prices';
 let visibleMobileSection: HTMLElement | null = null;
+const missingScenarios = new Set<string>();
+
+function effectivePrices(): PriceMap {
+    return { ...apiPrices, ...manualPrices };
+}
 
 function loadState(): void {
     debugMode = store_get(KEY_DEBUG) === 'true';
+    apiKey = store_get(KEY_API_KEY, '');
+    activeTab = store_get(KEY_ACTIVE_TAB, 'prices');
+    apiLastRefresh = parseInt(store_get(KEY_API_REFRESH, '0'), 10) || 0;
+
+    try { manualPrices = JSON.parse(store_get(KEY_MANUAL_PRICES, '{}')) as PriceMap; }
+    catch { manualPrices = {}; }
+
+    try { apiPrices = JSON.parse(store_get(KEY_API_PRICES, '{}')) as PriceMap; }
+    catch { apiPrices = {}; }
+
     try {
-        const saved = store_get(KEY_PRICES, '{}');
-        prices = JSON.parse(saved) as PriceMap;
-    } catch {
-        prices = {};
-    }
+        const saved = JSON.parse(store_get(KEY_THRESHOLDS, '{}')) as Partial<ProfitThresholds>;
+        if (typeof saved.low === 'number' && typeof saved.good === 'number') {
+            thresholds = { low: saved.low, good: saved.good };
+        }
+    } catch { /* use defaults */ }
+}
+
+// ---------------------------------------------------------------------------
+// State mutation helpers — persist + trigger re-scan where needed
+// ---------------------------------------------------------------------------
+function setManualPrice(id: ResourceId, price: number): void {
+    manualPrices = { ...manualPrices, [id]: price };
+    store_set(KEY_MANUAL_PRICES, JSON.stringify(manualPrices));
+    resetScans();
+}
+
+function clearManualPrice(id: ResourceId): void {
+    const next = { ...manualPrices };
+    delete next[id];
+    manualPrices = next;
+    store_set(KEY_MANUAL_PRICES, JSON.stringify(manualPrices));
+    resetScans();
+}
+
+function setThresholds(t: ProfitThresholds): void {
+    thresholds = t;
+    store_set(KEY_THRESHOLDS, JSON.stringify(thresholds));
+    resetScans();
+}
+
+function setApiPrices(prices: PriceMap, timestamp: number): void {
+    apiPrices = prices;
+    apiLastRefresh = timestamp;
+    store_set(KEY_API_PRICES, JSON.stringify(apiPrices));
+    store_set(KEY_API_REFRESH, String(apiLastRefresh));
+    resetScans();
+}
+
+function setApiKey(key: string): void {
+    apiKey = key;
+    store_set(KEY_API_KEY, apiKey);
+}
+
+function setDebugMode(on: boolean): void {
+    debugMode = on;
+    store_set(KEY_DEBUG, String(debugMode));
+}
+
+function setActiveTab(tab: string): void {
+    activeTab = tab;
+    store_set(KEY_ACTIVE_TAB, activeTab);
 }
 
 // ---------------------------------------------------------------------------
 // Skill detection (CS >= 80 = has flamethrower)
 // ---------------------------------------------------------------------------
 function getSkillValue(): number {
-    // Prefer scoped lookup; fall back to document-wide in case panel moves.
     const btn = document.querySelector(`${SEL.STATS_PANEL} ${SEL.SKILL_BTN}`)
              ?? document.querySelector(SEL.SKILL_BTN);
     if (!btn) return 0;
@@ -153,24 +211,13 @@ function injectHighlightStyles(): void {
     `;
     document.head.appendChild(style);
 
-    // Inject tooltip content styles into the BalaclavaTooltip shadow when it initialises
     injectTooltipContentStyles();
 }
 
 function injectTooltipContentStyles(): void {
-    // BalaclavaTooltip uses a shadow DOM; we inject .pyro-tt-* styles into the
-    // regular document so they're available when BalaclavaTooltip clones our
-    // content node into its shadow (cloneNode does not carry shadow styles, but
-    // BalaclavaTooltip's content div is in the shadow while .pyro-tt fills it —
-    // so we need the styles in the light DOM stylesheet that the shadow inherits
-    // via inherited CSS custom properties, OR we inline them here).
     if (document.getElementById('pyro-tt-styles')) return;
     const style = document.createElement('style');
     style.id = 'pyro-tt-styles';
-    // BalaclavaTooltip clones our node into its shadow root. The shadow inherits
-    // nothing from the document stylesheet. We therefore inline the pyro-tt
-    // styles as a <style> inside the content node itself when we build it.
-    // This placeholder is kept here for any future light-DOM usage.
     style.textContent = '';
     document.head.appendChild(style);
 }
@@ -179,14 +226,12 @@ function injectTooltipContentStyles(): void {
 // Scan and annotate
 // ---------------------------------------------------------------------------
 function applyToSection(section: HTMLElement, allRanked: RankedStrategy[], scenarioName: string): void {
-    // Remove any previous pyro annotations
     section.querySelector('.pyro-label')?.remove();
     section.classList.forEach(c => { if (c.startsWith('pyro-band--')) section.classList.remove(c); });
 
     const scenarioEl = section.querySelector<HTMLElement>(SEL.SCENARIO);
     const titleSection = scenarioEl?.closest<HTMLElement>(SEL.TITLE_SECTION) ?? null;
 
-    // Best confirmed strategy drives the inline label and band
     const best = allRanked.find(r => !r.strategy.needsVerification) ?? null;
 
     if (!best) {
@@ -217,10 +262,8 @@ function wireTooltip(section: HTMLElement, hoverTarget: HTMLElement, allRanked: 
     if (section.dataset.pyroTooltipWired) return;
     section.dataset.pyroTooltipWired = 'true';
 
-    // Lazy getter so content is fresh after price/settings resets
     const getContent = (): HTMLElement => buildTooltipContentWithStyles(allRanked);
 
-    // Desktop hover
     hoverTarget.addEventListener('mouseenter', () => {
         tryTooltip(api => api.show(hoverTarget, getContent(), { position: 'top', theme: 'dark' }));
     });
@@ -228,7 +271,6 @@ function wireTooltip(section: HTMLElement, hoverTarget: HTMLElement, allRanked: 
         tryTooltip(api => api.hide());
     });
 
-    // Mobile tap toggle
     section.addEventListener('click', e => {
         if ((e.target as HTMLElement).closest('button, a, input, select, textarea, [role="button"]')) return;
 
@@ -243,7 +285,6 @@ function wireTooltip(section: HTMLElement, hoverTarget: HTMLElement, allRanked: 
         });
     });
 
-    // Outside tap closes
     document.addEventListener('click', e => {
         if (visibleMobileSection === section && !section.contains(e.target as Node)) {
             tryTooltip(api => api.hide());
@@ -255,7 +296,6 @@ function wireTooltip(section: HTMLElement, hoverTarget: HTMLElement, allRanked: 
 function buildTooltipContentWithStyles(allRanked: RankedStrategy[]): HTMLElement {
     const node = buildTooltipContent(allRanked);
 
-    // Embed .pyro-tt-* styles inline so they survive shadow DOM cloning
     const style = document.createElement('style');
     style.textContent = buildTooltipStyles();
     node.insertBefore(style, node.firstChild);
@@ -269,6 +309,7 @@ function getRoot(): Element {
 
 function scanPage(): void {
     const hasFlamethrower = getSkillValue() >= 80;
+    const prices = effectivePrices();
 
     getRoot().querySelectorAll<HTMLElement>(SEL.CARD).forEach(section => {
         if (section.dataset.pyroScanned) return;
@@ -279,8 +320,12 @@ function scanPage(): void {
         if (!rawName) return;
 
         const candidates = strategyIndex.get(rawName.toLowerCase()) ?? [];
-        const allRanked = rankForScenario(candidates, hasFlamethrower, prices, DEFAULT_THRESHOLDS);
 
+        if (candidates.length === 0 && debugMode) {
+            missingScenarios.add(rawName);
+        }
+
+        const allRanked = rankForScenario(candidates, hasFlamethrower, prices, thresholds);
         applyToSection(section, allRanked, rawName);
     });
 }
@@ -289,21 +334,49 @@ function scanPage(): void {
 export function resetScans(): void {
     getRoot().querySelectorAll<HTMLElement>(SEL.CARD).forEach(section => {
         delete section.dataset.pyroScanned;
+        delete section.dataset.pyroTooltipWired;
     });
     scanPage();
 }
+
+// ---------------------------------------------------------------------------
+// Settings context
+// ---------------------------------------------------------------------------
+const settingsCtx: SettingsCtx = {
+    getManualPrices: () => manualPrices,
+    getApiPrices: () => apiPrices,
+    getThresholds: () => thresholds,
+    getApiKey: () => apiKey,
+    getApiLastRefresh: () => apiLastRefresh,
+    getDebugMode: () => debugMode,
+    getActiveTab: () => activeTab,
+    getMissingScenarios: () => Array.from(missingScenarios),
+
+    setManualPrice,
+    clearManualPrice,
+    setThresholds,
+    setApiPrices,
+    setApiKey,
+    setDebugMode,
+    setActiveTab,
+};
 
 // ---------------------------------------------------------------------------
 // MutationObserver loop
 // ---------------------------------------------------------------------------
 const observer = new MutationObserver(() => {
     scanPage();
+    // Re-inject settings if the arson root was re-mounted
+    if (!document.getElementById('pyro-settings-btn')) {
+        injectSettings(getRoot(), settingsCtx);
+    }
 });
 
 function start(): void {
     loadState();
     injectHighlightStyles();
     scanPage();
+    injectSettings(getRoot(), settingsCtx);
     observer.observe(document.body, { childList: true, subtree: true });
     if (debugMode) console.log('[PyroLedger] started, debug on');
 }

@@ -563,18 +563,18 @@
 
   // src/userscripts/pyromaniacs-ledger/engine.ts
   var DEFAULT_THRESHOLDS = { low: 5e3, good: 1e4 };
-  function resolvePrice(resourceId, prices2) {
-    const override = prices2[resourceId];
+  function resolvePrice(resourceId, prices) {
+    const override = prices[resourceId];
     if (override !== void 0) return override;
     return CATALOG[resourceId]?.defaultPrice ?? 0;
   }
-  function itemCost(items, prices2) {
+  function itemCost(items, prices) {
     if (!items) return 0;
     return items.reduce((sum, item) => {
       if (item.optional) return sum;
       const resource = CATALOG[item.resourceId];
       if (!resource || resource.isTool) return sum;
-      return sum + item.qty * resolvePrice(item.resourceId, prices2);
+      return sum + item.qty * resolvePrice(item.resourceId, prices);
     }, 0);
   }
   function itemActionCount(items) {
@@ -590,19 +590,19 @@
     void ignite;
     return 10 + items * 5;
   }
-  function calcMaterialCost(strategy, prices2) {
+  function calcMaterialCost(strategy, prices) {
     const { evidence, ignite, place, stoke, dampen } = strategy.actions;
-    return itemCost(evidence, prices2) + itemCost(ignite, prices2) + itemCost(place, prices2) + itemCost(stoke, prices2) + itemCost(dampen, prices2);
+    return itemCost(evidence, prices) + itemCost(ignite, prices) + itemCost(place, prices) + itemCost(stoke, prices) + itemCost(dampen, prices);
   }
-  function calcProfitPerNerve(strategy, prices2) {
+  function calcProfitPerNerve(strategy, prices) {
     const nerve = calcNerve(strategy);
-    const cost = calcMaterialCost(strategy, prices2);
+    const cost = calcMaterialCost(strategy, prices);
     return (strategy.payout - cost) / nerve;
   }
-  function profitBand(ppn, thresholds) {
+  function profitBand(ppn, thresholds2) {
     if (ppn <= 0) return "negative";
-    if (ppn <= thresholds.low) return "low";
-    if (ppn <= thresholds.good) return "good";
+    if (ppn <= thresholds2.low) return "low";
+    if (ppn <= thresholds2.good) return "good";
     return "jackpot";
   }
   function formatPpn(ppn) {
@@ -610,20 +610,20 @@
     if (rounded >= 1e3) return `$${(rounded / 1e3).toFixed(1)}k/N`;
     return `$${rounded}/N`;
   }
-  function rankForScenario(candidates, hasFlamethrower, prices2, thresholds) {
+  function rankForScenario(candidates, hasFlamethrower, prices, thresholds2) {
     const eligible = candidates.filter((s) => {
       if (s.requiresFlamethrower && !hasFlamethrower) return false;
       return true;
     });
     if (eligible.length === 0) return [];
     const ranked = eligible.map((s) => {
-      const ppn = calcProfitPerNerve(s, prices2);
+      const ppn = calcProfitPerNerve(s, prices);
       return {
         strategy: s,
-        materialCost: calcMaterialCost(s, prices2),
+        materialCost: calcMaterialCost(s, prices),
         baseNerve: calcNerve(s),
         profitPerNerve: ppn,
-        band: profitBand(ppn, thresholds)
+        band: profitBand(ppn, thresholds2)
       };
     });
     ranked.sort((a, b) => {
@@ -862,15 +862,548 @@
      * Used with .closest() from scenarioEl — single prefix match instead of
      * the previous triple-class selector.
      */
-    TITLE_SECTION: '[class*="crimeOptionSection___"]'
+    TITLE_SECTION: '[class*="crimeOptionSection___"]',
+    /**
+     * Title bar at the top of the current crime panel.
+     * Settings button is appended here; falls back to ROOT if absent.
+     */
+    TITLE_BAR: '[class*="titleBar___"]'
   };
+
+  // src/userscripts/pyromaniacs-ledger/api.ts
+  var TORN_ITEMS_URL = "https://api.torn.com/v2/torn/items?cat=All&sort=ASC&key=";
+  var tornIdToResource = new Map(
+    Object.values(CATALOG).filter((r) => r.tornId !== void 0).map((r) => [r.tornId, r.id])
+  );
+  async function fetchApiPrices(apiKey2) {
+    try {
+      const response = await fetch(TORN_ITEMS_URL + encodeURIComponent(apiKey2));
+      if (!response.ok) return { success: false, error: `HTTP ${response.status}` };
+      const data = await response.json();
+      if (data.error) return { success: false, error: data.error.error };
+      if (!Array.isArray(data.items)) return { success: false, error: "Unexpected response format" };
+      const prices = {};
+      for (const item of data.items) {
+        const resourceId = tornIdToResource.get(item.id);
+        if (resourceId && item.value?.market_price && item.value.market_price > 0) {
+          prices[resourceId] = item.value.market_price;
+        }
+      }
+      return { success: true, prices, updatedCount: Object.keys(prices).length };
+    } catch {
+      return { success: false, error: "Network error" };
+    }
+  }
+
+  // src/userscripts/pyromaniacs-ledger/settings.ts
+  function el2(tag, className) {
+    const e = document.createElement(tag);
+    if (className) e.className = className;
+    return e;
+  }
+  function txt(content) {
+    return document.createTextNode(content);
+  }
+  function injectSettingsStyles() {
+    if (document.getElementById("pyro-settings-styles")) return;
+    const style = el2("style");
+    style.id = "pyro-settings-styles";
+    style.textContent = `
+.pyro-settings-wrap {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    margin-left: 8px;
+}
+#pyro-settings-btn {
+    background: none;
+    border: 1px solid rgba(255,255,255,0.18);
+    color: #bbb;
+    cursor: pointer;
+    border-radius: 4px;
+    padding: 2px 7px;
+    font-size: 13px;
+    line-height: 1.4;
+    user-select: none;
+}
+#pyro-settings-btn:hover { background: rgba(255,255,255,0.08); color: #fff; }
+#pyro-settings-panel {
+    position: absolute;
+    top: calc(100% + 6px);
+    right: 0;
+    z-index: 9999;
+    background: #1c1c1c;
+    border: 1px solid #3a3a3a;
+    border-radius: 6px;
+    min-width: 290px;
+    max-width: 360px;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.55);
+    overflow: hidden;
+}
+.pyro-tab-bar {
+    display: flex;
+    background: #161616;
+    border-bottom: 1px solid #303030;
+}
+.pyro-tab {
+    flex: 1;
+    background: none;
+    border: none;
+    border-bottom: 2px solid transparent;
+    color: #777;
+    cursor: pointer;
+    padding: 7px 2px;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+.pyro-tab:hover { color: #bbb; }
+.pyro-tab.active { color: #fff; border-bottom-color: #4ef; }
+.pyro-tab-content {
+    padding: 10px;
+    max-height: 380px;
+    overflow-y: auto;
+}
+.pyro-s-group { margin-bottom: 10px; }
+.pyro-s-group:last-child { margin-bottom: 0; }
+.pyro-s-group-title {
+    font-size: 9px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: #555;
+    margin-bottom: 5px;
+    padding-bottom: 3px;
+    border-bottom: 1px solid #2a2a2a;
+}
+.pyro-s-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 3px;
+}
+.pyro-s-label {
+    flex: 1;
+    font-size: 11px;
+    color: #aaa;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    min-width: 0;
+}
+.pyro-s-input {
+    width: 76px;
+    background: #252525;
+    border: 1px solid #3a3a3a;
+    color: #ddd;
+    font-size: 11px;
+    padding: 3px 5px;
+    border-radius: 3px;
+    text-align: right;
+    -moz-appearance: textfield;
+}
+.pyro-s-input::-webkit-inner-spin-button,
+.pyro-s-input::-webkit-outer-spin-button { -webkit-appearance: none; }
+.pyro-s-input:focus { outline: none; border-color: #4ef; }
+.pyro-s-input.overridden { border-color: #4a4; color: #6d6; }
+.pyro-s-divider { border: none; border-top: 1px solid #2a2a2a; margin: 8px 0; }
+.pyro-s-key-row { display: flex; gap: 6px; margin-bottom: 6px; }
+.pyro-s-key-input {
+    flex: 1;
+    background: #252525;
+    border: 1px solid #3a3a3a;
+    color: #ddd;
+    font-size: 11px;
+    padding: 4px 6px;
+    border-radius: 3px;
+    min-width: 0;
+    font-family: monospace;
+}
+.pyro-s-key-input:focus { outline: none; border-color: #4ef; }
+.pyro-s-btn {
+    background: #252525;
+    border: 1px solid #484848;
+    color: #bbb;
+    cursor: pointer;
+    border-radius: 3px;
+    padding: 4px 9px;
+    font-size: 11px;
+    white-space: nowrap;
+}
+.pyro-s-btn:hover:not(:disabled) { background: #303030; color: #fff; }
+.pyro-s-btn:disabled { opacity: 0.35; cursor: default; }
+.pyro-s-status {
+    font-size: 10px;
+    margin-bottom: 8px;
+    min-height: 13px;
+    color: #666;
+}
+.pyro-s-status.ok  { color: #6c6; }
+.pyro-s-status.err { color: #c66; }
+.pyro-s-refresh-row { display: flex; align-items: center; gap: 8px; }
+.pyro-s-timestamp { font-size: 10px; color: #555; }
+.pyro-s-check-row {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    margin-bottom: 7px;
+    font-size: 12px;
+    color: #bbb;
+    cursor: pointer;
+    user-select: none;
+}
+.pyro-s-check-row input[type=checkbox] { cursor: pointer; }
+.pyro-s-section-note { font-size: 10px; color: #555; margin-bottom: 6px; }
+.pyro-s-missing-header { font-size: 10px; color: #666; margin: 8px 0 4px; }
+.pyro-s-missing-list { font-size: 10px; color: #777; padding-left: 14px; margin: 0; }
+.pyro-s-missing-list li { margin-bottom: 2px; font-family: monospace; }
+`;
+    document.head.appendChild(style);
+  }
+  function priceInput(id, ctx) {
+    const manual = ctx.getManualPrices()[id];
+    const input = el2("input", "pyro-s-input");
+    input.type = "number";
+    input.min = "0";
+    input.placeholder = String(ctx.getApiPrices()[id] ?? CATALOG[id]?.defaultPrice ?? 0);
+    if (manual !== void 0) {
+      input.value = String(manual);
+      input.classList.add("overridden");
+    }
+    const commit = () => {
+      const raw = input.value.trim();
+      if (raw === "") {
+        ctx.clearManualPrice(id);
+        input.classList.remove("overridden");
+        input.placeholder = String(ctx.getApiPrices()[id] ?? CATALOG[id]?.defaultPrice ?? 0);
+      } else {
+        const val = Math.round(parseFloat(raw));
+        if (!isNaN(val) && val >= 0) {
+          ctx.setManualPrice(id, val);
+          input.classList.add("overridden");
+        }
+      }
+    };
+    input.addEventListener("blur", commit);
+    input.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") input.blur();
+    });
+    return input;
+  }
+  var PRICE_GROUPS = [
+    {
+      title: "Liquid fuels",
+      ids: ["gasoline", "diesel", "kerosene"]
+    },
+    {
+      title: "Solid fuels",
+      ids: ["magnesium", "thermite", "saltpetre", "potassium_nitrate"]
+    },
+    {
+      title: "Gaseous fuels",
+      ids: ["oxygen", "methane", "hydrogen"]
+    },
+    {
+      title: "Evidence",
+      ids: Object.values(CATALOG).filter((r) => r.kind === "evidence").sort((a, b) => a.name.localeCompare(b.name)).map((r) => r.id)
+    }
+  ];
+  function buildPricesTab(ctx) {
+    const root = el2("div");
+    for (const group of PRICE_GROUPS) {
+      const g = el2("div", "pyro-s-group");
+      const title = el2("div", "pyro-s-group-title");
+      title.textContent = group.title;
+      g.appendChild(title);
+      for (const id of group.ids) {
+        const resource = CATALOG[id];
+        if (!resource) continue;
+        const row2 = el2("div", "pyro-s-row");
+        const label = el2("span", "pyro-s-label");
+        label.textContent = resource.name;
+        label.title = resource.name;
+        row2.appendChild(label);
+        row2.appendChild(priceInput(id, ctx));
+        g.appendChild(row2);
+      }
+      root.appendChild(g);
+    }
+    const note = el2("p", "pyro-s-section-note");
+    note.textContent = "Clear a field to restore API or default price. Tool prices are read-only.";
+    root.appendChild(note);
+    return root;
+  }
+  function thresholdInput(label, getVal, setVal, ctx) {
+    const row2 = el2("div", "pyro-s-row");
+    const lbl = el2("span", "pyro-s-label");
+    lbl.textContent = label;
+    const input = el2("input", "pyro-s-input");
+    input.type = "number";
+    input.min = "0";
+    input.value = String(getVal());
+    input.addEventListener("blur", () => {
+      const val = Math.round(parseFloat(input.value));
+      if (!isNaN(val) && val >= 0) {
+        setVal(val);
+        input.value = String(val);
+      } else {
+        input.value = String(getVal());
+      }
+    });
+    input.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") input.blur();
+    });
+    row2.appendChild(lbl);
+    row2.appendChild(input);
+    return row2;
+  }
+  function buildHighlightsTab(ctx) {
+    const root = el2("div");
+    const g = el2("div", "pyro-s-group");
+    const title = el2("div", "pyro-s-group-title");
+    title.textContent = "Profit bands ($/nerve)";
+    g.appendChild(title);
+    const bandNote = el2("p", "pyro-s-section-note");
+    bandNote.textContent = "negative \u2264 0 < low \u2264 X < good \u2264 Y < jackpot";
+    g.appendChild(bandNote);
+    g.appendChild(thresholdInput(
+      "Low threshold",
+      () => ctx.getThresholds().low,
+      (val) => {
+        const t = ctx.getThresholds();
+        ctx.setThresholds({ low: val, good: Math.max(val, t.good) });
+      },
+      ctx
+    ));
+    g.appendChild(thresholdInput(
+      "Good threshold",
+      () => ctx.getThresholds().good,
+      (val) => {
+        const t = ctx.getThresholds();
+        ctx.setThresholds({ low: Math.min(t.low, val), good: val });
+      },
+      ctx
+    ));
+    root.appendChild(g);
+    return root;
+  }
+  function buildApiTab(ctx, panel) {
+    const root = el2("div");
+    const keyGroup = el2("div", "pyro-s-group");
+    const keyTitle = el2("div", "pyro-s-group-title");
+    keyTitle.textContent = "Torn API key";
+    keyGroup.appendChild(keyTitle);
+    const keyRow = el2("div", "pyro-s-key-row");
+    const keyInput = el2("input", "pyro-s-key-input");
+    keyInput.type = "password";
+    keyInput.placeholder = "Your Torn API key";
+    keyInput.value = ctx.getApiKey();
+    keyInput.autocomplete = "off";
+    keyInput.spellcheck = false;
+    const saveBtn = el2("button", "pyro-s-btn");
+    saveBtn.textContent = "Validate & Save";
+    keyRow.appendChild(keyInput);
+    keyRow.appendChild(saveBtn);
+    keyGroup.appendChild(keyRow);
+    const keyStatus = el2("div", "pyro-s-status");
+    if (ctx.getApiKey()) {
+      keyStatus.textContent = "\u2713 Key saved";
+      keyStatus.className = "pyro-s-status ok";
+    }
+    keyGroup.appendChild(keyStatus);
+    root.appendChild(keyGroup);
+    saveBtn.addEventListener("click", async () => {
+      const key = keyInput.value.trim();
+      if (!key) {
+        keyStatus.textContent = "Enter a key first.";
+        keyStatus.className = "pyro-s-status err";
+        return;
+      }
+      saveBtn.disabled = true;
+      keyStatus.textContent = "Validating\u2026";
+      keyStatus.className = "pyro-s-status";
+      const result = await fetchApiPrices(key);
+      saveBtn.disabled = false;
+      if (result.success && result.prices) {
+        ctx.setApiKey(key);
+        ctx.setApiPrices(result.prices, Date.now());
+        keyStatus.textContent = `\u2713 Valid \u2014 ${result.updatedCount} prices updated`;
+        keyStatus.className = "pyro-s-status ok";
+        rerenderTab(panel, "api", ctx);
+      } else {
+        keyStatus.textContent = `\u2717 ${result.error ?? "Unknown error"}`;
+        keyStatus.className = "pyro-s-status err";
+      }
+    });
+    const hr = el2("hr", "pyro-s-divider");
+    root.appendChild(hr);
+    const refreshGroup = el2("div", "pyro-s-group");
+    const refreshTitle = el2("div", "pyro-s-group-title");
+    refreshTitle.textContent = "Market prices";
+    refreshGroup.appendChild(refreshTitle);
+    const refreshRow = el2("div", "pyro-s-refresh-row");
+    const refreshBtn = el2("button", "pyro-s-btn");
+    refreshBtn.textContent = "Refresh Prices";
+    if (!ctx.getApiKey()) refreshBtn.disabled = true;
+    const ts = ctx.getApiLastRefresh();
+    const tsEl = el2("span", "pyro-s-timestamp");
+    tsEl.textContent = ts ? `Last: ${formatTimestamp(ts)}` : "Never refreshed";
+    refreshRow.appendChild(refreshBtn);
+    refreshRow.appendChild(tsEl);
+    refreshGroup.appendChild(refreshRow);
+    const refreshStatus = el2("div", "pyro-s-status");
+    refreshGroup.appendChild(refreshStatus);
+    root.appendChild(refreshGroup);
+    refreshBtn.addEventListener("click", async () => {
+      refreshBtn.disabled = true;
+      refreshStatus.textContent = "Refreshing\u2026";
+      refreshStatus.className = "pyro-s-status";
+      const result = await fetchApiPrices(ctx.getApiKey());
+      refreshBtn.disabled = !ctx.getApiKey();
+      if (result.success && result.prices) {
+        ctx.setApiPrices(result.prices, Date.now());
+        refreshStatus.textContent = `\u2713 ${result.updatedCount} prices updated`;
+        refreshStatus.className = "pyro-s-status ok";
+        tsEl.textContent = `Last: ${formatTimestamp(ctx.getApiLastRefresh())}`;
+      } else {
+        refreshStatus.textContent = `\u2717 ${result.error ?? "Unknown error"}`;
+        refreshStatus.className = "pyro-s-status err";
+      }
+    });
+    return root;
+  }
+  function formatTimestamp(ts) {
+    const d = new Date(ts);
+    return d.toLocaleString(void 0, {
+      month: "short",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit"
+    });
+  }
+  function buildDebugTab(ctx) {
+    const root = el2("div");
+    const checkRow = el2("label", "pyro-s-check-row");
+    const checkbox = el2("input");
+    checkbox.type = "checkbox";
+    checkbox.checked = ctx.getDebugMode();
+    checkbox.addEventListener("change", () => ctx.setDebugMode(checkbox.checked));
+    checkRow.appendChild(checkbox);
+    checkRow.appendChild(txt("Debug mode"));
+    root.appendChild(checkRow);
+    const missing = ctx.getMissingScenarios();
+    const header = el2("div", "pyro-s-missing-header");
+    header.textContent = missing.length ? `Missing strategies observed this session (${missing.length}):` : "No missing strategies observed this session.";
+    root.appendChild(header);
+    if (missing.length > 0) {
+      const list = el2("ul", "pyro-s-missing-list");
+      for (const name of missing) {
+        const li = el2("li");
+        li.textContent = name;
+        list.appendChild(li);
+      }
+      root.appendChild(list);
+    }
+    return root;
+  }
+  var TABS = [
+    { id: "prices", label: "Prices" },
+    { id: "highlights", label: "Highlights" },
+    { id: "api", label: "API" },
+    { id: "debug", label: "Debug" }
+  ];
+  function buildTabBar(activeId, onSwitch) {
+    const bar = el2("div", "pyro-tab-bar");
+    for (const tab of TABS) {
+      const btn = el2("button", tab.id === activeId ? "pyro-tab active" : "pyro-tab");
+      btn.textContent = tab.label;
+      btn.dataset.tab = tab.id;
+      btn.addEventListener("click", () => {
+        bar.querySelectorAll(".pyro-tab").forEach((b) => b.classList.remove("active"));
+        btn.classList.add("active");
+        onSwitch(tab.id);
+      });
+      bar.appendChild(btn);
+    }
+    return bar;
+  }
+  function rerenderTab(panel, tabId, ctx) {
+    const content = panel.querySelector(".pyro-tab-content");
+    if (!content) return;
+    content.innerHTML = "";
+    content.appendChild(buildTabContent(tabId, ctx, panel));
+  }
+  function buildTabContent(tabId, ctx, panel) {
+    switch (tabId) {
+      case "prices":
+        return buildPricesTab(ctx);
+      case "highlights":
+        return buildHighlightsTab(ctx);
+      case "api":
+        return buildApiTab(ctx, panel);
+      case "debug":
+        return buildDebugTab(ctx);
+      default:
+        return buildPricesTab(ctx);
+    }
+  }
+  function injectSettings(root, ctx) {
+    if (document.getElementById("pyro-settings-btn")) return;
+    injectSettingsStyles();
+    const anchor = root.querySelector(SEL.TITLE_BAR) ?? root;
+    const wrap = el2("div", "pyro-settings-wrap");
+    const btn = el2("button");
+    btn.id = "pyro-settings-btn";
+    btn.setAttribute("aria-label", "Pyromaniac's Ledger settings");
+    btn.setAttribute("aria-expanded", "false");
+    btn.textContent = "\u2699";
+    const panel = el2("div");
+    panel.id = "pyro-settings-panel";
+    panel.setAttribute("hidden", "");
+    const activeTab2 = ctx.getActiveTab() || "prices";
+    panel.appendChild(buildTabBar(activeTab2, (tabId) => {
+      ctx.setActiveTab(tabId);
+      rerenderTab(panel, tabId, ctx);
+    }));
+    const content = el2("div", "pyro-tab-content");
+    content.appendChild(buildTabContent(activeTab2, ctx, panel));
+    panel.appendChild(content);
+    wrap.appendChild(btn);
+    wrap.appendChild(panel);
+    anchor.appendChild(wrap);
+    btn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const hidden = panel.hasAttribute("hidden");
+      panel.toggleAttribute("hidden", !hidden);
+      btn.setAttribute("aria-expanded", String(hidden));
+    });
+    document.addEventListener("click", (e) => {
+      if (!wrap.contains(e.target)) {
+        panel.setAttribute("hidden", "");
+        btn.setAttribute("aria-expanded", "false");
+      }
+    }, { passive: true });
+  }
 
   // src/userscripts/pyromaniacs-ledger/index.ts
   var KEY_DEBUG = "pyroLedger.v1.debug";
-  var KEY_PRICES = "pyroLedger.v1.prices";
+  var KEY_MANUAL_PRICES = "pyroLedger.v1.manualPrices";
+  var KEY_API_PRICES = "pyroLedger.v1.apiPrices";
+  var KEY_API_KEY = "pyroLedger.v1.apiKey";
+  var KEY_API_REFRESH = "pyroLedger.v1.apiRefresh";
+  var KEY_THRESHOLDS = "pyroLedger.v1.thresholds";
+  var KEY_ACTIVE_TAB = "pyroLedger.v1.activeTab";
   function store_get(key, def = "") {
     if (typeof GM_getValue !== "undefined") return GM_getValue(key, def);
     return localStorage.getItem(key) ?? def;
+  }
+  function store_set(key, val) {
+    if (typeof GM_setValue !== "undefined") {
+      GM_setValue(key, val);
+      return;
+    }
+    localStorage.setItem(key, val);
   }
   function getTooltipAPI() {
     const w = typeof unsafeWindow !== "undefined" ? unsafeWindow : window;
@@ -892,17 +1425,76 @@
     }
     callback(api);
   }
-  var prices = {};
+  var manualPrices = {};
+  var apiPrices = {};
+  var apiKey = "";
+  var apiLastRefresh = 0;
+  var thresholds = { ...DEFAULT_THRESHOLDS };
   var debugMode = false;
+  var activeTab = "prices";
   var visibleMobileSection = null;
+  var missingScenarios = /* @__PURE__ */ new Set();
+  function effectivePrices() {
+    return { ...apiPrices, ...manualPrices };
+  }
   function loadState() {
     debugMode = store_get(KEY_DEBUG) === "true";
+    apiKey = store_get(KEY_API_KEY, "");
+    activeTab = store_get(KEY_ACTIVE_TAB, "prices");
+    apiLastRefresh = parseInt(store_get(KEY_API_REFRESH, "0"), 10) || 0;
     try {
-      const saved = store_get(KEY_PRICES, "{}");
-      prices = JSON.parse(saved);
+      manualPrices = JSON.parse(store_get(KEY_MANUAL_PRICES, "{}"));
     } catch {
-      prices = {};
+      manualPrices = {};
     }
+    try {
+      apiPrices = JSON.parse(store_get(KEY_API_PRICES, "{}"));
+    } catch {
+      apiPrices = {};
+    }
+    try {
+      const saved = JSON.parse(store_get(KEY_THRESHOLDS, "{}"));
+      if (typeof saved.low === "number" && typeof saved.good === "number") {
+        thresholds = { low: saved.low, good: saved.good };
+      }
+    } catch {
+    }
+  }
+  function setManualPrice(id, price) {
+    manualPrices = { ...manualPrices, [id]: price };
+    store_set(KEY_MANUAL_PRICES, JSON.stringify(manualPrices));
+    resetScans();
+  }
+  function clearManualPrice(id) {
+    const next = { ...manualPrices };
+    delete next[id];
+    manualPrices = next;
+    store_set(KEY_MANUAL_PRICES, JSON.stringify(manualPrices));
+    resetScans();
+  }
+  function setThresholds(t) {
+    thresholds = t;
+    store_set(KEY_THRESHOLDS, JSON.stringify(thresholds));
+    resetScans();
+  }
+  function setApiPrices(prices, timestamp) {
+    apiPrices = prices;
+    apiLastRefresh = timestamp;
+    store_set(KEY_API_PRICES, JSON.stringify(apiPrices));
+    store_set(KEY_API_REFRESH, String(apiLastRefresh));
+    resetScans();
+  }
+  function setApiKey(key) {
+    apiKey = key;
+    store_set(KEY_API_KEY, apiKey);
+  }
+  function setDebugMode(on) {
+    debugMode = on;
+    store_set(KEY_DEBUG, String(debugMode));
+  }
+  function setActiveTab(tab) {
+    activeTab = tab;
+    store_set(KEY_ACTIVE_TAB, activeTab);
   }
   function getSkillValue() {
     const btn = document.querySelector(`${SEL.STATS_PANEL} ${SEL.SKILL_BTN}`) ?? document.querySelector(SEL.SKILL_BTN);
@@ -1026,6 +1618,7 @@
   }
   function scanPage() {
     const hasFlamethrower = getSkillValue() >= 80;
+    const prices = effectivePrices();
     getRoot().querySelectorAll(SEL.CARD).forEach((section) => {
       if (section.dataset.pyroScanned) return;
       section.dataset.pyroScanned = "true";
@@ -1033,23 +1626,48 @@
       const rawName = scenarioEl?.textContent?.trim() ?? "";
       if (!rawName) return;
       const candidates = strategyIndex.get(rawName.toLowerCase()) ?? [];
-      const allRanked = rankForScenario(candidates, hasFlamethrower, prices, DEFAULT_THRESHOLDS);
+      if (candidates.length === 0 && debugMode) {
+        missingScenarios.add(rawName);
+      }
+      const allRanked = rankForScenario(candidates, hasFlamethrower, prices, thresholds);
       applyToSection(section, allRanked, rawName);
     });
   }
   function resetScans() {
     getRoot().querySelectorAll(SEL.CARD).forEach((section) => {
       delete section.dataset.pyroScanned;
+      delete section.dataset.pyroTooltipWired;
     });
     scanPage();
   }
+  var settingsCtx = {
+    getManualPrices: () => manualPrices,
+    getApiPrices: () => apiPrices,
+    getThresholds: () => thresholds,
+    getApiKey: () => apiKey,
+    getApiLastRefresh: () => apiLastRefresh,
+    getDebugMode: () => debugMode,
+    getActiveTab: () => activeTab,
+    getMissingScenarios: () => Array.from(missingScenarios),
+    setManualPrice,
+    clearManualPrice,
+    setThresholds,
+    setApiPrices,
+    setApiKey,
+    setDebugMode,
+    setActiveTab
+  };
   var observer = new MutationObserver(() => {
     scanPage();
+    if (!document.getElementById("pyro-settings-btn")) {
+      injectSettings(getRoot(), settingsCtx);
+    }
   });
   function start() {
     loadState();
     injectHighlightStyles();
     scanPage();
+    injectSettings(getRoot(), settingsCtx);
     observer.observe(document.body, { childList: true, subtree: true });
     if (debugMode) console.log("[PyroLedger] started, debug on");
   }
