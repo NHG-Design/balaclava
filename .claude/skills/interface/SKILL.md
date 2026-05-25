@@ -1,6 +1,6 @@
 ---
 name: interface
-description: Definitive UI/UX design engineering. Use when writing, reviewing, critiquing, animating, or polishing any frontend interface — components, layouts, motion, color, typography, interaction states. Framework-agnostic: applies to any stack (React, Vue, Svelte, plain CSS, etc.). Trigger phrases: "review this UI", "add animations", "polish this", "critique the design", "what easing should I use", "this feels generic", "make this look better", "how should I animate", "color palette", "this looks like AI made it", "what's wrong with this design". Not for backend-only or non-UI tasks.
+description: Definitive UI/UX design engineering. Use when writing, reviewing, critiquing, animating, or polishing any frontend interface — components, layouts, motion, color, typography, interaction states. Framework-agnostic - applies to any stack (React, Vue, Svelte, plain CSS, etc.). Trigger phrases include "review this UI", "add animations", "polish this", "critique the design", "what easing should I use", "this feels generic", "make this look better", "how should I animate", "color palette", "this looks like AI made it", "what's wrong with this design". Not for backend-only or non-UI tasks.
 ---
 
 # Interface
