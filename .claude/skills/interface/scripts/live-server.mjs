@@ -30,11 +30,11 @@ import {
   removeLiveServerInfo,
   resolveDesignSidecarPath,
   writeLiveServerInfo,
-} from './impeccable-paths.mjs';
+} from './interface-paths.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 // PRODUCT.md / DESIGN.md live wherever load-context.mjs resolves. The generated
-// DESIGN sidecar is project-local at .impeccable/design.json, with legacy
+// DESIGN sidecar is project-local at .interface/design.json, with legacy
 // DESIGN.json fallback for existing projects.
 const CONTEXT_DIR = resolveContextDir(process.cwd());
 const DEFAULT_POLL_TIMEOUT = 600_000;   // 10 min — agent re-polls on timeout anyway
@@ -162,7 +162,7 @@ function loadBrowserScripts() {
     path.join(__dirname, 'detector', 'detect-antipatterns-browser.js'),
     path.join(__dirname, '..', '..', 'cli', 'engine', 'detect-antipatterns-browser.js'),
     path.join(__dirname, '..', '..', '..', '..', 'cli', 'engine', 'detect-antipatterns-browser.js'),
-    path.join(process.cwd(), 'node_modules', 'impeccable', 'cli', 'engine', 'detect-antipatterns-browser.js'),
+    path.join(process.cwd(), 'node_modules', 'interface', 'cli', 'engine', 'detect-antipatterns-browser.js'),
   ];
   let detectScript = '';
   for (const p of detectPaths) {
@@ -204,7 +204,7 @@ function statOrNull(filePath) {
 // ---------------------------------------------------------------------------
 
 const VISUAL_ACTIONS = [
-  'impeccable', 'bolder', 'quieter', 'distill', 'polish', 'typeset',
+  'interface', 'bolder', 'quieter', 'distill', 'polish', 'typeset',
   'colorize', 'layout', 'adapt', 'animate', 'delight', 'overdrive',
 ];
 
@@ -418,13 +418,13 @@ function createRequestHandler({ detectScript, sessionPath, livePath }) {
     }
 
     // --- Design system (unified v2 response) + raw ---
-    //   /design-system.json    returns both parsed DESIGN.md and .impeccable/design.json
+    //   /design-system.json    returns both parsed DESIGN.md and .interface/design.json
     //                          sidecar when present. Panel merges them:
     //                            { present, parsed, sidecar, hasMd, hasSidecar,
     //                              mdNewerThanJson, parseError?, sidecarError? }
     //                          - parsed: output of parseDesignMd (frontmatter
     //                            + six canonical sections) when DESIGN.md exists.
-    //                          - sidecar: .impeccable/design.json contents when present.
+    //                          - sidecar: .interface/design.json contents when present.
     //                            Expected shape: schemaVersion 2, carrying
     //                            extensions + components + narrative.
     //   /design-system/raw     returns DESIGN.md markdown verbatim
@@ -469,7 +469,7 @@ function createRequestHandler({ detectScript, sessionPath, livePath }) {
         try {
           response.sidecar = JSON.parse(fs.readFileSync(jsonPath, 'utf-8'));
         } catch (err) {
-          response.sidecarError = 'Failed to parse .impeccable/design.json: ' + err.message;
+          response.sidecarError = 'Failed to parse .interface/design.json: ' + err.message;
         }
       }
 

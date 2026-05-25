@@ -6,8 +6,8 @@ if (IS_BROWSER) {
   // Detect extension mode via the script tag's data attribute or the document element fallback.
   // currentScript is reliable for synchronously-executing scripts (which our IIFE is).
   const _myScript = document.currentScript;
-  const EXTENSION_MODE = (_myScript && _myScript.dataset.impeccableExtension === 'true')
-    || document.documentElement.dataset.impeccableExtension === 'true';
+  const EXTENSION_MODE = (_myScript && _myScript.dataset.interfaceExtension === 'true')
+    || document.documentElement.dataset.interfaceExtension === 'true';
 
   const BRAND_COLOR = 'oklch(55% 0.25 350)';
   const BRAND_COLOR_HOVER = 'oklch(45% 0.25 350)';
@@ -17,38 +17,38 @@ if (IS_BROWSER) {
   // Inject hover styles via CSS (more reliable than JS event listeners)
   const styleEl = document.createElement('style');
   styleEl.textContent = `
-    @keyframes impeccable-reveal {
+    @keyframes interface-reveal {
       from { opacity: 0; }
       to { opacity: 1; }
     }
-    .impeccable-overlay:not(.impeccable-banner) {
+    .interface-overlay:not(.interface-banner) {
       pointer-events: none;
       outline: 2px solid ${OUTLINE_COLOR};
       border-radius: 4px;
       transition: outline-color 0.15s ease;
-      animation: impeccable-reveal 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+      animation: interface-reveal 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
       animation-play-state: paused;
       border-top-left-radius: 0;
     }
-    .impeccable-overlay.impeccable-visible {
+    .interface-overlay.interface-visible {
       animation-play-state: running;
     }
-    .impeccable-overlay.impeccable-hover {
+    .interface-overlay.interface-hover {
       outline-color: ${BRAND_COLOR_HOVER};
       z-index: 100001 !important;
     }
-    .impeccable-overlay.impeccable-hover .impeccable-label {
+    .interface-overlay.interface-hover .interface-label {
       background: ${BRAND_COLOR_HOVER};
     }
-    .impeccable-overlay.impeccable-spotlight {
+    .interface-overlay.interface-spotlight {
       z-index: 100002 !important;
     }
-    .impeccable-overlay.impeccable-spotlight-dimmed {
+    .interface-overlay.interface-spotlight-dimmed {
       opacity: 0.15 !important;
       animation: none !important;
       filter: blur(3px);
     }
-    .impeccable-spotlight-backdrop {
+    .interface-spotlight-backdrop {
       position: fixed;
       top: 0; left: 0; right: 0; bottom: 0;
       backdrop-filter: blur(3px) brightness(0.6);
@@ -59,10 +59,10 @@ if (IS_BROWSER) {
       outline: none !important;
       animation: none !important;
     }
-    .impeccable-spotlight-backdrop.impeccable-visible {
+    .interface-spotlight-backdrop.interface-visible {
       opacity: 1;
     }
-    .impeccable-hidden .impeccable-overlay${EXTENSION_MODE ? '' : ':not(.impeccable-banner)'} {
+    .interface-hidden .interface-overlay${EXTENSION_MODE ? '' : ':not(.interface-banner)'} {
       display: none !important;
     }
   `;
@@ -75,7 +75,7 @@ if (IS_BROWSER) {
   function getSpotlightBackdrop() {
     if (!spotlightBackdrop) {
       spotlightBackdrop = document.createElement('div');
-      spotlightBackdrop.className = 'impeccable-spotlight-backdrop';
+      spotlightBackdrop.className = 'interface-spotlight-backdrop';
       document.body.appendChild(spotlightBackdrop);
     }
     return spotlightBackdrop;
@@ -108,12 +108,12 @@ if (IS_BROWSER) {
     spotlightTarget = target;
     const bd = getSpotlightBackdrop();
     updateSpotlightClipPath();
-    bd.classList.add('impeccable-visible');
+    bd.classList.add('interface-visible');
   }
 
   function hideSpotlight() {
     spotlightTarget = null;
-    if (spotlightBackdrop) spotlightBackdrop.classList.remove('impeccable-visible');
+    if (spotlightBackdrop) spotlightBackdrop.classList.remove('interface-visible');
   }
 
   function isInViewport(el) {
@@ -165,7 +165,7 @@ if (IS_BROWSER) {
 
   function repositionOverlays() {
     for (const o of overlays) {
-      if (!o._targetEl || o.classList.contains('impeccable-banner')) continue;
+      if (!o._targetEl || o.classList.contains('interface-banner')) continue;
       // Skip overlays whose target is currently hidden (display: none on the overlay)
       if (o.style.display === 'none') continue;
       positionOverlay(o);
@@ -193,7 +193,7 @@ if (IS_BROWSER) {
   let overlayIndex = 0;
   const visibilityObserver = new IntersectionObserver((entries) => {
     for (const entry of entries) {
-      const overlay = entry.target._impeccableOverlay;
+      const overlay = entry.target._interfaceOverlay;
       if (!overlay) continue;
       if (entry.isIntersecting) {
         overlay.style.display = '';
@@ -208,7 +208,7 @@ if (IS_BROWSER) {
             overlay.style.animationDelay = `${Math.min((overlay._staggerIndex || 0) * 60, 600)}ms`;
           }
           requestAnimationFrame(() => {
-            overlay.classList.add('impeccable-visible');
+            overlay.classList.add('interface-visible');
             if (overlay._checkLabel) overlay._checkLabel();
           });
         }
@@ -223,9 +223,9 @@ if (IS_BROWSER) {
     if (typeof overlay._cleanup === 'function') {
       try { overlay._cleanup(); } catch { /* best effort overlay teardown */ }
     }
-    if (overlay._targetEl && overlay._targetEl._impeccableOverlay === overlay) {
+    if (overlay._targetEl && overlay._targetEl._interfaceOverlay === overlay) {
       visibilityObserver.unobserve(overlay._targetEl);
-      delete overlay._targetEl._impeccableOverlay;
+      delete overlay._targetEl._interfaceOverlay;
     }
     const idx = overlays.indexOf(overlay);
     if (idx >= 0) overlays.splice(idx, 1);
@@ -238,7 +238,7 @@ if (IS_BROWSER) {
   document.addEventListener('transitionend', (e) => {
     if (e.propertyName !== 'transform') return;
     for (const o of overlays) {
-      if (!o._targetEl || o.classList.contains('impeccable-banner') || o.style.display === 'none') continue;
+      if (!o._targetEl || o.classList.contains('interface-banner') || o.style.display === 'none') continue;
       if (e.target === o._targetEl || e.target.contains(o._targetEl)) {
         positionOverlay(o);
       }
@@ -246,13 +246,13 @@ if (IS_BROWSER) {
   });
 
   const highlight = function(el, findings) {
-    if (el._impeccableOverlay) detachOverlay(el._impeccableOverlay);
+    if (el._interfaceOverlay) detachOverlay(el._interfaceOverlay);
     const hasSlop = findings.some(f => RULE_CATEGORY[f.type || f.id] === 'slop');
 
     const fixed = isInFixedContext(el);
     const rect = el.getBoundingClientRect();
     const outline = document.createElement('div');
-    outline.className = 'impeccable-overlay';
+    outline.className = 'interface-overlay';
     outline._targetEl = el;
     outline._isFixed = fixed;
     Object.assign(outline.style, {
@@ -272,7 +272,7 @@ if (IS_BROWSER) {
     const allText = entries.map(e => e.name).join(', ');
 
     const label = document.createElement('div');
-    label.className = 'impeccable-label';
+    label.className = 'interface-label';
     Object.assign(label.style, {
       position: 'absolute', bottom: '100%', left: '-2px',
       display: 'flex', alignItems: 'center',
@@ -348,7 +348,7 @@ if (IS_BROWSER) {
     // Start hidden; the IntersectionObserver will show it once the target is rendered
     outline.style.display = 'none';
     outline._staggerIndex = overlayIndex++;
-    el._impeccableOverlay = outline;
+    el._interfaceOverlay = outline;
     visibilityObserver.observe(el);
 
     // After first paint, check label width vs outline
@@ -361,7 +361,7 @@ if (IS_BROWSER) {
     // Hover: show detail text, darken
     const onMouseEnter = () => {
       isHovered = true;
-      outline.classList.add('impeccable-hover');
+      outline.classList.add('interface-hover');
       outline.style.outlineColor = BRAND_COLOR_HOVER;
       label.style.background = BRAND_COLOR_HOVER;
       if (cycleMode) {
@@ -372,7 +372,7 @@ if (IS_BROWSER) {
     };
     const onMouseLeave = () => {
       isHovered = false;
-      outline.classList.remove('impeccable-hover');
+      outline.classList.remove('interface-hover');
       outline.style.outlineColor = '';
       label.style.background = LABEL_BG;
       if (cycleMode) {
@@ -395,7 +395,7 @@ if (IS_BROWSER) {
   const showPageBanner = function(findings) {
     if (!findings.length) return;
     const banner = document.createElement('div');
-    banner.className = 'impeccable-overlay impeccable-banner';
+    banner.className = 'interface-overlay interface-banner';
     Object.assign(banner.style, {
       position: 'fixed', top: '0', left: '0', right: '0', zIndex: '100000',
       background: LABEL_BG, color: 'white',
@@ -450,7 +450,7 @@ if (IS_BROWSER) {
       let overlaysVisible = true;
       toggle.addEventListener('click', () => {
         overlaysVisible = !overlaysVisible;
-        document.body.classList.toggle('impeccable-hidden', !overlaysVisible);
+        document.body.classList.toggle('interface-hidden', !overlaysVisible);
         toggle.textContent = overlaysVisible ? '\u25C9' : '\u25CB'; // filled vs empty circle
         toggle.style.opacity = overlaysVisible ? '0.85' : '0.5';
       });
@@ -489,7 +489,7 @@ if (IS_BROWSER) {
 
     if (el.classList && el.classList.length > 0) {
       const classes = [...el.classList]
-        .filter(c => !c.startsWith('impeccable-') && !isLikelyHashedClass(c))
+        .filter(c => !c.startsWith('interface-') && !isLikelyHashedClass(c))
         .slice(0, 2);
       if (classes.length > 0) {
         sel += '.' + classes.map(c => CSS.escape(c)).join('.');
@@ -644,8 +644,8 @@ if (IS_BROWSER) {
     const candidates = [];
     for (const el of document.querySelectorAll('*')) {
       if (candidates.length >= maxCandidates) break;
-      if (el.closest('.impeccable-overlay, .impeccable-label, .impeccable-banner, .impeccable-tooltip')) continue;
-      if (el.closest('[id^="impeccable-live-"]')) continue;
+      if (el.closest('.interface-overlay, .interface-label, .interface-banner, .interface-tooltip')) continue;
+      if (el.closest('[id^="interface-live-"]')) continue;
       if (el === document.body || el === document.documentElement) continue;
 
       const tag = el.tagName.toLowerCase();
@@ -1022,7 +1022,7 @@ if (IS_BROWSER) {
 
     for (const node of nodes) {
       if (!node || node.nodeType !== 1) continue;
-      if (node.closest?.('.impeccable-overlay, .impeccable-label, .impeccable-banner, .impeccable-tooltip')) continue;
+      if (node.closest?.('.interface-overlay, .interface-label, .interface-banner, .interface-tooltip')) continue;
       const tag = node.tagName?.toLowerCase();
       if (tag === 'img') {
         const sample = await sampleImageElement(node, point);
@@ -1218,11 +1218,11 @@ if (IS_BROWSER) {
 
   const printSummary = function(allFindings) {
     if (allFindings.length === 0) {
-      console.log('%c[impeccable] No anti-patterns found.', 'color: #22c55e; font-weight: bold');
+      console.log('%c[interface] No anti-patterns found.', 'color: #22c55e; font-weight: bold');
       return;
     }
     console.group(
-      `%c[impeccable] ${allFindings.length} anti-pattern${allFindings.length === 1 ? '' : 's'} found`,
+      `%c[interface] ${allFindings.length} anti-pattern${allFindings.length === 1 ? '' : 's'} found`,
       'color: oklch(60% 0.25 350); font-weight: bold'
     );
     for (const { el, findings } of allFindings) {
@@ -1251,14 +1251,14 @@ if (IS_BROWSER) {
     const _ruleOk = (id) => !_disabled.length || !_disabled.includes(id);
 
     for (const el of document.querySelectorAll('*')) {
-      // Skip impeccable's own elements and any descendants (overlays, labels, banner, nav buttons)
-      if (el.closest('.impeccable-overlay, .impeccable-label, .impeccable-banner, .impeccable-tooltip')) continue;
+      // Skip interface's own elements and any descendants (overlays, labels, banner, nav buttons)
+      if (el.closest('.interface-overlay, .interface-label, .interface-banner, .interface-tooltip')) continue;
       // Skip browser extension elements (Claude, etc.)
       const elId = el.id || '';
       if (elId.startsWith('claude-') || elId.startsWith('cic-')) continue;
       // Skip the impeccable live-mode overlay (highlight, tooltip, bar, picker, toast).
       // These are inspector chrome, not part of the user's design.
-      if (el.closest('[id^="impeccable-live-"]')) continue;
+      if (el.closest('[id^="interface-live-"]')) continue;
       // Skip html/body -- page-level findings go in the banner, not a full-page overlay
       if (el === document.body || el === document.documentElement) continue;
 
@@ -1307,11 +1307,11 @@ if (IS_BROWSER) {
     }
 
     // Regex-on-HTML checks (shared with Node)
-    // Clone the document and strip impeccable-live overlay nodes before the
+    // Clone the document and strip interface-live overlay nodes before the
     // regex scan, so the inspector's own inline styles (transitions on top/
     // left/width/height, etc.) don't register as page anti-patterns.
     const docClone = document.documentElement.cloneNode(true);
-    for (const node of docClone.querySelectorAll('[id^="impeccable-live-"]')) {
+    for (const node of docClone.querySelectorAll('[id^="interface-live-"]')) {
       node.remove();
     }
     const htmlPatternFindings = checkHtmlPatterns(docClone.outerHTML);
@@ -1419,7 +1419,7 @@ if (IS_BROWSER) {
   }
 
   function reportVisualContrastError(err, detail = {}) {
-    window.dispatchEvent(new CustomEvent('impeccable-visual-contrast-error', {
+    window.dispatchEvent(new CustomEvent('interface-visual-contrast-error', {
       detail: {
         ...detail,
         message: err?.message || String(err),
@@ -1428,7 +1428,7 @@ if (IS_BROWSER) {
     if (EXTENSION_MODE) {
       postExtensionError(err);
     } else {
-      console.warn('[impeccable] visual contrast scan failed', err);
+      console.warn('[interface] visual contrast scan failed', err);
     }
   }
 
@@ -1461,7 +1461,7 @@ if (IS_BROWSER) {
             const added = addVisualContrastResult(groupMap, result, { decorate: true });
             if (added) {
               postSerializedFindings(groupMap);
-              window.dispatchEvent(new CustomEvent('impeccable-visual-contrast-resolved', {
+              window.dispatchEvent(new CustomEvent('interface-visual-contrast-resolved', {
                 detail: {
                   selector: result.selector,
                   status: result.status,
@@ -1616,15 +1616,15 @@ if (IS_BROWSER) {
         }
       }
       if (e.data.action === 'toggle-overlays') {
-        const visible = !document.body.classList.contains('impeccable-hidden');
-        document.body.classList.toggle('impeccable-hidden', visible);
-        window.postMessage({ source: 'impeccable-overlays-toggled', visible: !visible }, '*');
+        const visible = !document.body.classList.contains('interface-hidden');
+        document.body.classList.toggle('interface-hidden', visible);
+        window.postMessage({ source: 'interface-overlays-toggled', visible: !visible }, '*');
       }
       if (e.data.action === 'remove') {
         clearOverlays();
         styleEl.remove();
         if (spotlightBackdrop) { spotlightBackdrop.remove(); spotlightBackdrop = null; }
-        document.body.classList.remove('impeccable-hidden');
+        document.body.classList.remove('interface-hidden');
       }
       if (e.data.action === 'highlight') {
         try {
@@ -1635,15 +1635,15 @@ if (IS_BROWSER) {
               target.scrollIntoView({ behavior: 'instant', block: 'center' });
             }
             for (const o of overlays) {
-              if (o.classList.contains('impeccable-banner')) continue;
+              if (o.classList.contains('interface-banner')) continue;
               const isMatch = o._targetEl === target;
-              o.classList.toggle('impeccable-spotlight', isMatch);
-              o.classList.toggle('impeccable-spotlight-dimmed', !isMatch);
+              o.classList.toggle('interface-spotlight', isMatch);
+              o.classList.toggle('interface-spotlight-dimmed', !isMatch);
               if (isMatch) {
                 // Force the matching overlay visible immediately, don't wait for IntersectionObserver
                 o.style.display = '';
                 o.style.animation = 'none';
-                o.classList.add('impeccable-visible');
+                o.classList.add('interface-visible');
                 o._revealed = true;
                 positionOverlay(o);
               }
@@ -1655,8 +1655,8 @@ if (IS_BROWSER) {
       if (e.data.action === 'unhighlight') {
         hideSpotlight();
         for (const o of overlays) {
-          o.classList.remove('impeccable-spotlight');
-          o.classList.remove('impeccable-spotlight-dimmed');
+          o.classList.remove('interface-spotlight');
+          o.classList.remove('interface-spotlight-dimmed');
         }
       }
     });
@@ -1667,7 +1667,7 @@ if (IS_BROWSER) {
         try {
           scan();
         } catch (err) {
-          console.warn('[impeccable] scan failed', err);
+          console.warn('[interface] scan failed', err);
         }
       };
       if (document.readyState === 'loading') {
@@ -1678,11 +1678,11 @@ if (IS_BROWSER) {
     }
   }
 
-  window.impeccableDetect = detect;
-  window.impeccableDetectAsync = detectAsync;
-  window.impeccableScan = scan;
-  window.impeccableScanAsync = scanAsync;
-  window.impeccableCollectVisualContrastCandidates = collectVisualContrastCandidates;
-  window.impeccableAnalyzeVisualContrast = analyzeVisualContrast;
-  window.impeccableGetLastVisualContrastAnalyses = () => lastVisualContrastAnalyses.slice();
+  window.interfaceDetect = detect;
+  window.interfaceDetectAsync = detectAsync;
+  window.interfaceScan = scan;
+  window.interfaceScanAsync = scanAsync;
+  window.interfaceCollectVisualContrastCandidates = collectVisualContrastCandidates;
+  window.interfaceAnalyzeVisualContrast = analyzeVisualContrast;
+  window.interfaceGetLastVisualContrastAnalyses = () => lastVisualContrastAnalyses.slice();
 }

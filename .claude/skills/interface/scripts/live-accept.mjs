@@ -154,7 +154,7 @@ function handleAccept(id, variantNum, lines, targetFile, paramValues) {
   // - CSS block exists, OR
   // - variant HTML contains helper classes/attributes that need cleanup
   const variantText = variantContent.join('\n');
-  const hasHelperAttrs = variantText.includes('data-impeccable-variant');
+  const hasHelperAttrs = variantText.includes('data-interface-variant');
   const needsCarbonize = !!(cssContent || hasHelperAttrs);
 
   // Build the replacement
@@ -162,10 +162,10 @@ function handleAccept(id, variantNum, lines, targetFile, paramValues) {
   const replacement = [];
 
   if (cssContent) {
-    replacement.push(indent + commentSyntax.open + ' impeccable-carbonize-start ' + id + ' ' + commentSyntax.close);
+    replacement.push(indent + commentSyntax.open + ' interface-carbonize-start ' + id + ' ' + commentSyntax.close);
     // JSX targets need the CSS body wrapped in a template literal so that the
     // `{` and `}` in CSS rules don't get parsed as JSX expressions.
-    replacement.push(indent + '<style data-impeccable-css="' + id + '">' + (isJsx ? '{`' : ''));
+    replacement.push(indent + '<style data-interface-css="' + id + '">' + (isJsx ? '{`' : ''));
     // Re-indent CSS content to match
     for (const cssLine of cssContent) {
       replacement.push(indent + cssLine.trimStart());
@@ -174,14 +174,14 @@ function handleAccept(id, variantNum, lines, targetFile, paramValues) {
     if (paramValues && Object.keys(paramValues).length > 0) {
       // Preserve the user's knob positions for the carbonize-cleanup agent
       // to bake into the final CSS when it collapses scoped rules.
-      replacement.push(indent + commentSyntax.open + ' impeccable-param-values ' + id + ': ' + JSON.stringify(paramValues) + ' ' + commentSyntax.close);
+      replacement.push(indent + commentSyntax.open + ' interface-param-values ' + id + ': ' + JSON.stringify(paramValues) + ' ' + commentSyntax.close);
     }
-    replacement.push(indent + commentSyntax.open + ' impeccable-carbonize-end ' + id + ' ' + commentSyntax.close);
+    replacement.push(indent + commentSyntax.open + ' interface-carbonize-end ' + id + ' ' + commentSyntax.close);
   }
 
-  // Keep the `@scope ([data-impeccable-variant="N"])` selectors in the
+  // Keep the `@scope ([data-interface-variant="N"])` selectors in the
   // carbonize CSS block working visually by re-wrapping the accepted content
-  // in a data-impeccable-variant="N" div with `display: contents` (so layout
+  // in a data-interface-variant="N" div with `display: contents` (so layout
   // isn't affected). The carbonize agent strips this attribute + wrapper when
   // it moves the CSS to a proper stylesheet.
   //
@@ -190,7 +190,7 @@ function handleAccept(id, variantNum, lines, targetFile, paramValues) {
   // property [0] on CSSStyleDeclaration" while parsing the string char-by-char.
   if (cssContent) {
     const styleAttr = isJsx ? "style={{ display: 'contents' }}" : 'style="display: contents"';
-    replacement.push(indent + '<div data-impeccable-variant="' + variantNum + '" ' + styleAttr + '>');
+    replacement.push(indent + '<div data-interface-variant="' + variantNum + '" ' + styleAttr + '>');
     replacement.push(...restored);
     replacement.push(indent + '</div>');
   } else {
@@ -218,8 +218,8 @@ function handleAccept(id, variantNum, lines, targetFile, paramValues) {
 function findMarkerBlock(id, lines) {
   let start = -1;
   let end = -1;
-  const startPattern = 'impeccable-variants-start ' + id;
-  const endPattern = 'impeccable-variants-end ' + id;
+  const startPattern = 'interface-variants-start ' + id;
+  const endPattern = 'interface-variants-end ' + id;
 
   for (let i = 0; i < lines.length; i++) {
     if (start === -1 && lines[i].includes(startPattern)) start = i;
@@ -232,13 +232,13 @@ function findMarkerBlock(id, lines) {
 /**
  * Compute the line range to REPLACE (vs. just the marker range to extract
  * from). For JSX/TSX wrappers, live-wrap places the marker comments INSIDE
- * the `<div data-impeccable-variants="ID">` outer wrapper so the picked
+ * the `<div data-interface-variants="ID">` outer wrapper so the picked
  * element's JSX slot keeps a single child — a Fragment `<></>` would have
  * solved the multi-sibling case but failed inside `asChild` / cloneElement
  * parents with "Invalid prop supplied to React.Fragment".
  *
  * That means the marker block is enclosed by the wrapper `<div>` opener
- * (with `data-impeccable-variants="ID"`) and its matching `</div>`. We
+ * (with `data-interface-variants="ID"`) and its matching `</div>`. We
  * walk back to the opener and forward to the closer so accept/discard
  * remove the entire scaffold, not just the inner markers.
  *
@@ -250,11 +250,11 @@ function expandReplaceRange(block, lines, isJsx) {
 
   let { start, end } = block;
 
-  // Walk back for the wrapper `<div data-impeccable-variants="..."` opener.
+  // Walk back for the wrapper `<div data-interface-variants="..."` opener.
   // The attr may sit on a continuation line of a multi-line opening tag, so
   // also walk to the line that actually contains `<div`.
   for (let i = start - 1; i >= Math.max(0, start - 12); i--) {
-    if (/data-impeccable-variants=/.test(lines[i])) {
+    if (/data-interface-variants=/.test(lines[i])) {
       let opener = i;
       while (opener > 0 && !/<div\b/.test(lines[opener])) opener--;
       start = opener;
@@ -298,7 +298,7 @@ function expandReplaceRange(block, lines, isJsx) {
 /**
  * Join wrapper lines into a single string with `<style>` elements removed so
  * marker matching and div-depth tracking aren't confused by:
- *   - CSS `@scope ([data-impeccable-variant="N"])` strings that look like the
+ *   - CSS `@scope ([data-interface-variant="N"])` strings that look like the
  *     HTML marker we're searching for
  *   - JSX self-closing `<style ... />` (no separate `</style>` to close on)
  *   - Same-line `<style>…</style>` blocks
@@ -378,7 +378,7 @@ function extractInnerByAttr(text, attrMatch) {
  */
 function extractOriginal(lines, block) {
   const text = stripStyleAndJoin(lines, block);
-  const inner = extractInnerByAttr(text, 'data-impeccable-variant="original"');
+  const inner = extractInnerByAttr(text, 'data-interface-variant="original"');
   if (inner === null) return [];
   return inner.split('\n');
 }
@@ -389,7 +389,7 @@ function extractOriginal(lines, block) {
  */
 function extractVariant(lines, block, variantNum) {
   const text = stripStyleAndJoin(lines, block);
-  const inner = extractInnerByAttr(text, 'data-impeccable-variant="' + variantNum + '"');
+  const inner = extractInnerByAttr(text, 'data-interface-variant="' + variantNum + '"');
   if (inner === null) return null;
   const result = inner.split('\n');
   // Collapse a lone empty leading/trailing line (common after string splice).
@@ -402,14 +402,14 @@ function extractVariant(lines, block, variantNum) {
  * Extract the colocated <style> block content (between the style tags).
  * Returns an array of CSS lines, or null if no style block found.
  *
- * Handles three shapes of `<style data-impeccable-css="ID" ...>`:
+ * Handles three shapes of `<style data-interface-css="ID" ...>`:
  *   1. Self-closing: `<style ... />` — no body; return null (nothing to carbonize).
  *   2. Same-line open+close: `<style>...</style>` — return the inner content.
  *   3. Multi-line: `<style>` on one line, `</style>` on a later line — return
  *      the lines between them.
  */
 function extractCss(lines, block, id) {
-  const styleAttr = 'data-impeccable-css="' + id + '"';
+  const styleAttr = 'data-interface-css="' + id + '"';
   let inStyle = false;
   const content = [];
 
@@ -530,7 +530,7 @@ function detectCommentSyntax(filePath) {
 // ---------------------------------------------------------------------------
 
 function findSessionFile(id, cwd) {
-  const marker = 'impeccable-variants-start ' + id;
+  const marker = 'interface-variants-start ' + id;
   const searchDirs = ['src', 'app', 'pages', 'components', 'public', 'views', 'templates', '.'];
   const seen = new Set();
 

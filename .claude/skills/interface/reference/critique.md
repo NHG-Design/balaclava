@@ -20,10 +20,10 @@ Resolve one stable target, run two independent assessments, synthesize a design 
    - "this page" -> the current URL or source file
 2. **Compute the slug**:
    ```bash
-   node .claude/skills/impeccable/scripts/critique-storage.mjs slug "<resolved-path-or-url>"
+   node .claude/skills/interface/scripts/critique-storage.mjs slug "<resolved-path-or-url>"
    ```
    Keep it. If the command exits non-zero, skip persistence and trend for this run, but continue the critique.
-3. **Read `.impeccable/critique/ignore.md`** if it exists. Drop matching findings silently; it is the only prior-run input critique consumes.
+3. **Read `.interface/critique/ignore.md`** if it exists. Drop matching findings silently; it is the only prior-run input critique consumes.
 
 ### Assessment Orchestration
 
@@ -50,7 +50,7 @@ Run the bundled detector and browser visualization evidence. Assessment B is man
 
 CLI scan:
 ```bash
-node .claude/skills/impeccable/scripts/detect.mjs --json [--fast] [target]
+node .claude/skills/interface/scripts/detect.mjs --json [--fast] [target]
 ```
 
 - Pass markup files/directories as `[target]`; do not pass CSS-only files.
@@ -64,7 +64,7 @@ Browser visualization is required for a viewable target when browser automation 
 1. Create a fresh tab and navigate.
 2. Preflight mutable injection by setting `document.title` and appending a `<script>` tag. Read-only evaluate APIs do not count.
 3. If mutation is unavailable, skip live server, browser presentation, and injection; report fallback signal.
-4. If mutation is available, start `node .claude/skills/impeccable/scripts/live-server.mjs --background`, present the browser if supported, label `[Human]`, scroll top, inject `http://localhost:PORT/detect.js`, wait 2-3 seconds, read `impeccable` console messages, then stop the live server.
+4. If mutation is available, start `node .claude/skills/interface/scripts/live-server.mjs --background`, present the browser if supported, label `[Human]`, scroll top, inject `http://localhost:PORT/detect.js`, wait 2-3 seconds, read `interface` console messages, then stop the live server.
 5. For multi-view targets, inject on 3-5 representative pages.
 
 Return: CLI findings JSON/counts, browser console findings if applicable, false positives, and skipped/failed browser steps with concrete reasons.
@@ -123,12 +123,12 @@ For each issue, tag with **P0-P3 severity** (consult [heuristics-scoring](heuris
 - **[P?] What**: Name the problem clearly
 - **Why it matters**: How this hurts users or undermines goals
 - **Fix**: What to do about it (be concrete)
-- **Suggested command**: Which command could address this (from: /impeccable adapt, /impeccable animate, /impeccable audit, /impeccable bolder, /impeccable clarify, /impeccable colorize, /impeccable critique, /impeccable delight, /impeccable distill, /impeccable document, /impeccable harden, /impeccable layout, /impeccable onboard, /impeccable optimize, /impeccable overdrive, /impeccable polish, /impeccable quieter, /impeccable shape, /impeccable typeset)
+- **Suggested command**: Which command could address this (from: reference/adapt.md, reference/animate.md, reference/audit.md, reference/bolder.md, reference/clarify.md, reference/colorize.md, reference/critique.md, reference/delight.md, reference/distill.md, reference/document.md, reference/harden.md, reference/layout.md, reference/onboard.md, reference/optimize.md, reference/overdrive.md, reference/polish.md, reference/quieter.md, reference/shape.md, reference/typeset.md)
 
 #### Persona Red Flags
 > *Consult [personas](personas.md)*
 
-Auto-select 2-3 personas most relevant to this interface type (use the selection table in the reference). If `CLAUDE.md` contains a `## Design Context` section from `impeccable teach`, also generate 1-2 project-specific personas from the audience/brand info.
+Auto-select 2-3 personas most relevant to this interface type (use the selection table in the reference). If `CLAUDE.md` contains a `## Design Context` section from `reference/teach.md`, also generate 1-2 project-specific personas from the audience/brand info.
 
 For each selected persona, walk through the primary user action and list specific red flags found:
 
@@ -157,7 +157,7 @@ Provocative questions that might unlock better solutions:
 
 ### Persist the Snapshot
 
-Once the report above is finalized, write it to `.impeccable/critique/` so the user can refer back, and so `/impeccable polish` can pick up the priority issues without a copy-paste.
+Once the report above is finalized, write it to `.interface/critique/` so the user can refer back, and so `reference/polish.md` can pick up the priority issues without a copy-paste.
 
 Skip this step if the Setup slug was null (vague or root-level target).
 
@@ -166,7 +166,7 @@ Skip this step if the Setup slug was null (vague or root-level target).
 2. **Pass the structured metadata** through `IMPECCABLE_CRITIQUE_META` (JSON), then run the write command:
    ```bash
    IMPECCABLE_CRITIQUE_META='{"target":"<user phrasing>","total_score":<n>,"p0_count":<n>,"p1_count":<n>}' \
-     node .claude/skills/impeccable/scripts/critique-storage.mjs write <slug> <body-file>
+     node .claude/skills/interface/scripts/critique-storage.mjs write <slug> <body-file>
    ```
    The helper prints the absolute path it wrote.
 
@@ -174,14 +174,14 @@ Skip this step if the Setup slug was null (vague or root-level target).
 
 4. **Read the trend** for context:
    ```bash
-   node .claude/skills/impeccable/scripts/critique-storage.mjs trend <slug> 5
+   node .claude/skills/interface/scripts/critique-storage.mjs trend <slug> 5
    ```
    This returns a JSON array of the last 5 frontmatter entries (including the one you just wrote).
 
 5. **Append a single line to the user-visible output**, after the report and before the questions:
 
    > **Trend for `<slug>` (last 5 runs): 24 → 28 → 32 → 29 → 32**
-   > Wrote `.impeccable/critique/<filename>`.
+   > Wrote `.interface/critique/<filename>`.
 
    If this is the first run for the slug, the trend is just one score; say so: "First run for this target, no trend yet."
 
@@ -220,17 +220,17 @@ List recommended commands in priority order, based on the user's answers:
 ...
 
 **Rules for recommendations**:
-- Only recommend commands from: /impeccable adapt, /impeccable animate, /impeccable audit, /impeccable bolder, /impeccable clarify, /impeccable colorize, /impeccable critique, /impeccable delight, /impeccable distill, /impeccable document, /impeccable harden, /impeccable layout, /impeccable onboard, /impeccable optimize, /impeccable overdrive, /impeccable polish, /impeccable quieter, /impeccable shape, /impeccable typeset
+- Only recommend commands from: reference/adapt.md, reference/animate.md, reference/audit.md, reference/bolder.md, reference/clarify.md, reference/colorize.md, reference/critique.md, reference/delight.md, reference/distill.md, reference/document.md, reference/harden.md, reference/layout.md, reference/onboard.md, reference/optimize.md, reference/overdrive.md, reference/polish.md, reference/quieter.md, reference/shape.md, reference/typeset.md
 - Order by the user's stated priorities first, then by impact
 - Each item's description should carry enough context that the command knows what to focus on
 - Map each Priority Issue to the appropriate command
 - Skip commands that would address zero issues
 - If the user chose a limited scope, only include items within that scope
 - If the user marked areas as off-limits, exclude commands that would touch those areas
-- End with `/impeccable polish` as the final step if any fixes were recommended
+- End with `reference/polish.md` as the final step if any fixes were recommended
 
 After presenting the summary, tell the user:
 
 > You can ask me to run these one at a time, all at once, or in any order you prefer.
 >
-> Re-run `/impeccable critique` after fixes to see your score improve.
+> Re-run `reference/critique.md` after fixes to see your score improve.

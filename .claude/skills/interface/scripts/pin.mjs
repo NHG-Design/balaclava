@@ -6,7 +6,7 @@
  *   node <scripts_path>/pin.mjs pin <command>
  *   node <scripts_path>/pin.mjs unpin <command>
  *
- * `pin audit` creates a lightweight /audit skill that redirects to /impeccable audit.
+ * `pin audit` creates a lightweight /audit skill that redirects to reference/audit.md.
  * `unpin audit` removes that shortcut.
  *
  * The script discovers harness directories (.claude/skills, .cursor/skills, etc.)
@@ -35,7 +35,7 @@ const VALID_COMMANDS = [
 ];
 
 // Marker to identify pinned skills (so unpin doesn't delete user skills)
-const PIN_MARKER = '<!-- impeccable-pinned-skill -->';
+const PIN_MARKER = '<!-- interface-pinned-skill -->';
 
 /**
  * Walk up from startDir to find a project root.
@@ -64,9 +64,9 @@ function findHarnessDirs(projectRoot) {
   const dirs = [];
   for (const harness of HARNESS_DIRS) {
     const skillsDir = join(projectRoot, harness, 'skills');
-    // Only pin in harness dirs that already have impeccable installed
-    const impeccableDir = join(skillsDir, 'impeccable');
-    if (existsSync(impeccableDir) || existsSync(join(skillsDir, 'i-impeccable'))) {
+    // Only pin in harness dirs that already have interface installed
+    const interfaceDir = join(skillsDir, 'interface');
+    if (existsSync(interfaceDir) || existsSync(join(skillsDir, 'i-interface'))) {
       dirs.push(skillsDir);
     }
   }
@@ -88,7 +88,7 @@ function loadCommandMetadata() {
  * Generate a pinned skill's SKILL.md content.
  */
 function generatePinnedSkill(command, metadata) {
-  const desc = metadata[command]?.description || `Shortcut for /impeccable ${command}.`;
+  const desc = metadata[command]?.description || `Shortcut for /interface ${command}.`;
   const hint = metadata[command]?.argumentHint || '[target]';
 
   return `---
@@ -100,9 +100,9 @@ user-invocable: true
 
 ${PIN_MARKER}
 
-This is a pinned shortcut for \`{{command_prefix}}impeccable ${command}\`.
+This is a pinned shortcut for \`{{command_prefix}}interface ${command}\`.
 
-Invoke {{command_prefix}}impeccable ${command}, passing along any arguments provided here, and follow its instructions.
+Invoke {{command_prefix}}interface ${command}, passing along any arguments provided here, and follow its instructions.
 `;
 }
 
@@ -114,7 +114,7 @@ function pin(command, projectRoot) {
   const harnessDirs = findHarnessDirs(projectRoot);
 
   if (harnessDirs.length === 0) {
-    console.log('No harness directories with impeccable installed found.');
+    console.log('No harness directories with interface installed found.');
     return false;
   }
 
@@ -177,7 +177,7 @@ function unpin(command, projectRoot) {
 
   if (removed > 0) {
     console.log(`\nUnpinned '${command}' from ${removed} location(s).`);
-    console.log(`Use /impeccable ${command} to access it.`);
+    console.log(`Use /interface ${command} to access it.`);
   } else {
     console.log(`No pinned '${command}' shortcut found.`);
   }

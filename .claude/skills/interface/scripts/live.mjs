@@ -2,7 +2,7 @@
  * CLI entry point: prepare everything needed to enter the live variant poll loop.
  *
  * Does (all in one command):
- *   1. Check .impeccable/live/config.json (returns config_missing if first-ever run)
+ *   1. Check .interface/live/config.json (returns config_missing if first-ever run)
  *   2. Start the live server in the background (or reuse a running one)
  *   3. Inject the browser script tag into the project's entry file
  *   4. Read PRODUCT.md / DESIGN.md for project context
@@ -23,7 +23,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { loadContext } from './load-context.mjs';
 import { resolveFiles } from './live-inject.mjs';
-import { readLiveServerInfo } from './impeccable-paths.mjs';
+import { readLiveServerInfo } from './interface-paths.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -34,7 +34,7 @@ async function liveCli() {
     console.log(`Usage: node live.mjs
 
 Prepare everything for live variant mode in a single command:
-  - Checks .impeccable/live/config.json (required, created once per project)
+  - Checks .interface/live/config.json (required, created once per project)
   - Starts (or reuses) the live server in the background
   - Injects the browser script tag
   - Reads PRODUCT.md / DESIGN.md for project context

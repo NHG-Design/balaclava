@@ -52,7 +52,7 @@ Run comprehensive checks across 5 dimensions. Score each dimension 0-4 using the
 
 ### 5. Anti-Patterns (CRITICAL)
 
-Check against ALL the **DON'T** guidelines from the parent impeccable skill (already loaded in this context). Look for AI slop tells (AI color palette, gradient text, glassmorphism, hero metrics, card grids, generic fonts) and general design anti-patterns (gray on color, nested cards, bounce easing, redundant copy).
+Check against ALL the **DON'T** guidelines from the interface skill (already loaded in this context). Look for AI slop tells (AI color palette, gradient text, glassmorphism, hero metrics, card grids, generic fonts) and general design anti-patterns (gray on color, nested cards, bounce easing, redundant copy).
 
 **Score 0-4**: 0=AI slop gallery (5+ tells), 1=Heavy AI aesthetic (3-4 tells), 2=Some tells (1-2 noticeable), 3=Mostly clean (subtle issues only), 4=No AI tells (distinctive, intentional design)
 
@@ -95,7 +95,7 @@ For each issue, document:
 - **Impact**: How it affects users
 - **WCAG/Standard**: Which standard it violates (if applicable)
 - **Recommendation**: How to fix it
-- **Suggested command**: Which command to use (prefer: /impeccable adapt, /impeccable animate, /impeccable audit, /impeccable bolder, /impeccable clarify, /impeccable colorize, /impeccable critique, /impeccable delight, /impeccable distill, /impeccable document, /impeccable harden, /impeccable layout, /impeccable onboard, /impeccable optimize, /impeccable overdrive, /impeccable polish, /impeccable quieter, /impeccable shape, /impeccable typeset)
+- **Suggested command**: Which command to use (prefer: reference/adapt.md, reference/animate.md, reference/audit.md, reference/bolder.md, reference/clarify.md, reference/colorize.md, reference/critique.md, reference/delight.md, reference/distill.md, reference/document.md, reference/harden.md, reference/layout.md, reference/onboard.md, reference/optimize.md, reference/overdrive.md, reference/polish.md, reference/quieter.md, reference/shape.md, reference/typeset.md)
 
 ### Patterns & Systemic Issues
 
@@ -114,13 +114,13 @@ List recommended commands in priority order (P0 first, then P1, then P2):
 1. **[P?] `/command-name`**: Brief description (specific context from audit findings)
 2. **[P?] `/command-name`**: Brief description (specific context)
 
-**Rules**: Only recommend commands from: /impeccable adapt, /impeccable animate, /impeccable audit, /impeccable bolder, /impeccable clarify, /impeccable colorize, /impeccable critique, /impeccable delight, /impeccable distill, /impeccable document, /impeccable harden, /impeccable layout, /impeccable onboard, /impeccable optimize, /impeccable overdrive, /impeccable polish, /impeccable quieter, /impeccable shape, /impeccable typeset. Map findings to the most appropriate command. End with `/impeccable polish` as the final step if any fixes were recommended.
+**Rules**: Only recommend commands from: reference/adapt.md, reference/animate.md, reference/audit.md, reference/bolder.md, reference/clarify.md, reference/colorize.md, reference/critique.md, reference/delight.md, reference/distill.md, reference/document.md, reference/harden.md, reference/layout.md, reference/onboard.md, reference/optimize.md, reference/overdrive.md, reference/polish.md, reference/quieter.md, reference/shape.md, reference/typeset.md. Map findings to the most appropriate command. End with `reference/polish.md` as the final step if any fixes were recommended.
 
 After presenting the summary, tell the user:
 
 > You can ask me to run these one at a time, all at once, or in any order you prefer.
 >
-> Re-run `/impeccable audit` after fixes to see your score improve.
+> Re-run `reference/audit.md` after fixes to see your score improve.
 
 **IMPORTANT**: Be thorough but actionable. Too many P3 issues creates noise. Focus on what actually matters.
 

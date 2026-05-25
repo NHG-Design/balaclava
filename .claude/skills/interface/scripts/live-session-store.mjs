@@ -1,6 +1,6 @@
 import fs from 'node:fs';
 import path from 'node:path';
-import { getLegacyLiveSessionsDir, getLiveSessionsDir } from './impeccable-paths.mjs';
+import { getLegacyLiveSessionsDir, getLiveSessionsDir } from './interface-paths.mjs';
 
 const COMPLETED_PHASES = new Set(['completed', 'discarded']);
 

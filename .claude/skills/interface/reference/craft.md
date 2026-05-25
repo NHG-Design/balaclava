@@ -42,7 +42,7 @@ Default: Astro for brand briefs, the project's existing framework for product br
 
 ## Step 1: Shape the Design
 
-Run /impeccable shape, passing along whatever feature description the user provided. Shape is **required** for craft; it is what produces a confirmed direction.
+Run reference/shape.md, passing along whatever feature description the user provided. Shape is **required** for craft; it is what produces a confirmed direction.
 
 Present the shape output and stop. Wait for the user to confirm, override, or course-correct before writing code.
 
@@ -54,7 +54,7 @@ If the harness has native image generation (Codex), a compact shape's "confirm o
 
 ## Step 2: Load References
 
-Based on the design brief's "Recommended References" section, consult the relevant impeccable reference files. At minimum, always consult:
+Based on the design brief's "Recommended References" section, consult the relevant interface reference files. At minimum, always consult:
 
 - [spatial-design.md](spatial-design.md) for layout and spacing
 - [typography.md](typography.md) for type hierarchy
@@ -68,7 +68,7 @@ Then add references based on the brief's needs:
 
 ## Step 3: Visual Direction & Assets (Harness-Gated)
 
-If the harness has **native image generation** (currently Codex via `image_gen`), this step is mandatory. **Stop and load [codex.md](codex.md)**. It covers palette generation, mock exploration, the approval loop, mock-fidelity inventory, and asset slicing via the `impeccable_asset_producer` subagent. Follow Steps A-F in that file, then return here for Step 4.
+If the harness has **native image generation** (currently Codex via `image_gen`), this step is mandatory. **Stop and load [codex.md](codex.md)**. It covers palette generation, mock exploration, the approval loop, mock-fidelity inventory, and asset slicing via the `interface_asset_producer` subagent. Follow Steps A-F in that file, then return here for Step 4.
 
 If the harness lacks native image generation, **state in one line that the visual-direction-by-generation step is being skipped because the harness lacks native image generation, then proceed**. The one-line announcement is required; it forces a conscious decision instead of letting the step quietly evaporate. The brief is your only visual reference. Implement directly from it, treating any named anchor references and the brief's "Design Direction" as the contract.
 
@@ -106,7 +106,7 @@ If your tool returns a file path, read the PNG back into the conversation. A scr
 
 For long-form brand surfaces, inspect major sections individually. Thumbnails hide spacing, clipping, and cascade defects.
 
-After the first pass, write an honest critique against the brief, the approved mock's major ingredients (hero silhouette, motifs, imagery, nav/CTA, density), and impeccable's DON'Ts. Patch material defects and re-inspect. **Don't invent defects to demonstrate iteration.** A confident "first pass clean, shipping" beats a fake fix.
+After the first pass, write an honest critique against the brief, the approved mock's major ingredients (hero silhouette, motifs, imagery, nav/CTA, density), and the interface skill's forbidden patterns (reference/forbidden.md). Patch material defects and re-inspect. **Don't invent defects to demonstrate iteration.** A confident "first pass clean, shipping" beats a fake fix.
 
 Actively check: responsive behavior (composes, not shrinks), every state (empty / error / loading / edge), craft details (spacing, alignment, hierarchy, contrast, motion timing, focus), performance basics. The exit bar: defensible in a high-end studio review.
 

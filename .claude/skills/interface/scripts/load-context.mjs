@@ -1,5 +1,5 @@
 /**
- * Shared context loader for every impeccable command that needs to know
+ * Shared context loader for every interface reference that needs to know
  * "who is this for" and "what does this look like".
  *
  * Input: project root (process.cwd()).

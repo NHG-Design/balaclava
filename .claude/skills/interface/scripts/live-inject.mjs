@@ -2,7 +2,7 @@
  * CLI helper: insert/remove the live variant mode script tag in the project's
  * main HTML entry point.
  *
- * On first live run, the agent generates `.impeccable/live/config.json`
+ * On first live run, the agent generates `.interface/live/config.json`
  * with the project's insertion target (framework-specific). On
  * every subsequent run, this script handles insert/remove deterministically
  * with zero LLM involvement.
@@ -16,12 +16,12 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { resolveLiveConfigPath } from './impeccable-paths.mjs';
+import { resolveLiveConfigPath } from './interface-paths.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const CONFIG_PATH = resolveLiveConfigPath({ cwd: process.cwd(), scriptsDir: __dirname });
-const MARKER_OPEN_TEXT = 'impeccable-live-start';
-const MARKER_CLOSE_TEXT = 'impeccable-live-end';
+const MARKER_OPEN_TEXT = 'interface-live-start';
+const MARKER_CLOSE_TEXT = 'interface-live-end';
 
 /**
  * Hard-excluded directory patterns. These are NEVER user-facing pages and
@@ -40,12 +40,12 @@ export async function injectCli() {
     console.log(`Usage: node live-inject.mjs [options]
 
 Insert or remove the live mode script tag in the project's HTML entry point.
-Reads configuration from .impeccable/live/config.json.
+Reads configuration from .interface/live/config.json.
 
 Modes:
   --port PORT   Insert script tag pointing at http://localhost:PORT/live.js
   --remove      Remove the script tag (if present)
-  --check       Print whether .impeccable/live/config.json exists and its content
+  --check       Print whether .interface/live/config.json exists and its content
 
 Output (JSON):
   { ok, file, inserted|removed, config? }`);
@@ -299,8 +299,8 @@ function insertTag(content, config, port) {
  */
 function removeTag(content, _syntax) {
   const patterns = [
-    /([ \t]*)<!--\s*impeccable-live-start\s*-->[\s\S]*?<!--\s*impeccable-live-end\s*-->[ \t]*\n/,
-    /([ \t]*)\{\/\*\s*impeccable-live-start\s*\*\/\}[\s\S]*?\{\/\*\s*impeccable-live-end\s*\*\/\}[ \t]*\n/,
+    /([ \t]*)<!--\s*interface-live-start\s*-->[\s\S]*?<!--\s*interface-live-end\s*-->[ \t]*\n/,
+    /([ \t]*)\{\/\*\s*interface-live-start\s*\*\/\}[\s\S]*?\{\/\*\s*interface-live-end\s*\*\/\}[ \t]*\n/,
   ];
   for (const pat of patterns) {
     const next = content.replace(pat, '$1');
@@ -317,7 +317,7 @@ function removeTag(content, _syntax) {
 // localhost:PORT) is blocked unless the CSP explicitly allows that origin.
 //
 // On insert: append `http://localhost:PORT` to `script-src` and `connect-src`,
-// and stash the original `content` value in a `data-impeccable-csp-original`
+// and stash the original `content` value in a `data-interface-csp-original`
 // attribute (base64) so revert is exact.
 //
 // On remove: detect the marker attribute, decode it, restore the original
@@ -329,7 +329,7 @@ function removeTag(content, _syntax) {
 // Only the in-source meta-tag form gets the auto-patch.
 // ---------------------------------------------------------------------------
 
-const CSP_MARKER_ATTR = 'data-impeccable-csp-original';
+const CSP_MARKER_ATTR = 'data-interface-csp-original';
 
 function findCspMetaTags(content) {
   const out = [];

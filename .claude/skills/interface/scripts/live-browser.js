@@ -49,14 +49,14 @@
   // z-index: detect overlays use 99999, so our UI must be above them
   const Z = { highlight: 100001, bar: 100005, picker: 100007, toast: 100010 };
   const EASE = 'cubic-bezier(0.22, 1, 0.36, 1)'; // ease-out-quint
-  const PREFIX = 'impeccable-live';
+  const PREFIX = 'interface-live';
   const sessionState = window.__IMPECCABLE_LIVE_SESSION__?.createLiveBrowserSessionState({
     prefix: PREFIX,
     storage: localStorage,
     idFactory: () => crypto.randomUUID().replace(/-/g, '').slice(0, 8),
   });
   if (!sessionState) {
-    console.error('[impeccable] live-browser-session.js was not loaded. Live mode cannot start safely.');
+    console.error('[interface] live-browser-session.js was not loaded. Live mode cannot start safely.');
     window.__IMPECCABLE_LIVE_INIT__ = false;
     return;
   }
@@ -78,7 +78,7 @@
   // 1.5 stroke — visually consistent with the Foundation grid on the homepage.
   const ICON_ATTRS = 'width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="display:block"';
   const ICONS = {
-    impeccable: `<svg ${ICON_ATTRS}><path d="M4 20l4-1L18 9l-3-3L5 16z"/><path d="M14 7l3 3"/></svg>`,
+    interface: `<svg ${ICON_ATTRS}><path d="M4 20l4-1L18 9l-3-3L5 16z"/><path d="M14 7l3 3"/></svg>`,
     bolder:     `<svg ${ICON_ATTRS}><rect x="6" y="12" width="4" height="7" rx="0.5"/><rect x="14" y="5" width="4" height="14" rx="0.5"/></svg>`,
     quieter:    `<svg ${ICON_ATTRS}><rect x="6" y="5" width="4" height="14" rx="0.5"/><rect x="14" y="12" width="4" height="7" rx="0.5"/></svg>`,
     distill:    `<svg ${ICON_ATTRS}><path d="M4 5h16l-6 8v7l-4-2v-5z"/></svg>`,
@@ -93,7 +93,7 @@
   };
 
   const ACTIONS = [
-    { value: 'impeccable', label: 'Freeform' },
+    { value: 'interface', label: 'Freeform' },
     { value: 'bolder',     label: 'Bolder' },
     { value: 'quieter',    label: 'Quieter' },
     { value: 'distill',    label: 'Distill' },
@@ -120,7 +120,7 @@
   let visibleVariant = 0;
   let variantObserver = null;
   let hasProjectContext = false;
-  let selectedAction = 'impeccable';
+  let selectedAction = 'interface';
   let selectedCount = 3;
   const browserOwner = sessionState.owner;
   let checkpointTimer = null;
@@ -153,7 +153,7 @@
     if (savedY != null) {
       const apply = () => {
         if (Math.abs(window.scrollY - savedY) > 0.5) {
-          console.log('[impeccable.scroll] early restore', { from: window.scrollY, to: savedY });
+          console.log('[interface.scroll] early restore', { from: window.scrollY, to: savedY });
           window.scrollTo(0, savedY);
         }
       };
@@ -959,7 +959,7 @@
     const input = document.createElement('input');
     input.id = PREFIX + '-input';
     input.type = 'text';
-    input.placeholder = selectedAction === 'impeccable' ? 'describe what you want...' : 'refine further (optional)...';
+    input.placeholder = selectedAction === 'interface' ? 'describe what you want...' : 'refine further (optional)...';
     Object.assign(input.style, {
       flex: '1', minWidth: '0',
       padding: '5px 8px', borderRadius: '6px',
@@ -1194,7 +1194,7 @@
       width: '14px', height: '14px', borderRadius: '50%',
       border: '2px solid ' + BP.hairline,
       borderTopColor: BP.accent,
-      animation: 'impeccable-spin 0.6s linear infinite',
+      animation: 'interface-spin 0.6s linear infinite',
       flexShrink: '0',
     });
     row.appendChild(spinner);
@@ -1208,7 +1208,7 @@
     if (!document.getElementById(PREFIX + '-keyframes')) {
       const style = document.createElement('style');
       style.id = PREFIX + '-keyframes';
-      style.textContent = '@keyframes impeccable-spin { to { transform: rotate(360deg); } }';
+      style.textContent = '@keyframes interface-spin { to { transform: rotate(360deg); } }';
       document.head.appendChild(style);
     }
     return row;
@@ -1419,8 +1419,8 @@
   // Variants may declare a parameter manifest via a JSON attribute on the
   // variant wrapper:
   //
-  //   <div data-impeccable-variant="1"
-  //        data-impeccable-params='[{"id":"density","kind":"steps",...}]'>
+  //   <div data-interface-variant="1"
+  //        data-interface-params='[{"id":"density","kind":"steps",...}]'>
   //
   // The panel docks to the right edge of the outline during CYCLING and
   // exposes 2-5 coarse knobs. Values apply to the variant wrapper so scoped
@@ -1498,20 +1498,20 @@
 
   function getVisibleVariantEl() {
     if (!currentSessionId) return null;
-    const wrapper = document.querySelector('[data-impeccable-variants="' + currentSessionId + '"]');
+    const wrapper = document.querySelector('[data-interface-variants="' + currentSessionId + '"]');
     if (!wrapper) return null;
-    return wrapper.querySelector('[data-impeccable-variant="' + visibleVariant + '"]');
+    return wrapper.querySelector('[data-interface-variant="' + visibleVariant + '"]');
   }
 
   function parseVariantParams(variantEl) {
     if (!variantEl) return [];
-    const raw = variantEl.getAttribute('data-impeccable-params');
+    const raw = variantEl.getAttribute('data-interface-params');
     if (!raw) return [];
     try {
       const parsed = JSON.parse(raw);
       return Array.isArray(parsed) ? parsed : [];
     } catch (err) {
-      console.warn('[impeccable] Invalid data-impeccable-params JSON:', err.message);
+      console.warn('[interface] Invalid data-interface-params JSON:', err.message);
       return [];
     }
   }
@@ -1818,10 +1818,10 @@
   // ---------------------------------------------------------------------------
 
   function showVariantInDOM(sessionId, num) {
-    const wrapper = document.querySelector('[data-impeccable-variants="' + sessionId + '"]');
+    const wrapper = document.querySelector('[data-interface-variants="' + sessionId + '"]');
     if (!wrapper) return;
     for (const child of wrapper.children) {
-      const v = child.dataset ? child.dataset.impeccableVariant : null;
+      const v = child.dataset ? child.dataset.interfaceVariant : null;
       if (!v) continue;
       child.style.display = (v === String(num)) ? '' : 'none';
     }
@@ -1844,9 +1844,9 @@
         // Parse the raw source HTML
         const parser = new DOMParser();
         const doc = parser.parseFromString(html, 'text/html');
-        const srcWrapper = doc.querySelector('[data-impeccable-variants="' + sessionId + '"]');
+        const srcWrapper = doc.querySelector('[data-interface-variants="' + sessionId + '"]');
         if (!srcWrapper) {
-          console.error('[impeccable] Variant wrapper not found in source file.');
+          console.error('[interface] Variant wrapper not found in source file.');
           return;
         }
 
@@ -1854,7 +1854,7 @@
         // The original is inside the wrapper in the source. We find the
         // corresponding element in the live DOM by matching the first child's
         // tag + classes from the original snapshot.
-        const origContent = srcWrapper.querySelector('[data-impeccable-variant="original"] > :first-child');
+        const origContent = srcWrapper.querySelector('[data-interface-variant="original"] > :first-child');
         if (!origContent) return;
 
         const tag = origContent.tagName.toLowerCase();
@@ -1871,7 +1871,7 @@
         }
 
         if (!liveEl) {
-          console.error('[impeccable] Could not find original element in live DOM.');
+          console.error('[interface] Could not find original element in live DOM.');
           return;
         }
 
@@ -1883,9 +1883,9 @@
 
         // Update state: count variants, preserving the user's current variant
         // when a late HMR/source reinjection lands after they have cycled.
-        const variants = wrapper.querySelectorAll('[data-impeccable-variant]:not([data-impeccable-variant="original"])');
+        const variants = wrapper.querySelectorAll('[data-interface-variant]:not([data-interface-variant="original"])');
         arrivedVariants = variants.length;
-        expectedVariants = parseInt(wrapper.dataset.impeccableVariantCount || arrivedVariants);
+        expectedVariants = parseInt(wrapper.dataset.interfaceVariantCount || arrivedVariants);
         const saved = loadSession();
         const savedVisibleVariant = saved && saved.id === sessionId ? saved.visible : 0;
         visibleVariant = previousVisibleVariant > 0 && previousVisibleVariant <= arrivedVariants
@@ -1901,10 +1901,10 @@
         updateBarContent('cycling');
         refreshParamsPanel();
         saveSession();
-        console.log('[impeccable] Injected ' + arrivedVariants + ' variants from source file.');
+        console.log('[interface] Injected ' + arrivedVariants + ' variants from source file.');
       })
       .catch(err => {
-        console.error('[impeccable] Failed to fetch source:', err);
+        console.error('[interface] Failed to fetch source:', err);
         showToast('Could not load variants. Try refreshing the page.', 5000);
       });
   }
@@ -1922,19 +1922,19 @@
 
   function updateSelectedElement() {
     if (!currentSessionId) return;
-    const wrapper = document.querySelector('[data-impeccable-variants="' + currentSessionId + '"]');
+    const wrapper = document.querySelector('[data-interface-variants="' + currentSessionId + '"]');
     if (!wrapper) return;
     const visEl = pickVariantContent(wrapper, visibleVariant);
     if (visEl) selectedElement = visEl;
   }
 
   function readVisibleVariantFromDOM(sessionId) {
-    const wrapper = document.querySelector('[data-impeccable-variants="' + sessionId + '"]');
+    const wrapper = document.querySelector('[data-interface-variants="' + sessionId + '"]');
     if (!wrapper) return 0;
-    const variants = wrapper.querySelectorAll('[data-impeccable-variant]:not([data-impeccable-variant="original"])');
+    const variants = wrapper.querySelectorAll('[data-interface-variant]:not([data-interface-variant="original"])');
     for (const variant of variants) {
       if (variant.style.display === 'none') continue;
-      const idx = parseInt(variant.dataset.impeccableVariant || '0', 10);
+      const idx = parseInt(variant.dataset.interfaceVariant || '0', 10);
       if (idx > 0) return idx;
     }
     return 0;
@@ -1948,7 +1948,7 @@
   // (it wraps all of them and gets correct bounds).
   function pickVariantContent(wrapper, index) {
     if (!wrapper) return null;
-    const variantDiv = wrapper.querySelector('[data-impeccable-variant="' + index + '"]');
+    const variantDiv = wrapper.querySelector('[data-interface-variant="' + index + '"]');
     if (!variantDiv) return null;
     const NON_VISUAL = new Set(['STYLE', 'SCRIPT', 'LINK', 'META', 'TEMPLATE']);
     const visual = [];
@@ -1966,7 +1966,7 @@
     scrollLockTargetY = typeof initialTargetY === 'number' && isFinite(initialTargetY)
       ? initialTargetY
       : window.scrollY;
-    console.log('[impeccable.scroll] startScrollLock', { sessionId, scrollY: window.scrollY, targetY: scrollLockTargetY, initialOverride: initialTargetY });
+    console.log('[interface.scroll] startScrollLock', { sessionId, scrollY: window.scrollY, targetY: scrollLockTargetY, initialOverride: initialTargetY });
 
     try { history.scrollRestoration = 'manual'; } catch {}
 
@@ -1981,11 +1981,11 @@
       const before = window.scrollY;
       const delta = before - scrollLockTargetY;
       if (Math.abs(delta) < 0.5) {
-        console.log('[impeccable.scroll] correct noop', { why, scrollY: before, targetY: scrollLockTargetY });
+        console.log('[interface.scroll] correct noop', { why, scrollY: before, targetY: scrollLockTargetY });
         return;
       }
       window.scrollTo({ top: scrollLockTargetY, left: window.scrollX, behavior: 'instant' });
-      console.log('[impeccable.scroll] corrected', { why, from: before, to: scrollLockTargetY, delta, nowAt: window.scrollY });
+      console.log('[interface.scroll] corrected', { why, from: before, to: scrollLockTargetY, delta, nowAt: window.scrollY });
     };
     const schedule = (why) => {
       if (scrollLockRaf != null) return;
@@ -1994,15 +1994,15 @@
 
     scrollLockObserver = new MutationObserver((mutations) => {
       for (const m of mutations) {
-        if (m.target?.closest?.('[data-impeccable-variants="' + sessionId + '"]')) {
-          const childAdds = Array.from(m.addedNodes).map(n => n.nodeType === 1 ? (n.tagName + (n.dataset?.impeccableVariant ? ('[variant=' + n.dataset.impeccableVariant + ']') : '')) : n.nodeType).join(',');
-          console.log('[impeccable.scroll] mutation inside wrapper', { type: m.type, target: m.target?.tagName, adds: childAdds, scrollYBefore: window.scrollY, targetY: scrollLockTargetY });
+        if (m.target?.closest?.('[data-interface-variants="' + sessionId + '"]')) {
+          const childAdds = Array.from(m.addedNodes).map(n => n.nodeType === 1 ? (n.tagName + (n.dataset?.interfaceVariant ? ('[variant=' + n.dataset.interfaceVariant + ']') : '')) : n.nodeType).join(',');
+          console.log('[interface.scroll] mutation inside wrapper', { type: m.type, target: m.target?.tagName, adds: childAdds, scrollYBefore: window.scrollY, targetY: scrollLockTargetY });
           schedule('mutation-in-wrapper');
           return;
         }
         for (const n of m.addedNodes) {
-          if (n.nodeType === 1 && (n.matches?.('[data-impeccable-variants="' + sessionId + '"]') || n.querySelector?.('[data-impeccable-variants="' + sessionId + '"]'))) {
-            console.log('[impeccable.scroll] wrapper node added', { tag: n.tagName, scrollYBefore: window.scrollY, targetY: scrollLockTargetY });
+          if (n.nodeType === 1 && (n.matches?.('[data-interface-variants="' + sessionId + '"]') || n.querySelector?.('[data-interface-variants="' + sessionId + '"]'))) {
+            console.log('[interface.scroll] wrapper node added', { tag: n.tagName, scrollYBefore: window.scrollY, targetY: scrollLockTargetY });
             schedule('wrapper-added');
             return;
           }
@@ -2029,7 +2029,7 @@
       const prevTarget = scrollLockTargetY;
       scrollLockTargetY = window.scrollY;
       writeScrollY(scrollLockTargetY);
-      console.log('[impeccable.scroll] reanchor', { why, prevTarget, newTarget: scrollLockTargetY });
+      console.log('[interface.scroll] reanchor', { why, prevTarget, newTarget: scrollLockTargetY });
     };
     const markGesture = (why) => {
       userGestureAt = performance.now();
@@ -2050,13 +2050,13 @@
     window.addEventListener('scroll', () => {
       const now = window.scrollY;
       if (Math.abs(now - lastLoggedScrollY) > 5) {
-        console.log('[impeccable.scroll] scroll event', { from: lastLoggedScrollY, to: now, targetY: scrollLockTargetY });
+        console.log('[interface.scroll] scroll event', { from: lastLoggedScrollY, to: now, targetY: scrollLockTargetY });
         lastLoggedScrollY = now;
       }
       if (scrollLockTargetY == null) return;
       if (performance.now() - userGestureAt < USER_GESTURE_WINDOW_MS) return;
       if (Math.abs(now - scrollLockTargetY) < 0.5) return;
-      console.log('[impeccable.scroll] scroll-event snap', { from: now, to: scrollLockTargetY });
+      console.log('[interface.scroll] scroll-event snap', { from: now, to: scrollLockTargetY });
       window.scrollTo({ top: scrollLockTargetY, left: window.scrollX, behavior: 'instant' });
     }, { passive: true, ...sig });
 
@@ -2064,7 +2064,7 @@
     // restore or a smooth-scroll animation means we want to win now.
     if (Math.abs(window.scrollY - scrollLockTargetY) > 0.5) {
       window.scrollTo({ top: scrollLockTargetY, left: window.scrollX, behavior: 'instant' });
-      console.log('[impeccable.scroll] startScrollLock initial apply', { to: scrollLockTargetY });
+      console.log('[interface.scroll] startScrollLock initial apply', { to: scrollLockTargetY });
     }
   }
 
@@ -2088,22 +2088,22 @@
     const obs = new MutationObserver((mutations) => {
       if (updating) return;
 
-      // Only react to mutations that add nodes with data-impeccable-variant,
+      // Only react to mutations that add nodes with data-interface-variant,
       // or mutations inside the variant wrapper. Ignore our own bar/UI changes.
       let dominated = false;
       for (const m of mutations) {
-        if (m.target.closest?.('[data-impeccable-variants]')) { dominated = true; break; }
+        if (m.target.closest?.('[data-interface-variants]')) { dominated = true; break; }
         for (const n of m.addedNodes) {
           if (n.nodeType !== 1) continue;
           // Direct hit: the added node itself is the wrapper or a variant.
-          if (n.dataset?.impeccableVariants || n.dataset?.impeccableVariant) {
+          if (n.dataset?.interfaceVariants || n.dataset?.interfaceVariant) {
             dominated = true; break;
           }
           // Subtree hit: framework HMR (notably SvelteKit) sometimes replaces
           // a whole subtree where the wrapper is a descendant of the added
           // node. Without this check, the observer ignores those mutations
           // and the session stays in GENERATING forever.
-          if (n.querySelector?.('[data-impeccable-variants],[data-impeccable-variant]')) {
+          if (n.querySelector?.('[data-interface-variants],[data-interface-variant]')) {
             dominated = true; break;
           }
         }
@@ -2111,7 +2111,7 @@
       }
       if (!dominated) return;
 
-      const wrapper = document.querySelector('[data-impeccable-variants="' + sessionId + '"]');
+      const wrapper = document.querySelector('[data-interface-variants="' + sessionId + '"]');
       if (!wrapper) return;
 
       // Re-anchor selectedElement if it was detached by live-wrap's HMR swap.
@@ -2121,7 +2121,7 @@
         selectedElement = pickVariantContent(wrapper, 'original') || wrapper;
       }
 
-      const variants = wrapper.querySelectorAll('[data-impeccable-variant]:not([data-impeccable-variant="original"])');
+      const variants = wrapper.querySelectorAll('[data-interface-variant]:not([data-interface-variant="original"])');
       const count = variants.length;
 
       // Nothing new
@@ -2141,7 +2141,7 @@
         if (visEl) selectedElement = visEl;
       }
 
-      const expected = parseInt(wrapper.dataset.impeccableVariantCount || '0');
+      const expected = parseInt(wrapper.dataset.interfaceVariantCount || '0');
       if (expected > 0) expectedVariants = expected;
 
       if (arrivedVariants >= expectedVariants && expectedVariants > 0) {
@@ -2207,8 +2207,8 @@
       switch (msg.type) {
         case 'connected':
           hasProjectContext = !!msg.hasProjectContext;
-          if (!hasProjectContext) showToast('No PRODUCT.md found. Variants will be brand-agnostic. Run /impeccable teach to generate one.', 7000);
-          console.log('[impeccable] Live mode connected.');
+          if (!hasProjectContext) showToast('No PRODUCT.md found. Variants will be brand-agnostic. Run reference/teach.md to generate one.', 7000);
+          console.log('[interface] Live mode connected.');
           if (state === 'IDLE') state = 'PICKING';
           break;
         case 'done':
@@ -2238,7 +2238,7 @@
           }, 2000);
           break;
         case 'error':
-          console.error('[impeccable] Error:', msg.message);
+          console.error('[interface] Error:', msg.message);
           showToast('Error: ' + msg.message, 5000);
           hideBar();
           state = 'PICKING';
@@ -2249,11 +2249,11 @@
     evtSource.onerror = () => {
       sseRetries++;
       if (sseRetries <= SSE_MAX_RETRIES) {
-        console.log('[impeccable] SSE connection lost. Retry ' + sseRetries + '/' + SSE_MAX_RETRIES + '...');
+        console.log('[interface] SSE connection lost. Retry ' + sseRetries + '/' + SSE_MAX_RETRIES + '...');
         return; // EventSource auto-reconnects
       }
       // Server is gone. Clean up gracefully.
-      console.log('[impeccable] Live server unreachable. Cleaning up UI.');
+      console.log('[interface] Live server unreachable. Cleaning up UI.');
       evtSource.close();
       evtSource = null;
       handleServerLost();
@@ -2278,7 +2278,7 @@
     // resume after a helper restart or page reload instead of treating a
     // transient disconnect as an explicit discard.
     selectedElement = null;
-    selectedAction = 'impeccable';
+    selectedAction = 'interface';
     state = recoveryState;
     if (currentSessionId) saveSession();
   }
@@ -2286,7 +2286,7 @@
   function sendEvent(msg, opts) {
     msg.token = TOKEN;
     function handleFailure(err) {
-      console.error('[impeccable] Failed to send event:', err);
+      console.error('[interface] Failed to send event:', err);
       if (opts && opts.throwOnError) throw err;
       return null;
     }
@@ -2567,7 +2567,7 @@
     writeScrollY(window.scrollY);
     if (variantObserver) variantObserver.disconnect();
     variantObserver = startVariantObserver(currentSessionId);
-    console.log('[impeccable.scroll] Go pressed', { scrollY: window.scrollY, sessionId: currentSessionId });
+    console.log('[interface.scroll] Go pressed', { scrollY: window.scrollY, sessionId: currentSessionId });
     startScrollLock(currentSessionId);
 
     captureAndEmit(elForCapture, basePayload, snapshot, captureRect);
@@ -2739,7 +2739,7 @@
     try {
       blob = await captureElementToBlob(el, snapshot, rect);
     } catch (err) {
-      console.warn('[impeccable] capture failed, proceeding without screenshot:', err);
+      console.warn('[interface] capture failed, proceeding without screenshot:', err);
     }
     // Light up the shader overlay the moment capture is ready — no reason to
     // wait for the upload to complete before the user sees something alive.
@@ -2762,10 +2762,10 @@
           const { path: p } = await uploadRes.json();
           screenshotPath = p;
         } else {
-          console.warn('[impeccable] annotation upload failed:', uploadRes.status);
+          console.warn('[interface] annotation upload failed:', uploadRes.status);
         }
       } catch (err) {
-        console.warn('[impeccable] annotation upload failed:', err);
+        console.warn('[interface] annotation upload failed:', err);
       }
     }
     sendEvent(screenshotPath ? { ...basePayload, screenshotPath } : basePayload);
@@ -2933,7 +2933,7 @@ void main() {
       gl.enableVertexAttribArray(uvLoc);
       gl.vertexAttribPointer(uvLoc, 2, gl.FLOAT, false, 16, 8);
     } catch (err) {
-      console.warn('[impeccable] shader setup failed:', err);
+      console.warn('[interface] shader setup failed:', err);
       canvas.remove();
       return;
     }
@@ -3034,19 +3034,19 @@ void main() {
       clearSession();
       selectedElement = null;
       currentSessionId = null;
-      selectedAction = 'impeccable';
+      selectedAction = 'interface';
       state = 'PICKING';
     }, 1800);
 
     // Static-server / no-HMR fallback: if the wrapper is still around 2s after
     // the cleanup above, swap it out manually. By now React has either moved
-    // on or the app isn't React at all. Preserve the `data-impeccable-variant="N"`
+    // on or the app isn't React at all. Preserve the `data-interface-variant="N"`
     // div (with display:contents) so @scope rules anchored to the variant
     // attribute keep matching until reload replaces it with the carbonize block.
     setTimeout(function() {
-      const wrapper = document.querySelector('[data-impeccable-variants="' + acceptedSessionId + '"]');
+      const wrapper = document.querySelector('[data-interface-variants="' + acceptedSessionId + '"]');
       if (!wrapper) return;
-      const accepted = wrapper.querySelector('[data-impeccable-variant="' + acceptedVariant + '"]');
+      const accepted = wrapper.querySelector('[data-interface-variant="' + acceptedVariant + '"]');
       if (accepted && accepted.firstElementChild) {
         const parent = wrapper.parentElement;
         if (!parent) return;
@@ -3120,14 +3120,14 @@ void main() {
     // replaced the wrapper by then (keeps static-server / no-HMR flows alive).
     const cleanupSessionId = currentSessionId;
     if (cleanupSessionId) {
-      const wrapper = document.querySelector('[data-impeccable-variants="' + cleanupSessionId + '"]');
+      const wrapper = document.querySelector('[data-interface-variants="' + cleanupSessionId + '"]');
       if (wrapper) wrapper.style.display = 'none';
     }
     setTimeout(function() {
       if (!cleanupSessionId) return;
-      const wrapper = document.querySelector('[data-impeccable-variants="' + cleanupSessionId + '"]');
+      const wrapper = document.querySelector('[data-interface-variants="' + cleanupSessionId + '"]');
       if (!wrapper) return;
-      const orig = wrapper.querySelector('[data-impeccable-variant="original"]');
+      const orig = wrapper.querySelector('[data-interface-variant="original"]');
       if (orig) {
         const content = orig.firstElementChild;
         if (content) {
@@ -3146,7 +3146,7 @@ void main() {
     clearSession();
     selectedElement = null;
     currentSessionId = null;
-    selectedAction = 'impeccable';
+    selectedAction = 'interface';
     state = 'PICKING';
   }
 
@@ -3195,20 +3195,20 @@ void main() {
   // ---------------------------------------------------------------------------
 
   // Resume an active variant session after HMR/page reload.
-  // If a [data-impeccable-variants] wrapper exists in the DOM, the agent wrote
+  // If a [data-interface-variants] wrapper exists in the DOM, the agent wrote
   // variants before HMR fired. Pick up where we left off.
   function resumeSession() {
-    const wrapper = document.querySelector('[data-impeccable-variants]');
+    const wrapper = document.querySelector('[data-interface-variants]');
     if (!wrapper) { clearSession(); clearHandled(); return false; }
 
-    const sessionId = wrapper.dataset.impeccableVariants;
+    const sessionId = wrapper.dataset.interfaceVariants;
 
     // Don't resume if this session was already accepted/discarded
     if (isSessionHandled(sessionId)) return false;
 
     currentSessionId = sessionId;
-    expectedVariants = parseInt(wrapper.dataset.impeccableVariantCount || '0');
-    const variants = wrapper.querySelectorAll('[data-impeccable-variant]:not([data-impeccable-variant="original"])');
+    expectedVariants = parseInt(wrapper.dataset.interfaceVariantCount || '0');
+    const variants = wrapper.querySelectorAll('[data-interface-variant]:not([data-interface-variant="original"])');
     arrivedVariants = variants.length;
 
     // Restore state from localStorage if available
@@ -3262,7 +3262,7 @@ void main() {
             showShaderOverlay(origEl, blob, rect);
           }
         } catch (err) {
-          console.warn('[impeccable] shader resume failed:', err);
+          console.warn('[interface] shader resume failed:', err);
         }
       })();
     }
@@ -3284,10 +3284,10 @@ void main() {
   // dark pages. This keeps the bar from fighting with the host design.
   function detectPageTheme() {
     try {
-      // Dev override: set localStorage 'impeccable-dev-theme' to 'light' or
+      // Dev override: set localStorage 'interface-dev-theme' to 'light' or
       // 'dark' to preview the opposite palette without actually changing the
       // page bg. Used for screenshots and theme QA.
-      const override = localStorage.getItem('impeccable-dev-theme');
+      const override = localStorage.getItem('interface-dev-theme');
       if (override === 'light' || override === 'dark') return override;
 
       // Walk body → html, taking the first opaque background. The browser's
@@ -3598,12 +3598,12 @@ void main() {
     }
 
     // When pick is active, make detect overlays click-through so the picker works
-    document.querySelectorAll('.impeccable-overlay').forEach(o => {
+    document.querySelectorAll('.interface-overlay').forEach(o => {
       o.style.pointerEvents = pickActive ? 'none' : '';
     });
   }
 
-  let detectReady = false; // true once detect script posts 'impeccable-ready'
+  let detectReady = false; // true once detect script posts 'interface-ready'
   let detectPendingScan = false; // scan requested before script was ready
 
   function toggleDetect() {
@@ -3649,14 +3649,14 @@ void main() {
     detectScriptLoaded = true;
     const s = document.createElement('script');
     s.src = 'http://localhost:' + PORT + '/detect.js';
-    s.dataset.impeccableExtension = 'true';
+    s.dataset.interfaceExtension = 'true';
     document.head.appendChild(s);
   }
 
   function onDetectMessage(e) {
     if (!e.data || typeof e.data.source !== 'string') return;
     // Detection script is loaded and ready
-    if (e.data.source === 'impeccable-ready') {
+    if (e.data.source === 'interface-ready') {
       detectReady = true;
       if (detectPendingScan && detectActive) {
         detectPendingScan = false;
@@ -3692,14 +3692,14 @@ void main() {
     window.postMessage({ source: 'impeccable-command', action: 'remove' }, '*');
     state = 'IDLE';
     window.__IMPECCABLE_LIVE_INIT__ = false;
-    console.log('[impeccable] Live mode exited.');
+    console.log('[interface] Live mode exited.');
   }
 
   // ---------------------------------------------------------------------------
-  // Design System Panel — visualizes the project's .impeccable/design.json sidecar
+  // Design System Panel — visualizes the project's .interface/design.json sidecar
   // ---------------------------------------------------------------------------
 
-  const DESIGN_PREFS_KEY = 'impeccable-live-design-panel';
+  const DESIGN_PREFS_KEY = 'interface-live-design-panel';
   const DESIGN_PANEL_WIDTH = 440;
 
   let designHost = null;
@@ -3708,7 +3708,7 @@ void main() {
     open: false,
     tab: 'visual',          // 'visual' | 'raw'
     parsed: null,           // parseDesignMd output (frontmatter + body sections)
-    sidecar: null,          // .impeccable/design.json v2 payload (extensions + components + narrative)
+    sidecar: null,          // .interface/design.json v2 payload (extensions + components + narrative)
     hasMd: false,
     hasSidecar: false,
     present: null,          // true/false once fetch resolves
@@ -4179,7 +4179,7 @@ void main() {
     if (designState.present === false) {
       const empty = document.createElement('div');
       empty.className = 'empty';
-      empty.innerHTML = `<strong>No DESIGN.md yet</strong>Create one by running <code>/impeccable document</code> in your terminal, then re-open this panel.`;
+      empty.innerHTML = `<strong>No DESIGN.md yet</strong>Create one by running <code>/interface document</code> in your terminal, then re-open this panel.`;
       body.appendChild(empty);
       return;
     }
@@ -4209,7 +4209,7 @@ void main() {
     box.className = 'stale';
     box.innerHTML = `
       <span class="stale-dot"></span>
-      <span class="stale-text"><strong>DESIGN.md is newer than .impeccable/design.json.</strong> Run <code>/impeccable document</code> to refresh the sidecar.</span>
+      <span class="stale-text"><strong>DESIGN.md is newer than .interface/design.json.</strong> Run <code>/interface document</code> to refresh the sidecar.</span>
     `;
     return box;
   }
@@ -4217,7 +4217,7 @@ void main() {
   function renderParsedMdCta() {
     const box = document.createElement('div');
     box.className = 'parsed-md-cta';
-    box.innerHTML = `<strong>Basic view</strong>This panel reads the tokens in your <code>DESIGN.md</code> frontmatter. Running <code>/impeccable document</code> also generates a <code>.impeccable/design.json</code> sidecar with your project's actual component snippets (button, input, nav) and tonal ramps, rendered live below the tokens.`;
+    box.innerHTML = `<strong>Basic view</strong>This panel reads the tokens in your <code>DESIGN.md</code> frontmatter. Running <code>/interface document</code> also generates a <code>.interface/design.json</code> sidecar with your project's actual component snippets (button, input, nav) and tonal ramps, rendered live below the tokens.`;
     return box;
   }
 
@@ -4677,7 +4677,7 @@ void main() {
 
   function cssSafe(v) {
     // Strip anything outside valid CSS value chars to prevent injection via
-    // .impeccable/design.json values rendered into inline style strings.
+    // .interface/design.json values rendered into inline style strings.
     return String(v).replace(/[<>"'`\n]/g, '');
   }
 
@@ -4834,21 +4834,21 @@ void main() {
 
     // Check for an active session to resume (variant wrapper already in DOM after HMR)
     if (!resumeSession()) {
-      console.log('[impeccable] Live variant mode ready. Hover over elements to pick one.');
+      console.log('[interface] Live variant mode ready. Hover over elements to pick one.');
       // SvelteKit (and any framework that hydrates after HTML parse) may add
       // the variant wrapper AFTER init runs. Watch for it and retry resume
       // once it appears. Disconnect on first hit.
       const scout = new MutationObserver(() => {
-        const wrapper = document.querySelector('[data-impeccable-variants]');
+        const wrapper = document.querySelector('[data-interface-variants]');
         if (!wrapper) return;
         scout.disconnect();
         if (resumeSession()) {
-          console.log('[impeccable] Resumed deferred session ' + currentSessionId + ' (post-hydration).');
+          console.log('[interface] Resumed deferred session ' + currentSessionId + ' (post-hydration).');
         }
       });
       scout.observe(document.body, { childList: true, subtree: true });
     } else {
-      console.log('[impeccable] Resumed active variant session ' + currentSessionId + ' (' + arrivedVariants + '/' + expectedVariants + ' variants).');
+      console.log('[interface] Resumed active variant session ' + currentSessionId + ' (' + arrivedVariants + '/' + expectedVariants + ' variants).');
     }
   }
 

@@ -74,7 +74,7 @@ async function confirm(question) {
 }
 
 function printUsage() {
-  console.log(`Usage: impeccable detect [options] [file-or-dir-or-url...]
+  console.log(`Usage: interface detect [options] [file-or-dir-or-url...]
 
 Scan files or URLs for UI anti-patterns and design quality issues.
 
@@ -90,10 +90,10 @@ Detection modes:
   --fast         Forces regex for all files
 
 Examples:
-  impeccable detect src/
-  impeccable detect index.html
-  impeccable detect https://example.com
-  impeccable detect --fast --json .`);
+  interface detect src/
+  interface detect index.html
+  interface detect https://example.com
+  interface detect --fast --json .`);
 }
 
 async function detectCli() {
@@ -146,7 +146,7 @@ async function detectCli() {
                 process.stderr.write(
                   `\n${fwConfig.name} dev server detected on localhost:${fwConfig.port}.\n` +
                   `For more accurate results, scan the running site:\n` +
-                  `  npx impeccable detect http://localhost:${fwConfig.port}\n\n`
+                  `  npx interface detect http://localhost:${fwConfig.port}\n\n`
                 );
               } else if (probe.listening && !probe.matched) {
                 process.stderr.write(
@@ -157,7 +157,7 @@ async function detectCli() {
                 process.stderr.write(
                   `\n${fwConfig.name} project detected (${path.basename(fwConfig.configPath)}).\n` +
                   `Start the dev server and scan via URL for best results:\n` +
-                  `  npx impeccable detect http://localhost:${fwConfig.port}\n\n`
+                  `  npx interface detect http://localhost:${fwConfig.port}\n\n`
                 );
               }
             }

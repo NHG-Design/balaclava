@@ -2,17 +2,17 @@
  * CLI client for the live variant mode poll/reply protocol.
  *
  * Usage:
- *   npx impeccable poll                         # Block until browser event, print JSON
- *   npx impeccable poll --timeout=600000        # Custom timeout (ms); default is long-poll friendly
- *   npx impeccable poll --reply <id> done       # Reply "done" to event <id>
- *   npx impeccable poll --reply <id> error "msg" # Reply with error
+ *   npx interface poll                         # Block until browser event, print JSON
+ *   npx interface poll --timeout=600000        # Custom timeout (ms); default is long-poll friendly
+ *   npx interface poll --reply <id> done       # Reply "done" to event <id>
+ *   npx interface poll --reply <id> error "msg" # Reply with error
  */
 
 import { execFileSync } from 'node:child_process';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { completionAckForAcceptResult, completionTypeForAcceptResult } from './live-completion.mjs';
-import { readLiveServerInfo } from './impeccable-paths.mjs';
+import { readLiveServerInfo } from './interface-paths.mjs';
 
 // Node's built-in fetch (undici under the hood) enforces a 300s headers
 // timeout that can't be lowered per-request. We cap each request below
@@ -23,7 +23,7 @@ const PER_REQUEST_TIMEOUT_MS = 270_000;
 function readServerInfo() {
   const record = readLiveServerInfo(process.cwd());
   if (!record) {
-    console.error('No running live server found. Start one with: npx impeccable live');
+    console.error('No running live server found. Start one with: npx interface live');
     process.exit(1);
   }
   return record.info;
@@ -49,7 +49,7 @@ export async function pollCli() {
   const args = process.argv.slice(2);
 
   if (args.includes('--help') || args.includes('-h')) {
-    console.log(`Usage: impeccable poll [options]
+    console.log(`Usage: interface poll [options]
 
 Wait for a browser event from the live variant server, or reply to one.
 
@@ -67,7 +67,7 @@ Options:
   const info = readServerInfo();
   const base = `http://localhost:${info.port}`;
 
-  // Reply mode: npx impeccable poll --reply <id> <status> [--file path] [message]
+  // Reply mode: npx interface poll --reply <id> <status> [--file path] [message]
   const replyIdx = args.indexOf('--reply');
   if (replyIdx !== -1) {
     const id = args[replyIdx + 1];
@@ -78,7 +78,7 @@ Options:
     const message = args.find((a, i) => i > replyIdx + 2 && !a.startsWith('--') && i !== fileIdx + 1) || undefined;
 
     if (!id) {
-      console.error('Usage: npx impeccable poll --reply <id> <status> [--file path] [message]');
+      console.error('Usage: npx interface poll --reply <id> <status> [--file path] [message]');
       process.exit(1);
     }
 
@@ -88,7 +88,7 @@ Options:
       // Success — silent exit (agent doesn't need output for replies)
     } catch (err) {
       if (err.cause?.code === 'ECONNREFUSED') {
-        console.error('Live server not running. Start one with: npx impeccable live');
+        console.error('Live server not running. Start one with: npx interface live');
       } else {
         console.error('Reply failed:', err.message);
       }
@@ -118,7 +118,7 @@ Options:
 
       if (res.status === 401) {
         console.error('Authentication failed. The server token may have changed.');
-        console.error('Try restarting: npx impeccable live stop && npx impeccable live');
+        console.error('Try restarting: npx interface live stop && npx interface live');
         process.exit(1);
       }
 
@@ -185,7 +185,7 @@ Options:
     console.log(JSON.stringify(event));
   } catch (err) {
     if (err.cause?.code === 'ECONNREFUSED') {
-      console.error('Live server not running. Start one with: npx impeccable live');
+      console.error('Live server not running. Start one with: npx interface live');
     } else {
       console.error('Poll failed:', err.message);
     }

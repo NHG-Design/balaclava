@@ -29,8 +29,8 @@ async function runVisualContrastFallback(page, serializedGroups, options, profil
       target,
     }, async () => {
       browserAnalyses = await page.evaluate(async ({ maxCandidates, scrollOffscreen }) => {
-        if (typeof window.impeccableAnalyzeVisualContrast !== 'function') return [];
-        return window.impeccableAnalyzeVisualContrast({ maxCandidates, scrollOffscreen });
+        if (typeof window.interfaceAnalyzeVisualContrast !== 'function') return [];
+        return window.interfaceAnalyzeVisualContrast({ maxCandidates, scrollOffscreen });
       }, { maxCandidates, scrollOffscreen });
       return browserAnalyses
         .filter(result => result.finding && !existingLowContrastSelectors.has(result.selector))
@@ -47,8 +47,8 @@ async function runVisualContrastFallback(page, serializedGroups, options, profil
       ruleId: 'collect-candidates',
       target,
     }, () => page.evaluate(({ maxCandidates }) => {
-      if (typeof window.impeccableCollectVisualContrastCandidates !== 'function') return [];
-      return window.impeccableCollectVisualContrastCandidates({ maxCandidates });
+      if (typeof window.interfaceCollectVisualContrastCandidates !== 'function') return [];
+      return window.interfaceCollectVisualContrastCandidates({ maxCandidates });
     }, { maxCandidates }));
   }
 
@@ -187,8 +187,8 @@ async function detectUrl(url, options = {}) {
       target: url,
     }, async () => {
       serializedGroups = await page.evaluate(() => {
-        if (!window.impeccableDetect) return [];
-        return window.impeccableDetect({ decorate: false, serialize: true });
+        if (!window.interfaceDetect) return [];
+        return window.interfaceDetect({ decorate: false, serialize: true });
       });
       return serializedGroups.flatMap(({ findings }) =>
         findings.map(f => ({ id: f.type, snippet: f.detail }))

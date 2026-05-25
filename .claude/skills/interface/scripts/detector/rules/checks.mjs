@@ -988,7 +988,7 @@ const REPEATED_KICKER_SKIP_SELECTOR = [
   '[role="navigation"]',
   '[aria-label*="breadcrumb" i]',
   '[class*="breadcrumb" i]',
-  '[data-impeccable-allow-kickers]',
+  '[data-interface-allow-kickers]',
 ].join(',');
 
 function cleanInlineText(el) {
@@ -1617,8 +1617,8 @@ function checkTypography() {
   const fontUsage = new Map(); // primary font name → count of elements
   let totalTextElements = 0;
   for (const el of document.querySelectorAll('p, h1, h2, h3, h4, h5, h6, li, td, th, dd, blockquote, figcaption, a, button, label, span')) {
-    // Skip impeccable's own elements
-    if (el.closest && el.closest('.impeccable-overlay, .impeccable-label, .impeccable-banner, .impeccable-tooltip')) continue;
+    // Skip interface's own elements
+    if (el.closest && el.closest('.interface-overlay, .interface-label, .interface-banner, .interface-tooltip')) continue;
     // Only count elements that actually have visible direct text
     const hasText = [...el.childNodes].some(n => n.nodeType === 3 && n.textContent.trim().length > 0);
     if (!hasText) continue;

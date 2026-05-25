@@ -61,7 +61,7 @@ Optional evocative subtitles are allowed in the form `## 2. Colors: The [Name] P
 
 ## When to run
 
-- The user just ran `/impeccable teach` and needs the visual side documented.
+- The user just ran `reference/teach.md` and needs the visual side documented.
 - The skill noticed no `DESIGN.md` exists and nudged the user to create one.
 - An existing `DESIGN.md` is stale (the design has drifted).
 - Before a large redesign, to capture the current state as a reference.
@@ -73,7 +73,7 @@ If a `DESIGN.md` already exists, **do not silently overwrite it**. Show the user
 - **Scan mode** (default): the project has design tokens, components, or rendered output. Extract, then confirm descriptive language. Use when there's code to analyze.
 - **Seed mode**: the project is pre-implementation (fresh teach, nothing built yet). Interview for five high-level answers, write a minimal DESIGN.md marked `<!-- SEED -->`. Re-run in scan mode once there's code.
 
-Decide by scanning first (Scan mode Step 1). If the scan finds no tokens, no component files, and no rendered site, offer seed mode; don't silently switch. `/impeccable document --seed` forces seed mode regardless of code presence.
+Decide by scanning first (Scan mode Step 1). If the scan finds no tokens, no component files, and no rendered site, offer seed mode; don't silently switch. `reference/document.md --seed` forces seed mode regardless of code presence.
 
 ## Scan mode (approach C: auto-extract, then confirm descriptive language)
 
@@ -237,11 +237,11 @@ Concrete, forceful guardrails. Lead each with "Do" or "Don't". Be specific: incl
 - **Don't** [...]
 ```
 
-### Step 4b: Write .impeccable/design.json sidecar (extensions only)
+### Step 4b: Write .interface/design.json sidecar (extensions only)
 
-The frontmatter owns token primitives (colors, typography, rounded, spacing, components). The sidecar at `.impeccable/design.json` carries **what Stitch's schema can't hold**: tonal ramps per color, shadow/elevation tokens, motion tokens, breakpoints, full component HTML/CSS snippets (the panel renders these into a shadow DOM), and narrative (north star, rules, do's/don'ts). It extends the frontmatter, it doesn't duplicate it.
+The frontmatter owns token primitives (colors, typography, rounded, spacing, components). The sidecar at `.interface/design.json` carries **what Stitch's schema can't hold**: tonal ramps per color, shadow/elevation tokens, motion tokens, breakpoints, full component HTML/CSS snippets (the panel renders these into a shadow DOM), and narrative (north star, rules, do's/don'ts). It extends the frontmatter, it doesn't duplicate it.
 
-Regenerate the sidecar whenever you regenerate root `DESIGN.md`. If the user only asks to refresh the sidecar (e.g., from the live panel's stale-hint), preserve `DESIGN.md` and write only `.impeccable/design.json`.
+Regenerate the sidecar whenever you regenerate root `DESIGN.md`. If the user only asks to refresh the sidecar (e.g., from the live panel's stale-hint), preserve `DESIGN.md` and write only `.interface/design.json`.
 
 #### Schema
 
@@ -310,7 +310,7 @@ Aim for a tight set of **5-10 components** that best represent the visual system
 - **Signature components (include if distinctive):** hero CTA, featured card, filter pill, any custom pattern the user mentioned as important in PRODUCT.md.
 - **Skip the rest.** Utility components, form building blocks, wrapper layouts: not worth documenting unless visually distinctive.
 
-If the project has **no component library yet** (bare landing page, new project), synthesize canonical primitives from the tokens using best-practice defaults consistent with the DESIGN.md's rules. Every `.impeccable/design.json` has *something* to render, even on day zero.
+If the project has **no component library yet** (bare landing page, new project), synthesize canonical primitives from the tokens using best-practice defaults consistent with the DESIGN.md's rules. Every `.interface/design.json` has *something* to render, even on day zero.
 
 #### Tonal ramps
 
@@ -331,9 +331,9 @@ Do not reword. The panel shows these as secondary collapsible context; the same 
 ### Step 5: Confirm, refine, and refresh session cache
 
 1. Show the user the full DESIGN.md you wrote. Briefly highlight the non-obvious creative choices (descriptive color names, atmosphere language, named rules).
-2. Mention that `.impeccable/design.json` was also written alongside; the live panel will now render this project's actual button/input/nav primitives instead of generic approximations.
+2. Mention that `.interface/design.json` was also written alongside; the live panel will now render this project's actual button/input/nav primitives instead of generic approximations.
 3. Offer to refine any section: "Want me to revise a section, add component patterns I missed, or adjust the atmosphere language?"
-4. **Refresh the session cache.** Run `node .claude/skills/impeccable/scripts/load-context.mjs` one final time so the newly-written DESIGN.md lands in conversation. Subsequent commands in this session will use the fresh version automatically without re-reading.
+4. **Refresh the session cache.** Run `node .claude/skills/interface/scripts/load-context.mjs` one final time so the newly-written DESIGN.md lands in conversation. Subsequent commands in this session will use the fresh version automatically without re-reading.
 
 ## Seed mode
 
@@ -341,7 +341,7 @@ For projects with no visual system to extract yet. Produces a minimal scaffold, 
 
 ### Step 1: Confirm seed mode
 
-Before interviewing: "There's no existing visual system to scan. I'll ask five quick questions to seed a starter DESIGN.md. You can re-run `/impeccable document` once there's code, to capture the real tokens and components. OK?"
+Before interviewing: "There's no existing visual system to scan. I'll ask five quick questions to seed a starter DESIGN.md. You can re-run `reference/document.md` once there's code, to capture the real tokens and components. OK?"
 
 If the user prefers to skip, stop. No file.
 
@@ -380,7 +380,7 @@ Use the six-section spec from Scan mode. Populate what the interview answers; le
 Lead the file with:
 
 ```markdown
-<!-- SEED: re-run /impeccable document once there's code to capture the actual tokens and components. -->
+<!-- SEED: re-run reference/document.md once there's code to capture the actual tokens and components. -->
 ```
 
 Per-section guidance in seed mode:
@@ -392,13 +392,13 @@ Per-section guidance in seed mode:
 - **Components**: omit entirely; no components exist yet.
 - **Do's and Don'ts**: carry PRODUCT.md's anti-references directly plus the anti-reference named in Q5.
 
-Seed mode writes a minimal frontmatter with `name` and `description` only; no colors, typography, rounded, spacing, or components yet. Real tokens land on the next Scan-mode run. Skip the `.impeccable/design.json` sidecar in seed mode for the same reason: nothing to render.
+Seed mode writes a minimal frontmatter with `name` and `description` only; no colors, typography, rounded, spacing, or components yet. Real tokens land on the next Scan-mode run. Skip the `.interface/design.json` sidecar in seed mode for the same reason: nothing to render.
 
 ### Step 4: Confirm and refresh session cache
 
 1. Show the seed DESIGN.md. Call out that it is a seed (the marker is the literal commitment).
-2. Tell the user: "Re-run `/impeccable document` once you have some code. That pass will extract real tokens and generate the sidecar."
-3. Run `node .claude/skills/impeccable/scripts/load-context.mjs` once so the seed lands in conversation for the rest of the session.
+2. Tell the user: "Re-run `reference/document.md` once you have some code. That pass will extract real tokens and generate the sidecar."
+3. Run `node .claude/skills/interface/scripts/load-context.mjs` once so the seed lands in conversation for the rest of the session.
 
 ## Style guidelines
 

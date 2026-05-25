@@ -4,7 +4,7 @@
  */
 
 import { createLiveSessionStore } from './live-session-store.mjs';
-import { readLiveServerInfo } from './impeccable-paths.mjs';
+import { readLiveServerInfo } from './interface-paths.mjs';
 
 function readServerInfo() {
   return readLiveServerInfo(process.cwd())?.info || null;

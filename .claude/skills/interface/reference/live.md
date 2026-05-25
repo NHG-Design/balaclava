@@ -27,10 +27,10 @@ Chat is overhead. No recap, no tutorial output, no pasting PRODUCT / DESIGN bodi
 ## Start
 
 ```bash
-node .claude/skills/impeccable/scripts/live.mjs
+node .claude/skills/interface/scripts/live.mjs
 ```
 
-Output JSON: `{ ok, serverPort, serverToken, pageFiles, hasProduct, product, productPath, hasDesign, design, designPath, migrated }`. `pageFiles` is the list of HTML entries the live script was injected into. Keep PRODUCT.md and DESIGN.md in mind for variant generation; **DESIGN.md wins on visual decisions; PRODUCT.md wins on strategic/voice decisions.** When DESIGN.md is missing, identity is **not** absent; extract it from CSS variables, computed styles, and sibling components on the page (see Step 4 Phase A). Identity preservation is the default; departure from existing identity requires an explicit trigger from PRODUCT.md anti-references or the user's freeform prompt. If `migrated: true`, the loader auto-renamed legacy `.impeccable.md` to `PRODUCT.md`; mention this once and suggest `/impeccable document` for the matching DESIGN.md.
+Output JSON: `{ ok, serverPort, serverToken, pageFiles, hasProduct, product, productPath, hasDesign, design, designPath, migrated }`. `pageFiles` is the list of HTML entries the live script was injected into. Keep PRODUCT.md and DESIGN.md in mind for variant generation; **DESIGN.md wins on visual decisions; PRODUCT.md wins on strategic/voice decisions.** When DESIGN.md is missing, identity is **not** absent; extract it from CSS variables, computed styles, and sibling components on the page (see Step 4 Phase A). Identity preservation is the default; departure from existing identity requires an explicit trigger from PRODUCT.md anti-references or the user's freeform prompt. If `migrated: true`, the loader auto-renamed legacy `.impeccable.md` to `PRODUCT.md`; mention this once and suggest `reference/document.md` for the matching DESIGN.md.
 
 `serverPort` and `serverToken` belong to the small **Impeccable live helper** HTTP server (serves `/live.js`, SSE, and `/poll`). That port is **not** your dev server and is usually not the URL you open to view the app. The browser page is whatever origin serves one of the `pageFiles` entries (Vite / Next / Bun / tunnel / LAN hostname).
 
@@ -40,7 +40,7 @@ If output is `{ ok: false, error: "config_missing" | "config_invalid", path }`, 
 
 ```
 LOOP:
-  node .claude/skills/impeccable/scripts/live-poll.mjs   # default long timeout; no --timeout=
+  node .claude/skills/interface/scripts/live-poll.mjs   # default long timeout; no --timeout=
   Read JSON; dispatch on "type"
 
   "generate"  → Handle Generate; reply done; LOOP
@@ -53,14 +53,14 @@ LOOP:
 
 ## Recovery commands
 
-The live helper persists an append-only journal under `.impeccable/live/sessions/`. Browser checkpoints are advisory but durable; the journal is canonical. This is local durable recovery state, not project source.
+The live helper persists an append-only journal under `.interface/live/sessions/`. Browser checkpoints are advisory but durable; the journal is canonical. This is local durable recovery state, not project source.
 
 Use these commands when the chat was interrupted, polling was missed, the helper restarted, or the browser reloaded:
 
 ```bash
-node .claude/skills/impeccable/scripts/live-status.mjs
-node .claude/skills/impeccable/scripts/live-resume.mjs --id SESSION_ID
-node .claude/skills/impeccable/scripts/live-complete.mjs --id SESSION_ID
+node .claude/skills/interface/scripts/live-status.mjs
+node .claude/skills/interface/scripts/live-resume.mjs --id SESSION_ID
+node .claude/skills/interface/scripts/live-complete.mjs --id SESSION_ID
 ```
 
 - `live-status.mjs` prints connected helper state, active durable sessions, and queued pending events. It works even when the helper is down by reading the journal directly.
@@ -93,7 +93,7 @@ Reading annotations precisely:
 ### 2. Wrap the element
 
 ```bash
-node .claude/skills/impeccable/scripts/live-wrap.mjs --id EVENT_ID --count EVENT_COUNT --element-id "ELEMENT_ID" --classes "class1,class2" --tag "div" --text "TEXT_SNIPPET"
+node .claude/skills/interface/scripts/live-wrap.mjs --id EVENT_ID --count EVENT_COUNT --element-id "ELEMENT_ID" --classes "class1,class2" --tag "div" --text "TEXT_SNIPPET"
 ```
 
 Flag mapping. Keep them separate, don't collapse into `--query`:
@@ -111,8 +111,8 @@ Output on success: `{ file, insertLine, commentSyntax, styleMode, styleTag, cssS
 
 `styleMode` controls how preview CSS must be authored. Treat it as a detected capability mode, not a framework guess:
 
-- `scoped`: use `@scope ([data-impeccable-variant="N"])` rules.
-- `astro-global-prefixed`: use explicit `[data-impeccable-variant="N"]` selector prefixes and the exact `styleTag` returned by the tool.
+- `scoped`: use `@scope ([data-interface-variant="N"])` rules.
+- `astro-global-prefixed`: use explicit `[data-interface-variant="N"]` selector prefixes and the exact `styleTag` returned by the tool.
 
 Use `cssAuthoring` as the source of truth for the current file. It includes the exact `styleTag`, selector strategy, selector examples, requirements, and forbidden patterns. Do not apply a framework-specific exception unless the returned `styleMode` / `cssAuthoring.mode` says to.
 
@@ -126,7 +126,7 @@ All three carry `fallback: "agent-driven"`. Follow **Handle fallback** below.
 
 ### 3. Load the action's reference
 
-If `event.action` is `impeccable` (the default freeform action), use SKILL.md's shared laws plus the loaded register reference (`brand.md` or `product.md`). Do not load a sub-command reference. **Freeform is not a pass to skip parameters:** you still follow the composition budget and the freeform bias in **§7 Parameters** below. Sub-command files list MUST-have signature knobs; freeform has no such file, so sizing knobs from surface weight and primary axes is entirely on you.
+If `event.action` is `interface` (the default freeform action), use SKILL.md's shared laws plus the loaded register reference (`brand.md` or `product.md`). Do not load a sub-command reference. **Freeform is not a pass to skip parameters:** you still follow the composition budget and the freeform bias in **§7 Parameters** below. Sub-command files list MUST-have signature knobs; freeform has no such file, so sizing knobs from surface weight and primary axes is entirely on you.
 
 Any other `event.action` (`bolder`, `quieter`, `distill`, `polish`, `typeset`, `colorize`, `layout`, `adapt`, `animate`, `delight`, `overdrive`): Read `reference/<action>.md` before planning. Each sub-command encodes a specific discipline; skipping its reference produces generic output. Those files may require specific params; layer them on top of the §7 budget, not instead of it.
 
@@ -240,16 +240,16 @@ Use the `cssAuthoring` object returned by `live-wrap.mjs` to author the temporar
 
 ```html
 <!-- Variants: insert below this line -->
-<style data-impeccable-css="SESSION_ID">
+<style data-interface-css="SESSION_ID">
   /* rules matching cssAuthoring.rulePattern */
 </style>
-<div data-impeccable-variant="1">
+<div data-interface-variant="1">
   <!-- variant 1: full element replacement (single top-level element) -->
 </div>
-<div data-impeccable-variant="2" style="display: none">
+<div data-interface-variant="2" style="display: none">
   <!-- variant 2: full element replacement -->
 </div>
-<div data-impeccable-variant="3" style="display: none">
+<div data-interface-variant="3" style="display: none">
   <!-- variant 3: full element replacement -->
 </div>
 ```
@@ -260,24 +260,24 @@ The first variant has no `display: none` (visible by default). All others do. If
 
 One edit, all variants; the browser's MutationObserver picks everything up in one pass.
 
-For `styleMode: "scoped"`, author every `:scope` rule with a descendant combinator. The `@scope` boundary is the **variant wrapper `<div data-impeccable-variant="N">`**, not the element you're designing. A bare `:scope { background: cream; }` styles the wrapper, not the inner replacement, so the cream lands on a `display: contents` shell while the actual element keeps page defaults. Always step in: `:scope > .card`, `:scope > section`, `:scope .hero-title`, etc. The fake test agent's CSS in `tests/live-e2e/agent.mjs` is a faithful template; every scoped rule starts `:scope > ...`.
+For `styleMode: "scoped"`, author every `:scope` rule with a descendant combinator. The `@scope` boundary is the **variant wrapper `<div data-interface-variant="N">`**, not the element you're designing. A bare `:scope { background: cream; }` styles the wrapper, not the inner replacement, so the cream lands on a `display: contents` shell while the actual element keeps page defaults. Always step in: `:scope > .card`, `:scope > section`, `:scope .hero-title`, etc. The fake test agent's CSS in `tests/live-e2e/agent.mjs` is a faithful template; every scoped rule starts `:scope > ...`.
 
-**JSX / TSX target files.** Wrap `<style>` content in a template literal so the CSS `{` / `}` aren't parsed as JSX expressions, and use `className=` / `style={{…}}` on every variant element. Keep `data-impeccable-*` attributes as-is; they're plain strings:
+**JSX / TSX target files.** Wrap `<style>` content in a template literal so the CSS `{` / `}` aren't parsed as JSX expressions, and use `className=` / `style={{…}}` on every variant element. Keep `data-interface-*` attributes as-is; they're plain strings:
 
 ```tsx
-<style data-impeccable-css="SESSION_ID">{`
-  @scope ([data-impeccable-variant="1"]) { ... }
-  @scope ([data-impeccable-variant="2"]) { ... }
+<style data-interface-css="SESSION_ID">{`
+  @scope ([data-interface-variant="1"]) { ... }
+  @scope ([data-interface-variant="2"]) { ... }
 `}</style>
-<div data-impeccable-variant="1">
+<div data-interface-variant="1">
   {/* variant 1 */}
 </div>
-<div data-impeccable-variant="2" style={{ display: 'none' }}>
+<div data-interface-variant="2" style={{ display: 'none' }}>
   {/* variant 2 */}
 </div>
 ```
 
-The wrap script already gives you a single-rooted JSX wrapper: a `<div data-impeccable-variants="…">` outer element with the marker comments tucked inside. Drop the variants block above into the "Variants: insert below this line" comment and the source stays valid TSX.
+The wrap script already gives you a single-rooted JSX wrapper: a `<div data-interface-variants="…">` outer element with the marker comments tucked inside. Drop the variants block above into the "Variants: insert below this line" comment and the source stays valid TSX.
 
 ### 7. Parameters (composition-sized, 0–4 per variant)
 
@@ -287,7 +287,7 @@ Each variant can expose **coarse** knobs alongside the full HTML/CSS replacement
 
 **When to add.** As soon as the variant’s scoped CSS has a meaningful continuous or stepped axis: density, color amount, type scale, motion intensity, column weight, and so on. If you can imagine the user muttering “a bit tighter” or “a touch more accent” **without** wanting a full regeneration, wire that axis. **Not** micro-margins or one-off nudges; those are not parameters.
 
-**Freeform (`action` is `impeccable`) bias.** You did not load a sub-command reference, so you must **choose** signature axes yourself. Match the budget table: for a hero or large composition, that means **2–3 axes per variant**, not 1. Prefer knobs that sit on the dimensions where your three variants actually differ (if density varies, expose it as a `steps` knob; if color commitment varies, expose it as a `range`). A hero that ships with **0** params is almost always a mistake, not a judgment call. A hero with exactly **1** param is underweight unless the design is genuinely a fixed-point comparison. Start from the budget table, not from zero.
+**Freeform (`action` is `interface`) bias.** You did not load a sub-command reference, so you must **choose** signature axes yourself. Match the budget table: for a hero or large composition, that means **2–3 axes per variant**, not 1. Prefer knobs that sit on the dimensions where your three variants actually differ (if density varies, expose it as a `steps` knob; if color commitment varies, expose it as a `range`). A hero that ships with **0** params is almost always a mistake, not a judgment call. A hero with exactly **1** param is underweight unless the design is genuinely a fixed-point comparison. Start from the budget table, not from zero.
 
 **Budget scales with the element's visual weight, not token budget.** Knobs need real estate to read as tunable; three sliders on a single control are noise.
 
@@ -303,7 +303,7 @@ Each variant can expose **coarse** knobs alongside the full HTML/CSS replacement
 **How to declare.** Put a JSON manifest on the variant wrapper:
 
 ```html
-<div data-impeccable-variant="1" data-impeccable-params='[
+<div data-interface-variant="1" data-interface-params='[
   {"id":"color-amount","kind":"range","min":0,"max":1,"step":0.05,"default":0.5,"label":"Color amount"},
   {"id":"density","kind":"steps","default":"snug","label":"Density","options":[
     {"value":"airy","label":"Airy"},
@@ -322,14 +322,14 @@ Each variant can expose **coarse** knobs alongside the full HTML/CSS replacement
 - `steps`: segmented radio. Drives a data attribute `data-p-<id>` on the variant wrapper. Author CSS with `:scope[data-p-density="airy"] .grid { ... }`. Fields: `options` (array of `{value, label}`), `default` (string), `label`.
 - `toggle`: on/off switch. Drives BOTH a CSS var (`--p-<id>: 0|1`) and a data attribute (present when on, absent when off). Use whichever is more convenient. Fields: `default` (boolean), `label`.
 
-**Signature params per action.** For named sub-commands, read that action’s `reference/<action>.md` for one or two **MUST** params (e.g. `layout` → `density`). Those are non-negotiable when the design can express them. **Freeform has no file-level MUST**; the **Freeform (`impeccable`) bias** in this section is the stand-in. If the user’s action is both stylized and sub-command (e.g. `colorize`), the sub-command’s MUST list takes precedence for its axes; still respect the **Hard cap** and add no redundant duplicate knobs.
+**Signature params per action.** For named sub-commands, read that action’s `reference/<action>.md` for one or two **MUST** params (e.g. `layout` → `density`). Those are non-negotiable when the design can express them. **Freeform has no file-level MUST**; the **Freeform (`interface`) bias** in this section is the stand-in. If the user’s action is both stylized and sub-command (e.g. `colorize`), the sub-command’s MUST list takes precedence for its axes; still respect the **Hard cap** and add no redundant duplicate knobs.
 
 **Reset on variant switch.** User dials density on v1, flips to v2, v2 starts at v2's declared defaults. Known limitation; preservation across variants may land later.
 
 **On accept**, the browser sends the user's current values in the accept event. `live-accept.mjs` writes them as a sibling comment:
 
 ```html
-<!-- impeccable-param-values SESSION_ID: {"color-amount":0.7,"density":"packed"} -->
+<!-- interface-param-values SESSION_ID: {"color-amount":0.7,"density":"packed"} -->
 ```
 
 The carbonize cleanup step (see below) reads that comment and bakes the chosen values into the final CSS. For `steps`/`toggle` attribute selectors: keep only the branch matching the chosen value, drop the others, collapse `:scope[data-p-density="packed"] .grid` to a semantic class rule. For `range` vars: either substitute the literal or keep the var with the chosen value as its new default.
@@ -337,7 +337,7 @@ The carbonize cleanup step (see below) reads that comment and bakes the chosen v
 ### 8. Signal done
 
 ```bash
-node .claude/skills/impeccable/scripts/live-poll.mjs --reply EVENT_ID done --file RELATIVE_PATH
+node .claude/skills/interface/scripts/live-poll.mjs --reply EVENT_ID done --file RELATIVE_PATH
 ```
 
 `RELATIVE_PATH` is relative to project root (`public/index.html`, `src/App.tsx`, etc.); the browser fetches source directly if the dev server lacks HMR.
@@ -349,7 +349,7 @@ Then run `live-poll.mjs` again immediately.
 If wrap or generation fails after the browser has flipped to GENERATING (e.g. wrap landed on the wrong source branch and you've already reverted it, or generation hit an unrecoverable error), tell the **browser** so its bar resets to PICKING:
 
 ```bash
-node .claude/skills/impeccable/scripts/live-poll.mjs --reply EVENT_ID error "Short reason"
+node .claude/skills/interface/scripts/live-poll.mjs --reply EVENT_ID error "Short reason"
 ```
 
 Don't run `live-accept --discard` for this; that's a pure file mutator, the browser doesn't see it, and the bar gets stuck on the GENERATING dots forever (the user has to refresh). `--discard` is only correct when the **browser** initiated the discard (user clicked ✕ during CYCLING) and the agent is just running source-side cleanup the browser already triggered.
@@ -374,7 +374,7 @@ Read the candidate source until you're confident where a change to the element w
 
 The browser bar is waiting for variants. Even without a wrapper in source, you still need to show something:
 
-1. Manually write the wrapper scaffold into the **served** file (the one the browser actually loaded). Use the same structure `live-wrap.mjs` produces; `<!-- impeccable-variants-start ID --><div data-impeccable-variants="ID" data-impeccable-variant-count="3" style="display: contents">…</div><!-- end -->`.
+1. Manually write the wrapper scaffold into the **served** file (the one the browser actually loaded). Use the same structure `live-wrap.mjs` produces; `<!-- interface-variants-start ID --><div data-interface-variants="ID" data-interface-variant-count="3" style="display: contents">…</div><!-- end -->`.
 2. Insert your three variant divs inside it, same shape as the deterministic path.
 3. Signal done with `--reply EVENT_ID done --file <served file>`. The browser's no-HMR fallback will fetch and inject.
 
@@ -406,15 +406,15 @@ Event: `{id, variantId, _acceptResult, _completionAck}`. The poll script already
 
 ### Required after accept (carbonize)
 
-When `_acceptResult.carbonize === true`, the accepted variant was stitched into source with helper markers and inline CSS so the browser can render it immediately with no visual gap. That stitch-in is **temporary**. The agent must rewrite it into permanent form before doing anything else. Skipping this leaves dead `@scope` rules for unaccepted variants, a pointless `data-impeccable-variant` wrapper, and `impeccable-carbonize-start/end` comment noise in the source file; all of which accumulate across sessions.
+When `_acceptResult.carbonize === true`, the accepted variant was stitched into source with helper markers and inline CSS so the browser can render it immediately with no visual gap. That stitch-in is **temporary**. The agent must rewrite it into permanent form before doing anything else. Skipping this leaves dead `@scope` rules for unaccepted variants, a pointless `data-interface-variant` wrapper, and `interface-carbonize-start/end` comment noise in the source file; all of which accumulate across sessions.
 
 Do these five steps in the current thread, synchronously, before the next poll. Do not poll again until the file is clean.
 
-1. **Locate the carbonize block** in the source file (`_acceptResult.file`). It's bracketed by `<!-- impeccable-carbonize-start SESSION_ID -->` and `<!-- impeccable-carbonize-end SESSION_ID -->` and contains a `<style data-impeccable-css="SESSION_ID">` element. If the variant declared parameters, an `<!-- impeccable-param-values SESSION_ID: {...} -->` comment sits alongside the style tag with the user's chosen values; read it first; it drives steps 3 and 4 below.
+1. **Locate the carbonize block** in the source file (`_acceptResult.file`). It's bracketed by `<!-- interface-carbonize-start SESSION_ID -->` and `<!-- interface-carbonize-end SESSION_ID -->` and contains a `<style data-interface-css="SESSION_ID">` element. If the variant declared parameters, an `<!-- interface-param-values SESSION_ID: {...} -->` comment sits alongside the style tag with the user's chosen values; read it first; it drives steps 3 and 4 below.
 2. **Move the CSS rules** into the project's real stylesheet. Which stylesheet depends on the project (e.g. `site/styles/workflow.css` for an Astro project, or the component's co-located CSS file for a Vite/Next project; pick whichever already owns styling for the surrounding element).
-3. **Bake in parameter values while rewriting selectors.** For `@scope ([data-impeccable-variant="N"])` wrappers: retarget to real, semantic classes on the accepted HTML (`.why-visual--v2 .v2-label { … }`). For `:scope[data-p-<id>="VALUE"]` selectors: keep only the branch matching the chosen value from the param-values comment; drop the others (they're dead after accept). For `var(--p-<id>, DEFAULT)` in the CSS: either substitute the literal value, or if the param is still useful as a knob going forward, leave the var and update its initial declaration to the chosen value.
-4. **Unwrap the accepted content.** Delete the `<div data-impeccable-variant="N" style="display: contents">` that wraps it. Drop `data-impeccable-params` and any `data-p-*` attributes from it; those are live-mode plumbing, not source.
-5. **Delete the inline `<style>` block, the `<!-- impeccable-param-values -->` comment if present, and both `<!-- impeccable-carbonize-start/end -->` markers.** Also drop any `@scope` rules for variants other than the accepted one; those are dead code now.
+3. **Bake in parameter values while rewriting selectors.** For `@scope ([data-interface-variant="N"])` wrappers: retarget to real, semantic classes on the accepted HTML (`.why-visual--v2 .v2-label { … }`). For `:scope[data-p-<id>="VALUE"]` selectors: keep only the branch matching the chosen value from the param-values comment; drop the others (they're dead after accept). For `var(--p-<id>, DEFAULT)` in the CSS: either substitute the literal value, or if the param is still useful as a knob going forward, leave the var and update its initial declaration to the chosen value.
+4. **Unwrap the accepted content.** Delete the `<div data-interface-variant="N" style="display: contents">` that wraps it. Drop `data-interface-params` and any `data-p-*` attributes from it; those are live-mode plumbing, not source.
+5. **Delete the inline `<style>` block, the `<!-- interface-param-values -->` comment if present, and both `<!-- interface-carbonize-start/end -->` markers.** Also drop any `@scope` rules for variants other than the accepted one; those are dead code now.
 
 After the file is clean, run `live-complete.mjs --id SESSION_ID`, verify it reports `phase: "completed"`, then poll again.
 
@@ -449,18 +449,18 @@ When the poll returns `exit`, proceed to cleanup. If the poll is still running a
 ## Cleanup
 
 ```bash
-node .claude/skills/impeccable/scripts/live-server.mjs stop
+node .claude/skills/interface/scripts/live-server.mjs stop
 ```
 
-Stops the HTTP server and runs `live-inject.mjs --remove` to strip `localhost:…/live.js` from the HTML entry. To stop the server but keep the inject tag (for a quick restart), use `stop --keep-inject`. `.impeccable/live/config.json` persists as project config for future sessions.
+Stops the HTTP server and runs `live-inject.mjs --remove` to strip `localhost:…/live.js` from the HTML entry. To stop the server but keep the inject tag (for a quick restart), use `stop --keep-inject`. `.interface/live/config.json` persists as project config for future sessions.
 
 Then:
-- Remove any leftover variant wrappers (search for `impeccable-variants-start` markers).
-- Remove any leftover carbonize blocks (search for `impeccable-carbonize-start` markers).
+- Remove any leftover variant wrappers (search for `interface-variants-start` markers).
+- Remove any leftover carbonize blocks (search for `interface-carbonize-start` markers).
 
 ## First-time setup (config missing or invalid)
 
-If `live.mjs` outputs `{ ok: false, error: "config_missing" | "config_invalid", path }`, write the live config at the reported path. By default this is `.impeccable/live/config.json`.
+If `live.mjs` outputs `{ ok: false, error: "config_missing" | "config_invalid", path }`, write the live config at the reported path. By default this is `.interface/live/config.json`.
 
 Schema:
 
@@ -535,12 +535,12 @@ If `config.cspChecked === true`, skip this entire section. You already asked thi
 Otherwise, run the detection helper:
 
 ```bash
-node .claude/skills/impeccable/scripts/detect-csp.mjs
+node .claude/skills/interface/scripts/detect-csp.mjs
 ```
 
 Output: `{ shape, signals }` where `shape` is one of `append-arrays`, `append-string`, `middleware`, `meta-tag`, or `null`. The shape is named by *patch mechanism*, so one template covers many frameworks.
 
-- **`null`**: no CSP; skip to writing `.impeccable/live/config.json` with `cspChecked: true`.
+- **`null`**: no CSP; skip to writing `.interface/live/config.json` with `cspChecked: true`.
 - **`append-arrays`**: CSP defined as structured directive arrays. Auto-patchable. See *append-arrays* below. Covers:
   - Monorepo helpers with `additionalScriptSrc` / `additionalConnectSrc` options (Next.js + shared config package)
   - SvelteKit `kit.csp.directives`
@@ -574,12 +574,12 @@ CSP expressed as structured directive arrays. Patch mechanism: declare a dev-onl
 **Declare near the top of the file that holds the CSP arrays:**
 
 ```ts
-// Dev-only allowance so impeccable live mode can load. Guarded by NODE_ENV.
-const __impeccableLiveDev =
+// Dev-only allowance so interface live mode can load. Guarded by NODE_ENV.
+const __interfaceLiveDev =
   process.env.NODE_ENV === "development" ? ["http://localhost:8400"] : [];
 ```
 
-**Append `...__impeccableLiveDev` to the script-src and connect-src directive arrays.** Per-framework specifics:
+**Append `...__interfaceLiveDev` to the script-src and connect-src directive arrays.** Per-framework specifics:
 
 - **Next.js + monorepo helper**: edit the *app's* `next.config.*` (not the shared helper), appending to `additionalScriptSrc` and `additionalConnectSrc` passed into `createBaseNextConfig` (or equivalent). Keeps the shared package clean.
 - **SvelteKit**: edit `svelte.config.js`, appending to `kit.csp.directives['script-src']` and `kit.csp.directives['connect-src']`.
@@ -589,21 +589,21 @@ Reference outputs:
 - `tests/framework-fixtures/nextjs-turborepo/expected-after-patch.ts` (Next.js)
 - `tests/framework-fixtures/sveltekit-csp/expected-after-patch.js` (SvelteKit)
 
-Idempotency: if `__impeccableLiveDev` already exists in the file, the patch is already applied; skip asking and just mark `cspChecked: true`.
+Idempotency: if `__interfaceLiveDev` already exists in the file, the patch is already applied; skip asking and just mark `cspChecked: true`.
 
 #### append-string
 
 CSP built as a literal value string. Two-point patch: declare a dev-only string near the top, interpolate it into the CSP at the `script-src` and `connect-src` directives.
 
 ```ts
-// Dev-only allowance so impeccable live mode can load.
-const __impeccableLiveDev =
+// Dev-only allowance so interface live mode can load.
+const __interfaceLiveDev =
   process.env.NODE_ENV === "development" ? " http://localhost:8400" : "";
 ```
 
 Then in the CSP value string:
-- `script-src 'self' 'unsafe-inline'` → `` `script-src 'self' 'unsafe-inline'${__impeccableLiveDev}` ``
-- `connect-src 'self'` → `` `connect-src 'self'${__impeccableLiveDev}` ``
+- `script-src 'self' 'unsafe-inline'` → `` `script-src 'self' 'unsafe-inline'${__interfaceLiveDev}` ``
+- `connect-src 'self'` → `` `connect-src 'self'${__interfaceLiveDev}` ``
 
 (Leading space on the dev string so it concatenates cleanly into the existing value. Convert the literal CSP directives into template strings as part of the edit if they aren't already.)
 
@@ -617,6 +617,6 @@ Reference outputs:
 
 ### Troubleshooting
 
-If a user says "no" to the CSP patch at setup time and later complains that live doesn't work: their dev CSP blocks `http://localhost:8400`. Fix: delete `cspChecked` from `.impeccable/live/config.json` and re-run `live.mjs`: setup will ask again.
+If a user says "no" to the CSP patch at setup time and later complains that live doesn't work: their dev CSP blocks `http://localhost:8400`. Fix: delete `cspChecked` from `.interface/live/config.json` and re-run `live.mjs`: setup will ask again.
 
 Then re-run `live.mjs`.

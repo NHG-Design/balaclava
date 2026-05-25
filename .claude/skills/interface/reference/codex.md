@@ -1,6 +1,6 @@
 # Codex: Visual Direction & Asset Production
 
-This file is loaded by `/impeccable craft` when the harness has native image generation (currently Codex via `image_gen`). Other harnesses skip it. It covers the two craft steps that depend on real image generation: landing the visual direction, and producing the raster assets the implementation will compose.
+This file is loaded by `reference/craft.md` when the harness has native image generation (currently Codex via `image_gen`). Other harnesses skip it. It covers the two craft steps that depend on real image generation: landing the visual direction, and producing the raster assets the implementation will compose.
 
 Read this *before* generating any images. The order matters, and the per-step user pauses are what keep generated imagery from drifting away from the brief.
 
@@ -77,7 +77,7 @@ Don't substitute a different hero composition or visual driver post-approval wit
 
 ## Step F: Asset Slicing via the Asset Producer
 
-Raster ingredients identified in Step E need clean production assets. Use the bundled `impeccable_asset_producer` subagent rather than producing inline.
+Raster ingredients identified in Step E need clean production assets. Use the bundled `interface_asset_producer` subagent rather than producing inline.
 
 Spawn it as a scoped subagent. If you do not have explicit permission to use agents, stop and ask:
 
