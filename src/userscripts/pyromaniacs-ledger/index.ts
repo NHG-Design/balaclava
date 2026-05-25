@@ -1,4 +1,5 @@
 import { STRATEGIES, type Strategy } from '../../data/strategies.js';
+import '../balaclava-tooltip/index.js';
 import {
     rankForScenario,
     formatPpn,
@@ -29,6 +30,11 @@ const KEY_ACTIVE_TAB     = 'pyroLedger.v1.activeTab';
 declare const GM_getValue: ((key: string, def?: string) => string) | undefined;
 declare const GM_setValue: ((key: string, val: string) => void) | undefined;
 declare const unsafeWindow: typeof window | undefined;
+declare const GM_xmlhttpRequest: ((options: {
+    method: string; url: string;
+    onload: (r: { status: number; responseText: string }) => void;
+    onerror?: () => void;
+}) => void) | undefined;
 
 function store_get(key: string, def = ''): string {
     if (typeof GM_getValue !== 'undefined') return GM_getValue(key, def);
@@ -181,18 +187,59 @@ function getSkillValue(): number {
 // ---------------------------------------------------------------------------
 // Strategy index: scenarioName → Strategy[]
 // ---------------------------------------------------------------------------
+const KEY_STRATEGIES_CACHE = 'pyroLedger.v1.strategiesCache';
+const KEY_STRATEGIES_TS    = 'pyroLedger.v1.strategiesTs';
+const STRATEGIES_URL       = 'https://balaclava.app/pyromaniacs-ledger/strategies.json';
+const STRATEGIES_TTL_MS    = 24 * 60 * 60 * 1000;
+
 const strategyIndex = new Map<string, Strategy[]>();
 
-function loadStrategies(): void {
-    for (const s of STRATEGIES) {
+function populateStrategyIndex(strategies: Strategy[]): void {
+    strategyIndex.clear();
+    for (const s of strategies) {
         const key = s.scenarioName.toLowerCase();
         const existing = strategyIndex.get(key);
-        if (existing) {
-            existing.push(s);
-        } else {
-            strategyIndex.set(key, [s]);
-        }
+        if (existing) { existing.push(s); } else { strategyIndex.set(key, [s]); }
     }
+}
+
+function loadStrategies(): void {
+    populateStrategyIndex(STRATEGIES);
+}
+
+function scheduleStrategyRefresh(): void {
+    if (typeof GM_xmlhttpRequest === 'undefined') return;
+
+    const ts = parseInt(store_get(KEY_STRATEGIES_TS, '0'), 10) || 0;
+    const now = Date.now();
+
+    if (now - ts < STRATEGIES_TTL_MS) {
+        try {
+            const cached = JSON.parse(store_get(KEY_STRATEGIES_CACHE, '')) as Strategy[];
+            if (Array.isArray(cached) && cached.length > 0) {
+                populateStrategyIndex(cached);
+                resetScans();
+            }
+        } catch { /* keep bundled */ }
+        return;
+    }
+
+    GM_xmlhttpRequest({
+        method: 'GET',
+        url: STRATEGIES_URL,
+        onload(r) {
+            if (r.status !== 200) return;
+            try {
+                const fresh = JSON.parse(r.responseText) as Strategy[];
+                if (!Array.isArray(fresh) || fresh.length === 0) return;
+                store_set(KEY_STRATEGIES_CACHE, r.responseText);
+                store_set(KEY_STRATEGIES_TS, String(now));
+                populateStrategyIndex(fresh);
+                resetScans();
+            } catch { /* keep bundled */ }
+        },
+        onerror() { /* keep bundled */ },
+    });
 }
 
 // ---------------------------------------------------------------------------
@@ -450,6 +497,7 @@ function start(): void {
     scanPage();
     injectSettings(getRoot(), settingsCtx);
     observer.observe(document.body, { childList: true, subtree: true });
+    scheduleStrategyRefresh();
     if (debugMode) console.log('[PyroLedger] started, debug on');
 }
 
