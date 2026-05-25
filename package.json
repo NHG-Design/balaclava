@@ -8,7 +8,9 @@
     "build": "vite build",
     "preview": "vite preview",
     "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
-    "cf:deploy": "pnpm build && wrangler pages deploy .svelte-kit/cloudflare"
+    "cf:deploy": "pnpm build && wrangler pages deploy .svelte-kit/cloudflare",
+    "build:userscripts": "node scripts/build-userscripts.mjs",
+    "test:userscripts": "node --import tsx/esm --test src/userscripts/pyromaniacs-ledger/engine.test.ts"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^4.0.0",
@@ -17,6 +19,7 @@
     "@sveltejs/vite-plugin-svelte": "^7.0.0",
     "svelte": "^5.0.0",
     "svelte-check": "^4.0.0",
+    "tsx": "^4.22.3",
     "typescript": "^5.0.0",
     "vite": "^8.0.0",
     "wrangler": "^4.0.0"
