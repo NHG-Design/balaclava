@@ -33,7 +33,7 @@ const USERSCRIPTS = [
         metadata: {
             ...COMMON_METADATA,
             name: "Torn Pyromaniac's Ledger",
-            version: '0.4.1',
+            version: '0.4.2',
             description: "Arson profit-per-nerve calculator and strategy guide for Torn's Crimes page",
             icon: 'https://www.google.com/s2/favicons?sz=64&domain=torn.com',
             updateURL: `${DIST_BASE}/pyromaniacs-ledger.meta.js`,
