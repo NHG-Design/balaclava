@@ -28,10 +28,14 @@ detach();
 
 tooltip.configure({
   theme: 'system',
+  borderSize: '1px',
   borderRadius: '4px',
   padding: '8px 12px',
   maxWidth: '250px',
   arrowSize: '6px',
+  arrowBorderSize: '1px',
+  arrowBorderColor: 'var(--balaclava-tooltip-border)',
+  arrowBorderRadius: '4px',
   zIndex: 2147483647,
   animationDuration: '150ms',
   fontSize: '13px',
@@ -65,6 +69,8 @@ tooltip.configure({
   shadowColor: 'oklch(12% 0.01 260 / 0.36)'
 });
 ```
+
+Arrow styling inherits the tooltip border by default. Set `arrowBorderSize: '0'` for a borderless arrow, or set `arrowBorderRadius` separately when the arrow needs a sharper or softer shape than the tooltip body.
 
 ## Declarative Tooltips
 

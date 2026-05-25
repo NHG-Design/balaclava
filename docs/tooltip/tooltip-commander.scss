@@ -1,0 +1,155 @@
+@use "../styles/themes/active-theme" as theme;
+@use "../styles/themes/default/mixins/typography" as typography;
+
+@mixin tooltip-arrow-position($position, $border-sides-to-hide) {
+  @if $position == 'top' or $position == 'bottom' {
+    left: var(--js-tooltip-arrow-offset);
+    transform: translateX(-50%) rotate(45deg);
+  } @else {
+    top: var(--js-tooltip-arrow-offset);
+    transform: translateY(-50%) rotate(45deg);
+  }
+
+  @each $side in $border-sides-to-hide {
+    border-#{$side}: none;
+  }
+}
+
+:host {
+  --js-tooltip-offset: #{theme.$tooltip-offset};
+  --js-tooltip-x: 0px;
+  --js-tooltip-y: 0px;
+  --js-tooltip-arrow-offset: 50%;
+  --layer-base: 0;
+  --layer-front: 1;
+  --tooltip-layer-index: 2000;
+  --tooltip-animation-duration: #{theme.$tooltip-animation-duration};
+  --tooltip-animation-easing: #{theme.$tooltip-animation-easing};
+  --tooltip-border-radius: #{theme.$tooltip-border-radius};
+  --tooltip-max-width: #{theme.$tooltip-max-width};
+  --tooltip-padding-inline: #{theme.$tooltip-padding-inline};
+  --tooltip-padding-block: #{theme.$tooltip-padding-block};
+  --tooltip-foreground-color: #{theme.$tooltip-foreground-color};
+  --tooltip-background-color: #{theme.$tooltip-background-color};
+  --tooltip-border-size: #{theme.$tooltip-border-size};
+  --tooltip-border-color: #{theme.$tooltip-border-color};
+  --tooltip-box-shadow: #{theme.$tooltip-box-shadow};
+  --tooltip-content-gap: #{theme.$tooltip-content-gap};
+  --tooltip-arrow-size: #{theme.$tooltip-arrow-size};
+
+  display: contents;
+}
+
+.tooltip {
+  pointer-events: all;
+
+  isolation: isolate;
+  position: fixed;
+  z-index: var(--tooltip-layer-index);
+  top: var(--js-tooltip-y);
+  left: var(--js-tooltip-x);
+
+  max-width: var(--tooltip-max-width);
+
+  color: var(--tooltip-foreground-color);
+
+  opacity: 0;
+  border: var(--tooltip-border-size) solid var(--tooltip-border-color);
+  border-radius: var(--tooltip-border-radius);
+  box-shadow: var(--tooltip-box-shadow);
+
+  animation: fade-in-down-short var(--tooltip-animation-duration) var(--tooltip-animation-easing) forwards;
+
+  &.show-arrow .tooltip-arrow {
+    position: absolute;
+    z-index: var(--layer-base);
+    transform: rotate(45deg);
+
+    width: var(--tooltip-arrow-size);
+    height: var(--tooltip-arrow-size);
+
+    background-color: var(--tooltip-background-color);
+    border-color: var(--tooltip-border-color);
+    border-style: solid;
+    border-width: var(--tooltip-border-size);
+    box-shadow: var(--tooltip-box-shadow);
+  }
+
+  &.is-top .tooltip-arrow {
+    @include tooltip-arrow-position('top', (top, left));
+
+    bottom: calc(var(--tooltip-arrow-size) / -2);
+  }
+
+  &.is-bottom .tooltip-arrow {
+    @include tooltip-arrow-position('bottom', (right, bottom));
+
+    top: calc(var(--tooltip-arrow-size) / -2);
+  }
+
+  &.is-left .tooltip-arrow {
+    @include tooltip-arrow-position('left', (bottom, left));
+
+    right: calc(var(--tooltip-arrow-size) / -2);
+  }
+
+  &.is-right .tooltip-arrow {
+    @include tooltip-arrow-position('right', (top, right));
+
+    left: calc(var(--tooltip-arrow-size) / -2);
+  }
+}
+
+.tooltip-content {
+  @include typography.responsive-font(#{theme.$tooltip-font-style});
+
+  position: relative;
+  z-index: var(--layer-front);
+
+  display: flex;
+  flex-direction: column;
+  gap: var(--tooltip-content-gap);
+
+  padding-block: var(--tooltip-padding-block);
+  padding-inline: var(--tooltip-padding-inline);
+
+  background-color: var(--tooltip-background-color);
+  border-radius: var(--tooltip-border-radius);
+
+  .tooltip-title {
+    @include typography.responsive-font(#{theme.$tooltip-title-font-style});
+  }
+}
+
+/** FIXME: The following will probably be refactored once there is a story for popovers **/
+.tooltip-with-close {
+  display: flex;
+  flex-direction: row;
+  gap: #{theme.$space-2};
+  align-items: flex-start;
+
+  .content {
+    flex-grow: 1;
+  }
+
+  .tooltip-close-control {
+    cursor: pointer;
+
+    width: #{theme.$size-9};
+    height: #{theme.$size-5};
+    padding: 0;
+
+    background: none;
+    border: 0;
+
+    .con-icon {
+      --con-icon-size: var(--icon-size);
+      --con-icon-color: #{theme.$modal-close-button-icon-color-hover};
+
+      &:focus-visible {
+        outline: var(--wcag-outline);
+        outline-offset: calc(#{theme.$space-1} * -1);
+      }
+    }
+  }
+}

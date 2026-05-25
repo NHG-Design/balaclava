@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name        Balaclava Tooltip
-// @namespace   https://github.com/balaclava
+// @namespace   https://github.com/NHG-Design/balaclava
 // @version     1.0.1
 // @description Universal tooltip injection via Tampermonkey
 // @author      Balaclava
@@ -49,10 +49,14 @@
     textColor: THEME_TOKENS.dark.textColor,
     borderColor: THEME_TOKENS.dark.borderColor,
     shadowColor: THEME_TOKENS.dark.shadowColor,
+    borderSize: '1px',
     borderRadius: '4px',
     padding: '8px 12px',
     maxWidth: '250px',
     arrowSize: '6px',
+    arrowBorderSize: null,
+    arrowBorderColor: null,
+    arrowBorderRadius: null,
     zIndex: 2147483647,
     animationDuration: '150ms',
     fontSize: '13px',
@@ -116,56 +120,65 @@
   }
 
   function buildStylesheet() {
+    const visualConfig = getVisualConfig();
+
     return `
       .balaclava-tooltip {
         --balaclava-tooltip-bg: ${THEME_TOKENS.dark.bgColor};
         --balaclava-tooltip-text: ${THEME_TOKENS.dark.textColor};
         --balaclava-tooltip-border: ${THEME_TOKENS.dark.borderColor};
         --balaclava-tooltip-shadow: ${THEME_TOKENS.dark.shadowColor};
+        --balaclava-tooltip-border-size: ${visualConfig.borderSize};
+        --balaclava-tooltip-border-radius: ${visualConfig.borderRadius};
+        --balaclava-tooltip-arrow-size: ${visualConfig.arrowSize};
+        --balaclava-tooltip-arrow-border-size: ${visualConfig.arrowBorderSize};
+        --balaclava-tooltip-arrow-border-color: ${visualConfig.arrowBorderColor};
+        --balaclava-tooltip-arrow-border-radius: ${visualConfig.arrowBorderRadius};
         position: fixed;
         top: 0;
         left: 0;
         z-index: ${config.zIndex};
         box-sizing: border-box;
-        max-width: ${config.maxWidth};
+        max-width: ${visualConfig.maxWidth};
         color: var(--balaclava-tooltip-text);
         color-scheme: dark;
         font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-        font-size: ${config.fontSize};
+        font-size: ${visualConfig.fontSize};
         line-height: 1.4;
         letter-spacing: 0;
         overflow-wrap: anywhere;
         pointer-events: none;
         opacity: 1;
-        border: 1px solid var(--balaclava-tooltip-border);
-        border-radius: ${config.borderRadius};
+        border: var(--balaclava-tooltip-border-size) solid var(--balaclava-tooltip-border);
+        border-radius: var(--balaclava-tooltip-border-radius);
         filter: drop-shadow(0 10px 18px var(--balaclava-tooltip-shadow));
         transform: scale(1);
         transition:
-          opacity ${config.animationDuration} ease-out,
-          transform ${config.animationDuration} ease-out;
+          opacity ${visualConfig.animationDuration} ease-out,
+          transform ${visualConfig.animationDuration} ease-out;
       }
 
       .balaclava-tooltip-content {
         position: relative;
         z-index: 1;
         box-sizing: border-box;
-        padding: ${config.padding};
+        padding: ${visualConfig.padding};
         color: var(--balaclava-tooltip-text);
         background: var(--balaclava-tooltip-bg);
-        border-radius: ${config.borderRadius};
+        border-radius: var(--balaclava-tooltip-border-radius);
       }
 
       .balaclava-tooltip-arrow {
         position: absolute;
         z-index: 0;
         box-sizing: border-box;
-        width: ${config.arrowSize};
-        height: ${config.arrowSize};
+        width: var(--balaclava-tooltip-arrow-size);
+        height: var(--balaclava-tooltip-arrow-size);
         background: var(--balaclava-tooltip-bg);
-        border-color: var(--balaclava-tooltip-border);
+        border-color: var(--balaclava-tooltip-arrow-border-color);
         border-style: solid;
-        border-width: 1px;
+        border-width: var(--balaclava-tooltip-arrow-border-size);
+        border-radius: var(--balaclava-tooltip-arrow-border-radius);
       }
 
       .balaclava-tooltip.is-theme-system,
@@ -193,7 +206,7 @@
       }
 
       .balaclava-tooltip.is-top .balaclava-tooltip-arrow {
-        bottom: calc(${config.arrowSize} / -2);
+        bottom: calc(var(--balaclava-tooltip-arrow-size) / -2);
         left: var(--arrow-offset, 50%);
         transform: translateX(-50%) rotate(45deg);
         border-top: none;
@@ -201,7 +214,7 @@
       }
 
       .balaclava-tooltip.is-bottom .balaclava-tooltip-arrow {
-        top: calc(${config.arrowSize} / -2);
+        top: calc(var(--balaclava-tooltip-arrow-size) / -2);
         left: var(--arrow-offset, 50%);
         transform: translateX(-50%) rotate(45deg);
         border-right: none;
@@ -209,7 +222,7 @@
       }
 
       .balaclava-tooltip.is-left .balaclava-tooltip-arrow {
-        right: calc(${config.arrowSize} / -2);
+        right: calc(var(--balaclava-tooltip-arrow-size) / -2);
         top: var(--arrow-offset, 50%);
         transform: translateY(-50%) rotate(45deg);
         border-bottom: none;
@@ -217,7 +230,7 @@
       }
 
       .balaclava-tooltip.is-right .balaclava-tooltip-arrow {
-        left: calc(${config.arrowSize} / -2);
+        left: calc(var(--balaclava-tooltip-arrow-size) / -2);
         top: var(--arrow-offset, 50%);
         transform: translateY(-50%) rotate(45deg);
         border-top: none;
@@ -225,19 +238,19 @@
       }
 
       .balaclava-tooltip.is-top {
-        transform-origin: var(--arrow-offset, 50%) calc(100% + ${config.arrowSize});
+        transform-origin: var(--arrow-offset, 50%) calc(100% + var(--balaclava-tooltip-arrow-size));
       }
 
       .balaclava-tooltip.is-bottom {
-        transform-origin: var(--arrow-offset, 50%) calc(0px - ${config.arrowSize});
+        transform-origin: var(--arrow-offset, 50%) calc(0px - var(--balaclava-tooltip-arrow-size));
       }
 
       .balaclava-tooltip.is-left {
-        transform-origin: calc(100% + ${config.arrowSize}) var(--arrow-offset, 50%);
+        transform-origin: calc(100% + var(--balaclava-tooltip-arrow-size)) var(--arrow-offset, 50%);
       }
 
       .balaclava-tooltip.is-right {
-        transform-origin: calc(0px - ${config.arrowSize}) var(--arrow-offset, 50%);
+        transform-origin: calc(0px - var(--balaclava-tooltip-arrow-size)) var(--arrow-offset, 50%);
       }
 
       .balaclava-tooltip.is-entering {
@@ -261,6 +274,15 @@
         }
       }
     `;
+  }
+
+  function getVisualConfig() {
+    return {
+      ...config,
+      arrowBorderSize: config.arrowBorderSize ?? config.borderSize,
+      arrowBorderColor: config.arrowBorderColor ?? 'var(--balaclava-tooltip-border)',
+      arrowBorderRadius: config.arrowBorderRadius ?? config.borderRadius
+    };
   }
 
   function exposeApi() {

@@ -136,10 +136,14 @@ One-time configuration. Call before first use. Subsequent calls merge with exist
 | `textColor` | `string` | dark theme token | Custom text color |
 | `borderColor` | `string` | dark theme token | Custom border color |
 | `shadowColor` | `string` | dark theme token | Custom drop shadow color |
+| `borderSize` | `string` | `'1px'` | Tooltip border width |
 | `borderRadius` | `string` | `'4px'` | Border radius |
 | `padding` | `string` | `'8px 12px'` | Content padding |
 | `maxWidth` | `string` | `'250px'` | Maximum tooltip width |
 | `arrowSize` | `string` | `'6px'` | Arrow dimensions |
+| `arrowBorderSize` | `string` | inherits `borderSize` | Arrow border width; use `'0'` for no arrow border |
+| `arrowBorderColor` | `string` | inherits active border color | Arrow border color |
+| `arrowBorderRadius` | `string` | inherits `borderRadius` | Arrow knob border radius |
 | `zIndex` | `number` | `2147483647` | Z-index value |
 | `animationDuration` | `string` | `'150ms'` | Fade-in duration |
 | `fontSize` | `string` | `'13px'` | Font size |
@@ -205,10 +209,14 @@ Re-scan the DOM for `data-balaclava-tooltip` attributes. Useful if MutationObser
     bgColor: '#1a1a1a',
     textColor: '#ffffff',
     borderColor: 'transparent',
+    borderSize: '1px',
     borderRadius: '4px',
     padding: '8px 12px',
     maxWidth: '250px',
     arrowSize: '6px',
+    arrowBorderSize: null,
+    arrowBorderColor: null,
+    arrowBorderRadius: null,
     zIndex: 2147483647,
     animationDuration: '150ms',
     fontSize: '13px',
@@ -251,67 +259,76 @@ Re-scan the DOM for `data-balaclava-tooltip` attributes. Useful if MutationObser
 
 ```javascript
 function buildStylesheet() {
+  const visualConfig = getVisualConfig();
+
   return `
     .balaclava-tooltip {
+      --balaclava-tooltip-border-size: ${visualConfig.borderSize};
+      --balaclava-tooltip-border-radius: ${visualConfig.borderRadius};
+      --balaclava-tooltip-arrow-size: ${visualConfig.arrowSize};
+      --balaclava-tooltip-arrow-border-size: ${visualConfig.arrowBorderSize};
+      --balaclava-tooltip-arrow-border-color: ${visualConfig.arrowBorderColor};
+      --balaclava-tooltip-arrow-border-radius: ${visualConfig.arrowBorderRadius};
       position: fixed;
       z-index: ${config.zIndex};
-      max-width: ${config.maxWidth};
+      max-width: ${visualConfig.maxWidth};
       color: ${config.textColor};
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      font-size: ${config.fontSize};
+      font-size: ${visualConfig.fontSize};
       line-height: 1.4;
       pointer-events: none;
       opacity: 0;
-      border: 1px solid ${config.borderColor};
-      border-radius: ${config.borderRadius};
+      border: var(--balaclava-tooltip-border-size) solid ${config.borderColor};
+      border-radius: var(--balaclava-tooltip-border-radius);
       box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-      animation: balaclava-fade-in ${config.animationDuration} ease-out forwards;
+      animation: balaclava-fade-in ${visualConfig.animationDuration} ease-out forwards;
     }
 
     .balaclava-tooltip-content {
       position: relative;
       z-index: 1;
-      padding: ${config.padding};
+      padding: ${visualConfig.padding};
       background-color: ${config.bgColor};
-      border-radius: ${config.borderRadius};
+      border-radius: var(--balaclava-tooltip-border-radius);
     }
 
     .balaclava-tooltip-arrow {
       position: absolute;
       z-index: 0;
-      width: ${config.arrowSize};
-      height: ${config.arrowSize};
+      width: var(--balaclava-tooltip-arrow-size);
+      height: var(--balaclava-tooltip-arrow-size);
       background-color: ${config.bgColor};
-      border-color: ${config.borderColor};
+      border-color: var(--balaclava-tooltip-arrow-border-color);
       border-style: solid;
-      border-width: 1px;
+      border-width: var(--balaclava-tooltip-arrow-border-size);
+      border-radius: var(--balaclava-tooltip-arrow-border-radius);
       transform: rotate(45deg);
     }
 
     /* Arrow positions */
     .balaclava-tooltip.is-top .balaclava-tooltip-arrow {
-      bottom: calc(${config.arrowSize} / -2);
+      bottom: calc(var(--balaclava-tooltip-arrow-size) / -2);
       left: var(--arrow-offset, 50%);
       transform: translateX(-50%) rotate(45deg);
       border-top: none;
       border-left: none;
     }
     .balaclava-tooltip.is-bottom .balaclava-tooltip-arrow {
-      top: calc(${config.arrowSize} / -2);
+      top: calc(var(--balaclava-tooltip-arrow-size) / -2);
       left: var(--arrow-offset, 50%);
       transform: translateX(-50%) rotate(45deg);
       border-right: none;
       border-bottom: none;
     }
     .balaclava-tooltip.is-left .balaclava-tooltip-arrow {
-      right: calc(${config.arrowSize} / -2);
+      right: calc(var(--balaclava-tooltip-arrow-size) / -2);
       top: var(--arrow-offset, 50%);
       transform: translateY(-50%) rotate(45deg);
       border-bottom: none;
       border-left: none;
     }
     .balaclava-tooltip.is-right .balaclava-tooltip-arrow {
-      left: calc(${config.arrowSize} / -2);
+      left: calc(var(--balaclava-tooltip-arrow-size) / -2);
       top: var(--arrow-offset, 50%);
       transform: translateY(-50%) rotate(45deg);
       border-top: none;
