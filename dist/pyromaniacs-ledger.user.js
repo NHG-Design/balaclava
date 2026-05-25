@@ -1349,7 +1349,11 @@
     }
   }
   function injectSettings(root, ctx) {
-    if (document.getElementById("pyro-settings-btn")) return;
+    const existing = document.getElementById("pyro-settings-btn");
+    if (existing) {
+      if (root.contains(existing)) return;
+      existing.closest(".pyro-settings-wrap")?.remove();
+    }
     injectSettingsStyles();
     const anchor = root.querySelector(SEL.TITLE_BAR) ?? root;
     const wrap = el2("div", "pyro-settings-wrap");
@@ -1657,11 +1661,21 @@
     setDebugMode,
     setActiveTab
   };
+  var reInjectTimer = null;
+  function scheduleInjectSettings() {
+    if (reInjectTimer !== null) return;
+    reInjectTimer = setTimeout(() => {
+      reInjectTimer = null;
+      const root = getRoot();
+      const btn = document.getElementById("pyro-settings-btn");
+      if (!btn || !root.contains(btn)) {
+        injectSettings(root, settingsCtx);
+      }
+    }, 200);
+  }
   var observer = new MutationObserver(() => {
     scanPage();
-    if (!document.getElementById("pyro-settings-btn")) {
-      injectSettings(getRoot(), settingsCtx);
-    }
+    scheduleInjectSettings();
   });
   function start() {
     loadState();

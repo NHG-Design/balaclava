@@ -364,12 +364,28 @@ const settingsCtx: SettingsCtx = {
 // ---------------------------------------------------------------------------
 // MutationObserver loop
 // ---------------------------------------------------------------------------
+
+// Debounced re-injection: Torn's React replaces the titleBar node on each
+// render cycle. Injecting synchronously inside the observer fires mid-render,
+// causing the button to land in the body fallback or get wiped by the next
+// React batch. A 200 ms debounce lets React settle before we inject.
+let reInjectTimer: ReturnType<typeof setTimeout> | null = null;
+
+function scheduleInjectSettings(): void {
+    if (reInjectTimer !== null) return;
+    reInjectTimer = setTimeout(() => {
+        reInjectTimer = null;
+        const root = getRoot();
+        const btn = document.getElementById('pyro-settings-btn');
+        if (!btn || !root.contains(btn)) {
+            injectSettings(root, settingsCtx);
+        }
+    }, 200);
+}
+
 const observer = new MutationObserver(() => {
     scanPage();
-    // Re-inject settings if the arson root was re-mounted
-    if (!document.getElementById('pyro-settings-btn')) {
-        injectSettings(getRoot(), settingsCtx);
-    }
+    scheduleInjectSettings();
 });
 
 function start(): void {

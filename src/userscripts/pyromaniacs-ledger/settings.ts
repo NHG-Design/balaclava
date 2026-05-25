@@ -567,7 +567,12 @@ function buildTabContent(tabId: string, ctx: SettingsCtx, panel: HTMLElement): H
 // ---------------------------------------------------------------------------
 
 export function injectSettings(root: Element, ctx: SettingsCtx): void {
-    if (document.getElementById('pyro-settings-btn')) return;
+    const existing = document.getElementById('pyro-settings-btn');
+    if (existing) {
+        if (root.contains(existing)) return;
+        // Orphaned (e.g. injected into body fallback) — remove and re-inject into correct anchor
+        existing.closest('.pyro-settings-wrap')?.remove();
+    }
 
     injectSettingsStyles();
 
