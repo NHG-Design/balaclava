@@ -380,6 +380,10 @@ function buildApiTab(ctx: SettingsCtx, panel: HTMLElement): HTMLElement {
     keyTitle.textContent = 'Torn API key';
     keyGroup.appendChild(keyTitle);
 
+    const keyNote = el('p', 'pyro-s-section-note');
+    keyNote.textContent = 'Public access only — used solely to fetch item market prices.';
+    keyGroup.appendChild(keyNote);
+
     const keyRow = el('div', 'pyro-s-key-row');
     const keyInput = el('input', 'pyro-s-key-input');
     keyInput.type = 'password';

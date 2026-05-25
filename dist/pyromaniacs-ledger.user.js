@@ -1198,6 +1198,9 @@
     const keyTitle = el2("div", "pyro-s-group-title");
     keyTitle.textContent = "Torn API key";
     keyGroup.appendChild(keyTitle);
+    const keyNote = el2("p", "pyro-s-section-note");
+    keyNote.textContent = "Public access only \u2014 used solely to fetch item market prices.";
+    keyGroup.appendChild(keyNote);
     const keyRow = el2("div", "pyro-s-key-row");
     const keyInput = el2("input", "pyro-s-key-input");
     keyInput.type = "password";
