@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        Torn Pyromaniac's Ledger
 // @namespace   https://github.com/NHG-Design/balaclava
-// @version     0.2.0
+// @version     0.3.0
 // @description Arson profit-per-nerve calculator and strategy guide for Torn's Crimes page
 // @icon        https://www.google.com/s2/favicons?sz=64&domain=torn.com
 // @author      Yukio [906148]
@@ -1162,10 +1162,15 @@
         .pyro-band--good     .pyro-label { color: #4a4; }
         .pyro-band--jackpot  .pyro-label { color: #0cc; }
 
-        .arson-root .pyro-band--negative [class*="titleSection___"] { background: rgba(120,40,40,0.25) !important; }
-        .arson-root .pyro-band--low      [class*="titleSection___"] { background: rgba(180,140,0,0.15) !important; }
-        .arson-root .pyro-band--good     [class*="titleSection___"] { background: rgba(40,140,60,0.15) !important; }
-        .arson-root .pyro-band--jackpot  [class*="titleSection___"] { background: rgba(0,200,200,0.15) !important; }
+        .arson-root .pyro-band--negative:has([class*="desktopStatusSection___"]) [class*="titleSection___"] { background: rgba(120,40,40,0.25) !important; }
+        .arson-root .pyro-band--low:has([class*="desktopStatusSection___"])      [class*="titleSection___"] { background: rgba(180,140,0,0.15) !important; }
+        .arson-root .pyro-band--good:has([class*="desktopStatusSection___"])     [class*="titleSection___"] { background: rgba(40,140,60,0.15) !important; }
+        .arson-root .pyro-band--jackpot:has([class*="desktopStatusSection___"])  [class*="titleSection___"] { background: rgba(0,200,200,0.15) !important; }
+
+        .arson-root .pyro-band--negative:not(:has([class*="desktopStatusSection___"])) [class*="crimeOptionImage___"] { box-shadow: 3px 0 0 0 #c44; }
+        .arson-root .pyro-band--low:not(:has([class*="desktopStatusSection___"]))      [class*="crimeOptionImage___"] { box-shadow: 3px 0 0 0 #b90; }
+        .arson-root .pyro-band--good:not(:has([class*="desktopStatusSection___"]))     [class*="crimeOptionImage___"] { box-shadow: 3px 0 0 0 #4a4; }
+        .arson-root .pyro-band--jackpot:not(:has([class*="desktopStatusSection___"]))  [class*="crimeOptionImage___"] { box-shadow: 3px 0 0 0 #0cc; }
     `;
     document.head.appendChild(style);
     injectTooltipContentStyles();

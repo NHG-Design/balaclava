@@ -224,10 +224,15 @@ function injectHighlightStyles(): void {
         .pyro-band--good     .pyro-label { color: #4a4; }
         .pyro-band--jackpot  .pyro-label { color: #0cc; }
 
-        .arson-root .pyro-band--negative [class*="titleSection___"] { background: rgba(120,40,40,0.25) !important; }
-        .arson-root .pyro-band--low      [class*="titleSection___"] { background: rgba(180,140,0,0.15) !important; }
-        .arson-root .pyro-band--good     [class*="titleSection___"] { background: rgba(40,140,60,0.15) !important; }
-        .arson-root .pyro-band--jackpot  [class*="titleSection___"] { background: rgba(0,200,200,0.15) !important; }
+        .arson-root .pyro-band--negative:has([class*="desktopStatusSection___"]) [class*="titleSection___"] { background: rgba(120,40,40,0.25) !important; }
+        .arson-root .pyro-band--low:has([class*="desktopStatusSection___"])      [class*="titleSection___"] { background: rgba(180,140,0,0.15) !important; }
+        .arson-root .pyro-band--good:has([class*="desktopStatusSection___"])     [class*="titleSection___"] { background: rgba(40,140,60,0.15) !important; }
+        .arson-root .pyro-band--jackpot:has([class*="desktopStatusSection___"])  [class*="titleSection___"] { background: rgba(0,200,200,0.15) !important; }
+
+        .arson-root .pyro-band--negative:not(:has([class*="desktopStatusSection___"])) [class*="crimeOptionImage___"] { box-shadow: 3px 0 0 0 #c44; }
+        .arson-root .pyro-band--low:not(:has([class*="desktopStatusSection___"]))      [class*="crimeOptionImage___"] { box-shadow: 3px 0 0 0 #b90; }
+        .arson-root .pyro-band--good:not(:has([class*="desktopStatusSection___"]))     [class*="crimeOptionImage___"] { box-shadow: 3px 0 0 0 #4a4; }
+        .arson-root .pyro-band--jackpot:not(:has([class*="desktopStatusSection___"]))  [class*="crimeOptionImage___"] { box-shadow: 3px 0 0 0 #0cc; }
     `;
     document.head.appendChild(style);
 
