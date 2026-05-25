@@ -108,7 +108,7 @@ Transitions can be interrupted and retargeted mid-animation. Keyframes restart f
 }
 ```
 
-Replaces the `useEffect(() => setMounted(true))` pattern. Use when browser support allows.
+Replaces the JS-mounted-state pattern (toggling a class or attribute after initial render to trigger entry). Use when browser support allows.
 
 ### `clip-path: inset()` for reveals
 
@@ -204,7 +204,7 @@ element.animate(
 );
 ```
 
-**CSS animations beat JS under load.** CSS runs off the main thread. Framer Motion's `requestAnimationFrame` drops frames when the browser is also loading content.
+**CSS animations beat JS under load.** CSS runs off the main thread. JS animation libraries that use `requestAnimationFrame` drop frames when the browser is also loading content — use CSS for predetermined animations, JS for dynamic or interruptible ones.
 
 ---
 

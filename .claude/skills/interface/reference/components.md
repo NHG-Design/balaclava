@@ -111,13 +111,13 @@ Enter can be deliberate (slow), exit must always be snappy.
 
 Match motion to the component's mood. A professional dashboard should be crisp and fast. A playful tool can be bouncier. Cohesion matters: the easing, duration, visual design, and name should all feel like the same thing.
 
-The Sonner principles (from building a component with 13M+ weekly downloads) apply broadly:
+Principles for building components people love:
 
-1. **DX over features.** The less friction to adopt, the more people use it. No hooks, no context, no ceremony if avoidable.
-2. **Good defaults beat options.** Most users never customize. Ship beautiful out of the box.
-3. **Naming creates identity.** A memorable name ("Sonner", French for "to ring") beats a discoverable one ("react-toast"). Sacrifice discoverability for memorability when appropriate.
-4. **Handle edge cases invisibly.** Pause timers when the tab hides. Fill gaps with pseudo-elements to maintain hover state. Users never notice — that is exactly right.
-5. **Review your work the next day.** Imperfections you missed during development are obvious with fresh eyes. Play animations at 0.25× speed to catch timing issues invisible at full speed.
+1. **DX over features.** The less friction to adopt, the more people use it. Minimize setup ceremony — no wrappers, no configuration required for the default case.
+2. **Good defaults beat options.** Most users never customize. Ship beautiful out of the box; options are for edge cases, not the baseline experience.
+3. **Naming creates identity.** A memorable name beats a purely descriptive one. Sacrifice discoverability for memorability when the component is the product.
+4. **Handle edge cases invisibly.** Pause timers when the tab is hidden. Fill visual gaps with pseudo-elements to maintain hover state. Users never notice these — that is exactly right.
+5. **Review your work the next day.** Imperfections missed during development are obvious with fresh eyes. Play animations at 0.25× speed to catch timing issues invisible at full speed.
 
 ## scale() Scales Children
 
