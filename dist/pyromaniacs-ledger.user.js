@@ -865,9 +865,13 @@
     TITLE_SECTION: '[class*="crimeOptionSection___"]',
     /**
      * Title bar at the top of the current crime panel.
-     * Settings button is appended here; falls back to ROOT if absent.
      */
-    TITLE_BAR: '[class*="titleBar___"]'
+    TITLE_BAR: '[class*="titleBar___"]',
+    /**
+     * Result-counts strip (successes / fails / critical fails icons).
+     * Settings gear is appended here as an additional item.
+     */
+    RESULT_COUNTS: '[class*="resultCounts___"]'
   };
 
   // src/userscripts/pyromaniacs-ledger/api.ts
@@ -1355,7 +1359,7 @@
       existing.closest(".pyro-settings-wrap")?.remove();
     }
     injectSettingsStyles();
-    const anchor = root.querySelector(SEL.TITLE_BAR) ?? root;
+    const anchor = root.querySelector(SEL.RESULT_COUNTS) ?? root.querySelector(SEL.TITLE_BAR) ?? root;
     const wrap = el2("div", "pyro-settings-wrap");
     const btn = el2("button");
     btn.id = "pyro-settings-btn";

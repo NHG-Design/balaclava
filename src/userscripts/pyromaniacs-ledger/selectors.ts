@@ -29,4 +29,15 @@ export const SEL = {
      * the previous triple-class selector.
      */
     TITLE_SECTION: '[class*="crimeOptionSection___"]',
+
+    /**
+     * Title bar at the top of the current crime panel.
+     */
+    TITLE_BAR: '[class*="titleBar___"]',
+
+    /**
+     * Result-counts strip (successes / fails / critical fails icons).
+     * Settings gear is appended here as an additional item.
+     */
+    RESULT_COUNTS: '[class*="resultCounts___"]',
 } as const;

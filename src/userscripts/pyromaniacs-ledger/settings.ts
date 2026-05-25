@@ -576,7 +576,7 @@ export function injectSettings(root: Element, ctx: SettingsCtx): void {
 
     injectSettingsStyles();
 
-    const anchor = root.querySelector(SEL.TITLE_BAR) ?? root;
+    const anchor = root.querySelector(SEL.RESULT_COUNTS) ?? root.querySelector(SEL.TITLE_BAR) ?? root;
 
     const wrap = el('div', 'pyro-settings-wrap');
 
