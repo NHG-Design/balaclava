@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        Torn Pyromaniac's Ledger
 // @namespace   https://github.com/NHG-Design/balaclava
-// @version     0.4.3
+// @version     0.4.4
 // @description Arson profit-per-nerve calculator and strategy guide for Torn's Crimes page
 // @icon        https://www.google.com/s2/favicons?sz=64&domain=torn.com
 // @author      Yukio [906148]
@@ -2934,7 +2934,7 @@
   var ARROW_OFFSET_MIN = 10;
   var ARROW_OFFSET_MAX = 90;
   var ARROW_OFFSET_DEFAULT = 50;
-  var VERSION = "1.0.1";
+  var VERSION = "1.0.2";
   var VALID_POSITIONS = /* @__PURE__ */ new Set(["top", "bottom", "left", "right"]);
   var VALID_THEMES = /* @__PURE__ */ new Set(["system", "dark", "light", "custom"]);
   var CUSTOM_THEME_KEYS = /* @__PURE__ */ new Set(["bgColor", "textColor", "borderColor", "shadowColor"]);
@@ -3116,6 +3116,11 @@
         transform: scale(0.97);
       }
 
+      .balaclava-tooltip.is-exiting {
+        opacity: 0;
+        transform: scale(0.97);
+      }
+
       @media (prefers-color-scheme: light) {
         .balaclava-tooltip.is-theme-system {
           --balaclava-tooltip-bg: ${THEME_TOKENS.light.bgColor};
@@ -3201,6 +3206,7 @@
         trackTargetPosition();
       });
     }, hideTooltip = function() {
+      tooltipCooldownEnd = Date.now() + 600;
       cleanupTooltip();
     }, configure = function(userConfig = {}) {
       const nextConfig = { ...config };
@@ -3238,17 +3244,40 @@
       const controller = new AbortController();
       const { signal } = controller;
       let detached = false;
-      const onShow = () => showTooltip(element, resolveContent(content, element), options);
-      const onHide = () => {
+      let hoverTimer = null;
+      const doShow = () => showTooltip(element, resolveContent(content, element), options);
+      const onMouseEnter = () => {
+        if (Date.now() < tooltipCooldownEnd) {
+          nextShowInstant = true;
+          doShow();
+          nextShowInstant = false;
+        } else {
+          hoverTimer = setTimeout(() => {
+            hoverTimer = null;
+            doShow();
+          }, 200);
+        }
+      };
+      const onMouseLeave = () => {
+        if (hoverTimer !== null) {
+          clearTimeout(hoverTimer);
+          hoverTimer = null;
+        }
         if (targetElement === element) hideTooltip();
       };
-      element.addEventListener("mouseenter", onShow, { signal });
-      element.addEventListener("mouseleave", onHide, { signal });
-      element.addEventListener("focus", onShow, { signal });
-      element.addEventListener("blur", onHide, { signal });
+      element.addEventListener("mouseenter", onMouseEnter, { signal });
+      element.addEventListener("mouseleave", onMouseLeave, { signal });
+      element.addEventListener("focus", doShow, { signal });
+      element.addEventListener("blur", () => {
+        if (targetElement === element) hideTooltip();
+      }, { signal });
       const detach = function detach2() {
         if (detached) return;
         detached = true;
+        if (hoverTimer !== null) {
+          clearTimeout(hoverTimer);
+          hoverTimer = null;
+        }
         controller.abort();
         attachmentDetachers.delete(detach2);
         if (targetElement === element) {
@@ -3332,7 +3361,8 @@
       }
       tooltipEl = document.createElement("div");
       tooltipEl.id = tooltipId;
-      tooltipEl.className = `${getTooltipClassName()} is-entering`;
+      tooltipEl.className = nextShowInstant ? getTooltipClassName() : `${getTooltipClassName()} is-entering`;
+      if (nextShowInstant) tooltipEl.setAttribute("data-instant", "");
       tooltipEl.setAttribute("role", "tooltip");
       tooltipEl.setAttribute("aria-live", "polite");
       tooltipEl.style.setProperty("--arrow-offset", `${arrowOffset}%`);
@@ -3355,11 +3385,13 @@
         tooltipEl.appendChild(arrowEl);
       }
       shadow.appendChild(tooltipEl);
-      requestAnimationFrame(() => {
-        if (tooltipEl) {
-          tooltipEl.classList.remove("is-entering");
-        }
-      });
+      if (!nextShowInstant) {
+        requestAnimationFrame(() => {
+          if (tooltipEl) {
+            tooltipEl.classList.remove("is-entering");
+          }
+        });
+      }
     }, setupIntersectionObserver = function() {
       cleanupIntersectionObserver();
       if (!targetElement || typeof IntersectionObserver === "undefined") return;
@@ -3387,8 +3419,15 @@
         scrollFrameId = null;
       }
       if (tooltipEl) {
-        tooltipEl.remove();
+        const exiting = tooltipEl;
         tooltipEl = null;
+        exiting.removeAttribute("id");
+        exiting.classList.add("is-exiting");
+        const remove = () => {
+          if (exiting.isConnected) exiting.remove();
+        };
+        exiting.addEventListener("transitionend", remove, { once: true });
+        setTimeout(remove, 200);
       }
       cleanupIntersectionObserver();
       isVisible = false;
@@ -3623,6 +3662,8 @@
     let isVisible = false;
     let globalListenersController = null;
     let readyController = null;
+    let tooltipCooldownEnd = 0;
+    let nextShowInstant = false;
     const tooltipId = `balaclava-tt-${Math.random().toString(36).slice(2, 11)}`;
     let attachedElements = /* @__PURE__ */ new WeakMap();
     const attachmentDetachers = /* @__PURE__ */ new Set();
@@ -4064,12 +4105,17 @@
     color: #bbb;
     cursor: pointer;
     border-radius: 4px;
-    padding: 2px 7px;
+    padding: 3px 7px;
     font-size: 13px;
-    line-height: 1.4;
+    line-height: 1;
     user-select: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 100ms ease-out;
 }
 #pyro-settings-btn:hover { background: rgba(255,255,255,0.08); color: #fff; }
+#pyro-settings-btn:active { transform: scale(0.94); }
 #pyro-settings-panel {
     position: absolute;
     top: calc(100% + 6px);
@@ -4080,8 +4126,21 @@
     border-radius: 6px;
     min-width: 290px;
     max-width: 360px;
-    box-shadow: 0 6px 20px rgba(0,0,0,0.55);
+    box-shadow: 0 8px 28px oklch(6% 0.01 260 / 0.6);
     overflow: hidden;
+    transform-origin: top right;
+    transform: scale(0.95);
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: transform 150ms ease-out, opacity 150ms ease-out, visibility 0ms linear 150ms;
+}
+#pyro-settings-panel.is-open {
+    transform: scale(1);
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+    transition: transform 150ms ease-out, opacity 150ms ease-out, visibility 0ms linear 0ms;
 }
 .pyro-tab-bar {
     display: flex;
@@ -4096,7 +4155,7 @@
     color: #777;
     cursor: pointer;
     padding: 7px 2px;
-    font-size: 10px;
+    font-size: 11px;
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.04em;
@@ -4111,7 +4170,7 @@
 .pyro-s-group { margin-bottom: 10px; }
 .pyro-s-group:last-child { margin-bottom: 0; }
 .pyro-s-group-title {
-    font-size: 9px;
+    font-size: 10px;
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.06em;
@@ -4174,8 +4233,10 @@
     padding: 4px 9px;
     font-size: 11px;
     white-space: nowrap;
+    transition: transform 100ms ease-out;
 }
 .pyro-s-btn:hover:not(:disabled) { background: #303030; color: #fff; }
+.pyro-s-btn:active:not(:disabled) { transform: scale(0.97); }
 .pyro-s-btn:disabled { opacity: 0.35; cursor: default; }
 .pyro-s-status {
     font-size: 10px;
@@ -4533,10 +4594,9 @@
     btn.id = "pyro-settings-btn";
     btn.setAttribute("aria-label", "Pyromaniac's Ledger settings");
     btn.setAttribute("aria-expanded", "false");
-    btn.textContent = "\u2699";
+    btn.innerHTML = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>';
     const panel = el2("div");
     panel.id = "pyro-settings-panel";
-    panel.setAttribute("hidden", "");
     const activeTab2 = ctx.getActiveTab() || "prices";
     panel.appendChild(buildTabBar(activeTab2, (tabId) => {
       ctx.setActiveTab(tabId);
@@ -4550,16 +4610,16 @@
     anchor.appendChild(wrap);
     btn.addEventListener("click", (e) => {
       e.stopPropagation();
-      const hidden = panel.hasAttribute("hidden");
-      panel.toggleAttribute("hidden", !hidden);
-      btn.setAttribute("aria-expanded", String(hidden));
-      if (hidden && (ctx.getActiveTab() || "prices") === "debug") {
+      const isOpen = panel.classList.contains("is-open");
+      panel.classList.toggle("is-open", !isOpen);
+      btn.setAttribute("aria-expanded", String(!isOpen));
+      if (!isOpen && (ctx.getActiveTab() || "prices") === "debug") {
         rerenderTab(panel, "debug", ctx);
       }
     });
     document.addEventListener("click", (e) => {
       if (!wrap.contains(e.target)) {
-        panel.setAttribute("hidden", "");
+        panel.classList.remove("is-open");
         btn.setAttribute("aria-expanded", "false");
       }
     }, { passive: true });

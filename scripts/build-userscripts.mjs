@@ -19,7 +19,7 @@ const USERSCRIPTS = [
         metadata: {
             ...COMMON_METADATA,
             name: 'Balaclava Tooltip',
-            version: '1.0.1',
+            version: '1.0.2',
             description: 'Universal tooltip injection for userscript managers',
             updateURL: `${DIST_BASE}/balaclava-tooltip.meta.js`,
             downloadURL: `${DIST_BASE}/balaclava-tooltip.user.js`,
@@ -33,7 +33,7 @@ const USERSCRIPTS = [
         metadata: {
             ...COMMON_METADATA,
             name: "Torn Pyromaniac's Ledger",
-            version: '0.4.3',
+            version: '0.4.4',
             description: "Arson profit-per-nerve calculator and strategy guide for Torn's Crimes page",
             icon: 'https://www.google.com/s2/favicons?sz=64&domain=torn.com',
             updateURL: `${DIST_BASE}/pyromaniacs-ledger.meta.js`,

@@ -6,7 +6,7 @@ const SAFEZONE = 8;
 const ARROW_OFFSET_MIN = 10;
 const ARROW_OFFSET_MAX = 90;
 const ARROW_OFFSET_DEFAULT = 50;
-const VERSION = '1.0.1';
+const VERSION = '1.0.2';
 
 type TooltipPosition = 'top' | 'bottom' | 'left' | 'right';
 type TooltipTheme = 'system' | 'dark' | 'light' | 'custom';
