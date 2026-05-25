@@ -78,7 +78,7 @@
     [RESOURCE.METHANE]: { id: RESOURCE.METHANE, name: "Methane Tank", kind: "fuel", category: "gaseous", isTool: false, defaultPrice: 8e3, tornId: 1460 },
     [RESOURCE.HYDROGEN]: { id: RESOURCE.HYDROGEN, name: "Hydrogen Tank", kind: "fuel", category: "gaseous", isTool: false, defaultPrice: 15e3, tornId: 1459 },
     // Igniters
-    [RESOURCE.LIGHTER]: { id: RESOURCE.LIGHTER, name: "Windproof Lighter", kind: "tool", category: "igniter", isTool: false, defaultPrice: 500, tornId: 544 },
+    [RESOURCE.LIGHTER]: { id: RESOURCE.LIGHTER, name: "Windproof Lighter", kind: "tool", category: "igniter", isTool: true, defaultPrice: 0, tornId: 544 },
     [RESOURCE.MOLOTOV]: { id: RESOURCE.MOLOTOV, name: "Molotov Cocktail", kind: "tool", category: "igniter", isTool: false, defaultPrice: 3e3, tornId: 742 },
     [RESOURCE.FLAMETHROWER]: { id: RESOURCE.FLAMETHROWER, name: "Flamethrower", kind: "tool", category: "igniter", isTool: true, defaultPrice: 0 },
     // Dampeners
@@ -606,9 +606,10 @@
     return "jackpot";
   }
   function formatPpn(ppn) {
-    const rounded = Math.floor(ppn / 100) * 100;
-    if (rounded >= 1e3) return `$${(rounded / 1e3).toFixed(1)}k/N`;
-    return `$${rounded}/N`;
+    const sign = ppn < 0 ? "-" : "";
+    const rounded = Math.floor(Math.abs(ppn) / 100) * 100;
+    if (rounded >= 1e3) return `$${sign}${(rounded / 1e3).toFixed(1)}k/N`;
+    return `$${sign}${rounded}/N`;
   }
   function rankForScenario(candidates, hasFlamethrower, prices, thresholds2) {
     const eligible = candidates.filter((s) => {

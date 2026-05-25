@@ -47,14 +47,15 @@ describe('catalog', () => {
     });
 
     it('consumable igniters/dampeners have isTool=false (included in market cost)', () => {
-        // Windproof Lighter, molotov, sand are consumed per crime
-        const consumable = [RESOURCE.LIGHTER, RESOURCE.MOLOTOV, RESOURCE.SAND];
+        // Molotov and sand are physically consumed per crime
+        const consumable = [RESOURCE.MOLOTOV, RESOURCE.SAND];
         for (const id of consumable) {
             assert.equal(CATALOG[id].isTool, false, `Expected isTool=false for ${id}`);
         }
     });
 
-    it('Windproof Lighter has correct tornId', () => {
+    it('Windproof Lighter is a permanent tool (not consumed per crime)', () => {
+        assert.equal(CATALOG[RESOURCE.LIGHTER].isTool, true);
         assert.equal(CATALOG[RESOURCE.LIGHTER].tornId, 544);
         assert.equal(CATALOG[RESOURCE.LIGHTER].name, 'Windproof Lighter');
     });
@@ -268,9 +269,10 @@ describe('formatPpn', () => {
         assert.equal(formatPpn(0),    '$0/N');
     });
 
-    it('floors negative values (does not round up toward zero)', () => {
-        // Math.floor(-850 / 100) * 100 = Math.floor(-8.5) * 100 = -9 * 100 = -900
-        assert.equal(formatPpn(-850), '$-900/N');
+    it('abbreviates negative values with sign before dollar', () => {
+        assert.equal(formatPpn(-850),        '$-800/N');
+        assert.equal(formatPpn(-1_500),      '$-1.5k/N');
+        assert.equal(formatPpn(-331_700),    '$-331.7k/N');
     });
 });
 

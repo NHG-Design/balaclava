@@ -81,7 +81,7 @@ export const CATALOG: Readonly<Record<ResourceId, Resource>> = {
     [RESOURCE.METHANE]:           { id: RESOURCE.METHANE,           name: 'Methane Tank',       kind: 'fuel',     category: 'gaseous',  isTool: false, defaultPrice: 8_000,   tornId: 1460  },
     [RESOURCE.HYDROGEN]:          { id: RESOURCE.HYDROGEN,          name: 'Hydrogen Tank',      kind: 'fuel',     category: 'gaseous',  isTool: false, defaultPrice: 15_000,  tornId: 1459  },
     // Igniters
-    [RESOURCE.LIGHTER]:           { id: RESOURCE.LIGHTER,           name: 'Windproof Lighter',  kind: 'tool',     category: 'igniter',  isTool: false, defaultPrice: 500,     tornId: 544   },
+    [RESOURCE.LIGHTER]:           { id: RESOURCE.LIGHTER,           name: 'Windproof Lighter',  kind: 'tool',     category: 'igniter',  isTool: true,  defaultPrice: 0,       tornId: 544   },
     [RESOURCE.MOLOTOV]:           { id: RESOURCE.MOLOTOV,           name: 'Molotov Cocktail',   kind: 'tool',     category: 'igniter',  isTool: false, defaultPrice: 3_000,   tornId: 742   },
     [RESOURCE.FLAMETHROWER]:      { id: RESOURCE.FLAMETHROWER,      name: 'Flamethrower',       kind: 'tool',     category: 'igniter',  isTool: true,  defaultPrice: 0                      },
     // Dampeners

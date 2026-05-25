@@ -87,9 +87,10 @@ export function profitBand(ppn: number, thresholds: ProfitThresholds): ProfitBan
 }
 
 export function formatPpn(ppn: number): string {
-    const rounded = Math.floor(ppn / 100) * 100;
-    if (rounded >= 1_000) return `$${(rounded / 1_000).toFixed(1)}k/N`;
-    return `$${rounded}/N`;
+    const sign = ppn < 0 ? '-' : '';
+    const rounded = Math.floor(Math.abs(ppn) / 100) * 100;
+    if (rounded >= 1_000) return `$${sign}${(rounded / 1_000).toFixed(1)}k/N`;
+    return `$${sign}${rounded}/N`;
 }
 
 /**
