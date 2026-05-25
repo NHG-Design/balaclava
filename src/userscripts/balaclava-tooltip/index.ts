@@ -128,6 +128,8 @@ if (!rootWindow[API_NAME]?.version) {
     let isVisible = false;
     let globalListenersController: AbortController | null = null;
     let readyController: AbortController | null = null;
+    let tooltipCooldownEnd = 0;
+    let nextShowInstant = false;
 
     const tooltipId = `balaclava-tt-${Math.random().toString(36).slice(2, 11)}`;
     let attachedElements = new WeakMap<HTMLElement, () => void>();
@@ -303,6 +305,11 @@ if (!rootWindow[API_NAME]?.version) {
         transform: scale(0.97);
       }
 
+      .balaclava-tooltip.is-exiting {
+        opacity: 0;
+        transform: scale(0.97);
+      }
+
       @media (prefers-color-scheme: light) {
         .balaclava-tooltip.is-theme-system {
           --balaclava-tooltip-bg: ${THEME_TOKENS.light.bgColor};
@@ -416,6 +423,7 @@ if (!rootWindow[API_NAME]?.version) {
     }
 
     function hideTooltip(): void {
+        tooltipCooldownEnd = Date.now() + 600;
         cleanupTooltip();
     }
 
@@ -467,21 +475,44 @@ if (!rootWindow[API_NAME]?.version) {
         const controller = new AbortController();
         const { signal } = controller;
         let detached = false;
+        let hoverTimer: ReturnType<typeof setTimeout> | null = null;
 
-        const onShow = (): void => showTooltip(element, resolveContent(content, element), options);
-        const onHide = (): void => {
+        const doShow = (): void => showTooltip(element, resolveContent(content, element), options);
+
+        const onMouseEnter = (): void => {
+            if (Date.now() < tooltipCooldownEnd) {
+                nextShowInstant = true;
+                doShow();
+                nextShowInstant = false;
+            } else {
+                hoverTimer = setTimeout(() => {
+                    hoverTimer = null;
+                    doShow();
+                }, 200);
+            }
+        };
+
+        const onMouseLeave = (): void => {
+            if (hoverTimer !== null) {
+                clearTimeout(hoverTimer);
+                hoverTimer = null;
+            }
             if (targetElement === element) hideTooltip();
         };
 
-        element.addEventListener('mouseenter', onShow, { signal });
-        element.addEventListener('mouseleave', onHide, { signal });
-        element.addEventListener('focus', onShow, { signal });
-        element.addEventListener('blur', onHide, { signal });
+        element.addEventListener('mouseenter', onMouseEnter, { signal });
+        element.addEventListener('mouseleave', onMouseLeave, { signal });
+        element.addEventListener('focus', doShow, { signal });
+        element.addEventListener('blur', () => { if (targetElement === element) hideTooltip(); }, { signal });
 
         const detach = function detach(): void {
             if (detached) return;
 
             detached = true;
+            if (hoverTimer !== null) {
+                clearTimeout(hoverTimer);
+                hoverTimer = null;
+            }
             controller.abort();
             attachmentDetachers.delete(detach);
 
@@ -605,7 +636,8 @@ if (!rootWindow[API_NAME]?.version) {
 
         tooltipEl = document.createElement('div');
         tooltipEl.id = tooltipId;
-        tooltipEl.className = `${getTooltipClassName()} is-entering`;
+        tooltipEl.className = nextShowInstant ? getTooltipClassName() : `${getTooltipClassName()} is-entering`;
+        if (nextShowInstant) tooltipEl.setAttribute('data-instant', '');
         tooltipEl.setAttribute('role', 'tooltip');
         tooltipEl.setAttribute('aria-live', 'polite');
         tooltipEl.style.setProperty('--arrow-offset', `${arrowOffset}%`);
@@ -634,11 +666,13 @@ if (!rootWindow[API_NAME]?.version) {
 
         shadow.appendChild(tooltipEl);
 
-        requestAnimationFrame(() => {
-            if (tooltipEl) {
-                tooltipEl.classList.remove('is-entering');
-            }
-        });
+        if (!nextShowInstant) {
+            requestAnimationFrame(() => {
+                if (tooltipEl) {
+                    tooltipEl.classList.remove('is-entering');
+                }
+            });
+        }
     }
 
     function setupIntersectionObserver(): void {
@@ -678,8 +712,13 @@ if (!rootWindow[API_NAME]?.version) {
         }
 
         if (tooltipEl) {
-            tooltipEl.remove();
+            const exiting = tooltipEl;
             tooltipEl = null;
+            exiting.removeAttribute('id');
+            exiting.classList.add('is-exiting');
+            const remove = () => { if (exiting.isConnected) exiting.remove(); };
+            exiting.addEventListener('transitionend', remove, { once: true });
+            setTimeout(remove, 200);
         }
 
         cleanupIntersectionObserver();
