@@ -1130,8 +1130,46 @@
       ids: Object.values(CATALOG).filter((r) => r.kind === "evidence").sort((a, b) => a.name.localeCompare(b.name)).map((r) => r.id)
     }
   ];
-  function buildPricesTab(ctx) {
+  function buildPricesTab(ctx, panel) {
     const root = el2("div");
+    const actionGroup = el2("div", "pyro-s-group");
+    const actionRow = el2("div", "pyro-s-refresh-row");
+    const refreshBtn = el2("button", "pyro-s-btn");
+    refreshBtn.textContent = "Refresh Prices";
+    if (!ctx.getApiKey()) refreshBtn.disabled = true;
+    const resetBtn = el2("button", "pyro-s-btn");
+    resetBtn.textContent = "Reset Prices";
+    if (!ctx.getApiLastRefresh()) resetBtn.disabled = true;
+    const tsEl = el2("span", "pyro-s-timestamp");
+    const ts = ctx.getApiLastRefresh();
+    tsEl.textContent = ts ? `Fetched: ${formatTimestamp(ts)}` : `DB: ${CATALOG_UPDATED}`;
+    actionRow.appendChild(refreshBtn);
+    actionRow.appendChild(resetBtn);
+    actionRow.appendChild(tsEl);
+    actionGroup.appendChild(actionRow);
+    const actionStatus = el2("div", "pyro-s-status");
+    actionGroup.appendChild(actionStatus);
+    root.appendChild(actionGroup);
+    refreshBtn.addEventListener("click", async () => {
+      refreshBtn.disabled = true;
+      actionStatus.textContent = "Refreshing\u2026";
+      actionStatus.className = "pyro-s-status";
+      const result = await fetchApiPrices(ctx.getApiKey());
+      refreshBtn.disabled = !ctx.getApiKey();
+      if (result.success && result.prices) {
+        ctx.setApiPrices(result.prices, Date.now());
+        actionStatus.textContent = `\u2713 ${result.updatedCount} prices updated`;
+        actionStatus.className = "pyro-s-status ok";
+        rerenderTab(panel, "prices", ctx);
+      } else {
+        actionStatus.textContent = `\u2717 ${result.error ?? "Unknown error"}`;
+        actionStatus.className = "pyro-s-status err";
+      }
+    });
+    resetBtn.addEventListener("click", () => {
+      ctx.clearApiPrices();
+      rerenderTab(panel, "prices", ctx);
+    });
     for (const group of PRICE_GROUPS) {
       const g = el2("div", "pyro-s-group");
       const title = el2("div", "pyro-s-group-title");
@@ -1209,7 +1247,7 @@
     root.appendChild(g);
     return root;
   }
-  function buildApiTab(ctx, panel) {
+  function buildApiTab(ctx) {
     const root = el2("div");
     const keyGroup = el2("div", "pyro-s-group");
     const keyTitle = el2("div", "pyro-s-group-title");
@@ -1235,7 +1273,7 @@
     keyInput.autocomplete = "off";
     keyInput.spellcheck = false;
     const saveBtn = el2("button", "pyro-s-btn");
-    saveBtn.textContent = "Validate & Save";
+    saveBtn.textContent = "Validate & save";
     keyRow.appendChild(keyInput);
     keyRow.appendChild(saveBtn);
     keyGroup.appendChild(keyRow);
@@ -1263,61 +1301,10 @@
         ctx.setApiPrices(result.prices, Date.now());
         keyStatus.textContent = `\u2713 Valid \u2014 ${result.updatedCount} prices updated`;
         keyStatus.className = "pyro-s-status ok";
-        rerenderTab(panel, "api", ctx);
       } else {
         keyStatus.textContent = `\u2717 ${result.error ?? "Unknown error"}`;
         keyStatus.className = "pyro-s-status err";
       }
-    });
-    const hr = el2("hr", "pyro-s-divider");
-    root.appendChild(hr);
-    const refreshGroup = el2("div", "pyro-s-group");
-    const refreshTitle = el2("div", "pyro-s-group-title");
-    refreshTitle.textContent = "Market prices";
-    refreshGroup.appendChild(refreshTitle);
-    const dbNote = el2("p", "pyro-s-section-note");
-    dbNote.textContent = `Built-in DB prices: ${CATALOG_UPDATED}. An API key lets you fetch live market prices instead.`;
-    refreshGroup.appendChild(dbNote);
-    const refreshRow = el2("div", "pyro-s-refresh-row");
-    const refreshBtn = el2("button", "pyro-s-btn");
-    refreshBtn.textContent = "Refresh";
-    if (!ctx.getApiKey()) refreshBtn.disabled = true;
-    const resetBtn = el2("button", "pyro-s-btn");
-    resetBtn.textContent = "Reset to DB";
-    if (!ctx.getApiLastRefresh()) resetBtn.disabled = true;
-    const ts = ctx.getApiLastRefresh();
-    const tsEl = el2("span", "pyro-s-timestamp");
-    tsEl.textContent = ts ? `Fetched: ${formatTimestamp(ts)}` : "";
-    refreshRow.appendChild(refreshBtn);
-    refreshRow.appendChild(resetBtn);
-    refreshRow.appendChild(tsEl);
-    refreshGroup.appendChild(refreshRow);
-    const refreshStatus = el2("div", "pyro-s-status");
-    refreshGroup.appendChild(refreshStatus);
-    root.appendChild(refreshGroup);
-    refreshBtn.addEventListener("click", async () => {
-      refreshBtn.disabled = true;
-      refreshStatus.textContent = "Refreshing\u2026";
-      refreshStatus.className = "pyro-s-status";
-      const result = await fetchApiPrices(ctx.getApiKey());
-      refreshBtn.disabled = !ctx.getApiKey();
-      if (result.success && result.prices) {
-        ctx.setApiPrices(result.prices, Date.now());
-        refreshStatus.textContent = `\u2713 ${result.updatedCount} prices updated`;
-        refreshStatus.className = "pyro-s-status ok";
-        tsEl.textContent = `Fetched: ${formatTimestamp(ctx.getApiLastRefresh())}`;
-        resetBtn.disabled = false;
-      } else {
-        refreshStatus.textContent = `\u2717 ${result.error ?? "Unknown error"}`;
-        refreshStatus.className = "pyro-s-status err";
-      }
-    });
-    resetBtn.addEventListener("click", () => {
-      ctx.clearApiPrices();
-      tsEl.textContent = "";
-      resetBtn.disabled = true;
-      refreshStatus.textContent = "Restored built-in DB prices.";
-      refreshStatus.className = "pyro-s-status ok";
     });
     return root;
   }
@@ -1385,15 +1372,15 @@
   function buildTabContent(tabId, ctx, panel) {
     switch (tabId) {
       case "prices":
-        return buildPricesTab(ctx);
+        return buildPricesTab(ctx, panel);
       case "highlights":
         return buildHighlightsTab(ctx);
       case "api":
-        return buildApiTab(ctx, panel);
+        return buildApiTab(ctx);
       case "debug":
         return buildDebugTab(ctx);
       default:
-        return buildPricesTab(ctx);
+        return buildPricesTab(ctx, panel);
     }
   }
   function injectSettings(root, ctx) {
