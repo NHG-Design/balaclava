@@ -78,9 +78,9 @@ A universal, self-contained tooltip system delivered as a Tampermonkey userscrip
 // ==UserScript==
 // @name        Balaclava Tooltip
 // @namespace   https://github.com/balaclava
-// @version     1.0.0
+// @version     1.0.1
 // @description Universal tooltip injection via Tampermonkey
-// @author      TODO
+// @author      Balaclava
 // @match       *://*/*
 // @grant       unsafeWindow
 // @run-at      document-idle
@@ -95,9 +95,9 @@ A universal, self-contained tooltip system delivered as a Tampermonkey userscrip
 // @namespace   https://github.com/balaclava
 // @version     1.0.0
 // @description Uses Balaclava Tooltip
-// @author      TODO
+// @author      Balaclava
 // @match       https://example.com/*
-// @require     https://raw.githubusercontent.com/USER/balaclava-tooltip/main/dist/balaclava-tooltip.min.js
+// @require     https://raw.githubusercontent.com/robcsaszar/balaclava/v1.0.1/dist/balaclava-tooltip.user.js
 // @grant       unsafeWindow
 // @run-at      document-idle
 // ==/UserScript==
@@ -119,6 +119,7 @@ Show a tooltip anchored to an element.
 | `content` | `string \| Node` | ✅ | Tooltip content — plain text or DOM node |
 | `options.position` | `'top' \| 'bottom' \| 'left' \| 'right'` | ❌ | Preferred position (default: `'bottom'`) |
 | `options.showArrow` | `boolean` | ❌ | Show directional arrow (default: `true`) |
+| `options.theme` | `'system' \| 'dark' \| 'light' \| 'custom'` | ❌ | Per-tooltip theme override |
 
 ### `BalaclavaTooltip.hide()`
 
@@ -130,9 +131,11 @@ One-time configuration. Call before first use. Subsequent calls merge with exist
 
 | Property | Type | Default | Description |
 |----------|------|---------|-------------|
-| `bgColor` | `string` | `'#1a1a1a'` | Background color |
-| `textColor` | `string` | `'#ffffff'` | Text color |
-| `borderColor` | `string` | `'transparent'` | Border color |
+| `theme` | `'system' \| 'dark' \| 'light' \| 'custom'` | `'system'` | Global theme for new tooltips |
+| `bgColor` | `string` | dark theme token | Custom background color |
+| `textColor` | `string` | dark theme token | Custom text color |
+| `borderColor` | `string` | dark theme token | Custom border color |
+| `shadowColor` | `string` | dark theme token | Custom drop shadow color |
 | `borderRadius` | `string` | `'4px'` | Border radius |
 | `padding` | `string` | `'8px 12px'` | Content padding |
 | `maxWidth` | `string` | `'250px'` | Maximum tooltip width |
@@ -150,7 +153,7 @@ Imperatively attach tooltip behavior to an element. Returns a cleanup function.
 const detach = BalaclavaTooltip.attach(
   document.querySelector('.my-btn'),
   'Click to save',
-  { position: 'top' }
+  { position: 'top', theme: 'light' }
 );
 
 // Later:
@@ -181,6 +184,7 @@ Re-scan the DOM for `data-balaclava-tooltip` attributes. Useful if MutationObser
 | `data-balaclava-tooltip` | ✅ | Text content | — |
 | `data-balaclava-tooltip-position` | ❌ | `top \| bottom \| left \| right` | `bottom` |
 | `data-balaclava-tooltip-arrow` | ❌ | `true \| false` | `true` |
+| `data-balaclava-tooltip-theme` | ❌ | `system \| dark \| light \| custom` | Global configured theme |
 
 ---
 
@@ -610,7 +614,7 @@ function cleanupTooltip() {
 ```
 
 **Key differences from original:**
-- Original uses `AbortController` pattern for cleanup (Lit component lifecycle). Here, listeners are permanent (script lifetime = page lifetime), only per-tooltip observers need cleanup.
+- Original uses `AbortController` pattern for cleanup (Lit component lifecycle). Here, global and per-element listeners also use `AbortController`; the public `destroy()` method aborts global listeners and removes the Shadow DOM host.
 - Original uses `addTypeSafeEventListener` wrapper. Here, standard `addEventListener`.
 
 ---
@@ -805,7 +809,7 @@ balaclava-tooltip/
 | `calculatePercentageOffset()` | Inline function (same math) |
 | `connectedCallback()` | IIFE execution (runs once at `document-idle`) |
 | `disconnectedCallback()` | Not needed — script lives for page lifetime |
-| `AbortController` cleanup | Not needed for global listeners; per-tooltip cleanup is manual |
+| `AbortController` cleanup | Used for global and per-element listener teardown |
 | Custom events (`tooltip:show/hide`) | Direct API calls |
 | `tooltipHelpers.ts` | `BalaclavaTooltip.show/hide/attach` |
 

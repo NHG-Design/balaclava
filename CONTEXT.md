@@ -43,7 +43,7 @@ Balaclava (`balaclava.app`) is a platform of Torn tools built by a player, for p
 
 ### Userscript Infrastructure
 
-- **BalaclavaTooltip**: A foundational Tampermonkey userscript library (`balaclava-tooltip.user.js`) providing a universal, viewport-aware tooltip system via Shadow DOM. Distributed as a `@require` dependency for other balaclava userscripts. Exposes `unsafeWindow.BalaclavaTooltip` with `.show()`, `.hide()`, `.configure()`, `.attach()`, and `.rescan()`.
+- **BalaclavaTooltip**: A foundational Tampermonkey userscript library (`balaclava-tooltip.user.js`) providing a universal, viewport-aware tooltip system via Shadow DOM. Distributed as a `@require` dependency for other balaclava userscripts. Exposes `unsafeWindow.BalaclavaTooltip` with `.show()`, `.hide()`, `.configure()`, `.attach()`, `.rescan()`, and `.destroy()`.
 - **Consumer Script**: A balaclava userscript that depends on BalaclavaTooltip via `@require`. Accesses the tooltip API through `unsafeWindow.BalaclavaTooltip`.
 
 ### Torn API Key Tiers

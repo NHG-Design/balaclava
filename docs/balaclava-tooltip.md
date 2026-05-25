@@ -9,7 +9,7 @@ unsafeWindow.BalaclavaTooltip
 It is intended to be used by external userscripts via `@require`. The lowest-cost hosting option is GitHub raw content, because it does not depend on this SvelteKit app or Cloudflare Pages bandwidth.
 
 ```javascript
-// @require https://raw.githubusercontent.com/robcsaszar/balaclava/v1.0.0/dist/balaclava-tooltip.user.js
+// @require https://raw.githubusercontent.com/robcsaszar/balaclava/v1.0.1/dist/balaclava-tooltip.user.js
 // @grant   unsafeWindow
 ```
 
@@ -20,16 +20,14 @@ Prefer a version tag or release branch instead of `main` for user-facing scripts
 ```javascript
 const tooltip = unsafeWindow.BalaclavaTooltip;
 
-tooltip.show(element, 'Tooltip text', { position: 'top' });
+tooltip.show(element, 'Tooltip text', { position: 'top', theme: 'dark' });
 tooltip.hide();
 
-const detach = tooltip.attach(element, 'Tooltip text', { position: 'bottom' });
+const detach = tooltip.attach(element, 'Tooltip text', { position: 'bottom', theme: 'light' });
 detach();
 
 tooltip.configure({
-  bgColor: '#111318',
-  textColor: '#f7f3e8',
-  borderColor: 'rgba(247, 243, 232, 0.18)',
+  theme: 'system',
   borderRadius: '4px',
   padding: '8px 12px',
   maxWidth: '250px',
@@ -41,9 +39,32 @@ tooltip.configure({
 });
 
 tooltip.rescan();
+
+tooltip.destroy(); // Removes listeners, observers, and the Shadow DOM host
 ```
 
 `show()` accepts string content or a DOM node. String content is rendered with `textContent`.
+
+## Themes
+
+Supported themes are `system`, `dark`, `light`, and `custom`. The default is `system`, which follows the browser's `prefers-color-scheme` setting. Global configuration applies to new tooltips unless a specific tooltip overrides it.
+
+```javascript
+tooltip.configure({ theme: 'dark' });
+tooltip.show(element, 'Light one-off', { theme: 'light' });
+tooltip.attach(element, 'System-aware', { theme: 'system' });
+```
+
+`custom` uses the legacy color configuration keys. Passing any custom color without an explicit `theme` switches the global theme to `custom`.
+
+```javascript
+tooltip.configure({
+  bgColor: 'oklch(18% 0.012 260)',
+  textColor: 'oklch(96% 0.012 95)',
+  borderColor: 'oklch(96% 0.012 95 / 0.16)',
+  shadowColor: 'oklch(12% 0.01 260 / 0.36)'
+});
+```
 
 ## Declarative Tooltips
 
@@ -54,12 +75,14 @@ tooltip.rescan();
   data-balaclava-tooltip="Settings"
   data-balaclava-tooltip-position="left"
   data-balaclava-tooltip-arrow="false"
+  data-balaclava-tooltip-theme="light"
 >
   Settings
 </button>
 ```
 
 Supported positions are `top`, `bottom`, `left`, and `right`. Invalid positions fall back to `bottom`.
+Supported declarative themes are `system`, `dark`, `light`, and `custom`. Invalid themes use the current global theme.
 
 ## Behavior
 
@@ -70,3 +93,4 @@ Supported positions are `top`, `bottom`, `left`, and `right`. Invalid positions 
 - Tracks target movement with `requestAnimationFrame`.
 - Hides when the target leaves the viewport or is removed from the DOM.
 - Adds and removes `aria-describedby` on the target.
+- Uses `AbortController` for event listener teardown.
