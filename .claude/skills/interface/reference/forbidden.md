@@ -84,6 +84,11 @@ These are the highest-signal AI design signatures. Each one fails the slop test 
 **Restated headings** (body copy that repeats what the heading just said)
 → Every word earns its place. The body continues; it doesn't restate.
 
+## Z-Index
+
+**Arbitrary z-index values on non-systemic elements** (`z-index: 50`, `z-index: 10` scattered throughout)
+→ Use z-index only for systemic layer contexts: sticky navigation, modals, overlays, toasts. Define a small named scale (e.g., `--z-nav: 100; --z-modal: 200; --z-toast: 300`) and use nothing outside it. Arbitrary z-values create invisible stacking conflicts that only appear in edge cases.
+
 ## Emojis in UI Code
 
 **Emojis in markup, alt text, or text content**

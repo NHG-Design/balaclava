@@ -52,7 +52,7 @@ First tooltip waits (prevents accidental activation). Once one is open, adjacent
 - Label above input, always. Never placeholder-as-label.
 - Helper text optional but present in markup.
 - Error text below input, inline (never modal or toast).
-- Use `gap-2` between input blocks.
+- Use `gap: 0.5rem` between input blocks.
 - Error state: red border + error text, not just one or the other.
 
 ## Interaction State Completeness
@@ -64,7 +64,7 @@ LLMs generate "happy path" states by default. Always implement the full cycle:
 | **Loading** | Skeleton loaders matching layout geometry — not generic spinners |
 | **Empty** | Composed empty state showing how to populate, not just "No items" |
 | **Error** | Clear inline error with recovery action — never just a red message |
-| **Success** | Tactile feedback: `-translate-y-[1px]` or `scale(0.98)` on confirm |
+| **Success** | Tactile feedback: `translateY(-1px)` or `scale(0.98)` on confirm |
 
 Skeleton loaders must match the actual layout dimensions — a skeleton for a 3-column list should have 3 placeholder columns.
 

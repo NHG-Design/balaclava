@@ -71,7 +71,7 @@ Springs feel more natural because they simulate real physics — no fixed durati
 - Drag interactions with momentum
 - Elements that should feel "alive" (Dynamic Island-style)
 - Gestures that can be interrupted mid-animation
-- Decorative mouse-tracking
+- Decorative mouse-tracking — direct position-to-value mapping feels artificial because it has no momentum; spring interpolation is what makes mouse-tracking feel physical
 
 **Configuration:**
 
@@ -160,6 +160,10 @@ Press: slow and deliberate. Release: always snappy.
 .item:nth-child(2) { animation-delay: 50ms; }
 .item:nth-child(3) { animation-delay: 100ms; }
 ```
+
+### List item enter/exit: opacity + height
+
+When animating list items in and out, animating `opacity` alone looks wrong (item disappears but space remains) and `height` alone is janky (layout triggers). The correct combination is `opacity` + `max-height` (or `height` via JS). There is no formula — tune both values together. A good starting point: `opacity 200ms ease-out, max-height 250ms ease-out`.
 
 ### Blur for crossfade masking
 
