@@ -1,5 +1,7 @@
 # Animation Reference
 
+**Concentrate impact.** One well-orchestrated page load with staggered reveals creates more delight than a dozen scattered micro-interactions. Plan the motion budget before writing code: pick 1–2 high-impact moments (page entry, primary action confirmation), then be conservative everywhere else.
+
 ## Decision Framework
 
 Answer these in order before writing any animation code.
