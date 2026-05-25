@@ -4,7 +4,7 @@
 // @version     0.1.0
 // @description Arson profit-per-nerve calculator and strategy guide for Torn's Crimes page
 // @icon        https://www.google.com/s2/favicons?sz=64&domain=torn.com
-// @author      Balaclava
+// @author      Yukio [906148]
 // @match       https://www.torn.com/page.php?sid=crimes*
 // @grant       GM_setValue
 // @grant       GM_getValue
@@ -25,7 +25,6 @@
     // Solid fuels
     MAGNESIUM: "magnesium",
     THERMITE: "thermite",
-    SALTPETRE: "saltpetre",
     POTASSIUM_NITRATE: "potassium_nitrate",
     // Gaseous fuels
     OXYGEN: "oxygen",
@@ -72,7 +71,6 @@
     // Solid fuels
     [RESOURCE.MAGNESIUM]: { id: RESOURCE.MAGNESIUM, name: "Magnesium Shavings", kind: "fuel", category: "solid", isTool: false, defaultPrice: 5e3, tornId: 1462 },
     [RESOURCE.THERMITE]: { id: RESOURCE.THERMITE, name: "Thermite", kind: "fuel", category: "solid", isTool: false, defaultPrice: 8e4, tornId: 1461 },
-    [RESOURCE.SALTPETRE]: { id: RESOURCE.SALTPETRE, name: "Saltpetre", kind: "fuel", category: "solid", isTool: false, defaultPrice: 2e3 },
     [RESOURCE.POTASSIUM_NITRATE]: { id: RESOURCE.POTASSIUM_NITRATE, name: "Potassium Nitrate", kind: "fuel", category: "solid", isTool: false, defaultPrice: 5e3, tornId: 1264 },
     // Gaseous fuels
     [RESOURCE.OXYGEN]: { id: RESOURCE.OXYGEN, name: "Oxygen Tank", kind: "fuel", category: "gaseous", isTool: false, defaultPrice: 3e3, tornId: 1219 },
@@ -1119,7 +1117,7 @@
     },
     {
       title: "Solid fuels",
-      ids: ["magnesium", "thermite", "saltpetre", "potassium_nitrate"]
+      ids: ["magnesium", "thermite", "potassium_nitrate"]
     },
     {
       title: "Gaseous fuels",

@@ -271,7 +271,7 @@ const PRICE_GROUPS: Array<{ title: string; ids: ResourceId[] }> = [
     },
     {
         title: 'Solid fuels',
-        ids: ['magnesium', 'thermite', 'saltpetre', 'potassium_nitrate'],
+        ids: ['magnesium', 'thermite', 'potassium_nitrate'],
     },
     {
         title: 'Gaseous fuels',

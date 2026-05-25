@@ -27,7 +27,6 @@ export const RESOURCE = {
     // Solid fuels
     MAGNESIUM:         'magnesium',
     THERMITE:          'thermite',
-    SALTPETRE:         'saltpetre',
     POTASSIUM_NITRATE: 'potassium_nitrate',
     // Gaseous fuels
     OXYGEN:            'oxygen',
@@ -77,7 +76,6 @@ export const CATALOG: Readonly<Record<ResourceId, Resource>> = {
     // Solid fuels
     [RESOURCE.MAGNESIUM]:         { id: RESOURCE.MAGNESIUM,         name: 'Magnesium Shavings', kind: 'fuel',     category: 'solid',    isTool: false, defaultPrice: 5_000,   tornId: 1462  },
     [RESOURCE.THERMITE]:          { id: RESOURCE.THERMITE,          name: 'Thermite',           kind: 'fuel',     category: 'solid',    isTool: false, defaultPrice: 80_000,  tornId: 1461  },
-    [RESOURCE.SALTPETRE]:         { id: RESOURCE.SALTPETRE,         name: 'Saltpetre',          kind: 'fuel',     category: 'solid',    isTool: false, defaultPrice: 2_000                  },
     [RESOURCE.POTASSIUM_NITRATE]: { id: RESOURCE.POTASSIUM_NITRATE, name: 'Potassium Nitrate',  kind: 'fuel',     category: 'solid',    isTool: false, defaultPrice: 5_000,   tornId: 1264  },
     // Gaseous fuels
     [RESOURCE.OXYGEN]:            { id: RESOURCE.OXYGEN,            name: 'Oxygen Tank',        kind: 'fuel',     category: 'gaseous',  isTool: false, defaultPrice: 3_000,   tornId: 1219  },
