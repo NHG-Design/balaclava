@@ -9,7 +9,7 @@
  *   5. Print a single JSON blob with everything the agent needs
  *
  * After this, the agent's only remaining steps are:
- *   - Open the project's live dev/preview URL in the browser (optional, if browser automation exists)—not `serverPort`; that port is the Impeccable helper for /live.js and /poll
+ *   - Open the project's live dev/preview URL in the browser (optional, if browser automation exists)—not `serverPort`; that port is the interface helper for /live.js and /poll
  *   - Enter the poll loop: `node live-poll.mjs`
  *
  * Usage:
@@ -80,7 +80,7 @@ The agent should then:
     process.exit(1);
   }
 
-  // 4. Load PRODUCT.md + DESIGN.md context (auto-migrates legacy .impeccable.md)
+  // 4. Load PRODUCT.md + DESIGN.md context (auto-migrates legacy context file)
   const ctx = loadContext(process.cwd());
 
   // 5. Compute drift-heal: compare resolved inject targets against the

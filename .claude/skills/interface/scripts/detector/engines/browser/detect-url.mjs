@@ -168,8 +168,8 @@ async function detectUrl(url, options = {}) {
       ruleId: 'configure-pure-detect',
       target: url,
     }, () => page.evaluate(() => {
-      window.__IMPECCABLE_CONFIG__ = {
-        ...(window.__IMPECCABLE_CONFIG__ || {}),
+      window.__INTERFACE_CONFIG__ = {
+        ...(window.__INTERFACE_CONFIG__ || {}),
         autoScan: false,
       };
     }));

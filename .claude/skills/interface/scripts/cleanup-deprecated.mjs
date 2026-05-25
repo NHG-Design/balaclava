@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Cleans up deprecated Impeccable skill files, symlinks, and
+ * Cleans up deprecated interface skill files, symlinks, and
  * skills-lock.json entries left over from previous versions.
  *
  * Safe to run repeatedly -- it is a no-op when nothing needs cleaning.
@@ -13,7 +13,7 @@
  *      .cursor/skills, .agents/skills, etc.).
  *   2. For each deprecated skill name (with and without i- prefix),
  *      checks if the directory exists and its SKILL.md mentions
- *      "impeccable" (to avoid deleting unrelated user skills).
+ *      "interface" (to avoid deleting unrelated user skills).
  *   3. Deletes confirmed matches (files, directories, or symlinks).
  *   4. Removes the corresponding entries from skills-lock.json.
  */
@@ -24,8 +24,8 @@ import { join, resolve } from 'node:path';
 // Skills that were renamed, merged, or folded in v2.0, v2.1, and v3.0.
 const DEPRECATED_NAMES = [
   // v2.0 renames
-  'frontend-design',    // renamed to impeccable
-  'teach-impeccable',   // folded into reference/teach.md
+  'frontend-design',    // formerly standalone
+  'teach-interface',   // folded into reference/teach.md
   // v2.1 merges
   'arrange',            // renamed to layout
   'normalize',          // merged into polish
@@ -58,7 +58,7 @@ const HARNESS_DIRS = [
 ];
 
 // Per-skill fingerprints for SKILL.md bodies that never mentioned
-// "impeccable" in their v2.x source. Used as a last-resort match
+// "interface" in their v2.x source. Used as a last-resort match
 // when no skills-lock.json exists and the word heuristic fails.
 // The strings are lifted verbatim from the v2.x frontmatter
 // descriptions, so collisions with hand-written user skills are
@@ -104,16 +104,16 @@ export function loadLock(projectRoot) {
 }
 
 /**
- * Check whether a skill directory belongs to Impeccable. Three layered
+ * Check whether a skill directory belongs to interface. Three layered
  * signals, in order of reliability:
- *   1. Lock source equals "pbakaus/impeccable" (authoritative).
- *   2. SKILL.md body contains the word "impeccable".
+ *   1. Lock source equals "robcsaszar/balaclava" (authoritative).
+ *   2. SKILL.md body contains the word "interface".
  *   3. SKILL.md body contains a per-skill fingerprint (for harden and
  *      optimize, whose v2.x SKILL.md never mentioned the pack name).
  */
-export function isImpeccableSkill(skillDir, { skillName, lock } = {}) {
+export function isInterfaceSkill(skillDir, { skillName, lock } = {}) {
   // 1. Authoritative: the lock file claims this skill is ours.
-  if (skillName && lock?.skills?.[skillName]?.source === 'pbakaus/impeccable') {
+  if (skillName && lock?.skills?.[skillName]?.source === 'robcsaszar/balaclava') {
     return true;
   }
   const skillMd = join(skillDir, 'SKILL.md');
@@ -125,7 +125,7 @@ export function isImpeccableSkill(skillDir, { skillName, lock } = {}) {
     return false;
   }
   // 2. Word-level content heuristic.
-  if (/impeccable/i.test(content)) return true;
+  if (/interface/i.test(content)) return true;
   // 3. Per-skill fingerprint for old skills that never mentioned the pack.
   //    Strip the i- prefix so both `harden` and `i-harden` resolve to the
   //    same fingerprint entry.
@@ -166,7 +166,7 @@ export function findSkillsDirs(projectRoot) {
 /**
  * Remove deprecated skill directories/symlinks from all harness dirs.
  * Reads skills-lock.json so the authoritative "source" field can
- * drive deletion even when SKILL.md never mentions impeccable.
+ * drive deletion even when SKILL.md never mentions interface.
  * Returns an array of paths that were deleted.
  */
 export function removeDeprecatedSkills(projectRoot, lock) {
@@ -193,7 +193,7 @@ export function removeDeprecatedSkills(projectRoot, lock) {
         // dangling symlinks to deprecated names as safe to remove.
         const targetAlive = existsSync(skillPath);
         const isMatch = targetAlive
-          ? isImpeccableSkill(skillPath, { skillName: name, lock })
+          ? isInterfaceSkill(skillPath, { skillName: name, lock })
           : true;
         if (isMatch) {
           unlinkSync(skillPath);
@@ -202,8 +202,8 @@ export function removeDeprecatedSkills(projectRoot, lock) {
         continue;
       }
 
-      // Regular directory -- verify it belongs to impeccable
-      if (isImpeccableSkill(skillPath, { skillName: name, lock })) {
+      // Regular directory -- verify it belongs to interface
+      if (isInterfaceSkill(skillPath, { skillName: name, lock })) {
         rmSync(skillPath, { recursive: true, force: true });
         deleted.push(skillPath);
       }
@@ -215,7 +215,7 @@ export function removeDeprecatedSkills(projectRoot, lock) {
 
 /**
  * Remove deprecated entries from skills-lock.json.
- * Only removes entries whose source is "pbakaus/impeccable".
+ * Only removes entries whose source is "robcsaszar/balaclava".
  * Returns the list of removed skill names.
  */
 export function cleanSkillsLock(projectRoot) {
@@ -237,8 +237,8 @@ export function cleanSkillsLock(projectRoot) {
   for (const name of targets) {
     const entry = lock.skills[name];
     if (!entry) continue;
-    // Only remove if it belongs to impeccable
-    if (entry.source === 'pbakaus/impeccable') {
+    // Only remove if it belongs to interface
+    if (entry.source === 'robcsaszar/balaclava') {
       delete lock.skills[name];
       removed.push(name);
     }
@@ -270,7 +270,7 @@ export function cleanup(projectRoot) {
 if (process.argv[1] && resolve(process.argv[1]) === resolve(new URL(import.meta.url).pathname)) {
   const result = cleanup();
   if (result.deletedPaths.length === 0 && result.removedLockEntries.length === 0) {
-    console.log('No deprecated Impeccable skills found. Nothing to clean up.');
+    console.log('No deprecated interface skills found. Nothing to clean up.');
   } else {
     if (result.deletedPaths.length > 0) {
       console.log(`Removed ${result.deletedPaths.length} deprecated skill(s):`);

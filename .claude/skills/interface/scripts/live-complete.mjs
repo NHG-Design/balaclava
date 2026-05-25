@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Canonical durable completion acknowledgement for Impeccable live sessions.
+ * Canonical durable completion acknowledgement for interface live sessions.
  */
 
 import { createLiveSessionStore } from './live-session-store.mjs';

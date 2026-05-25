@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 /**
- * Anti-Pattern Detector for Impeccable
+ * Anti-Pattern Detector for Interface
  * Copyright (c) 2026 Paul Bakaus
  * SPDX-License-Identifier: Apache-2.0
  *

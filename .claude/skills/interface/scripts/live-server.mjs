@@ -188,7 +188,7 @@ function hasProjectContext() {
   // PRODUCT.md carries brand voice / anti-references — that's what determines
   // whether variants are brand-aware. DESIGN.md (visual tokens) is a separate
   // concern, surfaced by the design panel's own empty state. Legacy
-  // .impeccable.md is auto-migrated to PRODUCT.md by load-context.mjs.
+  // Context file is auto-migrated to PRODUCT.md by load-context.mjs.
   try {
     fs.accessSync(path.join(CONTEXT_DIR, 'PRODUCT.md'), fs.constants.R_OK);
     return true;
@@ -290,8 +290,8 @@ function createRequestHandler({ detectScript, sessionPath, livePath }) {
         return;
       }
       const body =
-        `window.__IMPECCABLE_TOKEN__ = '${state.token}';\n` +
-        `window.__IMPECCABLE_PORT__ = ${state.port};\n` +
+        `window.__INTERFACE_TOKEN__ = '${state.token}';\n` +
+        `window.__INTERFACE_PORT__ = ${state.port};\n` +
         sessionScript + '\n' +
         liveScript;
       res.writeHead(200, {
@@ -828,7 +828,7 @@ httpServer = http.createServer(createRequestHandler({ detectScript, sessionPath,
 httpServer.listen(state.port, '127.0.0.1', () => {
   writeLiveServerInfo(process.cwd(), { pid: process.pid, port: state.port, token: state.token });
   const url = `http://localhost:${state.port}`;
-  console.log(`\nImpeccable live server running on ${url}`);
+  console.log(`\nInterface live server running on ${url}`);
   console.log(`Token: ${state.token}\n`);
   console.log(`Inject: <script src="${url}/live.js"><\/script>`);
   console.log(`Stop:   node ${path.basename(fileURLToPath(import.meta.url))} stop`);

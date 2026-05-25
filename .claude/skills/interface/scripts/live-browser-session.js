@@ -1,9 +1,9 @@
 /**
- * Browser-side durable session helpers for Impeccable live mode.
+ * Browser-side durable session helpers for interface live mode.
  *
  * Kept separate from live-browser.js so recovery state can be tested without
  * booting the full overlay UI. Served before live-browser.js and attached to
- * window.__IMPECCABLE_LIVE_SESSION__.
+ * window.__INTERFACE_LIVE_SESSION__.
  */
 (function (root) {
   'use strict';
@@ -119,5 +119,5 @@
     };
   }
 
-  root.__IMPECCABLE_LIVE_SESSION__ = { createLiveBrowserSessionState };
+  root.__INTERFACE_LIVE_SESSION__ = { createLiveBrowserSessionState };
 })(typeof window !== 'undefined' ? window : globalThis);

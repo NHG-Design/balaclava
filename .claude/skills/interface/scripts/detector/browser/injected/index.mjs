@@ -101,7 +101,7 @@ if (IS_BROWSER) {
   function showSpotlight(target) {
     if (!target || !target.getBoundingClientRect) return;
     // Respect the spotlightBlur setting: if disabled, don't show the backdrop
-    if (window.__IMPECCABLE_CONFIG__?.spotlightBlur === false) {
+    if (window.__INTERFACE_CONFIG__?.spotlightBlur === false) {
       spotlightTarget = target;
       return;
     }
@@ -1247,7 +1247,7 @@ if (IS_BROWSER) {
 
   function collectBrowserFindings() {
     const groupMap = new Map();
-    const _disabled = EXTENSION_MODE ? (window.__IMPECCABLE_CONFIG__?.disabledRules || []) : [];
+    const _disabled = EXTENSION_MODE ? (window.__INTERFACE_CONFIG__?.disabledRules || []) : [];
     const _ruleOk = (id) => !_disabled.length || !_disabled.includes(id);
 
     for (const el of document.querySelectorAll('*')) {
@@ -1256,7 +1256,7 @@ if (IS_BROWSER) {
       // Skip browser extension elements (Claude, etc.)
       const elId = el.id || '';
       if (elId.startsWith('claude-') || elId.startsWith('cic-')) continue;
-      // Skip the impeccable live-mode overlay (highlight, tooltip, bar, picker, toast).
+      // Skip the interface live-mode overlay (highlight, tooltip, bar, picker, toast).
       // These are inspector chrome, not part of the user's design.
       if (el.closest('[id^="interface-live-"]')) continue;
       // Skip html/body -- page-level findings go in the banner, not a full-page overlay
@@ -1329,11 +1329,11 @@ if (IS_BROWSER) {
   }
 
   function shouldRunVisualContrast(options = {}) {
-    return options.visualContrast === true || window.__IMPECCABLE_CONFIG__?.visualContrast === true;
+    return options.visualContrast === true || window.__INTERFACE_CONFIG__?.visualContrast === true;
   }
 
   function visualContrastOptions(options = {}) {
-    const config = window.__IMPECCABLE_CONFIG__ || {};
+    const config = window.__INTERFACE_CONFIG__ || {};
     const scrollOffscreen = typeof options.scrollOffscreen === 'boolean'
       ? options.scrollOffscreen
       : typeof options.visualContrastScrollOffscreen === 'boolean'
@@ -1404,7 +1404,7 @@ if (IS_BROWSER) {
     if (!EXTENSION_MODE) return;
     const allFindings = browserFindingsFromMap(groupMap);
     window.postMessage({
-      source: 'impeccable-results',
+      source: 'interface-results',
       findings: serializeFindings(allFindings),
       count: allFindings.length,
     }, '*');
@@ -1413,7 +1413,7 @@ if (IS_BROWSER) {
   function postExtensionError(err) {
     if (!EXTENSION_MODE) return;
     window.postMessage({
-      source: 'impeccable-error',
+      source: 'interface-error',
       message: err?.message || String(err),
     }, '*');
   }
@@ -1545,7 +1545,7 @@ if (IS_BROWSER) {
     // In extension mode, post serialized results for the DevTools panel
     if (EXTENSION_MODE) {
       window.postMessage({
-        source: 'impeccable-results',
+        source: 'interface-results',
         findings: serializeFindings(allFindings),
         count: allFindings.length,
       }, '*');
@@ -1606,9 +1606,9 @@ if (IS_BROWSER) {
   if (EXTENSION_MODE) {
     // Extension mode: listen for commands, don't auto-scan
     window.addEventListener('message', (e) => {
-      if (e.source !== window || !e.data || e.data.source !== 'impeccable-command') return;
+      if (e.source !== window || !e.data || e.data.source !== 'interface-command') return;
       if (e.data.action === 'scan') {
-        if (e.data.config) window.__IMPECCABLE_CONFIG__ = e.data.config;
+        if (e.data.config) window.__INTERFACE_CONFIG__ = e.data.config;
         try {
           scan(e.data.config || {});
         } catch (err) {
@@ -1660,9 +1660,9 @@ if (IS_BROWSER) {
         }
       }
     });
-    window.postMessage({ source: 'impeccable-ready' }, '*');
+    window.postMessage({ source: 'interface-ready' }, '*');
   } else {
-    if (window.__IMPECCABLE_CONFIG__?.autoScan !== false) {
+    if (window.__INTERFACE_CONFIG__?.autoScan !== false) {
       const runAutoScan = () => {
         try {
           scan();

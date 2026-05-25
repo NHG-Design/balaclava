@@ -1,8 +1,8 @@
 /**
- * Impeccable Live Variant Mode — Browser Script
+ * Interface Live Variant Mode — Browser Script
  *
  * Injected into the user's page via <script src="http://localhost:PORT/live.js">.
- * The server prepends window.__IMPECCABLE_TOKEN__ and window.__IMPECCABLE_PORT__
+ * The server prepends window.__INTERFACE_TOKEN__ and window.__INTERFACE_PORT__
  * before this code.
  *
  * UI: a single floating bar that morphs between three states —
@@ -16,13 +16,13 @@
   // Guard against double-init. Bun's HTML loader may process the <script> tag
   // and create a bundled copy alongside the external load, or HMR may re-execute.
   // Check BEFORE reading token/port to catch all cases.
-  if (window.__IMPECCABLE_LIVE_INIT__) return;
-  window.__IMPECCABLE_LIVE_INIT__ = true;
+  if (window.__INTERFACE_LIVE_INIT__) return;
+  window.__INTERFACE_LIVE_INIT__ = true;
 
-  const TOKEN = window.__IMPECCABLE_TOKEN__;
-  const PORT = window.__IMPECCABLE_PORT__;
+  const TOKEN = window.__INTERFACE_TOKEN__;
+  const PORT = window.__INTERFACE_PORT__;
   if (!TOKEN || !PORT) {
-    window.__IMPECCABLE_LIVE_INIT__ = false; // reset so the real load can init
+    window.__INTERFACE_LIVE_INIT__ = false; // reset so the real load can init
     return;
   }
 
@@ -50,14 +50,14 @@
   const Z = { highlight: 100001, bar: 100005, picker: 100007, toast: 100010 };
   const EASE = 'cubic-bezier(0.22, 1, 0.36, 1)'; // ease-out-quint
   const PREFIX = 'interface-live';
-  const sessionState = window.__IMPECCABLE_LIVE_SESSION__?.createLiveBrowserSessionState({
+  const sessionState = window.__INTERFACE_LIVE_SESSION__?.createLiveBrowserSessionState({
     prefix: PREFIX,
     storage: localStorage,
     idFactory: () => crypto.randomUUID().replace(/-/g, '').slice(0, 8),
   });
   if (!sessionState) {
     console.error('[interface] live-browser-session.js was not loaded. Live mode cannot start safely.');
-    window.__IMPECCABLE_LIVE_INIT__ = false;
+    window.__INTERFACE_LIVE_INIT__ = false;
     return;
   }
   const HIGHLIGHT_TRANSITION =
@@ -3352,7 +3352,7 @@ void main() {
     };
   }
 
-  // Impeccable logo mark — matches the site-header SVG (rounded square + "/").
+  // interface logo mark — matches the site-header SVG (rounded square + "/").
   function brandMarkSvg(fill, ink, size = 18) {
     return `<svg width="${size}" height="${size}" viewBox="0 0 32 32" aria-hidden="true">
       <rect width="32" height="32" rx="7" fill="${fill}"/>
@@ -3412,7 +3412,7 @@ void main() {
       fontSize: '18px', lineHeight: '1',
     });
     brand.textContent = '/';
-    brand.title = 'Impeccable';
+    brand.title = 'Interface';
     globalBarEl.appendChild(brand);
 
     // Inner wrapper: holds the toggles with normal bar padding.
@@ -3615,12 +3615,12 @@ void main() {
         detectPendingScan = true;
         loadDetectScript();
       } else if (detectReady) {
-        window.postMessage({ source: 'impeccable-command', action: 'scan' }, '*');
+        window.postMessage({ source: 'interface-command', action: 'scan' }, '*');
       } else {
         detectPendingScan = true;
       }
     } else {
-      window.postMessage({ source: 'impeccable-command', action: 'remove' }, '*');
+      window.postMessage({ source: 'interface-command', action: 'remove' }, '*');
       detectCount = 0;
       updateGlobalBarState();
     }
@@ -3660,11 +3660,11 @@ void main() {
       detectReady = true;
       if (detectPendingScan && detectActive) {
         detectPendingScan = false;
-        window.postMessage({ source: 'impeccable-command', action: 'scan' }, '*');
+        window.postMessage({ source: 'interface-command', action: 'scan' }, '*');
       }
     }
     // Scan results arrived
-    if (e.data.source === 'impeccable-results') {
+    if (e.data.source === 'interface-results') {
       detectCount = e.data.count || 0;
       updateGlobalBarState();
     }
@@ -3689,9 +3689,9 @@ void main() {
     document.removeEventListener('keydown', handleKeyDown, true);
     window.removeEventListener('message', onDetectMessage);
     // Remove detection overlays
-    window.postMessage({ source: 'impeccable-command', action: 'remove' }, '*');
+    window.postMessage({ source: 'interface-command', action: 'remove' }, '*');
     state = 'IDLE';
-    window.__IMPECCABLE_LIVE_INIT__ = false;
+    window.__INTERFACE_LIVE_INIT__ = false;
     console.log('[interface] Live mode exited.');
   }
 
@@ -3779,8 +3779,8 @@ void main() {
     }
   }
 
-  // Neutral panel palette — deliberately NOT Impeccable-branded. The panel is
-  // a viewer of the project's design system, not an Impeccable surface.
+  // Neutral panel palette — deliberately NOT interface-branded. The panel is
+  // a viewer of the project's design system, not an interface surface.
   const DP = {
     canvas:   'oklch(94% 0 0)',            // panel background
     tile:     'oklch(98.5% 0 0)',          // card-on-canvas

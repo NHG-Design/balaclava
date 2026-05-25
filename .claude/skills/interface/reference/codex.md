@@ -82,7 +82,7 @@ Raster ingredients identified in Step E need clean production assets. Use the bu
 Spawn it as a scoped subagent. If you do not have explicit permission to use agents, stop and ask:
 
 ```text
-Asset production will work better as a scoped subagent job. Should I spawn the Impeccable asset producer subagent for this step?
+Asset production will work better as a scoped subagent job. Should I spawn the interface asset producer subagent for this step?
 ```
 
 Pass to the agent:

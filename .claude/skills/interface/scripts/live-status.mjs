@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Print durable recovery status for Impeccable live sessions.
+ * Print durable recovery status for interface live sessions.
  */
 
 import { createLiveSessionStore } from './live-session-store.mjs';

@@ -245,7 +245,7 @@ function extractNamedRules(lines) {
   const rules = [];
   const seen = new Set();
 
-  // Style A (Impeccable): "**The X Rule.** body body body" — can span lines.
+  // Style A (interface): "**The X Rule.** body body body" — can span lines.
   const joined = lines.join('\n');
   const inlineStart = /\*\*(The [^*]+?Rule)\.\*\*/g;
   const inlineMatches = [];
@@ -391,7 +391,7 @@ function extractColors(section) {
 function parseColorBullet(bullet) {
   const text = bullet.trim();
 
-  // Case 1 (Impeccable): **Name** (value-with-maybe-nested-parens): description
+  // Case 1 (interface): **Name** (value-with-maybe-nested-parens): description
   const bold = text.match(/^\*\*(.+?)\*\*\s*(.*)$/);
   if (bold && bold[2].startsWith('(')) {
     const value = extractParenGroup(bold[2]);

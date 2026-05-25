@@ -15,7 +15,7 @@ Run the shared loader first so you know what already exists:
 node .claude/skills/interface/scripts/load-context.mjs
 ```
 
-The output tells you whether PRODUCT.md and/or DESIGN.md already exist. If `migrated: true`, legacy `.impeccable.md` was auto-renamed to `PRODUCT.md`. Mention this once to the user.
+The output tells you whether PRODUCT.md and/or DESIGN.md already exist. If `migrated: true`, a legacy context file was auto-renamed to `PRODUCT.md`. Mention this once to the user.
 
 Decision tree:
 - **Neither file exists (empty project or no context yet)**: do Steps 2-4 (write PRODUCT.md), then decide on DESIGN.md based on whether there's code to analyze.
@@ -128,7 +128,7 @@ product
 
 Register is either `brand` or `product` as a bare value. No prose, no commentary.
 
-Write to `PROJECT_ROOT/PRODUCT.md`. If `.impeccable.md` existed, the loader already renamed it; merge into that content rather than starting from scratch.
+Write to `PROJECT_ROOT/PRODUCT.md`. If a legacy context file existed at the root, the loader already renamed it; merge into that content rather than starting from scratch.
 
 ## Step 5: Decide on DESIGN.md
 

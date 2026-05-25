@@ -12,7 +12,7 @@
  *     hasDesign: boolean,         // DESIGN.md found
  *     design: string | null,      // DESIGN.md contents
  *     designPath: string | null,
- *     migrated: boolean,          // true if we auto-renamed .impeccable.md -> PRODUCT.md
+ *     migrated: boolean,          // true if we auto-renamed .interface.md -> PRODUCT.md
  *     contextDir: string,         // absolute path of the directory the files were found in
  *   }
  *
@@ -21,12 +21,12 @@
  * lowercase variants are also matched so users don't get punished for case.
  *
  * Lookup directory resolution (first match wins):
- *   1. process.env.IMPECCABLE_CONTEXT_DIR (absolute or relative to cwd)
- *   2. cwd, if PRODUCT.md / DESIGN.md / .impeccable.md is there (back-compat)
+ *   1. process.env.INTERFACE_CONTEXT_DIR (absolute or relative to cwd)
+ *   2. cwd, if PRODUCT.md / DESIGN.md / .interface.md is there (back-compat)
  *   3. Auto-fallback subdirectories of cwd: .agents/context/, then docs/
  *   4. cwd as a default "no context found" location
  *
- * Legacy `.impeccable.md` -> PRODUCT.md migration only fires at cwd root;
+ * Legacy context file -> PRODUCT.md migration only fires at cwd root;
  * fallback directories are read-only as far as auto-rename is concerned.
  */
 
@@ -35,7 +35,7 @@ import path from 'node:path';
 
 const PRODUCT_NAMES = ['PRODUCT.md', 'Product.md', 'product.md'];
 const DESIGN_NAMES = ['DESIGN.md', 'Design.md', 'design.md'];
-const LEGACY_NAMES = ['.impeccable.md'];
+const LEGACY_NAMES = []; // no legacy filenames
 const FALLBACK_DIRS = ['.agents/context', 'docs'];
 
 /**
@@ -45,7 +45,7 @@ const FALLBACK_DIRS = ['.agents/context', 'docs'];
  */
 export function resolveContextDir(cwd = process.cwd()) {
   // 1. Explicit override
-  const envDir = process.env.IMPECCABLE_CONTEXT_DIR;
+  const envDir = process.env.INTERFACE_CONTEXT_DIR;
   if (envDir && envDir.trim()) {
     const trimmed = envDir.trim();
     return path.isAbsolute(trimmed) ? trimmed : path.resolve(cwd, trimmed);
@@ -58,7 +58,7 @@ export function resolveContextDir(cwd = process.cwd()) {
   }
 
   // 3. Auto-fallback subdirs. Match if PRODUCT.md or DESIGN.md is present;
-  //    legacy `.impeccable.md` does not pull the lookup into a fallback dir.
+  //    legacy context file does not pull the lookup into a fallback dir.
   for (const rel of FALLBACK_DIRS) {
     const candidate = path.resolve(cwd, rel);
     if (firstExisting(candidate, [...PRODUCT_NAMES, ...DESIGN_NAMES])) {
@@ -78,7 +78,7 @@ export function loadContext(cwd = process.cwd()) {
   // 1. Look for PRODUCT.md (case-insensitive) in the resolved dir
   let productPath = firstExisting(contextDir, PRODUCT_NAMES);
 
-  // 2. Legacy: if no PRODUCT.md but .impeccable.md exists at cwd root, rename
+  // 2. Legacy: if no PRODUCT.md but .interface.md exists at cwd root, rename
   //    it in place. We only migrate at the root — fallback dirs are read-only
   //    so we don't surprise users by mutating files under docs/ or .agents/.
   if (!productPath && contextDir === cwd) {

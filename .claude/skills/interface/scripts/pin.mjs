@@ -58,7 +58,7 @@ function findProjectRoot(startDir = process.cwd()) {
 }
 
 /**
- * Find harness skill directories that have an impeccable skill installed.
+ * Find harness skill directories that have an interface skill installed.
  */
 function findHarnessDirs(projectRoot) {
   const dirs = [];
