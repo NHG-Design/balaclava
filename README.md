@@ -29,7 +29,7 @@ unsafeWindow.BalaclavaTooltip
 Use the pinned release URL in consumer userscripts:
 
 ```javascript
-// @require https://raw.githubusercontent.com/robcsaszar/balaclava/v1.0.1/dist/balaclava-tooltip.user.js
+// @require https://raw.githubusercontent.com/nhg-design/balaclava/v1.0.1/dist/balaclava-tooltip.user.js
 // @grant   unsafeWindow
 ```
 

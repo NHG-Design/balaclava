@@ -97,7 +97,7 @@ A universal, self-contained tooltip system delivered as a Tampermonkey userscrip
 // @description Uses Balaclava Tooltip
 // @author      Balaclava
 // @match       https://example.com/*
-// @require     https://raw.githubusercontent.com/robcsaszar/balaclava/v1.0.1/dist/balaclava-tooltip.user.js
+// @require     https://raw.githubusercontent.com/nhg-design/balaclava/v1.0.1/dist/balaclava-tooltip.user.js
 // @grant       unsafeWindow
 // @run-at      document-idle
 // ==/UserScript==
