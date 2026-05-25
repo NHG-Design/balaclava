@@ -20,7 +20,8 @@ There is no dedicated test suite yet. A change is considered verified when both 
 
 ### Balaclava Tooltip
 
-`dist/balaclava-tooltip.user.js` is a dependency-free Tampermonkey helper that exposes:
+Source lives in `src/userscripts/balaclava-tooltip/index.ts` and builds to
+`dist/balaclava-tooltip.user.js`, a dependency-free Tampermonkey helper that exposes:
 
 ```javascript
 unsafeWindow.BalaclavaTooltip
@@ -33,11 +34,12 @@ Use the pinned release URL in consumer userscripts:
 // @grant   unsafeWindow
 ```
 
-The tooltip supports declarative attributes, imperative `show()` / `attach()` calls, global configuration, viewport-aware positioning, and `system` / `dark` / `light` / `custom` themes. See [docs/balaclava-tooltip.md](docs/balaclava-tooltip.md).
+The tooltip supports declarative attributes, imperative `show()` / `attach()` calls, global configuration, viewport-aware positioning, and `system` / `dark` / `light` / `custom` themes. See [plans/tooltip/balaclava-tooltip.md](plans/tooltip/balaclava-tooltip.md).
 
-### Arson Helper
+### Pyromaniac's Ledger
 
-[docs/arson-helper.js](docs/arson-helper.js) is the current reference source for the arson userscript. Keep it in docs until it is promoted into a distributable userscript path.
+Source lives in `src/userscripts/pyromaniacs-ledger/` and builds to
+`dist/pyromaniacs-ledger.user.js`. Run `pnpm build:userscripts` to regenerate userscript bundles.
 
 ## Signature Features
 
