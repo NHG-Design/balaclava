@@ -16,6 +16,7 @@
 "use strict";
 (() => {
   // src/data/catalog.ts
+  var CATALOG_UPDATED = "2026-05-25";
   var RESOURCE = {
     // Liquid fuels
     GASOLINE: "gasoline",
@@ -1137,7 +1138,7 @@
       root.appendChild(g);
     }
     const note = el2("p", "pyro-s-section-note");
-    note.textContent = "Clear a field to restore API or default price. Tool prices are read-only.";
+    note.textContent = `Built-in prices as of ${CATALOG_UPDATED}. Clear a field to restore API or default price. Tool prices are excluded.`;
     root.appendChild(note);
     return root;
   }
@@ -1210,6 +1211,9 @@
     keyLink.rel = "noopener noreferrer";
     keyNote.appendChild(keyLink);
     keyGroup.appendChild(keyNote);
+    const storageNote = el2("p", "pyro-s-section-note");
+    storageNote.textContent = "Key is stored in Tampermonkey only \u2014 never sent to any server other than Torn's API.";
+    keyGroup.appendChild(storageNote);
     const keyRow = el2("div", "pyro-s-key-row");
     const keyInput = el2("input", "pyro-s-key-input");
     keyInput.type = "password";
@@ -1258,14 +1262,21 @@
     const refreshTitle = el2("div", "pyro-s-group-title");
     refreshTitle.textContent = "Market prices";
     refreshGroup.appendChild(refreshTitle);
+    const dbNote = el2("p", "pyro-s-section-note");
+    dbNote.textContent = `Built-in DB prices: ${CATALOG_UPDATED}. An API key lets you fetch live market prices instead.`;
+    refreshGroup.appendChild(dbNote);
     const refreshRow = el2("div", "pyro-s-refresh-row");
     const refreshBtn = el2("button", "pyro-s-btn");
-    refreshBtn.textContent = "Refresh Prices";
+    refreshBtn.textContent = "Refresh";
     if (!ctx.getApiKey()) refreshBtn.disabled = true;
+    const resetBtn = el2("button", "pyro-s-btn");
+    resetBtn.textContent = "Reset to DB";
+    if (!ctx.getApiLastRefresh()) resetBtn.disabled = true;
     const ts = ctx.getApiLastRefresh();
     const tsEl = el2("span", "pyro-s-timestamp");
-    tsEl.textContent = ts ? `Last: ${formatTimestamp(ts)}` : "Never refreshed";
+    tsEl.textContent = ts ? `Fetched: ${formatTimestamp(ts)}` : "";
     refreshRow.appendChild(refreshBtn);
+    refreshRow.appendChild(resetBtn);
     refreshRow.appendChild(tsEl);
     refreshGroup.appendChild(refreshRow);
     const refreshStatus = el2("div", "pyro-s-status");
@@ -1281,11 +1292,19 @@
         ctx.setApiPrices(result.prices, Date.now());
         refreshStatus.textContent = `\u2713 ${result.updatedCount} prices updated`;
         refreshStatus.className = "pyro-s-status ok";
-        tsEl.textContent = `Last: ${formatTimestamp(ctx.getApiLastRefresh())}`;
+        tsEl.textContent = `Fetched: ${formatTimestamp(ctx.getApiLastRefresh())}`;
+        resetBtn.disabled = false;
       } else {
         refreshStatus.textContent = `\u2717 ${result.error ?? "Unknown error"}`;
         refreshStatus.className = "pyro-s-status err";
       }
+    });
+    resetBtn.addEventListener("click", () => {
+      ctx.clearApiPrices();
+      tsEl.textContent = "";
+      resetBtn.disabled = true;
+      refreshStatus.textContent = "Restored built-in DB prices.";
+      refreshStatus.className = "pyro-s-status ok";
     });
     return root;
   }
@@ -1504,6 +1523,9 @@
     store_set(KEY_API_REFRESH, String(apiLastRefresh));
     resetScans();
   }
+  function clearApiPrices() {
+    setApiPrices({}, 0);
+  }
   function setApiKey(key) {
     apiKey = key;
     store_set(KEY_API_KEY, apiKey);
@@ -1673,6 +1695,7 @@
     clearManualPrice,
     setThresholds,
     setApiPrices,
+    clearApiPrices,
     setApiKey,
     setDebugMode,
     setActiveTab

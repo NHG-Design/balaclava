@@ -1,3 +1,6 @@
+/** ISO date of the most recent catalog default-price update. Shown in the settings UI. */
+export const CATALOG_UPDATED = '2026-05-25';
+
 export type ResourceKind = 'fuel' | 'evidence' | 'tool';
 export type FuelCategory = 'liquid' | 'solid' | 'gaseous';
 export type ToolCategory = 'igniter' | 'dampener';

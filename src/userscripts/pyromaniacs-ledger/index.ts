@@ -139,6 +139,10 @@ function setApiPrices(prices: PriceMap, timestamp: number): void {
     resetScans();
 }
 
+function clearApiPrices(): void {
+    setApiPrices({}, 0);
+}
+
 function setApiKey(key: string): void {
     apiKey = key;
     store_set(KEY_API_KEY, apiKey);
@@ -356,6 +360,7 @@ const settingsCtx: SettingsCtx = {
     clearManualPrice,
     setThresholds,
     setApiPrices,
+    clearApiPrices,
     setApiKey,
     setDebugMode,
     setActiveTab,
