@@ -11,6 +11,7 @@ import {
     formatPpn,
     rankForScenario,
     bestForScenario,
+    strategyNeedsFlamethrower,
     DEFAULT_THRESHOLDS,
     type PriceMap,
 } from './engine.js';
@@ -297,7 +298,6 @@ describe('rankForScenario', () => {
             ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
             place:  [{ resourceId: RESOURCE.GASOLINE,     qty: 1 }],
         },
-        requiresFlamethrower: true,
     };
     const unconfirmed: Strategy = {
         scenarioName: 'Test',
@@ -392,10 +392,12 @@ describe('strategies data', () => {
         }
     });
 
-    it('requiresFlamethrower strategies have FT in ignite slot', () => {
-        for (const s of STRATEGIES.filter(s => s.requiresFlamethrower)) {
-            const hasIt = s.actions.ignite?.some(i => i.resourceId === RESOURCE.FLAMETHROWER);
-            assert.ok(hasIt, `"${s.scenarioName}" requiresFlamethrower but ignite slot missing FLAMETHROWER`);
+    it('strategies using FLAMETHROWER are filtered out without CS>=80', () => {
+        const ftStrategies = STRATEGIES.filter(s => strategyNeedsFlamethrower(s));
+        assert.ok(ftStrategies.length > 0, 'expected some FT strategies');
+        for (const s of ftStrategies) {
+            const hasIt = Object.values(s.actions).flat().some(i => i.resourceId === RESOURCE.FLAMETHROWER);
+            assert.ok(hasIt, `strategyNeedsFlamethrower true but no FLAMETHROWER found in "${s.scenarioName}"`);
         }
     });
 });

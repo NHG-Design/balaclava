@@ -645,6 +645,9 @@ export function injectSettings(root: Element, ctx: SettingsCtx): void {
         const hidden = panel.hasAttribute('hidden');
         panel.toggleAttribute('hidden', !hidden);
         btn.setAttribute('aria-expanded', String(hidden));
+        if (hidden && (ctx.getActiveTab() || 'prices') === 'debug') {
+            rerenderTab(panel, 'debug', ctx);
+        }
     });
 
     document.addEventListener('click', e => {

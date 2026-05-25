@@ -1,4 +1,4 @@
-import { STRATEGIES, type Strategy } from '../../data/strategies.js';
+import type { Strategy } from '../../data/strategies.js';
 import {
     rankForScenario,
     formatPpn,
@@ -28,6 +28,7 @@ const KEY_ACTIVE_TAB     = 'pyroLedger.v1.activeTab';
 // ---------------------------------------------------------------------------
 declare const GM_getValue: ((key: string, def?: string) => string) | undefined;
 declare const GM_setValue: ((key: string, val: string) => void) | undefined;
+declare const GM_getResourceText: ((name: string) => string) | undefined;
 declare const unsafeWindow: typeof window | undefined;
 
 function store_get(key: string, def = ''): string {
@@ -151,6 +152,7 @@ function setApiKey(key: string): void {
 function setDebugMode(on: boolean): void {
     debugMode = on;
     store_set(KEY_DEBUG, String(debugMode));
+    resetScans();
 }
 
 function setActiveTab(tab: string): void {
@@ -173,13 +175,27 @@ function getSkillValue(): number {
 // Strategy index: scenarioName → Strategy[]
 // ---------------------------------------------------------------------------
 const strategyIndex = new Map<string, Strategy[]>();
-for (const s of STRATEGIES) {
-    const key = s.scenarioName.toLowerCase();
-    const existing = strategyIndex.get(key);
-    if (existing) {
-        existing.push(s);
-    } else {
-        strategyIndex.set(key, [s]);
+
+function loadStrategies(): void {
+    if (typeof GM_getResourceText === 'undefined') {
+        console.error('[PyroLedger] GM_getResourceText unavailable — strategies not loaded.');
+        return;
+    }
+    let strategies: Strategy[];
+    try {
+        strategies = JSON.parse(GM_getResourceText('pyroStrategies')) as Strategy[];
+    } catch (e) {
+        console.error('[PyroLedger] Failed to parse strategies resource:', e);
+        return;
+    }
+    for (const s of strategies) {
+        const key = s.scenarioName.toLowerCase();
+        const existing = strategyIndex.get(key);
+        if (existing) {
+            existing.push(s);
+        } else {
+            strategyIndex.set(key, [s]);
+        }
     }
 }
 
@@ -237,8 +253,9 @@ function applyToSection(section: HTMLElement, allRanked: RankedStrategy[], scena
     const titleSection = scenarioEl?.closest<HTMLElement>(SEL.TITLE_SECTION) ?? null;
 
     const best = allRanked.find(r => !r.strategy.needsVerification) ?? null;
+    const bestUnconfirmed = best ? null : (allRanked[0] ?? null);
 
-    if (!best) {
+    if (!best && !bestUnconfirmed) {
         if (debugMode) {
             const label = document.createElement('span');
             label.className = 'pyro-label pyro-label--unconfirmed';
@@ -249,12 +266,13 @@ function applyToSection(section: HTMLElement, allRanked: RankedStrategy[], scena
         return;
     }
 
-    section.classList.add(`pyro-band--${best.band}`);
+    const display = best ?? bestUnconfirmed!;
+    section.classList.add(`pyro-band--${display.band}`);
 
     if (scenarioEl) {
         const label = document.createElement('span');
-        label.className = 'pyro-label';
-        label.textContent = formatPpn(best.profitPerNerve);
+        label.className = best ? 'pyro-label' : 'pyro-label pyro-label--unconfirmed';
+        label.textContent = formatPpn(display.profitPerNerve);
         scenarioEl.appendChild(label);
     }
 
@@ -262,11 +280,28 @@ function applyToSection(section: HTMLElement, allRanked: RankedStrategy[], scena
     wireTooltip(section, hoverTarget, allRanked);
 }
 
+function isPendingCollect(section: HTMLElement): boolean {
+    return section.classList.contains('pending-collect') || !!section.closest(SEL.PENDING_COLLECT);
+}
+
+// Per-card tooltip data, updated on each resetScans so a single set of listeners
+// always reflects the latest prices without accumulating stale closures.
+const tooltipData = new WeakMap<HTMLElement, RankedStrategy[]>();
+
 function wireTooltip(section: HTMLElement, hoverTarget: HTMLElement, allRanked: RankedStrategy[]): void {
+    tooltipData.set(section, allRanked);
     if (section.dataset.pyroTooltipWired) return;
     section.dataset.pyroTooltipWired = 'true';
 
-    const getContent = (): HTMLElement => buildTooltipContentWithStyles(allRanked);
+    const getContent = (): HTMLElement => {
+        const ranked = tooltipData.get(section) ?? [];
+        // Pending-collect + fully verified: stats only (job done, no need to re-read actions).
+        // Pending-collect + any unconfirmed: full tooltip so author can compare against outcome.
+        const pending = isPendingCollect(section);
+        const allVerified = ranked.length > 0 && ranked.every(r => !r.strategy.needsVerification);
+        const statsOnly = pending && allVerified;
+        return buildTooltipContentWithStyles(ranked, statsOnly);
+    };
 
     hoverTarget.addEventListener('mouseenter', () => {
         tryTooltip(api => api.show(hoverTarget, getContent(), { position: 'top', theme: 'dark' }));
@@ -297,8 +332,8 @@ function wireTooltip(section: HTMLElement, hoverTarget: HTMLElement, allRanked: 
     }, { passive: true });
 }
 
-function buildTooltipContentWithStyles(allRanked: RankedStrategy[]): HTMLElement {
-    const node = buildTooltipContent(allRanked);
+function buildTooltipContentWithStyles(allRanked: RankedStrategy[], statsOnly = false): HTMLElement {
+    const node = buildTooltipContent(allRanked, statsOnly);
 
     const style = document.createElement('style');
     style.textContent = buildTooltipStyles();
@@ -311,11 +346,22 @@ function getRoot(): Element {
     return document.querySelector(SEL.ROOT) ?? document.body;
 }
 
+function cleanupSection(section: HTMLElement): void {
+    section.querySelector('.pyro-label')?.remove();
+    section.classList.forEach(c => { if (c.startsWith('pyro-band--')) section.classList.remove(c); });
+    delete section.dataset.pyroScanned;
+    delete section.dataset.pyroTooltipWired;
+}
+
 function scanPage(): void {
     const hasFlamethrower = getSkillValue() >= 80;
     const prices = effectivePrices();
 
     getRoot().querySelectorAll<HTMLElement>(SEL.CARD).forEach(section => {
+        if (isPendingCollect(section)) {
+            if (section.dataset.pyroScanned) cleanupSection(section);
+            return;
+        }
         if (section.dataset.pyroScanned) return;
         section.dataset.pyroScanned = 'true';
 
@@ -394,6 +440,7 @@ const observer = new MutationObserver(() => {
 });
 
 function start(): void {
+    loadStrategies();
     loadState();
     injectHighlightStyles();
     scanPage();

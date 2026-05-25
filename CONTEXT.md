@@ -46,6 +46,13 @@ Balaclava (`balaclava.app`) is a platform of Torn tools built by a player, for p
 - **BalaclavaTooltip**: A foundational Tampermonkey userscript library (`balaclava-tooltip.user.js`) providing a universal, viewport-aware tooltip system via Shadow DOM. Distributed as a `@require` dependency for other balaclava userscripts. Exposes `unsafeWindow.BalaclavaTooltip` with `.show()`, `.hide()`, `.configure()`, `.attach()`, `.rescan()`, and `.destroy()`.
 - **Consumer Script**: A balaclava userscript that depends on BalaclavaTooltip via `@require`. Accesses the tooltip API through `unsafeWindow.BalaclavaTooltip`.
 
+### Pyromaniac's Ledger
+
+- **Strategy**: A recipe for completing a specific Arson Job scenario — which accelerants to place, ignite, stoke, or dampen, optional evidence to plant, and the expected base payout. Multiple strategies may exist per scenario (e.g. Flamethrower vs. non-FT variants); these share the same payout and are alternatives based on CS level. _Avoid_: "recipe", "build", "loadout"
+- **Strategy Dataset**: The canonical collection of Strategies for all known scenarios, served as a static JSON file from `balaclava.app` and delivered to the userscript via Tampermonkey's `@resource` mechanism. Cached locally by Tampermonkey; refreshed on script update.
+- **Strategy Override**: A locally stored author-only patch keyed by `scenarioName` that corrects payout or verification status for all matching Strategy entries. Stored via `GM_setValue`. Applied on top of the Strategy Dataset at runtime. Only accessible in debug mode. _Avoid_: "edit", "correction", "fix"
+- **Profit Per Nerve (PPN)**: The primary ranking metric for Strategies. Calculated as `(payout − material cost) / nerve`. Used to surface the most efficient strategy for a given scenario. _Avoid_: "efficiency", "value"
+
 ### Torn API Key Tiers
 
 | Tier | Access scope | Used by |

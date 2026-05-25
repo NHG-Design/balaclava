@@ -22,8 +22,6 @@ export interface Strategy {
     /** Base listed payout in Torn dollars (ignoring ±10% variance). */
     payout: number;
     actions: StrategyActions;
-    /** Requires Crime Skill >= 80 (Flamethrower). */
-    requiresFlamethrower?: boolean;
     notes?: string;
     /**
      * Marked when recipe details are uncertain.
@@ -50,7 +48,6 @@ export const STRATEGIES: Strategy[] = [
             ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
             place:  [{ resourceId: RESOURCE.GASOLINE,     qty: 1 }],
         },
-        requiresFlamethrower: true,
     },
 
     {
@@ -60,7 +57,6 @@ export const STRATEGIES: Strategy[] = [
             ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
             place:  [{ resourceId: RESOURCE.GASOLINE,     qty: 2 }],
         },
-        requiresFlamethrower: true,
     },
 
     {
@@ -77,7 +73,6 @@ export const STRATEGIES: Strategy[] = [
             ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
             place:  [{ resourceId: RESOURCE.GASOLINE,     qty: 4 }],
         },
-        requiresFlamethrower: true,
     },
 
     {
@@ -94,7 +89,6 @@ export const STRATEGIES: Strategy[] = [
             ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
             place:  [{ resourceId: RESOURCE.GASOLINE,     qty: 1 }],
         },
-        requiresFlamethrower: true,
     },
 
     {
@@ -105,7 +99,6 @@ export const STRATEGIES: Strategy[] = [
             ignite:   [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
             place:    [{ resourceId: RESOURCE.GASOLINE,   qty: 2 }],
         },
-        requiresFlamethrower: true,
     },
 
     {
@@ -115,7 +108,6 @@ export const STRATEGIES: Strategy[] = [
             ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
             place:  [{ resourceId: RESOURCE.GASOLINE,     qty: 4 }],
         },
-        requiresFlamethrower: true,
     },
 
     {
@@ -125,7 +117,6 @@ export const STRATEGIES: Strategy[] = [
             ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
             place:  [{ resourceId: RESOURCE.GASOLINE,     qty: 4 }],
         },
-        requiresFlamethrower: true,
     },
 
     {
@@ -143,7 +134,6 @@ export const STRATEGIES: Strategy[] = [
             place:  [{ resourceId: RESOURCE.GASOLINE,     qty: 3 }],
             stoke:  [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1, optional: true, optionalLabel: 'if needed' }],
         },
-        requiresFlamethrower: true,
     },
 
     {
@@ -153,7 +143,6 @@ export const STRATEGIES: Strategy[] = [
             ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
             place:  [{ resourceId: RESOURCE.GASOLINE,     qty: 4 }],
         },
-        requiresFlamethrower: true,
     },
 
     {
@@ -170,7 +159,6 @@ export const STRATEGIES: Strategy[] = [
             ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
             place:  [{ resourceId: RESOURCE.GASOLINE,     qty: 2 }],
         },
-        requiresFlamethrower: true,
     },
 
     {
@@ -180,7 +168,6 @@ export const STRATEGIES: Strategy[] = [
             ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
             place:  [{ resourceId: RESOURCE.GASOLINE,     qty: 4 }],
         },
-        requiresFlamethrower: true,
     },
 
     {
@@ -190,7 +177,6 @@ export const STRATEGIES: Strategy[] = [
             ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
             place:  [{ resourceId: RESOURCE.GASOLINE,     qty: 1 }],
         },
-        requiresFlamethrower: true,
     },
 
     {
@@ -201,7 +187,6 @@ export const STRATEGIES: Strategy[] = [
             place:  [{ resourceId: RESOURCE.HYDROGEN,     qty: 1 }],
             stoke:  [{ resourceId: RESOURCE.HYDROGEN,     qty: 1 }],
         },
-        requiresFlamethrower: true,
     },
 
     {
@@ -218,7 +203,6 @@ export const STRATEGIES: Strategy[] = [
             ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
             place:  [{ resourceId: RESOURCE.GASOLINE,     qty: 3 }],
         },
-        requiresFlamethrower: true,
     },
 
     {
@@ -235,7 +219,6 @@ export const STRATEGIES: Strategy[] = [
             ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
             place:  [{ resourceId: RESOURCE.GASOLINE,     qty: 2 }],
         },
-        requiresFlamethrower: true,
     },
 
     {
@@ -252,7 +235,6 @@ export const STRATEGIES: Strategy[] = [
             ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
             place:  [{ resourceId: RESOURCE.GASOLINE,     qty: 2 }],
         },
-        requiresFlamethrower: true,
     },
 
     {
@@ -262,7 +244,6 @@ export const STRATEGIES: Strategy[] = [
             ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
             place:  [{ resourceId: RESOURCE.GASOLINE,     qty: 5 }],
         },
-        requiresFlamethrower: true,
     },
 
     {
@@ -272,7 +253,6 @@ export const STRATEGIES: Strategy[] = [
             ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
             place:  [{ resourceId: RESOURCE.GASOLINE,     qty: 3 }],
         },
-        requiresFlamethrower: true,
     },
 
     {
@@ -289,7 +269,6 @@ export const STRATEGIES: Strategy[] = [
             ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
             place:  [{ resourceId: RESOURCE.GASOLINE,     qty: 3 }],
         },
-        requiresFlamethrower: true,
     },
 
     {
@@ -308,7 +287,6 @@ export const STRATEGIES: Strategy[] = [
             ignite:   [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
             place:    [{ resourceId: RESOURCE.GASOLINE,     qty: 4 }],
         },
-        requiresFlamethrower: true,
     },
 
     {
@@ -319,7 +297,6 @@ export const STRATEGIES: Strategy[] = [
             ignite:   [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
             place:    [{ resourceId: RESOURCE.GASOLINE,     qty: 2 }],
         },
-        requiresFlamethrower: true,
     },
 
     {
@@ -330,7 +307,6 @@ export const STRATEGIES: Strategy[] = [
             ignite:   [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
             place:    [{ resourceId: RESOURCE.GASOLINE,     qty: 2 }],
         },
-        requiresFlamethrower: true,
     },
 
     {
@@ -341,7 +317,6 @@ export const STRATEGIES: Strategy[] = [
             ignite:   [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
             place:    [{ resourceId: RESOURCE.GASOLINE,     qty: 3 }],
         },
-        requiresFlamethrower: true,
     },
 
     {
@@ -353,7 +328,6 @@ export const STRATEGIES: Strategy[] = [
             place:    [{ resourceId: RESOURCE.GASOLINE,     qty: 2 }],
             stoke:    [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
         },
-        requiresFlamethrower: true,
     },
 
     {
@@ -364,7 +338,6 @@ export const STRATEGIES: Strategy[] = [
             ignite:   [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
             place:    [{ resourceId: RESOURCE.GASOLINE,     qty: 1 }],
         },
-        requiresFlamethrower: true,
     },
 
     {
@@ -375,7 +348,6 @@ export const STRATEGIES: Strategy[] = [
             ignite:   [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
             place:    [{ resourceId: RESOURCE.GASOLINE,     qty: 2 }],
         },
-        requiresFlamethrower: true,
     },
 
     {
@@ -386,7 +358,6 @@ export const STRATEGIES: Strategy[] = [
             ignite:   [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
             place:    [{ resourceId: RESOURCE.GASOLINE,     qty: 3 }],
         },
-        requiresFlamethrower: true,
     },
 
     {
@@ -406,7 +377,6 @@ export const STRATEGIES: Strategy[] = [
             ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
             place:  [{ resourceId: RESOURCE.KEROSENE,     qty: 3 }],
         },
-        requiresFlamethrower: true,
     },
 
     {
@@ -416,7 +386,6 @@ export const STRATEGIES: Strategy[] = [
             ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
             place:  [{ resourceId: RESOURCE.KEROSENE,     qty: 4 }],
         },
-        requiresFlamethrower: true,
     },
 
     {
@@ -427,7 +396,6 @@ export const STRATEGIES: Strategy[] = [
             place:  [{ resourceId: RESOURCE.HYDROGEN,     qty: 1 }],
             stoke:  [{ resourceId: RESOURCE.HYDROGEN,     qty: 1 }],
         },
-        requiresFlamethrower: true,
     },
 
     {
@@ -438,7 +406,6 @@ export const STRATEGIES: Strategy[] = [
             place:  [{ resourceId: RESOURCE.HYDROGEN,     qty: 1 }],
             stoke:  [{ resourceId: RESOURCE.HYDROGEN,     qty: 2 }],
         },
-        requiresFlamethrower: true,
     },
 
     {
@@ -449,7 +416,6 @@ export const STRATEGIES: Strategy[] = [
             place:  [{ resourceId: RESOURCE.GASOLINE,        qty: 2 }],
             stoke:  [{ resourceId: RESOURCE.POTASSIUM_NITRATE, qty: 2 }],
         },
-        requiresFlamethrower: true,
     },
     {
         scenarioName: 'A Burnt Child Dreads the Fire',
@@ -469,7 +435,6 @@ export const STRATEGIES: Strategy[] = [
             place:  [{ resourceId: RESOURCE.HYDROGEN, qty: 1 }],
             stoke:  [{ resourceId: RESOURCE.HYDROGEN, qty: 1 }],
         },
-        requiresFlamethrower: true,
     },
 
     {
@@ -486,7 +451,6 @@ export const STRATEGIES: Strategy[] = [
             ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
             place:  [{ resourceId: RESOURCE.GASOLINE, qty: 1 }],
         },
-        requiresFlamethrower: true,
     },
 
     {
@@ -503,7 +467,6 @@ export const STRATEGIES: Strategy[] = [
             ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
             place:  [{ resourceId: RESOURCE.GASOLINE, qty: 1 }],
         },
-        requiresFlamethrower: true,
     },
 
     {
@@ -513,7 +476,6 @@ export const STRATEGIES: Strategy[] = [
             ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
             place:  [{ resourceId: RESOURCE.GASOLINE, qty: 1 }],
         },
-        requiresFlamethrower: true,
     },
 
     {
@@ -531,7 +493,6 @@ export const STRATEGIES: Strategy[] = [
             ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
             place:  [{ resourceId: RESOURCE.GASOLINE, qty: 2 }],
         },
-        requiresFlamethrower: true,
     },
 
     {
@@ -550,7 +511,6 @@ export const STRATEGIES: Strategy[] = [
             place:  [{ resourceId: RESOURCE.GASOLINE, qty: 4 }],
             stoke:  [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
         },
-        requiresFlamethrower: true,
     },
 
     {
@@ -578,7 +538,6 @@ export const STRATEGIES: Strategy[] = [
             ignite:   [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
             place:    [{ resourceId: RESOURCE.GASOLINE, qty: 2 }],
         },
-        requiresFlamethrower: true,
     },
 
     {
@@ -589,7 +548,6 @@ export const STRATEGIES: Strategy[] = [
             place:  [{ resourceId: RESOURCE.GASOLINE, qty: 5 }],
             stoke:  [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
         },
-        requiresFlamethrower: true,
     },
 
     {
@@ -606,7 +564,6 @@ export const STRATEGIES: Strategy[] = [
             ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
             place:  [{ resourceId: RESOURCE.GASOLINE, qty: 1 }],
         },
-        requiresFlamethrower: true,
     },
 
     {
@@ -624,7 +581,6 @@ export const STRATEGIES: Strategy[] = [
             place:  [{ resourceId: RESOURCE.GASOLINE, qty: 4 }],
             stoke:  [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
         },
-        requiresFlamethrower: true,
     },
 
     {
@@ -635,7 +591,6 @@ export const STRATEGIES: Strategy[] = [
             place:  [{ resourceId: RESOURCE.HYDROGEN, qty: 1 }],
             stoke:  [{ resourceId: RESOURCE.HYDROGEN, qty: 1 }],
         },
-        requiresFlamethrower: true,
     },
 
     {
@@ -653,7 +608,6 @@ export const STRATEGIES: Strategy[] = [
             ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
             place:  [{ resourceId: RESOURCE.GASOLINE, qty: 5 }],
         },
-        requiresFlamethrower: true,
     },
 
     {
@@ -663,7 +617,6 @@ export const STRATEGIES: Strategy[] = [
             ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
             place:  [{ resourceId: RESOURCE.HYDROGEN, qty: 2 }],
         },
-        requiresFlamethrower: true,
     },
 
     {
@@ -673,7 +626,6 @@ export const STRATEGIES: Strategy[] = [
             ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
             place:  [{ resourceId: RESOURCE.GASOLINE, qty: 1 }],
         },
-        requiresFlamethrower: true,
     },
 
     {
@@ -683,7 +635,6 @@ export const STRATEGIES: Strategy[] = [
             ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
             place:  [{ resourceId: RESOURCE.GASOLINE, qty: 1 }],
         },
-        requiresFlamethrower: true,
     },
 
     {
@@ -711,7 +662,6 @@ export const STRATEGIES: Strategy[] = [
             ignite:   [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
             place:    [{ resourceId: RESOURCE.GASOLINE,     qty: 1 }],
         },
-        requiresFlamethrower: true,
     },
 
     {
@@ -738,7 +688,6 @@ export const STRATEGIES: Strategy[] = [
             ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
             place:  [{ resourceId: RESOURCE.GASOLINE, qty: 1 }],
         },
-        requiresFlamethrower: true,
     },
 
     {
@@ -748,7 +697,6 @@ export const STRATEGIES: Strategy[] = [
             ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
             place:  [{ resourceId: RESOURCE.GASOLINE, qty: 4 }],
         },
-        requiresFlamethrower: true,
     },
 
     {
@@ -761,7 +709,6 @@ export const STRATEGIES: Strategy[] = [
                 { resourceId: RESOURCE.THERMITE, qty: 2 },
             ],
         },
-        requiresFlamethrower: true,
         needsVerification: true,
     },
 
@@ -773,7 +720,6 @@ export const STRATEGIES: Strategy[] = [
             place:  [{ resourceId: RESOURCE.GASOLINE, qty: 4 }],
             stoke:  [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
         },
-        requiresFlamethrower: true,
         needsVerification: true,
     },
 
@@ -791,7 +737,6 @@ export const STRATEGIES: Strategy[] = [
             ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
             place:  [{ resourceId: RESOURCE.GASOLINE, qty: 5 }],
         },
-        requiresFlamethrower: true,
     },
 
     {
@@ -811,7 +756,6 @@ export const STRATEGIES: Strategy[] = [
             ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
             place:  [{ resourceId: RESOURCE.GASOLINE, qty: 2 }],
         },
-        requiresFlamethrower: true,
     },
 
     {
@@ -838,7 +782,6 @@ export const STRATEGIES: Strategy[] = [
             ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
             place:  [{ resourceId: RESOURCE.GASOLINE, qty: 2 }],
         },
-        requiresFlamethrower: true,
     },
 
     {
@@ -856,7 +799,6 @@ export const STRATEGIES: Strategy[] = [
             ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
             place:  [{ resourceId: RESOURCE.GASOLINE, qty: 5 }],
         },
-        requiresFlamethrower: true,
         needsVerification: true,
     },
 
@@ -923,7 +865,6 @@ export const STRATEGIES: Strategy[] = [
             ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
             place:  [{ resourceId: RESOURCE.GASOLINE, qty: 2 }],
         },
-        requiresFlamethrower: true,
     },
 
     {
@@ -940,7 +881,6 @@ export const STRATEGIES: Strategy[] = [
             ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
             place:  [{ resourceId: RESOURCE.HYDROGEN, qty: 1 }],
         },
-        requiresFlamethrower: true,
     },
 
     {
@@ -950,7 +890,6 @@ export const STRATEGIES: Strategy[] = [
             ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
             place:  [{ resourceId: RESOURCE.GASOLINE, qty: 4 }],
         },
-        requiresFlamethrower: true,
         needsVerification: true,
     },
 
@@ -968,7 +907,6 @@ export const STRATEGIES: Strategy[] = [
             ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
             place:  [{ resourceId: RESOURCE.GASOLINE, qty: 2 }],
         },
-        requiresFlamethrower: true,
     },
 
     {
@@ -987,7 +925,6 @@ export const STRATEGIES: Strategy[] = [
             place:  [{ resourceId: RESOURCE.GASOLINE, qty: 4 }],
             stoke:  [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
         },
-        requiresFlamethrower: true,
     },
 
     {
@@ -997,7 +934,6 @@ export const STRATEGIES: Strategy[] = [
             ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
             place:  [{ resourceId: RESOURCE.GASOLINE, qty: 2 }],
         },
-        requiresFlamethrower: true,
     },
 
     {
@@ -1014,7 +950,6 @@ export const STRATEGIES: Strategy[] = [
             ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
             place:  [{ resourceId: RESOURCE.GASOLINE, qty: 2 }],
         },
-        requiresFlamethrower: true,
     },
 
     {
@@ -1031,7 +966,6 @@ export const STRATEGIES: Strategy[] = [
             ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
             place:  [{ resourceId: RESOURCE.GASOLINE, qty: 1 }],
         },
-        requiresFlamethrower: true,
     },
 
     {
@@ -1041,7 +975,6 @@ export const STRATEGIES: Strategy[] = [
             ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
             place:  [{ resourceId: RESOURCE.GASOLINE, qty: 1 }],
         },
-        requiresFlamethrower: true,
     },
 
     {
@@ -1061,7 +994,6 @@ export const STRATEGIES: Strategy[] = [
             ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
             place:  [{ resourceId: RESOURCE.GASOLINE, qty: 2 }],
         },
-        requiresFlamethrower: true,
     },
 
     {
@@ -1080,7 +1012,6 @@ export const STRATEGIES: Strategy[] = [
             place:  [{ resourceId: RESOURCE.GASOLINE, qty: 4 }],
             stoke:  [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
         },
-        requiresFlamethrower: true,
     },
 
     {
@@ -1090,7 +1021,6 @@ export const STRATEGIES: Strategy[] = [
             ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
             place:  [{ resourceId: RESOURCE.DIESEL, qty: 1 }],
         },
-        requiresFlamethrower: true,
     },
 
     {
@@ -1130,7 +1060,6 @@ export const STRATEGIES: Strategy[] = [
             place:  [{ resourceId: RESOURCE.GASOLINE, qty: 5 }],
             stoke:  [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
         },
-        requiresFlamethrower: true,
         needsVerification: true,
     },
 
@@ -1166,7 +1095,6 @@ export const STRATEGIES: Strategy[] = [
             ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
             place:  [{ resourceId: RESOURCE.GASOLINE, qty: 1 }],
         },
-        requiresFlamethrower: true,
     },
 
     {
@@ -1176,7 +1104,6 @@ export const STRATEGIES: Strategy[] = [
             ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
             place:  [{ resourceId: RESOURCE.GASOLINE, qty: 1 }],
         },
-        requiresFlamethrower: true,
     },
 
     {
@@ -1202,7 +1129,6 @@ export const STRATEGIES: Strategy[] = [
             ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
             place:  [{ resourceId: RESOURCE.GASOLINE, qty: 1 }],
         },
-        requiresFlamethrower: true,
     },
 
     {
@@ -1244,7 +1170,6 @@ export const STRATEGIES: Strategy[] = [
             ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
             place:  [{ resourceId: RESOURCE.GASOLINE, qty: 1 }],
         },
-        requiresFlamethrower: true,
     },
 
     {
@@ -1271,7 +1196,6 @@ export const STRATEGIES: Strategy[] = [
             place:  [{ resourceId: RESOURCE.DIESEL,           qty: 1 }],
             stoke:  [{ resourceId: RESOURCE.POTASSIUM_NITRATE, qty: 1 }],
         },
-        requiresFlamethrower: true,
         needsVerification: true,
     },
 
@@ -1317,7 +1241,6 @@ export const STRATEGIES: Strategy[] = [
             ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
             place:  [{ resourceId: RESOURCE.GASOLINE, qty: 2 }],
         },
-        requiresFlamethrower: true,
     },
 
     {
@@ -1334,7 +1257,6 @@ export const STRATEGIES: Strategy[] = [
             ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
             place:  [{ resourceId: RESOURCE.GASOLINE, qty: 1 }],
         },
-        requiresFlamethrower: true,
     },
 
     {
@@ -1352,7 +1274,6 @@ export const STRATEGIES: Strategy[] = [
             place:  [{ resourceId: RESOURCE.GASOLINE, qty: 4 }],
             stoke:  [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
         },
-        requiresFlamethrower: true,
     },
 
     {
@@ -1369,7 +1290,6 @@ export const STRATEGIES: Strategy[] = [
             ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
             place:  [{ resourceId: RESOURCE.GASOLINE, qty: 3 }],
         },
-        requiresFlamethrower: true,
     },
 
     {
@@ -1386,7 +1306,6 @@ export const STRATEGIES: Strategy[] = [
             ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
             place:  [{ resourceId: RESOURCE.GASOLINE, qty: 3 }],
         },
-        requiresFlamethrower: true,
     },
 
     {
@@ -1403,7 +1322,6 @@ export const STRATEGIES: Strategy[] = [
             ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
             place:  [{ resourceId: RESOURCE.GASOLINE, qty: 1 }],
         },
-        requiresFlamethrower: true,
     },
 
     {
@@ -1439,7 +1357,6 @@ export const STRATEGIES: Strategy[] = [
             ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
             place:  [{ resourceId: RESOURCE.GASOLINE, qty: 2 }],
         },
-        requiresFlamethrower: true,
     },
 
     {
@@ -1465,7 +1382,6 @@ export const STRATEGIES: Strategy[] = [
             ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
             place:  [{ resourceId: RESOURCE.GASOLINE, qty: 4 }],
         },
-        requiresFlamethrower: true,
     },
 
     {
@@ -1475,7 +1391,6 @@ export const STRATEGIES: Strategy[] = [
             ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
             place:  [{ resourceId: RESOURCE.GASOLINE, qty: 1 }],
         },
-        requiresFlamethrower: true,
     },
 
     {
@@ -1503,7 +1418,6 @@ export const STRATEGIES: Strategy[] = [
             ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
             place:  [{ resourceId: RESOURCE.HYDROGEN, qty: 1 }],
         },
-        requiresFlamethrower: true,
     },
 
     {
@@ -1520,7 +1434,6 @@ export const STRATEGIES: Strategy[] = [
             ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
             place:  [{ resourceId: RESOURCE.GASOLINE, qty: 1 }],
         },
-        requiresFlamethrower: true,
     },
 
     {
@@ -1537,7 +1450,6 @@ export const STRATEGIES: Strategy[] = [
             ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
             place:  [{ resourceId: RESOURCE.GASOLINE, qty: 4 }],
         },
-        requiresFlamethrower: true,
     },
 
     {
@@ -1562,7 +1474,6 @@ export const STRATEGIES: Strategy[] = [
             ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
             place:  [{ resourceId: RESOURCE.GASOLINE, qty: 2 }],
         },
-        requiresFlamethrower: true,
     },
 
     {
@@ -1579,7 +1490,6 @@ export const STRATEGIES: Strategy[] = [
             ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
             place:  [{ resourceId: RESOURCE.GASOLINE, qty: 2 }],
         },
-        requiresFlamethrower: true,
     },
 
     {
@@ -1604,7 +1514,6 @@ export const STRATEGIES: Strategy[] = [
             ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
             place:  [{ resourceId: RESOURCE.GASOLINE, qty: 2 }],
         },
-        requiresFlamethrower: true,
     },
 
     {
@@ -1631,7 +1540,6 @@ export const STRATEGIES: Strategy[] = [
             ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
             place:  [{ resourceId: RESOURCE.GASOLINE, qty: 2 }],
         },
-        requiresFlamethrower: true,
     },
 
     {
@@ -1648,7 +1556,6 @@ export const STRATEGIES: Strategy[] = [
             ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
             place:  [{ resourceId: RESOURCE.GASOLINE, qty: 2 }],
         },
-        requiresFlamethrower: true,
     },
 
     {
@@ -1665,7 +1572,6 @@ export const STRATEGIES: Strategy[] = [
             ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
             place:  [{ resourceId: RESOURCE.GASOLINE, qty: 1 }],
         },
-        requiresFlamethrower: true,
     },
 
     {
@@ -1682,7 +1588,6 @@ export const STRATEGIES: Strategy[] = [
             ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
             place:  [{ resourceId: RESOURCE.GASOLINE, qty: 2 }],
         },
-        requiresFlamethrower: true,
     },
 
     {
@@ -1701,7 +1606,6 @@ export const STRATEGIES: Strategy[] = [
             ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
             place:  [{ resourceId: RESOURCE.GASOLINE, qty: 1 }],
         },
-        requiresFlamethrower: true,
     },
 
     {
@@ -1718,7 +1622,6 @@ export const STRATEGIES: Strategy[] = [
             ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
             place:  [{ resourceId: RESOURCE.GASOLINE, qty: 1 }],
         },
-        requiresFlamethrower: true,
     },
 
     {
@@ -1728,7 +1631,6 @@ export const STRATEGIES: Strategy[] = [
             ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
             place:  [{ resourceId: RESOURCE.GASOLINE, qty: 3 }],
         },
-        requiresFlamethrower: true,
     },
 
     {
@@ -1738,7 +1640,6 @@ export const STRATEGIES: Strategy[] = [
             ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
             place:  [{ resourceId: RESOURCE.DIESEL, qty: 1 }],
         },
-        requiresFlamethrower: true,
     },
 
     {
@@ -1755,7 +1656,6 @@ export const STRATEGIES: Strategy[] = [
             ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
             place:  [{ resourceId: RESOURCE.GASOLINE, qty: 1 }],
         },
-        requiresFlamethrower: true,
     },
 
     {
@@ -1772,7 +1672,6 @@ export const STRATEGIES: Strategy[] = [
             ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
             place:  [{ resourceId: RESOURCE.GASOLINE, qty: 2 }],
         },
-        requiresFlamethrower: true,
     },
 
     {
@@ -1782,7 +1681,6 @@ export const STRATEGIES: Strategy[] = [
             ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
             place:  [{ resourceId: RESOURCE.GASOLINE, qty: 1 }],
         },
-        requiresFlamethrower: true,
     },
 
     {
@@ -1817,7 +1715,6 @@ export const STRATEGIES: Strategy[] = [
             ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
             place:  [{ resourceId: RESOURCE.GASOLINE, qty: 2 }],
         },
-        requiresFlamethrower: true,
     },
 
     {
@@ -1843,7 +1740,6 @@ export const STRATEGIES: Strategy[] = [
             ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
             place:  [{ resourceId: RESOURCE.GASOLINE, qty: 3 }],
         },
-        requiresFlamethrower: true,
     },
 
     {
@@ -1889,7 +1785,6 @@ export const STRATEGIES: Strategy[] = [
             ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
             place:  [{ resourceId: RESOURCE.GASOLINE, qty: 1 }],
         },
-        requiresFlamethrower: true,
     },
 
     {
@@ -1909,7 +1804,6 @@ export const STRATEGIES: Strategy[] = [
             place:  [{ resourceId: RESOURCE.HYDROGEN, qty: 1 }],
             stoke:  [{ resourceId: RESOURCE.HYDROGEN, qty: 1 }],
         },
-        requiresFlamethrower: true,
     },
 
     {
@@ -1927,7 +1821,6 @@ export const STRATEGIES: Strategy[] = [
             ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
             place:  [{ resourceId: RESOURCE.GASOLINE, qty: 5 }],
         },
-        requiresFlamethrower: true,
         needsVerification: true,
     },
 
@@ -1938,7 +1831,6 @@ export const STRATEGIES: Strategy[] = [
             ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
             place:  [{ resourceId: RESOURCE.GASOLINE, qty: 2 }],
         },
-        requiresFlamethrower: true,
     },
 
     {
@@ -1963,7 +1855,6 @@ export const STRATEGIES: Strategy[] = [
             ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
             place:  [{ resourceId: RESOURCE.GASOLINE, qty: 3 }],
         },
-        requiresFlamethrower: true,
     },
 
     {
@@ -1990,7 +1881,6 @@ export const STRATEGIES: Strategy[] = [
             ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
             place:  [{ resourceId: RESOURCE.GASOLINE, qty: 2 }],
         },
-        requiresFlamethrower: true,
     },
 
     {
@@ -2007,7 +1897,6 @@ export const STRATEGIES: Strategy[] = [
             ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
             place:  [{ resourceId: RESOURCE.GASOLINE, qty: 1 }],
         },
-        requiresFlamethrower: true,
     },
 
     {
@@ -2035,7 +1924,6 @@ export const STRATEGIES: Strategy[] = [
             ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
             place:  [{ resourceId: RESOURCE.GASOLINE, qty: 2 }],
         },
-        requiresFlamethrower: true,
     },
 
     {
@@ -2068,7 +1956,6 @@ export const STRATEGIES: Strategy[] = [
                 { resourceId: RESOURCE.KEROSENE, qty: 2 },
             ],
         },
-        requiresFlamethrower: true,
     },
 
     {
@@ -2079,7 +1966,6 @@ export const STRATEGIES: Strategy[] = [
             place:  [{ resourceId: RESOURCE.GASOLINE, qty: 4 }],
             stoke:  [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
         },
-        requiresFlamethrower: true,
     },
 
     {
@@ -2096,7 +1982,6 @@ export const STRATEGIES: Strategy[] = [
             ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
             place:  [{ resourceId: RESOURCE.KEROSENE, qty: 1 }],
         },
-        requiresFlamethrower: true,
     },
 
     {
@@ -2113,7 +1998,6 @@ export const STRATEGIES: Strategy[] = [
             ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
             place:  [{ resourceId: RESOURCE.GASOLINE, qty: 3 }],
         },
-        requiresFlamethrower: true,
     },
 
     {
@@ -2135,7 +2019,6 @@ export const STRATEGIES: Strategy[] = [
                 { resourceId: RESOURCE.THERMITE, qty: 1 },
             ],
         },
-        requiresFlamethrower: true,
         needsVerification: true,
     },
 
@@ -2163,7 +2046,6 @@ export const STRATEGIES: Strategy[] = [
             place:  [{ resourceId: RESOURCE.GASOLINE, qty: 2 }],
             stoke:  [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
         },
-        requiresFlamethrower: true,
     },
 
     {
@@ -2188,7 +2070,6 @@ export const STRATEGIES: Strategy[] = [
             ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
             place:  [{ resourceId: RESOURCE.GASOLINE, qty: 3 }],
         },
-        requiresFlamethrower: true,
     },
 
     {
@@ -2206,7 +2087,6 @@ export const STRATEGIES: Strategy[] = [
             ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
             place:  [{ resourceId: RESOURCE.GASOLINE, qty: 1 }],
         },
-        requiresFlamethrower: true,
     },
 
     {
@@ -2223,7 +2103,6 @@ export const STRATEGIES: Strategy[] = [
             ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
             place:  [{ resourceId: RESOURCE.HYDROGEN, qty: 1 }],
         },
-        requiresFlamethrower: true,
     },
 
     {
@@ -2249,7 +2128,6 @@ export const STRATEGIES: Strategy[] = [
             ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
             place:  [{ resourceId: RESOURCE.GASOLINE, qty: 2 }],
         },
-        requiresFlamethrower: true,
     },
 
     {
@@ -2285,7 +2163,6 @@ export const STRATEGIES: Strategy[] = [
             ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
             place:  [{ resourceId: RESOURCE.GASOLINE, qty: 2 }],
         },
-        requiresFlamethrower: true,
     },
 
     {
@@ -2324,7 +2201,6 @@ export const STRATEGIES: Strategy[] = [
             ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
             place:  [{ resourceId: RESOURCE.GASOLINE, qty: 2 }],
         },
-        requiresFlamethrower: true,
     },
 
     {
@@ -2334,7 +2210,6 @@ export const STRATEGIES: Strategy[] = [
             ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
             place:  [{ resourceId: RESOURCE.GASOLINE, qty: 2 }],
         },
-        requiresFlamethrower: true,
     },
 
     {
@@ -2352,7 +2227,6 @@ export const STRATEGIES: Strategy[] = [
             place:  [{ resourceId: RESOURCE.GASOLINE, qty: 3 }],
             stoke:  [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
         },
-        requiresFlamethrower: true,
     },
 
     {
@@ -2379,7 +2253,6 @@ export const STRATEGIES: Strategy[] = [
             ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
             place:  [{ resourceId: RESOURCE.GASOLINE, qty: 4 }],
         },
-        requiresFlamethrower: true,
     },
 
     {
@@ -2389,7 +2262,6 @@ export const STRATEGIES: Strategy[] = [
             ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
             place:  [{ resourceId: RESOURCE.GASOLINE, qty: 3 }],
         },
-        requiresFlamethrower: true,
     },
 
     {
@@ -2399,7 +2271,6 @@ export const STRATEGIES: Strategy[] = [
             ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
             place:  [{ resourceId: RESOURCE.GASOLINE, qty: 1 }],
         },
-        requiresFlamethrower: true,
     },
 
     {
@@ -2437,7 +2308,6 @@ export const STRATEGIES: Strategy[] = [
             ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
             place:  [{ resourceId: RESOURCE.GASOLINE, qty: 4 }],
         },
-        requiresFlamethrower: true,
     },
 
     {
@@ -2463,7 +2333,6 @@ export const STRATEGIES: Strategy[] = [
             ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
             place:  [{ resourceId: RESOURCE.GASOLINE, qty: 3 }],
         },
-        requiresFlamethrower: true,
     },
 
     {
@@ -2483,7 +2352,6 @@ export const STRATEGIES: Strategy[] = [
             ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
             place:  [{ resourceId: RESOURCE.HYDROGEN, qty: 1 }],
         },
-        requiresFlamethrower: true,
     },
 
     {
@@ -2500,7 +2368,6 @@ export const STRATEGIES: Strategy[] = [
             ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
             place:  [{ resourceId: RESOURCE.GASOLINE, qty: 1 }],
         },
-        requiresFlamethrower: true,
     },
 
     {
@@ -2510,7 +2377,6 @@ export const STRATEGIES: Strategy[] = [
             ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
             place:  [{ resourceId: RESOURCE.GASOLINE, qty: 2 }],
         },
-        requiresFlamethrower: true,
     },
 
     {
@@ -2527,7 +2393,6 @@ export const STRATEGIES: Strategy[] = [
             ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
             place:  [{ resourceId: RESOURCE.GASOLINE, qty: 1 }],
         },
-        requiresFlamethrower: true,
     },
 
     {
@@ -2546,7 +2411,6 @@ export const STRATEGIES: Strategy[] = [
             ignite:   [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
             place:    [{ resourceId: RESOURCE.GASOLINE,     qty: 1 }],
         },
-        requiresFlamethrower: true,
     },
 
     {
@@ -2559,7 +2423,6 @@ export const STRATEGIES: Strategy[] = [
                 { resourceId: RESOURCE.MAGNESIUM, qty: 1 },
             ],
         },
-        requiresFlamethrower: true,
         needsVerification: true,
     },
 
@@ -2570,7 +2433,6 @@ export const STRATEGIES: Strategy[] = [
             ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
             place:  [{ resourceId: RESOURCE.GASOLINE, qty: 3 }],
         },
-        requiresFlamethrower: true,
         needsVerification: true,
     },
 
@@ -2590,7 +2452,6 @@ export const STRATEGIES: Strategy[] = [
             ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
             place:  [{ resourceId: RESOURCE.GASOLINE, qty: 1 }],
         },
-        requiresFlamethrower: true,
     },
 
     {
@@ -2620,7 +2481,6 @@ export const STRATEGIES: Strategy[] = [
             ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
             place:  [{ resourceId: RESOURCE.GASOLINE, qty: 3 }],
         },
-        requiresFlamethrower: true,
     },
 
     {
@@ -2667,7 +2527,6 @@ export const STRATEGIES: Strategy[] = [
             place:  [{ resourceId: RESOURCE.GASOLINE, qty: 3 }],
             stoke:  [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
         },
-        requiresFlamethrower: true,
     },
 
     {
@@ -2685,7 +2544,6 @@ export const STRATEGIES: Strategy[] = [
             ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
             place:  [{ resourceId: RESOURCE.GASOLINE, qty: 5 }],
         },
-        requiresFlamethrower: true,
     },
 
     {
@@ -2705,7 +2563,6 @@ export const STRATEGIES: Strategy[] = [
             ignite:   [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
             place:    [{ resourceId: RESOURCE.GASOLINE,     qty: 3 }],
         },
-        requiresFlamethrower: true,
     },
 
     {
@@ -2722,7 +2579,6 @@ export const STRATEGIES: Strategy[] = [
             ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
             place:  [{ resourceId: RESOURCE.GASOLINE, qty: 3 }],
         },
-        requiresFlamethrower: true,
     },
 
     {
@@ -2742,7 +2598,6 @@ export const STRATEGIES: Strategy[] = [
             place:  [{ resourceId: RESOURCE.GASOLINE, qty: 2 }],
             stoke:  [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
         },
-        requiresFlamethrower: true,
     },
 
     {
@@ -2759,7 +2614,6 @@ export const STRATEGIES: Strategy[] = [
             ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
             place:  [{ resourceId: RESOURCE.GASOLINE, qty: 3 }],
         },
-        requiresFlamethrower: true,
     },
 
     {
@@ -2776,7 +2630,6 @@ export const STRATEGIES: Strategy[] = [
             ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
             place:  [{ resourceId: RESOURCE.GASOLINE, qty: 2 }],
         },
-        requiresFlamethrower: true,
     },
 
     {
@@ -2787,7 +2640,6 @@ export const STRATEGIES: Strategy[] = [
             place:  [{ resourceId: RESOURCE.GASOLINE, qty: 5 }],
             stoke:  [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
         },
-        requiresFlamethrower: true,
     },
 
     {
@@ -2805,7 +2657,6 @@ export const STRATEGIES: Strategy[] = [
             place:  [{ resourceId: RESOURCE.GASOLINE, qty: 3 }],
             stoke:  [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
         },
-        requiresFlamethrower: true,
     },
 
     {
@@ -2832,7 +2683,6 @@ export const STRATEGIES: Strategy[] = [
             ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
             place:  [{ resourceId: RESOURCE.GASOLINE, qty: 4 }],
         },
-        requiresFlamethrower: true,
     },
 
     {
@@ -2849,7 +2699,6 @@ export const STRATEGIES: Strategy[] = [
             ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
             place:  [{ resourceId: RESOURCE.GASOLINE, qty: 3 }],
         },
-        requiresFlamethrower: true,
     },
 
     {
@@ -2866,7 +2715,6 @@ export const STRATEGIES: Strategy[] = [
             ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
             place:  [{ resourceId: RESOURCE.GASOLINE, qty: 3 }],
         },
-        requiresFlamethrower: true,
     },
 
     {
@@ -2883,7 +2731,6 @@ export const STRATEGIES: Strategy[] = [
             ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
             place:  [{ resourceId: RESOURCE.GASOLINE, qty: 1 }],
         },
-        requiresFlamethrower: true,
     },
 
     {
@@ -2927,7 +2774,6 @@ export const STRATEGIES: Strategy[] = [
             ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
             place:  [{ resourceId: RESOURCE.GASOLINE, qty: 1 }],
         },
-        requiresFlamethrower: true,
     },
 
     {
@@ -2937,7 +2783,6 @@ export const STRATEGIES: Strategy[] = [
             ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
             place:  [{ resourceId: RESOURCE.GASOLINE, qty: 3 }],
         },
-        requiresFlamethrower: true,
     },
 
     {
@@ -2954,7 +2799,6 @@ export const STRATEGIES: Strategy[] = [
             ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
             place:  [{ resourceId: RESOURCE.GASOLINE, qty: 1 }],
         },
-        requiresFlamethrower: true,
     },
 
     {
@@ -2973,7 +2817,6 @@ export const STRATEGIES: Strategy[] = [
             ignite:   [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
             place:    [{ resourceId: RESOURCE.GASOLINE,     qty: 2 }],
         },
-        requiresFlamethrower: true,
     },
 
     {
@@ -2990,7 +2833,6 @@ export const STRATEGIES: Strategy[] = [
             ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
             place:  [{ resourceId: RESOURCE.GASOLINE, qty: 1 }],
         },
-        requiresFlamethrower: true,
     },
 
     {
@@ -3007,7 +2849,6 @@ export const STRATEGIES: Strategy[] = [
             ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
             place:  [{ resourceId: RESOURCE.GASOLINE, qty: 2 }],
         },
-        requiresFlamethrower: true,
     },
 
     {
@@ -3017,7 +2858,6 @@ export const STRATEGIES: Strategy[] = [
             ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
             place:  [{ resourceId: RESOURCE.GASOLINE, qty: 2 }],
         },
-        requiresFlamethrower: true,
         needsVerification: true,
     },
 
@@ -3035,7 +2875,6 @@ export const STRATEGIES: Strategy[] = [
             ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
             place:  [{ resourceId: RESOURCE.GASOLINE, qty: 1 }],
         },
-        requiresFlamethrower: true,
     },
 
     {
@@ -3064,7 +2903,6 @@ export const STRATEGIES: Strategy[] = [
             ignite:   [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
             place:    [{ resourceId: RESOURCE.GASOLINE,     qty: 3 }],
         },
-        requiresFlamethrower: true,
     },
 
     {
@@ -3074,7 +2912,6 @@ export const STRATEGIES: Strategy[] = [
             ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
             place:  [{ resourceId: RESOURCE.GASOLINE, qty: 4 }],
         },
-        requiresFlamethrower: true,
     },
 
     {
@@ -3091,7 +2928,6 @@ export const STRATEGIES: Strategy[] = [
             ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
             place:  [{ resourceId: RESOURCE.GASOLINE, qty: 3 }],
         },
-        requiresFlamethrower: true,
     },
 
     {
@@ -3108,7 +2944,6 @@ export const STRATEGIES: Strategy[] = [
             ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
             place:  [{ resourceId: RESOURCE.GASOLINE, qty: 1 }],
         },
-        requiresFlamethrower: true,
     },
 
     {
@@ -3125,7 +2960,6 @@ export const STRATEGIES: Strategy[] = [
             ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
             place:  [{ resourceId: RESOURCE.GASOLINE, qty: 3 }],
         },
-        requiresFlamethrower: true,
     },
 
     {
@@ -3145,7 +2979,6 @@ export const STRATEGIES: Strategy[] = [
             ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
             place:  [{ resourceId: RESOURCE.GASOLINE, qty: 8 }],
         },
-        requiresFlamethrower: true,
     },
 
     {
@@ -3162,7 +2995,6 @@ export const STRATEGIES: Strategy[] = [
             ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
             place:  [{ resourceId: RESOURCE.GASOLINE, qty: 2 }],
         },
-        requiresFlamethrower: true,
     },
 
     {
@@ -3179,9 +3011,7 @@ export const STRATEGIES: Strategy[] = [
             ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
             place:  [{ resourceId: RESOURCE.GASOLINE, qty: 2 }],
         },
-        requiresFlamethrower: true,
     },
-
     {
         scenarioName: "You're Fired!",
         payout: 150_000,
@@ -3191,9 +3021,6 @@ export const STRATEGIES: Strategy[] = [
         },
         needsVerification: true,
     },
-
-    // --- Needs verification ---
-
     {
         scenarioName: 'A Bitter Taste',
         payout: 0,

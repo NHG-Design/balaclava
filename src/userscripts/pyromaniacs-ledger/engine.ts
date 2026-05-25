@@ -1,5 +1,5 @@
 import { CATALOG, type ResourceId } from '../../data/catalog.js';
-import { type Strategy, type ActionItem } from '../../data/strategies.js';
+import type { Strategy, ActionItem } from '../../data/strategies.js';
 
 export type ProfitBand = 'negative' | 'low' | 'good' | 'jackpot';
 
@@ -93,6 +93,12 @@ export function formatPpn(ppn: number): string {
     return `$${sign}${rounded}/N`;
 }
 
+export function strategyNeedsFlamethrower(s: Strategy): boolean {
+    return Object.values(s.actions).flat().some(
+        item => item.resourceId === ('flamethrower' as ResourceId),
+    );
+}
+
 /**
  * Returns all skill-eligible strategies ranked for a scenario.
  * Confirmed strategies sort before unconfirmed; within each group: PPN desc,
@@ -105,7 +111,7 @@ export function rankForScenario(
     thresholds: ProfitThresholds,
 ): RankedStrategy[] {
     const eligible = candidates.filter(s => {
-        if (s.requiresFlamethrower && !hasFlamethrower) return false;
+        if (!hasFlamethrower && strategyNeedsFlamethrower(s)) return false;
         return true;
     });
 

@@ -1,9 +1,14 @@
 import { execSync } from 'node:child_process';
 import { readFileSync, writeFileSync } from 'fs';
 
+const DIST_BASE = 'https://raw.githubusercontent.com/NHG-Design/balaclava/main/dist';
+const BALACLAVA_BASE = 'https://balaclava.app';
+
 const COMMON_METADATA = {
     namespace: 'https://github.com/NHG-Design/balaclava',
-    author: 'Balaclava',
+    author: 'Yukio [906148]',
+    supportURL: 'https://github.com/NHG-Design/balaclava/issues',
+    license: 'MIT',
     runAt: 'document-idle',
 };
 
@@ -16,6 +21,8 @@ const USERSCRIPTS = [
             name: 'Balaclava Tooltip',
             version: '1.0.1',
             description: 'Universal tooltip injection via Tampermonkey',
+            updateURL: `${DIST_BASE}/balaclava-tooltip.meta.js`,
+            downloadURL: `${DIST_BASE}/balaclava-tooltip.user.js`,
             match: '*://*/*',
             grant: 'unsafeWindow',
         },
@@ -29,9 +36,12 @@ const USERSCRIPTS = [
             version: '0.1.0',
             description: "Arson profit-per-nerve calculator and strategy guide for Torn's Crimes page",
             icon: 'https://www.google.com/s2/favicons?sz=64&domain=torn.com',
+            updateURL: `${DIST_BASE}/pyromaniacs-ledger.meta.js`,
+            downloadURL: `${DIST_BASE}/pyromaniacs-ledger.user.js`,
             match: 'https://www.torn.com/page.php?sid=crimes*',
-            grant: ['GM_setValue', 'GM_getValue', 'unsafeWindow'],
-            require: 'https://raw.githubusercontent.com/NHG-Design/balaclava/main/dist/balaclava-tooltip.user.js',
+            grant: ['GM_setValue', 'GM_getValue', 'GM_getResourceText', 'unsafeWindow'],
+            require: `${DIST_BASE}/balaclava-tooltip.user.js`,
+            resource: `pyroStrategies ${BALACLAVA_BASE}/pyromaniacs-ledger/strategies.json`,
         },
     },
 ];
@@ -43,9 +53,14 @@ const METADATA_FIELDS = [
     ['description', '@description'],
     ['icon', '@icon'],
     ['author', '@author'],
+    ['license', '@license'],
+    ['supportURL', '@supportURL'],
+    ['updateURL', '@updateURL'],
+    ['downloadURL', '@downloadURL'],
     ['match', '@match'],
     ['grant', '@grant'],
     ['require', '@require'],
+    ['resource', '@resource'],
     ['runAt', '@run-at'],
 ];
 
@@ -66,6 +81,8 @@ function createUserscriptHeader(metadata) {
     return lines.join('\n');
 }
 
+execSync('pnpm exec tsx scripts/dump-strategies.ts', { stdio: 'inherit' });
+
 for (const userscript of USERSCRIPTS) {
     execSync(
         `pnpm exec esbuild ${userscript.entry}` +
@@ -74,9 +91,12 @@ for (const userscript of USERSCRIPTS) {
         { stdio: 'inherit' }
     );
 
-    const header = `${createUserscriptHeader(userscript.metadata)}\n\n`;
+    const header = createUserscriptHeader(userscript.metadata);
     const bundle = readFileSync(userscript.outfile, 'utf8');
-    writeFileSync(userscript.outfile, header + bundle);
+    writeFileSync(userscript.outfile, `${header}\n\n${bundle}`);
+
+    const metaFile = userscript.outfile.replace('.user.js', '.meta.js');
+    writeFileSync(metaFile, `${header}\n`);
 
     console.log(`Built ${userscript.outfile}.`);
 }

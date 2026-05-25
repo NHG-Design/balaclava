@@ -1,6 +1,6 @@
 import { CATALOG, RESOURCE } from '../../data/catalog.js';
-import { type ActionItem, type Strategy } from '../../data/strategies.js';
-import { type RankedStrategy, formatPpn, calcNerve } from './engine.js';
+import type { ActionItem, Strategy } from '../../data/strategies.js';
+import { type RankedStrategy, formatPpn, calcNerve, strategyNeedsFlamethrower } from './engine.js';
 
 function el(tag: string, className?: string): HTMLElement {
     const e = document.createElement(tag);
@@ -41,7 +41,7 @@ function actionSection(label: string, items: ActionItem[] | undefined): HTMLElem
     return div;
 }
 
-function buildPrimaryBlock(ranked: RankedStrategy): DocumentFragment {
+function buildPrimaryBlock(ranked: RankedStrategy, statsOnly = false): DocumentFragment {
     const frag = document.createDocumentFragment();
     const { strategy, profitPerNerve, materialCost, baseNerve } = ranked;
 
@@ -62,14 +62,16 @@ function buildPrimaryBlock(ranked: RankedStrategy): DocumentFragment {
     stats.appendChild(row('Nerve',  String(baseNerve)));
     frag.appendChild(stats);
 
+    if (statsOnly) return frag;
+
     frag.appendChild(el('hr', 'pyro-tt-divider'));
 
     const { evidence, place, stoke, dampen } = strategy.actions;
     const ignite = strategy.actions.ignite ?? [{ resourceId: RESOURCE.LIGHTER, qty: 1 }];
     const actionOrder: [string, ActionItem[] | undefined][] = [
         ['Evidence', evidence],
-        ['Ignite',   ignite],
         ['Place',    place],
+        ['Ignite',   ignite],
         ['Stoke',    stoke],
         ['Dampen',   dampen],
     ];
@@ -92,7 +94,7 @@ function buildAltRow(ranked: RankedStrategy): HTMLElement {
     const ppn = el('span', `pyro-tt-alt-ppn pyro-tt-band--${ranked.band}`);
     ppn.textContent = formatPpn(ranked.profitPerNerve);
     const meta = el('span', 'pyro-tt-alt-meta');
-    const ftTag = ranked.strategy.requiresFlamethrower ? ' · FT' : '';
+    const ftTag = strategyNeedsFlamethrower(ranked.strategy) ? ' · FT' : '';
     const unconfTag = ranked.strategy.needsVerification ? ' · ?' : '';
     meta.textContent = `${ranked.baseNerve}N · $${(ranked.materialCost / 1000).toFixed(1)}k${ftTag}${unconfTag}`;
     div.appendChild(ppn);
@@ -103,13 +105,16 @@ function buildAltRow(ranked: RankedStrategy): HTMLElement {
 /**
  * Builds the structured DOM node passed to BalaclavaTooltip.show().
  * allRanked[0] is the best strategy; the rest are shown as compact alternatives.
+ * statsOnly omits action items and alternatives — used for pending-collect verified cards.
  */
-export function buildTooltipContent(allRanked: RankedStrategy[]): HTMLElement {
+export function buildTooltipContent(allRanked: RankedStrategy[], statsOnly = false): HTMLElement {
     const root = el('div', 'pyro-tt');
 
     if (allRanked.length === 0) return root;
 
-    root.appendChild(buildPrimaryBlock(allRanked[0]!));
+    root.appendChild(buildPrimaryBlock(allRanked[0]!, statsOnly));
+
+    if (statsOnly) return root;
 
     const alts = allRanked.slice(1);
     if (alts.length > 0) {

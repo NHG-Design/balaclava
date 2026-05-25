@@ -40,4 +40,7 @@ export const SEL = {
      * Settings gear is appended here as an additional item.
      */
     RESULT_COUNTS: '[class*="resultCounts___"]',
+
+    /** Card that has already been committed and is waiting to be collected. */
+    PENDING_COLLECT: '.pending-collect',
 } as const;
