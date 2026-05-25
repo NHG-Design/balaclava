@@ -1,5 +1,6 @@
 import { execSync } from 'node:child_process';
 import { readFileSync, writeFileSync } from 'fs';
+import { build } from 'esbuild';
 
 const DIST_BASE = 'https://raw.githubusercontent.com/NHG-Design/balaclava/main/dist';
 const BALACLAVA_BASE = 'https://balaclava.app';
@@ -84,12 +85,15 @@ function createUserscriptHeader(metadata) {
 execSync('pnpm exec tsx scripts/dump-strategies.ts', { stdio: 'inherit' });
 
 for (const userscript of USERSCRIPTS) {
-    execSync(
-        `pnpm exec esbuild ${userscript.entry}` +
-        ' --bundle --format=iife --target=es2020 --tree-shaking=true' +
-        ` --outfile=${userscript.outfile} --log-level=info`,
-        { stdio: 'inherit' }
-    );
+    await build({
+        entryPoints: [userscript.entry],
+        bundle: true,
+        format: 'iife',
+        target: 'es2020',
+        treeShaking: true,
+        outfile: userscript.outfile,
+        logLevel: 'info',
+    });
 
     const header = createUserscriptHeader(userscript.metadata);
     const bundle = readFileSync(userscript.outfile, 'utf8');
