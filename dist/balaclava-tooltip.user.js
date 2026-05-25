@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        Balaclava Tooltip
 // @namespace   https://github.com/NHG-Design/balaclava
-// @version     1.0.1
+// @version     1.0.2
 // @description Universal tooltip injection for userscript managers
 // @author      Yukio [906148]
 // @license     MIT
@@ -22,7 +22,7 @@
   var ARROW_OFFSET_MIN = 10;
   var ARROW_OFFSET_MAX = 90;
   var ARROW_OFFSET_DEFAULT = 50;
-  var VERSION = "1.0.1";
+  var VERSION = "1.0.2";
   var VALID_POSITIONS = /* @__PURE__ */ new Set(["top", "bottom", "left", "right"]);
   var VALID_THEMES = /* @__PURE__ */ new Set(["system", "dark", "light", "custom"]);
   var CUSTOM_THEME_KEYS = /* @__PURE__ */ new Set(["bgColor", "textColor", "borderColor", "shadowColor"]);
@@ -204,6 +204,11 @@
         transform: scale(0.97);
       }
 
+      .balaclava-tooltip.is-exiting {
+        opacity: 0;
+        transform: scale(0.97);
+      }
+
       @media (prefers-color-scheme: light) {
         .balaclava-tooltip.is-theme-system {
           --balaclava-tooltip-bg: ${THEME_TOKENS.light.bgColor};
@@ -289,6 +294,7 @@
         trackTargetPosition();
       });
     }, hideTooltip = function() {
+      tooltipCooldownEnd = Date.now() + 600;
       cleanupTooltip();
     }, configure = function(userConfig = {}) {
       const nextConfig = { ...config };
@@ -326,17 +332,40 @@
       const controller = new AbortController();
       const { signal } = controller;
       let detached = false;
-      const onShow = () => showTooltip(element, resolveContent(content, element), options);
-      const onHide = () => {
+      let hoverTimer = null;
+      const doShow = () => showTooltip(element, resolveContent(content, element), options);
+      const onMouseEnter = () => {
+        if (Date.now() < tooltipCooldownEnd) {
+          nextShowInstant = true;
+          doShow();
+          nextShowInstant = false;
+        } else {
+          hoverTimer = setTimeout(() => {
+            hoverTimer = null;
+            doShow();
+          }, 200);
+        }
+      };
+      const onMouseLeave = () => {
+        if (hoverTimer !== null) {
+          clearTimeout(hoverTimer);
+          hoverTimer = null;
+        }
         if (targetElement === element) hideTooltip();
       };
-      element.addEventListener("mouseenter", onShow, { signal });
-      element.addEventListener("mouseleave", onHide, { signal });
-      element.addEventListener("focus", onShow, { signal });
-      element.addEventListener("blur", onHide, { signal });
+      element.addEventListener("mouseenter", onMouseEnter, { signal });
+      element.addEventListener("mouseleave", onMouseLeave, { signal });
+      element.addEventListener("focus", doShow, { signal });
+      element.addEventListener("blur", () => {
+        if (targetElement === element) hideTooltip();
+      }, { signal });
       const detach = function detach2() {
         if (detached) return;
         detached = true;
+        if (hoverTimer !== null) {
+          clearTimeout(hoverTimer);
+          hoverTimer = null;
+        }
         controller.abort();
         attachmentDetachers.delete(detach2);
         if (targetElement === element) {
@@ -420,7 +449,8 @@
       }
       tooltipEl = document.createElement("div");
       tooltipEl.id = tooltipId;
-      tooltipEl.className = `${getTooltipClassName()} is-entering`;
+      tooltipEl.className = nextShowInstant ? getTooltipClassName() : `${getTooltipClassName()} is-entering`;
+      if (nextShowInstant) tooltipEl.setAttribute("data-instant", "");
       tooltipEl.setAttribute("role", "tooltip");
       tooltipEl.setAttribute("aria-live", "polite");
       tooltipEl.style.setProperty("--arrow-offset", `${arrowOffset}%`);
@@ -443,11 +473,13 @@
         tooltipEl.appendChild(arrowEl);
       }
       shadow.appendChild(tooltipEl);
-      requestAnimationFrame(() => {
-        if (tooltipEl) {
-          tooltipEl.classList.remove("is-entering");
-        }
-      });
+      if (!nextShowInstant) {
+        requestAnimationFrame(() => {
+          if (tooltipEl) {
+            tooltipEl.classList.remove("is-entering");
+          }
+        });
+      }
     }, setupIntersectionObserver = function() {
       cleanupIntersectionObserver();
       if (!targetElement || typeof IntersectionObserver === "undefined") return;
@@ -475,8 +507,15 @@
         scrollFrameId = null;
       }
       if (tooltipEl) {
-        tooltipEl.remove();
+        const exiting = tooltipEl;
         tooltipEl = null;
+        exiting.removeAttribute("id");
+        exiting.classList.add("is-exiting");
+        const remove = () => {
+          if (exiting.isConnected) exiting.remove();
+        };
+        exiting.addEventListener("transitionend", remove, { once: true });
+        setTimeout(remove, 200);
       }
       cleanupIntersectionObserver();
       isVisible = false;
@@ -711,6 +750,8 @@
     let isVisible = false;
     let globalListenersController = null;
     let readyController = null;
+    let tooltipCooldownEnd = 0;
+    let nextShowInstant = false;
     const tooltipId = `balaclava-tt-${Math.random().toString(36).slice(2, 11)}`;
     let attachedElements = /* @__PURE__ */ new WeakMap();
     const attachmentDetachers = /* @__PURE__ */ new Set();

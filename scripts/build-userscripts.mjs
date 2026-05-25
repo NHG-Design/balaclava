@@ -1,5 +1,6 @@
 import { execSync } from 'node:child_process';
 import { readFileSync, writeFileSync } from 'fs';
+import { build } from 'esbuild';
 
 const DIST_BASE = 'https://raw.githubusercontent.com/NHG-Design/balaclava/main/dist';
 const BALACLAVA_BASE = 'https://balaclava.app';
@@ -19,7 +20,7 @@ const USERSCRIPTS = [
         metadata: {
             ...COMMON_METADATA,
             name: 'Balaclava Tooltip',
-            version: '1.0.1',
+            version: '1.0.2',
             description: 'Universal tooltip injection for userscript managers',
             updateURL: `${DIST_BASE}/balaclava-tooltip.meta.js`,
             downloadURL: `${DIST_BASE}/balaclava-tooltip.user.js`,
@@ -33,7 +34,7 @@ const USERSCRIPTS = [
         metadata: {
             ...COMMON_METADATA,
             name: "Torn Pyromaniac's Ledger",
-            version: '0.4.3',
+            version: '0.4.4',
             description: "Arson profit-per-nerve calculator and strategy guide for Torn's Crimes page",
             icon: 'https://www.google.com/s2/favicons?sz=64&domain=torn.com',
             updateURL: `${DIST_BASE}/pyromaniacs-ledger.meta.js`,
@@ -84,12 +85,15 @@ function createUserscriptHeader(metadata) {
 execSync('pnpm exec tsx scripts/dump-strategies.ts', { stdio: 'inherit' });
 
 for (const userscript of USERSCRIPTS) {
-    execSync(
-        `pnpm exec esbuild ${userscript.entry}` +
-        ' --bundle --format=iife --target=es2020 --tree-shaking=true' +
-        ` --outfile=${userscript.outfile} --log-level=info`,
-        { stdio: 'inherit' }
-    );
+    await build({
+        entryPoints: [userscript.entry],
+        bundle: true,
+        format: 'iife',
+        target: 'es2020',
+        treeShaking: true,
+        outfile: userscript.outfile,
+        logLevel: 'info',
+    });
 
     const header = createUserscriptHeader(userscript.metadata);
     const bundle = readFileSync(userscript.outfile, 'utf8');
