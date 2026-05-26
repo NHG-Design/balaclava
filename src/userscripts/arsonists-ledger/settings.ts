@@ -618,8 +618,8 @@ function buildDebugTab(ctx: SettingsCtx): HTMLElement {
     const missing = ctx.getMissingScenarios();
     const header = el('div', 'pyro-s-missing-header');
     header.textContent = missing.length
-        ? `Missing strategies observed this session (${missing.length}):`
-        : 'No missing strategies observed this session.';
+        ? `Missing scenarios observed this session (${missing.length}):`
+        : 'No Missing scenarios observed this session.';
     root.appendChild(header);
 
     if (missing.length > 0) {

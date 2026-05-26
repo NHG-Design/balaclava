@@ -2,7 +2,7 @@ import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
 
 import { CATALOG, RESOURCE } from '../../data/catalog.js';
-import { STRATEGIES } from '../../data/strategies.js';
+import { SCENARIOS } from '../../data/scenarios.js';
 import {
     calcNerve,
     calcMaterialCost,
@@ -10,17 +10,17 @@ import {
     profitBand,
     formatPpn,
     rankForScenario,
-    strategyNeedsFlamethrower,
+    scenarioNeedsFlamethrower,
     DEFAULT_THRESHOLDS,
     type PriceMap,
 } from './engine.js';
-import type { Strategy } from '../../data/strategies.js';
+import type { Scenario } from '../../data/scenarios.js';
 
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
 
-function strategy(overrides: Partial<Strategy> & Pick<Strategy, 'actions'>): Strategy {
+function Scenario(overrides: Partial<Scenario> & Pick<Scenario, 'actions'>): Scenario {
     return {
         scenarioName: 'Test Scenario',
         payout: 100_000,
@@ -99,18 +99,18 @@ describe('catalog', () => {
 
 describe('calcNerve', () => {
     it('baseline is 10 (breach + ignite + collect) with no material actions', () => {
-        const s = strategy({ actions: { place: [{ resourceId: RESOURCE.GASOLINE, qty: 0 }] } });
+        const s = Scenario({ actions: { place: [{ resourceId: RESOURCE.GASOLINE, qty: 0 }] } });
         assert.equal(calcNerve(s), 10);
     });
 
     it('each place qty adds 5 nerve', () => {
-        assert.equal(calcNerve(strategy({ actions: { place: [{ resourceId: RESOURCE.GASOLINE, qty: 1 }] } })), 15);
-        assert.equal(calcNerve(strategy({ actions: { place: [{ resourceId: RESOURCE.GASOLINE, qty: 2 }] } })), 20);
-        assert.equal(calcNerve(strategy({ actions: { place: [{ resourceId: RESOURCE.GASOLINE, qty: 4 }] } })), 30);
+        assert.equal(calcNerve(Scenario({ actions: { place: [{ resourceId: RESOURCE.GASOLINE, qty: 1 }] } })), 15);
+        assert.equal(calcNerve(Scenario({ actions: { place: [{ resourceId: RESOURCE.GASOLINE, qty: 2 }] } })), 20);
+        assert.equal(calcNerve(Scenario({ actions: { place: [{ resourceId: RESOURCE.GASOLINE, qty: 4 }] } })), 30);
     });
 
     it('evidence, stoke, dampen each add 5 nerve per qty', () => {
-        const s = strategy({
+        const s = Scenario({
             actions: {
                 evidence: [{ resourceId: RESOURCE.DIAMOND_RING, qty: 1 }],
                 place:    [{ resourceId: RESOURCE.GASOLINE,     qty: 1 }],
@@ -123,7 +123,7 @@ describe('calcNerve', () => {
     });
 
     it('optional items do not contribute to nerve', () => {
-        const s = strategy({
+        const s = Scenario({
             actions: {
                 place: [
                     { resourceId: RESOURCE.GASOLINE, qty: 2 },
@@ -136,13 +136,13 @@ describe('calcNerve', () => {
     });
 
     it('ignite slot does not add extra nerve (already in the 10 baseline)', () => {
-        const withFT = strategy({
+        const withFT = Scenario({
             actions: {
                 ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
                 place:  [{ resourceId: RESOURCE.GASOLINE,     qty: 1 }],
             },
         });
-        const withoutFT = strategy({
+        const withoutFT = Scenario({
             actions: {
                 place: [{ resourceId: RESOURCE.GASOLINE, qty: 1 }],
             },
@@ -157,18 +157,18 @@ describe('calcNerve', () => {
 
 describe('calcMaterialCost', () => {
     it('uses defaultPrice from catalog', () => {
-        const s = strategy({ actions: { place: [{ resourceId: RESOURCE.GASOLINE, qty: 2 }] } });
+        const s = Scenario({ actions: { place: [{ resourceId: RESOURCE.GASOLINE, qty: 2 }] } });
         assert.equal(calcMaterialCost(s, {}), CATALOG[RESOURCE.GASOLINE].defaultPrice * 2);
     });
 
     it('price override in PriceMap wins over defaultPrice', () => {
         const prices: PriceMap = { [RESOURCE.GASOLINE]: 9_999 };
-        const s = strategy({ actions: { place: [{ resourceId: RESOURCE.GASOLINE, qty: 2 }] } });
+        const s = Scenario({ actions: { place: [{ resourceId: RESOURCE.GASOLINE, qty: 2 }] } });
         assert.equal(calcMaterialCost(s, prices), 9_999 * 2);
     });
 
     it('tools are excluded from cost', () => {
-        const s = strategy({
+        const s = Scenario({
             actions: {
                 ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
                 place:  [{ resourceId: RESOURCE.GASOLINE,     qty: 1 }],
@@ -178,7 +178,7 @@ describe('calcMaterialCost', () => {
     });
 
     it('optional items are excluded from cost', () => {
-        const s = strategy({
+        const s = Scenario({
             actions: {
                 place: [
                     { resourceId: RESOURCE.GASOLINE, qty: 2 },
@@ -190,7 +190,7 @@ describe('calcMaterialCost', () => {
     });
 
     it('sums across all action slots', () => {
-        const s = strategy({
+        const s = Scenario({
             actions: {
                 evidence: [{ resourceId: RESOURCE.DIAMOND_RING, qty: 1 }],
                 place:    [{ resourceId: RESOURCE.GASOLINE,     qty: 2 }],
@@ -211,7 +211,7 @@ describe('calcMaterialCost', () => {
 
 describe('calcProfitPerNerve', () => {
     it('equals (payout - cost) / nerve', () => {
-        const s = strategy({
+        const s = Scenario({
             payout: 100_000,
             actions: { place: [{ resourceId: RESOURCE.GASOLINE, qty: 2 }] },
         });
@@ -221,7 +221,7 @@ describe('calcProfitPerNerve', () => {
     });
 
     it('returns negative when cost exceeds payout', () => {
-        const s = strategy({
+        const s = Scenario({
             payout: 1,
             actions: { place: [{ resourceId: RESOURCE.GASOLINE, qty: 1 }] },
         });
@@ -285,12 +285,12 @@ describe('rankForScenario', () => {
     const hasFT = true;
     const prices: PriceMap = {};
 
-    const confirmed: Strategy = {
+    const confirmed: Scenario = {
         scenarioName: 'Test',
         payout: 100_000,
         actions: { place: [{ resourceId: RESOURCE.GASOLINE, qty: 2 }] },
     };
-    const confirmedFT: Strategy = {
+    const confirmedFT: Scenario = {
         scenarioName: 'Test',
         payout: 120_000,
         actions: {
@@ -298,7 +298,7 @@ describe('rankForScenario', () => {
             place:  [{ resourceId: RESOURCE.GASOLINE,     qty: 1 }],
         },
     };
-    const unconfirmed: Strategy = {
+    const unconfirmed: Scenario = {
         scenarioName: 'Test',
         payout: 200_000,
         actions: { place: [{ resourceId: RESOURCE.DIESEL, qty: 1 }] },
@@ -309,63 +309,63 @@ describe('rankForScenario', () => {
         assert.equal(rankForScenario([], noFT, prices, DEFAULT_THRESHOLDS), null);
     });
 
-    it('excludes FT strategies when player lacks flamethrower', () => {
+    it('excludes FT SCENARIOS when player lacks flamethrower', () => {
         const result = rankForScenario([confirmed, confirmedFT], noFT, prices, DEFAULT_THRESHOLDS);
-        assert.equal(result?.strategy, confirmed);
+        assert.equal(result?.Scenario, confirmed);
     });
 
-    it('returns best FT strategy when player has flamethrower', () => {
+    it('returns best FT Scenario when player has flamethrower', () => {
         const result = rankForScenario([confirmed, confirmedFT], hasFT, prices, DEFAULT_THRESHOLDS);
-        assert.equal(result?.strategy, confirmedFT);
+        assert.equal(result?.Scenario, confirmedFT);
     });
 
-    it('returns confirmed strategy over higher-PPN unconfirmed', () => {
+    it('returns confirmed Scenario over higher-PPN unconfirmed', () => {
         const result = rankForScenario([unconfirmed, confirmed], noFT, prices, DEFAULT_THRESHOLDS);
-        assert.equal(result?.strategy.needsVerification, undefined);
+        assert.equal(result?.Scenario.needsVerification, undefined);
     });
 
-    it('returns unconfirmed when no confirmed strategy exists', () => {
+    it('returns unconfirmed when no confirmed Scenario exists', () => {
         const result = rankForScenario([unconfirmed], noFT, prices, DEFAULT_THRESHOLDS);
-        assert.equal(result?.strategy, unconfirmed);
+        assert.equal(result?.Scenario, unconfirmed);
     });
 
     it('within confirmed group, returns highest PPN', () => {
-        const highPayout: Strategy = { ...confirmed, payout: 500_000 };
+        const highPayout: Scenario = { ...confirmed, payout: 500_000 };
         const result = rankForScenario([confirmed, highPayout], noFT, prices, DEFAULT_THRESHOLDS);
-        assert.equal(result?.strategy, highPayout);
+        assert.equal(result?.Scenario, highPayout);
     });
 
     it('tie-breaks by nerve asc', () => {
-        const lowNerve:  Strategy = { scenarioName: 'T', payout: 100_000, actions: { place: [{ resourceId: RESOURCE.GASOLINE, qty: 1 }] } };
-        const highNerve: Strategy = { scenarioName: 'T', payout: 100_000, actions: { place: [{ resourceId: RESOURCE.GASOLINE, qty: 1 }, { resourceId: RESOURCE.GASOLINE, qty: 1 }] } };
+        const lowNerve:  Scenario = { scenarioName: 'T', payout: 100_000, actions: { place: [{ resourceId: RESOURCE.GASOLINE, qty: 1 }] } };
+        const highNerve: Scenario = { scenarioName: 'T', payout: 100_000, actions: { place: [{ resourceId: RESOURCE.GASOLINE, qty: 1 }, { resourceId: RESOURCE.GASOLINE, qty: 1 }] } };
         const result = rankForScenario([highNerve, lowNerve], noFT, prices, DEFAULT_THRESHOLDS);
-        assert.equal(result?.strategy, lowNerve);
+        assert.equal(result?.Scenario, lowNerve);
     });
 });
 
 // ---------------------------------------------------------------------------
-// Strategies data integrity
+// SCENARIOS data integrity
 // ---------------------------------------------------------------------------
 
-describe('strategies data', () => {
-    it('all strategies reference valid catalog resource IDs', () => {
+describe('SCENARIOS data', () => {
+    it('all SCENARIOS reference valid catalog resource IDs', () => {
         const validIds = new Set(Object.values(RESOURCE));
-        for (const s of STRATEGIES) {
+        for (const s of SCENARIOS) {
             for (const slot of [s.actions.evidence, s.actions.ignite, s.actions.place, s.actions.stoke, s.actions.dampen]) {
                 for (const item of slot ?? []) {
                     assert.ok(validIds.has(item.resourceId as never),
-                        `Unknown resourceId "${item.resourceId}" in strategy for "${s.scenarioName}"`);
+                        `Unknown resourceId "${item.resourceId}" in Scenario for "${s.scenarioName}"`);
                 }
             }
         }
     });
 
-    it('strategies using FLAMETHROWER are filtered out without CS>=80', () => {
-        const ftStrategies = STRATEGIES.filter(s => strategyNeedsFlamethrower(s));
-        assert.ok(ftStrategies.length > 0, 'expected some FT strategies');
+    it('SCENARIOS using FLAMETHROWER are filtered out without CS>=80', () => {
+        const ftStrategies = SCENARIOS.filter(s => scenarioNeedsFlamethrower(s));
+        assert.ok(ftStrategies.length > 0, 'expected some FT SCENARIOS');
         for (const s of ftStrategies) {
             const hasIt = Object.values(s.actions).flat().some(i => i.resourceId === RESOURCE.FLAMETHROWER);
-            assert.ok(hasIt, `strategyNeedsFlamethrower true but no FLAMETHROWER found in "${s.scenarioName}"`);
+            assert.ok(hasIt, `scenarioNeedsFlamethrower true but no FLAMETHROWER found in "${s.scenarioName}"`);
         }
     });
 });

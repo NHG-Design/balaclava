@@ -8,7 +8,7 @@ export interface ActionItem {
     optionalLabel?: string;
 }
 
-export interface StrategyActions {
+export interface ScenarioActions {
     evidence?: ActionItem[];
     ignite?: ActionItem[];
     place: ActionItem[];
@@ -20,12 +20,12 @@ export interface StrategyActions {
     dampenTime?: 'early' | 'late';
 }
 
-export interface Strategy {
+export interface Scenario {
     /** Exact scenario name as it appears on the Torn Arson crimes page. */
     scenarioName: string;
     /** Base listed payout in Torn dollars (ignoring ±10% variance). */
     payout: number;
-    actions: StrategyActions;
+    actions: ScenarioActions;
     notes?: string;
     /**
      * Marked when recipe details are uncertain.
@@ -34,7 +34,7 @@ export interface Strategy {
     needsVerification?: boolean;
 }
 
-export const STRATEGIES: Strategy[] = [
+export const SCENARIOS: Scenario[] = [
     // --- Flamethrower variants listed after non-FT for the same scenario ---
 
     {
@@ -1043,7 +1043,7 @@ export const STRATEGIES: Strategy[] = [
         actions: {
             ignite: [{ resourceId: RESOURCE.LIGHTER,  qty: 1 }],
             place:  [{ resourceId: RESOURCE.HYDROGEN, qty: 1 }],
-            stoke:  [{ resourceId: RESOURCE.HYDROGEN, qty: 2 }],
+            stoke:  [{ resourceId: RESOURCE.HYDROGEN, qty: 1 }],
             stokeTime: 'early',
         },
         needsVerification: true,

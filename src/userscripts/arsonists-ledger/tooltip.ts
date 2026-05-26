@@ -1,6 +1,6 @@
 import { CATALOG, RESOURCE } from '../../data/catalog.js';
-import type { ActionItem, Strategy } from '../../data/strategies.js';
-import { type RankedStrategy, type PriceMap, formatPpn, calcNerve } from './engine.js';
+import type { ActionItem, Scenario } from '../../data/scenarios.js';
+import { type RankedScenario, type PriceMap, formatPpn, calcNerve } from './engine.js';
 import { BAND_COLOR } from './colors.js';
 
 function el(tag: string, className?: string): HTMLElement {
@@ -62,9 +62,9 @@ function actionSection(label: string, items: ActionItem[] | undefined, prices: P
     return div;
 }
 
-function buildPrimaryBlock(ranked: RankedStrategy, prices: PriceMap, statsOnly = false): DocumentFragment {
+function buildPrimaryBlock(ranked: RankedScenario, prices: PriceMap, statsOnly = false): DocumentFragment {
     const frag = document.createDocumentFragment();
-    const { strategy, profitPerNerve, materialCost, baseNerve } = ranked;
+    const { Scenario, profitPerNerve, materialCost, baseNerve } = ranked;
 
     const header = el('div', 'pyro-tt-header');
     const title = el('span', 'pyro-tt-title');
@@ -73,7 +73,7 @@ function buildPrimaryBlock(ranked: RankedStrategy, prices: PriceMap, statsOnly =
     const ppnEl = el('span', `pyro-tt-ppn pyro-tt-band--${ranked.band}`);
     ppnEl.textContent = formatPpn(profitPerNerve);
     header.appendChild(ppnEl);
-    if (strategy.needsVerification) {
+    if (Scenario.needsVerification) {
         const badge = el('span', 'pyro-tt-unconfirmed');
         badge.textContent = 'unconfirmed';
         header.appendChild(badge);
@@ -81,7 +81,7 @@ function buildPrimaryBlock(ranked: RankedStrategy, prices: PriceMap, statsOnly =
     frag.appendChild(header);
 
     const stats = el('div', 'pyro-tt-stats');
-    stats.appendChild(row('Payout', `~$${(strategy.payout / 1000).toFixed(0)}k`));
+    stats.appendChild(row('Payout', `~$${(Scenario.payout / 1000).toFixed(0)}k`));
     stats.appendChild(row('Cost',   `~$${(materialCost / 1000).toFixed(1)}k`));
     stats.appendChild(row('Nerve',  String(baseNerve)));
     frag.appendChild(stats);
@@ -90,8 +90,8 @@ function buildPrimaryBlock(ranked: RankedStrategy, prices: PriceMap, statsOnly =
 
     frag.appendChild(el('hr', 'pyro-tt-divider'));
 
-    const { evidence, place, stoke, stokeTime, dampen, dampenTime } = strategy.actions;
-    const ignite = strategy.actions.ignite ?? [{ resourceId: RESOURCE.LIGHTER, qty: 1 }];
+    const { evidence, place, stoke, stokeTime, dampen, dampenTime } = Scenario.actions;
+    const ignite = Scenario.actions.ignite ?? [{ resourceId: RESOURCE.LIGHTER, qty: 1 }];
     const actionOrder: [string, ActionItem[] | undefined, 'early' | 'late' | undefined][] = [
         ['Evidence', evidence,  undefined],
         ['Place',    place,     undefined],
@@ -104,16 +104,16 @@ function buildPrimaryBlock(ranked: RankedStrategy, prices: PriceMap, statsOnly =
         if (s) frag.appendChild(s);
     }
 
-    if (strategy.notes) {
+    if (Scenario.notes) {
         const note = el('div', 'pyro-tt-notes');
-        note.textContent = strategy.notes;
+        note.textContent = Scenario.notes;
         frag.appendChild(note);
     }
 
     return frag;
 }
 
-export function buildTooltipContent(ranked: RankedStrategy | null, prices: PriceMap, statsOnly = false): HTMLElement {
+export function buildTooltipContent(ranked: RankedScenario | null, prices: PriceMap, statsOnly = false): HTMLElement {
     const root = el('div', 'pyro-tt');
     if (!ranked) return root;
     root.appendChild(buildPrimaryBlock(ranked, prices, statsOnly));

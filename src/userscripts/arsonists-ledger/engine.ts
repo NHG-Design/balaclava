@@ -1,5 +1,5 @@
 import { CATALOG, type ResourceId } from '../../data/catalog.js';
-import type { Strategy, ActionItem } from '../../data/strategies.js';
+import type { Scenario, ActionItem } from '../../data/scenarios.js';
 
 export type ProfitBand = 'negative' | 'low' | 'good' | 'excellent';
 
@@ -10,8 +10,8 @@ export interface ProfitThresholds {
 
 export const DEFAULT_THRESHOLDS: ProfitThresholds = { low: 5_000, good: 10_000 };
 
-export interface RankedStrategy {
-    strategy: Strategy;
+export interface RankedScenario {
+    scenario: Scenario;
     materialCost: number;
     baseNerve: number;
     profitPerNerve: number;
@@ -48,7 +48,7 @@ function itemActionCount(items: ActionItem[] | undefined): number {
  * Full-job nerve = Breach(3) + Ignite(5) + Collect(2) + 5 per material action.
  * Each qty on Place/Stoke/Dampen/Evidence = one action = 5 nerve.
  */
-export function calcNerve(strategy: Strategy): number {
+export function calcNerve(scenario: Scenario): number {
     const { evidence, ignite, place, stoke, dampen } = strategy.actions;
     const items =
         itemActionCount(evidence) +
@@ -93,7 +93,7 @@ export function formatPpn(ppn: number): string {
     return `~$${sign}${rounded}`;
 }
 
-export function strategyNeedsFlamethrower(s: Strategy): boolean {
+export function scenarioNeedsFlamethrower(s: Scenario): boolean {
     return Object.values(s.actions).flat().some(
         item => item.resourceId === ('flamethrower' as ResourceId),
     );
@@ -105,22 +105,22 @@ export function strategyNeedsFlamethrower(s: Strategy): boolean {
  * then nerve asc, then cost asc.
  */
 export function rankForScenario(
-    candidates: Strategy[],
+    candidates: Scenario[],
     hasFlamethrower: boolean,
     prices: PriceMap,
     thresholds: ProfitThresholds,
-): RankedStrategy | null {
+): RankedScenario | null {
     const eligible = candidates.filter(s => {
-        if (!hasFlamethrower && strategyNeedsFlamethrower(s)) return false;
+        if (!hasFlamethrower && scenarioNeedsFlamethrower(s)) return false;
         return true;
     });
 
     if (eligible.length === 0) return null;
 
-    const ranked: RankedStrategy[] = eligible.map(s => {
+    const ranked: RankedScenario[] = eligible.map(s => {
         const ppn = calcProfitPerNerve(s, prices);
         return {
-            strategy: s,
+            scenario: s,
             materialCost: calcMaterialCost(s, prices),
             baseNerve: calcNerve(s),
             profitPerNerve: ppn,

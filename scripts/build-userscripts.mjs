@@ -24,7 +24,7 @@ const STATIC_MODULES = [
         outfile: 'static/balaclava-tooltip.js',
     },
     {
-        entry: 'src/userscripts/pyromaniacs-ledger/scenarios.ts',
+        entry: 'src/userscripts/arsonists-ledger/scenarios.ts',
         outfile: 'static/pyromaniacs-ledger/scenarios.js',
     },
 ];
@@ -45,16 +45,16 @@ const USERSCRIPTS = [
         },
     },
     {
-        entry: 'src/userscripts/pyromaniacs-ledger/index.ts',
-        outfile: 'dist/pyromaniacs-ledger.user.js',
+        entry: 'src/userscripts/arsonists-ledger/index.ts',
+        outfile: 'dist/arsonists-ledger.user.js',
         metadata: {
             ...COMMON_METADATA,
-            name: "Torn Pyromaniac's Ledger",
-            version: versions['pyromaniacs-ledger'],
-            description: "Arson profit-per-nerve calculator and strategy guide for Torn's Crimes page",
+            name: "Torn Arsonist's Ledger",
+            version: versions['arsonists-ledger'],
+            description: "Arson profit-per-nerve calculator and scenario guide for Torn's Crimes page",
             icon: 'https://www.google.com/s2/favicons?sz=64&domain=torn.com',
-            updateURL: `${DIST_BASE}/pyromaniacs-ledger.meta.js`,
-            downloadURL: `${DIST_BASE}/pyromaniacs-ledger.user.js`,
+            updateURL: `${DIST_BASE}/arsonists-ledger.meta.js`,
+            downloadURL: `${DIST_BASE}/arsonists-ledger.user.js`,
             match: 'https://www.torn.com/page.php?sid=crimes*',
             grant: ['GM_setValue', 'GM_getValue', 'unsafeWindow', 'GM_xmlhttpRequest'],
             connect: 'balaclava.app',
@@ -103,7 +103,7 @@ function createUserscriptHeader(metadata) {
     return lines.join('\n');
 }
 
-execSync('pnpm exec tsx scripts/dump-strategies.ts', { stdio: 'inherit' });
+execSync('pnpm exec tsx scripts/dump-scenarios.ts', { stdio: 'inherit' });
 
 for (const mod of STATIC_MODULES) {
     await build({

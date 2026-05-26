@@ -1,5 +1,5 @@
-import { STRATEGIES, type Strategy } from '../../data/strategies.js';
-import { STRATEGIES_VERSION } from '../../data/strategies-version.js';
+import { SCENARIOS, type Scenario } from '../../data/scenarios.js';
+import { SCENARIOS_VERSION } from '../../data/scenarios-version.js';
 import '../balaclava-tooltip/index.js';
 import {
     rankForScenario,
@@ -7,7 +7,7 @@ import {
     DEFAULT_THRESHOLDS,
     type PriceMap,
     type ProfitThresholds,
-    type RankedStrategy,
+    type RankedScenario,
 } from './engine.js';
 import { buildTooltipContent, buildTooltipStyles } from './tooltip.js';
 import { SEL } from './selectors.js';
@@ -187,39 +187,39 @@ function getSkillValue(): number {
 }
 
 // ---------------------------------------------------------------------------
-// Strategy index: scenarioName → Strategy[]
+// Scenario index: scenarioName → Scenario[]
 // ---------------------------------------------------------------------------
-const KEY_STRATEGIES_CACHE = `pyroLedger.${STRATEGIES_VERSION}.strategiesCache`;
-const KEY_STRATEGIES_TS    = `pyroLedger.${STRATEGIES_VERSION}.strategiesTs`;
-const STRATEGIES_URL       = 'https://balaclava.app/pyromaniacs-ledger/strategies.json';
+const KEY_SCENARIOS_CACHE = `pyroLedger.${SCENARIOS_VERSION}.scenariosCache`;
+const KEY_SCENARIOS_TS    = `pyroLedger.${SCENARIOS_VERSION}.scenariosTs`;
+const SCENARIOS_URL       = 'https://balaclava.app/pyromaniacs-ledger/SCENARIOS.json';
 const STRATEGIES_TTL_MS    = 24 * 60 * 60 * 1000;
 
-const strategyIndex = new Map<string, Strategy[]>();
+const scenarioIndex = new Map<string, Scenario[]>();
 
-function populateStrategyIndex(strategies: Strategy[]): void {
-    strategyIndex.clear();
-    for (const s of strategies) {
+function populatescenarioIndex(SCENARIOS: Scenario[]): void {
+    scenarioIndex.clear();
+    for (const s of SCENARIOS) {
         const key = s.scenarioName.toLowerCase();
-        const existing = strategyIndex.get(key);
-        if (existing) { existing.push(s); } else { strategyIndex.set(key, [s]); }
+        const existing = scenarioIndex.get(key);
+        if (existing) { existing.push(s); } else { scenarioIndex.set(key, [s]); }
     }
 }
 
 function loadStrategies(): void {
-    populateStrategyIndex(STRATEGIES);
+    populatescenarioIndex(SCENARIOS);
 }
 
 function scheduleStrategyRefresh(): void {
     if (typeof GM_xmlhttpRequest === 'undefined') return;
 
-    const ts = parseInt(store_get(KEY_STRATEGIES_TS, '0'), 10) || 0;
+    const ts = parseInt(store_get(KEY_SCENARIOS_TS, '0'), 10) || 0;
     const now = Date.now();
 
     if (now - ts < STRATEGIES_TTL_MS) {
         try {
-            const cached = JSON.parse(store_get(KEY_STRATEGIES_CACHE, '')) as Strategy[];
+            const cached = JSON.parse(store_get(KEY_SCENARIOS_CACHE, '')) as Scenario[];
             if (Array.isArray(cached) && cached.length > 0) {
-                populateStrategyIndex(cached);
+                populatescenarioIndex(cached);
                 resetScans();
             }
         } catch { /* keep bundled */ }
@@ -228,15 +228,15 @@ function scheduleStrategyRefresh(): void {
 
     GM_xmlhttpRequest({
         method: 'GET',
-        url: STRATEGIES_URL,
+        url: SCENARIOS_URL,
         onload(r) {
             if (r.status !== 200) return;
             try {
-                const fresh = JSON.parse(r.responseText) as Strategy[];
+                const fresh = JSON.parse(r.responseText) as Scenario[];
                 if (!Array.isArray(fresh) || fresh.length === 0) return;
-                store_set(KEY_STRATEGIES_CACHE, r.responseText);
-                store_set(KEY_STRATEGIES_TS, String(now));
-                populateStrategyIndex(fresh);
+                store_set(KEY_SCENARIOS_CACHE, r.responseText);
+                store_set(KEY_SCENARIOS_TS, String(now));
+                populatescenarioIndex(fresh);
                 resetScans();
             } catch { /* keep bundled */ }
         },
@@ -291,7 +291,7 @@ function injectTooltipContentStyles(): void {
 // ---------------------------------------------------------------------------
 // Scan and annotate
 // ---------------------------------------------------------------------------
-function applyToSection(section: HTMLElement, ranked: RankedStrategy | null, scenarioName: string): void {
+function applyToSection(section: HTMLElement, ranked: RankedScenario | null, scenarioName: string): void {
     section.querySelector('.pyro-label')?.remove();
     section.classList.forEach(c => { if (c.startsWith('pyro-band--')) section.classList.remove(c); });
 
@@ -302,7 +302,7 @@ function applyToSection(section: HTMLElement, ranked: RankedStrategy | null, sce
             const label = document.createElement('span');
             label.className = 'pyro-label pyro-label--unconfirmed';
             label.textContent = '?';
-            label.title = `No strategy: ${scenarioName}`;
+            label.title = `No Scenario: ${scenarioName}`;
             scenarioEl?.appendChild(label);
         }
         return;
@@ -329,16 +329,16 @@ function isPendingCollect(section: HTMLElement): boolean {
 
 // Per-card tooltip data, updated on each resetScans so a single set of listeners
 // always reflects the latest prices without accumulating stale closures.
-const tooltipData = new WeakMap<HTMLElement, RankedStrategy | null>();
+const tooltipData = new WeakMap<HTMLElement, RankedScenario | null>();
 
-function wireTooltip(section: HTMLElement, hoverTarget: HTMLElement, ranked: RankedStrategy | null): void {
+function wireTooltip(section: HTMLElement, hoverTarget: HTMLElement, ranked: RankedScenario | null): void {
     tooltipData.set(section, ranked);
     if (section.dataset.pyroTooltipWired) return;
     section.dataset.pyroTooltipWired = 'true';
 
     const getContent = (): HTMLElement => {
         const r = tooltipData.get(section) ?? null;
-        const statsOnly = isPendingCollect(section) && !!r && !r.strategy.needsVerification;
+        const statsOnly = isPendingCollect(section) && !!r && !r.Scenario.needsVerification;
         return buildTooltipContentWithStyles(r, effectivePrices(), statsOnly);
     };
 
@@ -371,7 +371,7 @@ function wireTooltip(section: HTMLElement, hoverTarget: HTMLElement, ranked: Ran
     }, { passive: true });
 }
 
-function buildTooltipContentWithStyles(ranked: RankedStrategy | null, prices: PriceMap, statsOnly = false): HTMLElement {
+function buildTooltipContentWithStyles(ranked: RankedScenario | null, prices: PriceMap, statsOnly = false): HTMLElement {
     const node = buildTooltipContent(ranked, prices, statsOnly);
 
     const style = document.createElement('style');
@@ -405,7 +405,7 @@ function scanPage(): void {
         const rawName = scenarioEl?.textContent?.trim() ?? '';
         if (!rawName) return;
 
-        const candidates = strategyIndex.get(rawName.toLowerCase()) ?? [];
+        const candidates = scenarioIndex.get(rawName.toLowerCase()) ?? [];
 
         if (candidates.length === 0 && debugMode) {
             missingScenarios.add(rawName);
