@@ -50,4 +50,7 @@ export const SEL = {
 
     /** Card that has already been committed and is waiting to be collected. */
     PENDING_COLLECT: '.pending-collect',
+
+    /** Crime image thumbnail — used as the mobile tooltip anchor. */
+    CRIME_IMAGE: '.crime-image',
 } as const;

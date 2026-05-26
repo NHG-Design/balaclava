@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        Torn Pyromaniac's Ledger
 // @namespace   https://github.com/NHG-Design/balaclava
-// @version     0.4.5
+// @version     0.4.6
 // @description Arson profit-per-nerve calculator and strategy guide for Torn's Crimes page
 // @icon        https://www.google.com/s2/favicons?sz=64&domain=torn.com
 // @author      Yukio [906148]
@@ -3807,6 +3807,14 @@
     return ranked;
   }
 
+  // src/userscripts/pyromaniacs-ledger/colors.ts
+  var BAND_COLOR = {
+    negative: "#f66",
+    low: "#fa0",
+    good: "#3c9",
+    jackpot: "#c9f"
+  };
+
   // src/userscripts/pyromaniacs-ledger/tooltip.ts
   function el(tag, className) {
     const e = document.createElement(tag);
@@ -3930,10 +3938,10 @@
     font-weight: bold;
     font-size: 14px;
 }
-.pyro-tt-band--negative { color: #f66; }
-.pyro-tt-band--low      { color: #fc6; }
-.pyro-tt-band--good     { color: #6c6; }
-.pyro-tt-band--jackpot  { color: #4ef; }
+.pyro-tt-band--negative { color: ${BAND_COLOR.negative}; }
+.pyro-tt-band--low      { color: ${BAND_COLOR.low};      }
+.pyro-tt-band--good     { color: ${BAND_COLOR.good};     }
+.pyro-tt-band--jackpot  { color: ${BAND_COLOR.jackpot};  }
 .pyro-tt-unconfirmed {
     font-size: 10px;
     opacity: 0.7;
@@ -4051,7 +4059,9 @@
      */
     RESULT_COUNTS: '[class*="resultCounts___"]',
     /** Card that has already been committed and is waiting to be collected. */
-    PENDING_COLLECT: ".pending-collect"
+    PENDING_COLLECT: ".pending-collect",
+    /** Crime image thumbnail — used as the mobile tooltip anchor. */
+    CRIME_IMAGE: ".crime-image"
   };
 
   // src/userscripts/pyromaniacs-ledger/api.ts
@@ -4161,7 +4171,7 @@
     letter-spacing: 0.04em;
 }
 .pyro-tab:hover { color: #bbb; }
-.pyro-tab.active { color: #fff; border-bottom-color: #4ef; }
+.pyro-tab.active { color: #fff; border-bottom-color: ${BAND_COLOR.jackpot}; }
 .pyro-tab-content {
     padding: 10px;
     max-height: 380px;
@@ -4207,7 +4217,7 @@
 }
 .pyro-s-input::-webkit-inner-spin-button,
 .pyro-s-input::-webkit-outer-spin-button { -webkit-appearance: none; }
-.pyro-s-input:focus { outline: none; border-color: #4ef; }
+.pyro-s-input:focus { outline: none; border-color: ${BAND_COLOR.jackpot}; }
 .pyro-s-input.from-api   { border-color: #48a; color: #7af; }
 .pyro-s-input.overridden { border-color: #4a4; color: #6d6; }
 .pyro-s-divider { border: none; border-top: 1px solid #2a2a2a; margin: 8px 0; }
@@ -4223,7 +4233,7 @@
     min-width: 0;
     font-family: monospace;
 }
-.pyro-s-key-input:focus { outline: none; border-color: #4ef; }
+.pyro-s-key-input:focus { outline: none; border-color: ${BAND_COLOR.jackpot}; }
 .pyro-s-btn {
     background: #252525;
     border: 1px solid #484848;
@@ -4244,7 +4254,7 @@
     min-height: 13px;
     color: #666;
 }
-.pyro-s-status.ok  { color: #6c6; }
+.pyro-s-status.ok  { color: ${BAND_COLOR.good}; }
 .pyro-s-status.err { color: #c66; }
 .pyro-s-refresh-row { display: flex; align-items: center; gap: 8px; }
 .pyro-s-timestamp { font-size: 10px; color: #555; }
@@ -4260,7 +4270,7 @@
 }
 .pyro-s-check-row input[type=checkbox] { cursor: pointer; }
 .pyro-s-section-note { font-size: 10px; color: #555; margin-bottom: 6px; }
-.pyro-s-section-note a { color: #4ef; text-decoration: none; }
+.pyro-s-section-note a { color: ${BAND_COLOR.jackpot}; text-decoration: none; }
 .pyro-s-section-note a:hover { text-decoration: underline; }
 .pyro-s-missing-header { font-size: 10px; color: #666; margin: 8px 0 4px; }
 .pyro-s-missing-list { font-size: 10px; color: #777; padding-left: 14px; margin: 0; }
@@ -4808,27 +4818,28 @@
     const style = document.createElement("style");
     style.id = "pyro-highlight-styles";
     style.textContent = `
-        .pyro-label {
-            display: inline-block;
-            margin-left: 6px;
-            font-size: 11px;
-            font-weight: bold;
-            padding: 1px 5px;
-            border-radius: 3px;
-            vertical-align: middle;
+        .pyro-label { display: none; }
+
+        .arson-root .pyro-band--negative { box-shadow: inset -5px 0 0 ${BAND_COLOR.negative} !important; }
+        .arson-root .pyro-band--low      { box-shadow: inset -5px 0 0 ${BAND_COLOR.low}      !important; }
+        .arson-root .pyro-band--good     { box-shadow: inset -5px 0 0 ${BAND_COLOR.good}     !important; }
+        .arson-root .pyro-band--jackpot  { box-shadow: inset -5px 0 0 ${BAND_COLOR.jackpot}  !important; }
+
+        .crime-image { position: relative !important; }
+        .pyro-info-badge {
+            position: absolute;
+            bottom: 2px;
+            right: 2px;
+            width: 14px;
+            height: 14px;
+            padding: 1px;
+            background: #fff;
+            border-radius: 50%;
+            color: #2a2a2a;
             pointer-events: none;
+            user-select: none;
         }
-        .pyro-label--unconfirmed { opacity: 0.55; }
-
-        .pyro-band--negative .pyro-label { color: #d33; }
-        .pyro-band--low      .pyro-label { color: #dc3; }
-        .pyro-band--good     .pyro-label { color: #4a6; }
-        .pyro-band--jackpot  .pyro-label { color: #a6f; }
-
-        .arson-root .pyro-band--negative { box-shadow: inset -5px 0 0 #d33 !important; }
-        .arson-root .pyro-band--low { box-shadow: inset -5px 0 0 #dc3 !important; }
-        .arson-root .pyro-band--good { box-shadow: inset -5px 0 0 #4a6 !important; }
-        .arson-root .pyro-band--jackpot { box-shadow: inset -5px 0 0 #a6f !important; }
+        .pyro-info-badge svg { display: block; width: 100%; height: 100%; }
     `;
     document.head.appendChild(style);
     injectTooltipContentStyles();
@@ -4861,14 +4872,14 @@
     }
     const display = best ?? bestUnconfirmed;
     section.classList.add(`pyro-band--${display.band}`);
-    const isDesktop = !!section.querySelector(SEL.DESKTOP_STATUS_SECTION);
-    if (isDesktop && scenarioEl) {
-      const label = document.createElement("span");
-      label.className = best ? "pyro-label" : "pyro-label pyro-label--unconfirmed";
-      label.textContent = formatPpn(display.profitPerNerve);
-      scenarioEl.appendChild(label);
+    const crimeImage = section.querySelector(SEL.CRIME_IMAGE);
+    const hoverTarget = crimeImage ?? section;
+    if (crimeImage && !crimeImage.querySelector(".pyro-info-badge")) {
+      const badge = document.createElement("span");
+      badge.className = "pyro-info-badge";
+      badge.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M12 10.941c2.333 -3.308 .167 -7.823 -1 -8.941c0 3.395 -2.235 5.299 -3.667 6.706c-1.43 1.408 -2.333 3.294 -2.333 5.588c0 3.704 3.134 6.706 7 6.706c3.866 0 7 -3.002 7 -6.706c0 -1.712 -1.232 -4.403 -2.333 -5.588c-2.084 3.353 -3.257 3.353 -4.667 2.235"/></svg>';
+      crimeImage.appendChild(badge);
     }
-    const hoverTarget = titleSection ?? section;
     wireTooltip(section, hoverTarget, allRanked);
   }
   function isPendingCollect(section) {
@@ -4892,14 +4903,14 @@
     hoverTarget.addEventListener("mouseleave", () => {
       tryTooltip((api) => api.hide());
     });
-    section.addEventListener("click", (e) => {
+    hoverTarget.addEventListener("click", (e) => {
       if (e.target.closest('button, a, input, select, textarea, [role="button"]')) return;
       tryTooltip((api) => {
         if (visibleMobileSection === section) {
           api.hide();
           visibleMobileSection = null;
         } else {
-          api.show(section, getContent(), { position: "top", theme: "dark" });
+          api.show(hoverTarget, getContent(), { position: "top", theme: "dark" });
           visibleMobileSection = section;
         }
       });
@@ -4921,22 +4932,10 @@
   function getRoot() {
     return document.querySelector(SEL.ROOT) ?? document.body;
   }
-  function cleanupSection(section) {
-    section.querySelector(".pyro-label")?.remove();
-    section.classList.forEach((c) => {
-      if (c.startsWith("pyro-band--")) section.classList.remove(c);
-    });
-    delete section.dataset.pyroScanned;
-    delete section.dataset.pyroTooltipWired;
-  }
   function scanPage() {
     const hasFlamethrower = getSkillValue() >= 80;
     const prices = effectivePrices();
     getRoot().querySelectorAll(SEL.CARD).forEach((section) => {
-      if (isPendingCollect(section)) {
-        if (section.dataset.pyroScanned) cleanupSection(section);
-        return;
-      }
       if (section.dataset.pyroScanned) return;
       section.dataset.pyroScanned = "true";
       const scenarioEl = section.querySelector('[class*="scenario___"]');

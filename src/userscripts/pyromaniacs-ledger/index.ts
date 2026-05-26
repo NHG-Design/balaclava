@@ -10,6 +10,7 @@ import {
 } from './engine.js';
 import { buildTooltipContent, buildTooltipStyles } from './tooltip.js';
 import { SEL } from './selectors.js';
+import { BAND_COLOR } from './colors.js';
 import { injectSettings, type SettingsCtx } from './settings.js';
 import type { ResourceId } from '../../data/catalog.js';
 
@@ -250,27 +251,28 @@ function injectHighlightStyles(): void {
     const style = document.createElement('style');
     style.id = 'pyro-highlight-styles';
     style.textContent = `
-        .pyro-label {
-            display: inline-block;
-            margin-left: 6px;
-            font-size: 11px;
-            font-weight: bold;
-            padding: 1px 5px;
-            border-radius: 3px;
-            vertical-align: middle;
+        .pyro-label { display: none; }
+
+        .arson-root .pyro-band--negative { box-shadow: inset -5px 0 0 ${BAND_COLOR.negative} !important; }
+        .arson-root .pyro-band--low      { box-shadow: inset -5px 0 0 ${BAND_COLOR.low}      !important; }
+        .arson-root .pyro-band--good     { box-shadow: inset -5px 0 0 ${BAND_COLOR.good}     !important; }
+        .arson-root .pyro-band--jackpot  { box-shadow: inset -5px 0 0 ${BAND_COLOR.jackpot}  !important; }
+
+        .crime-image { position: relative !important; }
+        .pyro-info-badge {
+            position: absolute;
+            bottom: 2px;
+            right: 2px;
+            width: 14px;
+            height: 14px;
+            padding: 1px;
+            background: #fff;
+            border-radius: 50%;
+            color: #2a2a2a;
             pointer-events: none;
+            user-select: none;
         }
-        .pyro-label--unconfirmed { opacity: 0.55; }
-
-        .pyro-band--negative .pyro-label { color: #d33; }
-        .pyro-band--low      .pyro-label { color: #dc3; }
-        .pyro-band--good     .pyro-label { color: #4a6; }
-        .pyro-band--jackpot  .pyro-label { color: #a6f; }
-
-        .arson-root .pyro-band--negative { box-shadow: inset -5px 0 0 #d33 !important; }
-        .arson-root .pyro-band--low { box-shadow: inset -5px 0 0 #dc3 !important; }
-        .arson-root .pyro-band--good { box-shadow: inset -5px 0 0 #4a6 !important; }
-        .arson-root .pyro-band--jackpot { box-shadow: inset -5px 0 0 #a6f !important; }
+        .pyro-info-badge svg { display: block; width: 100%; height: 100%; }
     `;
     document.head.appendChild(style);
 
@@ -312,17 +314,16 @@ function applyToSection(section: HTMLElement, allRanked: RankedStrategy[], scena
     const display = best ?? bestUnconfirmed!;
     section.classList.add(`pyro-band--${display.band}`);
 
-    // Desktop cards have room for an inline label; mobile/tablet cards are too
-    // compact (51px height) — band colour + tap-to-tooltip is sufficient there.
-    const isDesktop = !!section.querySelector(SEL.DESKTOP_STATUS_SECTION);
-    if (isDesktop && scenarioEl) {
-        const label = document.createElement('span');
-        label.className = best ? 'pyro-label' : 'pyro-label pyro-label--unconfirmed';
-        label.textContent = formatPpn(display.profitPerNerve);
-        scenarioEl.appendChild(label);
+    const crimeImage = section.querySelector<HTMLElement>(SEL.CRIME_IMAGE);
+    const hoverTarget = crimeImage ?? section;
+
+    if (crimeImage && !crimeImage.querySelector('.pyro-info-badge')) {
+        const badge = document.createElement('span');
+        badge.className = 'pyro-info-badge';
+        badge.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M12 10.941c2.333 -3.308 .167 -7.823 -1 -8.941c0 3.395 -2.235 5.299 -3.667 6.706c-1.43 1.408 -2.333 3.294 -2.333 5.588c0 3.704 3.134 6.706 7 6.706c3.866 0 7 -3.002 7 -6.706c0 -1.712 -1.232 -4.403 -2.333 -5.588c-2.084 3.353 -3.257 3.353 -4.667 2.235"/></svg>';
+        crimeImage.appendChild(badge);
     }
 
-    const hoverTarget = titleSection ?? section;
     wireTooltip(section, hoverTarget, allRanked);
 }
 
@@ -356,7 +357,7 @@ function wireTooltip(section: HTMLElement, hoverTarget: HTMLElement, allRanked: 
         tryTooltip(api => api.hide());
     });
 
-    section.addEventListener('click', e => {
+    hoverTarget.addEventListener('click', e => {
         if ((e.target as HTMLElement).closest('button, a, input, select, textarea, [role="button"]')) return;
 
         tryTooltip(api => {
@@ -364,7 +365,7 @@ function wireTooltip(section: HTMLElement, hoverTarget: HTMLElement, allRanked: 
                 api.hide();
                 visibleMobileSection = null;
             } else {
-                api.show(section, getContent(), { position: 'top', theme: 'dark' });
+                api.show(hoverTarget, getContent(), { position: 'top', theme: 'dark' });
                 visibleMobileSection = section;
             }
         });
@@ -394,6 +395,7 @@ function getRoot(): Element {
 
 function cleanupSection(section: HTMLElement): void {
     section.querySelector('.pyro-label')?.remove();
+    section.querySelector('.pyro-info-badge')?.remove();
     section.classList.forEach(c => { if (c.startsWith('pyro-band--')) section.classList.remove(c); });
     delete section.dataset.pyroScanned;
     delete section.dataset.pyroTooltipWired;
@@ -404,10 +406,6 @@ function scanPage(): void {
     const prices = effectivePrices();
 
     getRoot().querySelectorAll<HTMLElement>(SEL.CARD).forEach(section => {
-        if (isPendingCollect(section)) {
-            if (section.dataset.pyroScanned) cleanupSection(section);
-            return;
-        }
         if (section.dataset.pyroScanned) return;
         section.dataset.pyroScanned = 'true';
 

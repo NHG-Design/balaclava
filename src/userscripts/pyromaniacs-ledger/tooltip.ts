@@ -1,6 +1,7 @@
 import { CATALOG, RESOURCE } from '../../data/catalog.js';
 import type { ActionItem, Strategy } from '../../data/strategies.js';
 import { type RankedStrategy, formatPpn, calcNerve, strategyNeedsFlamethrower } from './engine.js';
+import { BAND_COLOR } from './colors.js';
 
 function el(tag: string, className?: string): HTMLElement {
     const e = document.createElement(tag);
@@ -148,10 +149,10 @@ export function buildTooltipStyles(): string {
     font-weight: bold;
     font-size: 14px;
 }
-.pyro-tt-band--negative { color: #f66; }
-.pyro-tt-band--low      { color: #fc6; }
-.pyro-tt-band--good     { color: #6c6; }
-.pyro-tt-band--jackpot  { color: #4ef; }
+.pyro-tt-band--negative { color: ${BAND_COLOR.negative}; }
+.pyro-tt-band--low      { color: ${BAND_COLOR.low};      }
+.pyro-tt-band--good     { color: ${BAND_COLOR.good};     }
+.pyro-tt-band--jackpot  { color: ${BAND_COLOR.jackpot};  }
 .pyro-tt-unconfirmed {
     font-size: 10px;
     opacity: 0.7;

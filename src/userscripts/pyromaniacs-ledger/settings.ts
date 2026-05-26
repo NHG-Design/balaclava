@@ -2,6 +2,7 @@ import { CATALOG, CATALOG_UPDATED, type ResourceId } from '../../data/catalog.js
 import { type PriceMap, type ProfitThresholds } from './engine.js';
 import { fetchApiPrices } from './api.js';
 import { SEL } from './selectors.js';
+import { BAND_COLOR } from './colors.js';
 
 // ---------------------------------------------------------------------------
 // Context
@@ -121,7 +122,7 @@ export function injectSettingsStyles(): void {
     letter-spacing: 0.04em;
 }
 .pyro-tab:hover { color: #bbb; }
-.pyro-tab.active { color: #fff; border-bottom-color: #4ef; }
+.pyro-tab.active { color: #fff; border-bottom-color: ${BAND_COLOR.jackpot}; }
 .pyro-tab-content {
     padding: 10px;
     max-height: 380px;
@@ -167,7 +168,7 @@ export function injectSettingsStyles(): void {
 }
 .pyro-s-input::-webkit-inner-spin-button,
 .pyro-s-input::-webkit-outer-spin-button { -webkit-appearance: none; }
-.pyro-s-input:focus { outline: none; border-color: #4ef; }
+.pyro-s-input:focus { outline: none; border-color: ${BAND_COLOR.jackpot}; }
 .pyro-s-input.from-api   { border-color: #48a; color: #7af; }
 .pyro-s-input.overridden { border-color: #4a4; color: #6d6; }
 .pyro-s-divider { border: none; border-top: 1px solid #2a2a2a; margin: 8px 0; }
@@ -183,7 +184,7 @@ export function injectSettingsStyles(): void {
     min-width: 0;
     font-family: monospace;
 }
-.pyro-s-key-input:focus { outline: none; border-color: #4ef; }
+.pyro-s-key-input:focus { outline: none; border-color: ${BAND_COLOR.jackpot}; }
 .pyro-s-btn {
     background: #252525;
     border: 1px solid #484848;
@@ -204,7 +205,7 @@ export function injectSettingsStyles(): void {
     min-height: 13px;
     color: #666;
 }
-.pyro-s-status.ok  { color: #6c6; }
+.pyro-s-status.ok  { color: ${BAND_COLOR.good}; }
 .pyro-s-status.err { color: #c66; }
 .pyro-s-refresh-row { display: flex; align-items: center; gap: 8px; }
 .pyro-s-timestamp { font-size: 10px; color: #555; }
@@ -220,7 +221,7 @@ export function injectSettingsStyles(): void {
 }
 .pyro-s-check-row input[type=checkbox] { cursor: pointer; }
 .pyro-s-section-note { font-size: 10px; color: #555; margin-bottom: 6px; }
-.pyro-s-section-note a { color: #4ef; text-decoration: none; }
+.pyro-s-section-note a { color: ${BAND_COLOR.jackpot}; text-decoration: none; }
 .pyro-s-section-note a:hover { text-decoration: underline; }
 .pyro-s-missing-header { font-size: 10px; color: #666; margin: 8px 0 4px; }
 .pyro-s-missing-list { font-size: 10px; color: #777; padding-left: 14px; margin: 0; }
