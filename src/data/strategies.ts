@@ -13,7 +13,11 @@ export interface StrategyActions {
     ignite?: ActionItem[];
     place: ActionItem[];
     stoke?: ActionItem[];
+    /** When to stoke relative to ignition: immediately after ("early") or closer to target burn % ("late"). */
+    stokeTime?: 'early' | 'late';
     dampen?: ActionItem[];
+    /** When to dampen relative to ignition: immediately after ("early") or closer to target burn % ("late"). */
+    dampenTime?: 'early' | 'late';
 }
 
 export interface Strategy {
@@ -1040,6 +1044,7 @@ export const STRATEGIES: Strategy[] = [
             ignite: [{ resourceId: RESOURCE.LIGHTER,  qty: 1 }],
             place:  [{ resourceId: RESOURCE.HYDROGEN, qty: 1 }],
             stoke:  [{ resourceId: RESOURCE.HYDROGEN, qty: 2 }],
+            stokeTime: 'early',
         },
         needsVerification: true,
     },
@@ -2506,9 +2511,10 @@ export const STRATEGIES: Strategy[] = [
         scenarioName: 'Strike While it\'s Hot',
         payout: 265_000,
         actions: {
-            ignite: [{ resourceId: RESOURCE.LIGHTER,  qty: 1 }],
-            place:  [{ resourceId: RESOURCE.HYDROGEN, qty: 1 }],
-            stoke:  [{ resourceId: RESOURCE.HYDROGEN, qty: 2 }],
+            ignite:    [{ resourceId: RESOURCE.LIGHTER,  qty: 1 }],
+            place:     [{ resourceId: RESOURCE.HYDROGEN, qty: 1 }],
+            stoke:     [{ resourceId: RESOURCE.HYDROGEN, qty: 2 }],
+            stokeTime: 'early',
         },
     },
 

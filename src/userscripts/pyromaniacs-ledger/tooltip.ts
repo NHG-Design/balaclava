@@ -1,6 +1,6 @@
 import { CATALOG, RESOURCE } from '../../data/catalog.js';
 import type { ActionItem, Strategy } from '../../data/strategies.js';
-import { type RankedStrategy, formatPpn, calcNerve, strategyNeedsFlamethrower } from './engine.js';
+import { type RankedStrategy, type PriceMap, formatPpn, calcNerve } from './engine.js';
 import { BAND_COLOR } from './colors.js';
 
 function el(tag: string, className?: string): HTMLElement {
@@ -20,33 +20,56 @@ function row(label: string, value: string, highlight?: boolean): HTMLElement {
     return div;
 }
 
-function formatItems(items: ActionItem[]): string {
-    const parts: string[] = [];
-    for (const item of items) {
-        const name = CATALOG[item.resourceId]?.name ?? item.resourceId;
-        const prefix = item.optional ? '~' : '';
-        parts.push(`${prefix}${item.qty}× ${name}`);
-    }
-    return parts.join(', ');
+function itemCost(item: ActionItem, prices: PriceMap): number | null {
+    const resource = CATALOG[item.resourceId];
+    if (!resource || resource.isTool) return null;
+    const unitPrice = prices[item.resourceId] ?? resource.defaultPrice;
+    const total = item.qty * unitPrice;
+    return total > 0 ? total : null;
 }
 
-function actionSection(label: string, items: ActionItem[] | undefined): HTMLElement | null {
+function formatCost(total: number): string {
+    if (total >= 1_000) return `$${(total / 1_000).toFixed(1)}k`;
+    return `$${total}`;
+}
+
+function actionSection(label: string, items: ActionItem[] | undefined, prices: PriceMap, timing?: 'early' | 'late'): HTMLElement | null {
     if (!items || items.length === 0) return null;
     const div = el('div', 'pyro-tt-action');
     const labelEl = el('span', 'pyro-tt-action-label');
-    labelEl.textContent = label;
+    if (timing) {
+        labelEl.innerHTML = `${label} <span class="pyro-tt-timing">${timing}</span>`;
+    } else {
+        labelEl.textContent = label;
+    }
     const valueEl = el('span', 'pyro-tt-action-value');
-    valueEl.textContent = formatItems(items);
+
+    items.forEach((item, i) => {
+        if (i > 0) valueEl.appendChild(document.createTextNode(', '));
+        const name = CATALOG[item.resourceId]?.name ?? item.resourceId;
+        const prefix = item.optional ? '~' : '';
+        valueEl.appendChild(document.createTextNode(`${prefix}${item.qty}× ${name}`));
+        const cost = itemCost(item, prices);
+        if (cost !== null) {
+            const costEl = el('span', 'pyro-tt-item-cost');
+            costEl.textContent = ` (${formatCost(cost)})`;
+            valueEl.appendChild(costEl);
+        }
+    });
+
     div.appendChild(labelEl);
     div.appendChild(valueEl);
     return div;
 }
 
-function buildPrimaryBlock(ranked: RankedStrategy, statsOnly = false): DocumentFragment {
+function buildPrimaryBlock(ranked: RankedStrategy, prices: PriceMap, statsOnly = false): DocumentFragment {
     const frag = document.createDocumentFragment();
     const { strategy, profitPerNerve, materialCost, baseNerve } = ranked;
 
     const header = el('div', 'pyro-tt-header');
+    const title = el('span', 'pyro-tt-title');
+    title.textContent = 'Profit';
+    header.appendChild(title);
     const ppnEl = el('span', `pyro-tt-ppn pyro-tt-band--${ranked.band}`);
     ppnEl.textContent = formatPpn(profitPerNerve);
     header.appendChild(ppnEl);
@@ -58,8 +81,8 @@ function buildPrimaryBlock(ranked: RankedStrategy, statsOnly = false): DocumentF
     frag.appendChild(header);
 
     const stats = el('div', 'pyro-tt-stats');
-    stats.appendChild(row('Payout', `$${(strategy.payout / 1000).toFixed(0)}k`));
-    stats.appendChild(row('Cost',   `$${(materialCost / 1000).toFixed(1)}k`));
+    stats.appendChild(row('Payout', `~$${(strategy.payout / 1000).toFixed(0)}k`));
+    stats.appendChild(row('Cost',   `~$${(materialCost / 1000).toFixed(1)}k`));
     stats.appendChild(row('Nerve',  String(baseNerve)));
     frag.appendChild(stats);
 
@@ -67,17 +90,17 @@ function buildPrimaryBlock(ranked: RankedStrategy, statsOnly = false): DocumentF
 
     frag.appendChild(el('hr', 'pyro-tt-divider'));
 
-    const { evidence, place, stoke, dampen } = strategy.actions;
+    const { evidence, place, stoke, stokeTime, dampen, dampenTime } = strategy.actions;
     const ignite = strategy.actions.ignite ?? [{ resourceId: RESOURCE.LIGHTER, qty: 1 }];
-    const actionOrder: [string, ActionItem[] | undefined][] = [
-        ['Evidence', evidence],
-        ['Place',    place],
-        ['Ignite',   ignite],
-        ['Stoke',    stoke],
-        ['Dampen',   dampen],
+    const actionOrder: [string, ActionItem[] | undefined, 'early' | 'late' | undefined][] = [
+        ['Evidence', evidence,  undefined],
+        ['Place',    place,     undefined],
+        ['Ignite',   ignite,    undefined],
+        ['Stoke',    stoke,     stokeTime],
+        ['Dampen',   dampen,    dampenTime],
     ];
-    for (const [label, items] of actionOrder) {
-        const s = actionSection(label, items);
+    for (const [label, items, timing] of actionOrder) {
+        const s = actionSection(label, items, prices, timing);
         if (s) frag.appendChild(s);
     }
 
@@ -90,44 +113,10 @@ function buildPrimaryBlock(ranked: RankedStrategy, statsOnly = false): DocumentF
     return frag;
 }
 
-function buildAltRow(ranked: RankedStrategy): HTMLElement {
-    const div = el('div', 'pyro-tt-alt-row');
-    const ppn = el('span', `pyro-tt-alt-ppn pyro-tt-band--${ranked.band}`);
-    ppn.textContent = formatPpn(ranked.profitPerNerve);
-    const meta = el('span', 'pyro-tt-alt-meta');
-    const ftTag = strategyNeedsFlamethrower(ranked.strategy) ? ' · FT' : '';
-    const unconfTag = ranked.strategy.needsVerification ? ' · ?' : '';
-    meta.textContent = `${ranked.baseNerve}N · $${(ranked.materialCost / 1000).toFixed(1)}k${ftTag}${unconfTag}`;
-    div.appendChild(ppn);
-    div.appendChild(meta);
-    return div;
-}
-
-/**
- * Builds the structured DOM node passed to BalaclavaTooltip.show().
- * allRanked[0] is the best strategy; the rest are shown as compact alternatives.
- * statsOnly omits action items and alternatives — used for pending-collect verified cards.
- */
-export function buildTooltipContent(allRanked: RankedStrategy[], statsOnly = false): HTMLElement {
+export function buildTooltipContent(ranked: RankedStrategy | null, prices: PriceMap, statsOnly = false): HTMLElement {
     const root = el('div', 'pyro-tt');
-
-    if (allRanked.length === 0) return root;
-
-    root.appendChild(buildPrimaryBlock(allRanked[0]!, statsOnly));
-
-    if (statsOnly) return root;
-
-    const alts = allRanked.slice(1);
-    if (alts.length > 0) {
-        root.appendChild(el('hr', 'pyro-tt-divider'));
-        const altHeader = el('div', 'pyro-tt-alt-header');
-        altHeader.textContent = 'Also viable';
-        root.appendChild(altHeader);
-        for (const alt of alts) {
-            root.appendChild(buildAltRow(alt));
-        }
-    }
-
+    if (!ranked) return root;
+    root.appendChild(buildPrimaryBlock(ranked, prices, statsOnly));
     return root;
 }
 
@@ -145,6 +134,10 @@ export function buildTooltipStyles(): string {
     gap: 6px;
     margin-bottom: 6px;
 }
+.pyro-tt-title {
+    font-weight: bold;
+    font-size: 14px;
+}
 .pyro-tt-ppn {
     font-weight: bold;
     font-size: 14px;
@@ -152,7 +145,7 @@ export function buildTooltipStyles(): string {
 .pyro-tt-band--negative { color: ${BAND_COLOR.negative}; }
 .pyro-tt-band--low      { color: ${BAND_COLOR.low};      }
 .pyro-tt-band--good     { color: ${BAND_COLOR.good};     }
-.pyro-tt-band--jackpot  { color: ${BAND_COLOR.jackpot};  }
+.pyro-tt-band--excellent  { color: ${BAND_COLOR.excellent};  }
 .pyro-tt-unconfirmed {
     font-size: 10px;
     opacity: 0.7;
@@ -164,7 +157,6 @@ export function buildTooltipStyles(): string {
     display: flex;
     gap: 10px;
     margin-bottom: 6px;
-    opacity: 0.85;
 }
 .pyro-tt-row {
     display: flex;
@@ -172,7 +164,7 @@ export function buildTooltipStyles(): string {
     font-size: 11px;
 }
 .pyro-tt-label {
-    opacity: 0.6;
+    color: oklch(66% 0 0);
     font-size: 10px;
     text-transform: uppercase;
     letter-spacing: 0.03em;
@@ -190,11 +182,22 @@ export function buildTooltipStyles(): string {
 }
 .pyro-tt-action-label {
     min-width: 56px;
-    opacity: 0.6;
+    color: oklch(66% 0 0);
     font-size: 11px;
+}
+.pyro-tt-timing {
+    font-size: 9px;
+    opacity: 0.55;
+    margin-left: 4px;
 }
 .pyro-tt-action-value {
     font-size: 11px;
+    font-weight: bold;
+}
+.pyro-tt-item-cost {
+    color: oklch(66% 0 0);
+    font-size: 10px;
+    font-weight: normal;
 }
 .pyro-tt-notes {
     margin-top: 5px;
@@ -207,28 +210,11 @@ export function buildTooltipStyles(): string {
     opacity: 0.55;
     font-size: 10px;
 }
-.pyro-tt-alt-header {
-    margin-top: 2px;
-    margin-bottom: 3px;
-    opacity: 0.5;
-    font-size: 10px;
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
-}
-.pyro-tt-alt-row {
-    display: flex;
-    align-items: baseline;
-    gap: 6px;
-    margin: 2px 0;
-}
-.pyro-tt-alt-ppn {
-    font-size: 11px;
-    font-weight: bold;
-    min-width: 60px;
-}
-.pyro-tt-alt-meta {
-    font-size: 10px;
-    opacity: 0.65;
+
+.balaclava-tooltip.is-theme-dark {
+    --balaclava-tooltip-bg: oklch(24% 0 0);
+    --balaclava-tooltip-border-size: 1px;
+    --balaclava-tooltip-border: oklch(30% 0 0);
 }
 `;
 }

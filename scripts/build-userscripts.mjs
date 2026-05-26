@@ -15,6 +15,20 @@ const COMMON_METADATA = {
     runAt: 'document-idle',
 };
 
+// Static modules: built as clean IIFEs served from Cloudflare Pages.
+// When TornPDA ships @require support (https://github.com/Manuito83/torn-pda/pull/452),
+// add `require` entries to the relevant USERSCRIPTS metadata and remove inline imports.
+const STATIC_MODULES = [
+    {
+        entry: 'src/userscripts/balaclava-tooltip/index.ts',
+        outfile: 'static/balaclava-tooltip.js',
+    },
+    {
+        entry: 'src/userscripts/pyromaniacs-ledger/scenarios.ts',
+        outfile: 'static/pyromaniacs-ledger/scenarios.js',
+    },
+];
+
 const USERSCRIPTS = [
     {
         entry: 'src/userscripts/balaclava-tooltip/index.ts',
@@ -44,6 +58,11 @@ const USERSCRIPTS = [
             match: 'https://www.torn.com/page.php?sid=crimes*',
             grant: ['GM_setValue', 'GM_getValue', 'unsafeWindow', 'GM_xmlhttpRequest'],
             connect: 'balaclava.app',
+            // TODO: uncomment + remove inline imports when TornPDA ships @require (PR #452):
+            // require: [
+            //     `${BALACLAVA_BASE}/balaclava-tooltip.js`,
+            //     `${BALACLAVA_BASE}/pyromaniacs-ledger/scenarios.js`,
+            // ],
         },
     },
 ];
@@ -85,6 +104,19 @@ function createUserscriptHeader(metadata) {
 }
 
 execSync('pnpm exec tsx scripts/dump-strategies.ts', { stdio: 'inherit' });
+
+for (const mod of STATIC_MODULES) {
+    await build({
+        entryPoints: [mod.entry],
+        bundle: true,
+        format: 'iife',
+        target: 'es2020',
+        treeShaking: true,
+        outfile: mod.outfile,
+        logLevel: 'info',
+    });
+    console.log(`Built ${mod.outfile}.`);
+}
 
 for (const userscript of USERSCRIPTS) {
     await build({

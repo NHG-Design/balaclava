@@ -10,7 +10,6 @@ import {
     profitBand,
     formatPpn,
     rankForScenario,
-    bestForScenario,
     strategyNeedsFlamethrower,
     DEFAULT_THRESHOLDS,
     type PriceMap,
@@ -243,8 +242,8 @@ describe('profitBand', () => {
     it('low just above 0',  () => assert.equal(profitBand(1,    t), 'low'));
     it('good at threshold', () => assert.equal(profitBand(10_000, t), 'good'));
     it('good just above low threshold', () => assert.equal(profitBand(5_001, t), 'good'));
-    it('jackpot above good threshold',  () => assert.equal(profitBand(10_001, t), 'jackpot'));
-    it('jackpot at large value',        () => assert.equal(profitBand(50_000, t), 'jackpot'));
+    it('excellent above good threshold',  () => assert.equal(profitBand(10_001, t), 'excellent'));
+    it('excellent at large value',        () => assert.equal(profitBand(50_000, t), 'excellent'));
 });
 
 // ---------------------------------------------------------------------------
@@ -306,72 +305,41 @@ describe('rankForScenario', () => {
         needsVerification: true,
     };
 
-    it('returns empty array for no candidates', () => {
-        assert.deepEqual(rankForScenario([], noFT, prices, DEFAULT_THRESHOLDS), []);
+    it('returns null for no candidates', () => {
+        assert.equal(rankForScenario([], noFT, prices, DEFAULT_THRESHOLDS), null);
     });
 
     it('excludes FT strategies when player lacks flamethrower', () => {
         const result = rankForScenario([confirmed, confirmedFT], noFT, prices, DEFAULT_THRESHOLDS);
-        assert.equal(result.length, 1);
-        assert.equal(result[0]!.strategy, confirmed);
+        assert.equal(result?.strategy, confirmed);
     });
 
-    it('includes FT strategies when player has flamethrower', () => {
+    it('returns best FT strategy when player has flamethrower', () => {
         const result = rankForScenario([confirmed, confirmedFT], hasFT, prices, DEFAULT_THRESHOLDS);
-        assert.equal(result.length, 2);
+        assert.equal(result?.strategy, confirmedFT);
     });
 
-    it('confirmed strategies sort before unconfirmed', () => {
+    it('returns confirmed strategy over higher-PPN unconfirmed', () => {
         const result = rankForScenario([unconfirmed, confirmed], noFT, prices, DEFAULT_THRESHOLDS);
-        assert.equal(result[0]!.strategy.needsVerification, undefined);
-        assert.equal(result[1]!.strategy.needsVerification, true);
+        assert.equal(result?.strategy.needsVerification, undefined);
     });
 
-    it('within confirmed group, sorts by PPN descending', () => {
+    it('returns unconfirmed when no confirmed strategy exists', () => {
+        const result = rankForScenario([unconfirmed], noFT, prices, DEFAULT_THRESHOLDS);
+        assert.equal(result?.strategy, unconfirmed);
+    });
+
+    it('within confirmed group, returns highest PPN', () => {
         const highPayout: Strategy = { ...confirmed, payout: 500_000 };
         const result = rankForScenario([confirmed, highPayout], noFT, prices, DEFAULT_THRESHOLDS);
-        assert.ok(result[0]!.profitPerNerve > result[1]!.profitPerNerve);
+        assert.equal(result?.strategy, highPayout);
     });
 
-    it('tie-breaks by nerve asc then cost asc', () => {
-        // Same payout, same cost, different nerve
-        const lowNerve: Strategy  = { scenarioName: 'T', payout: 100_000, actions: { place: [{ resourceId: RESOURCE.GASOLINE, qty: 1 }] } };
+    it('tie-breaks by nerve asc', () => {
+        const lowNerve:  Strategy = { scenarioName: 'T', payout: 100_000, actions: { place: [{ resourceId: RESOURCE.GASOLINE, qty: 1 }] } };
         const highNerve: Strategy = { scenarioName: 'T', payout: 100_000, actions: { place: [{ resourceId: RESOURCE.GASOLINE, qty: 1 }, { resourceId: RESOURCE.GASOLINE, qty: 1 }] } };
         const result = rankForScenario([highNerve, lowNerve], noFT, prices, DEFAULT_THRESHOLDS);
-        assert.ok(result[0]!.baseNerve <= result[1]!.baseNerve);
-    });
-});
-
-// ---------------------------------------------------------------------------
-// bestForScenario
-// ---------------------------------------------------------------------------
-
-describe('bestForScenario', () => {
-    it('returns null for empty candidates', () => {
-        assert.equal(bestForScenario([], false, {}, DEFAULT_THRESHOLDS), null);
-    });
-
-    it('returns null when all candidates need verification', () => {
-        const s: Strategy = {
-            scenarioName: 'T', payout: 100_000,
-            actions: { place: [{ resourceId: RESOURCE.GASOLINE, qty: 1 }] },
-            needsVerification: true,
-        };
-        assert.equal(bestForScenario([s], false, {}, DEFAULT_THRESHOLDS), null);
-    });
-
-    it('returns best confirmed strategy, ignoring unconfirmed', () => {
-        const confirmed: Strategy = {
-            scenarioName: 'T', payout: 100_000,
-            actions: { place: [{ resourceId: RESOURCE.GASOLINE, qty: 1 }] },
-        };
-        const unconfirmed: Strategy = {
-            scenarioName: 'T', payout: 999_999,
-            actions: { place: [{ resourceId: RESOURCE.GASOLINE, qty: 1 }] },
-            needsVerification: true,
-        };
-        const result = bestForScenario([unconfirmed, confirmed], false, {}, DEFAULT_THRESHOLDS);
-        assert.equal(result?.strategy, confirmed);
+        assert.equal(result?.strategy, lowNerve);
     });
 });
 

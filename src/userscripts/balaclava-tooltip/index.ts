@@ -72,13 +72,13 @@ const THEME_TOKENS: Readonly<Record<'dark' | 'light', Readonly<TooltipThemeToken
         bgColor: 'oklch(18% 0.012 260)',
         textColor: 'oklch(96% 0.012 95)',
         borderColor: 'oklch(96% 0.012 95 / 0.16)',
-        shadowColor: 'oklch(12% 0.01 260 / 0.36)',
+        shadowColor: 'oklch(12% 0.01 260 / 0.55)',
     }),
     light: Object.freeze({
         bgColor: 'oklch(98% 0.008 95)',
         textColor: 'oklch(24% 0.014 260)',
         borderColor: 'oklch(24% 0.014 260 / 0.14)',
-        shadowColor: 'oklch(24% 0.014 260 / 0.16)',
+        shadowColor: 'oklch(24% 0.014 260 / 0.3)',
     }),
 });
 
@@ -94,11 +94,11 @@ if (!rootWindow[API_NAME]?.version) {
         textColor: THEME_TOKENS.dark.textColor,
         borderColor: THEME_TOKENS.dark.borderColor,
         shadowColor: THEME_TOKENS.dark.shadowColor,
-        borderSize: '1px',
-        borderRadius: '4px',
+        borderSize: '0',
+        borderRadius: '8px',
         padding: '8px 12px',
         maxWidth: '250px',
-        arrowSize: '6px',
+        arrowSize: '12px',
         arrowBorderSize: null,
         arrowBorderColor: null,
         arrowBorderRadius: null,
@@ -124,7 +124,6 @@ if (!rootWindow[API_NAME]?.version) {
     let positionTrackingId: number | null = null;
     let intersectionObserver: IntersectionObserver | null = null;
     let mutationObserver: MutationObserver | null = null;
-    let scrollFrameId: number | null = null;
     let isVisible = false;
     let globalListenersController: AbortController | null = null;
     let readyController: AbortController | null = null;
@@ -198,7 +197,7 @@ if (!rootWindow[API_NAME]?.version) {
         opacity: 1;
         border: var(--balaclava-tooltip-border-size) solid var(--balaclava-tooltip-border);
         border-radius: var(--balaclava-tooltip-border-radius);
-        filter: drop-shadow(0 10px 18px var(--balaclava-tooltip-shadow));
+        filter: drop-shadow(0 2px 8px var(--balaclava-tooltip-shadow));
         transform: scale(1);
         transition:
           opacity ${visualConfig.animationDuration} ease-out,
@@ -333,7 +332,7 @@ if (!rootWindow[API_NAME]?.version) {
             ...config,
             arrowBorderSize: config.arrowBorderSize ?? config.borderSize,
             arrowBorderColor: config.arrowBorderColor ?? 'var(--balaclava-tooltip-border)',
-            arrowBorderRadius: config.arrowBorderRadius ?? config.borderRadius,
+            arrowBorderRadius: config.arrowBorderRadius ?? '3px',
         };
     }
 
@@ -373,12 +372,8 @@ if (!rootWindow[API_NAME]?.version) {
     }
 
     function scheduleScrollUpdate(): void {
-        if (!isVisible || !targetElement || scrollFrameId !== null) return;
-
-        scrollFrameId = requestAnimationFrame(() => {
-            scrollFrameId = null;
-            updateVisibleTooltip();
-        });
+        if (!isVisible) return;
+        hideTooltip();
     }
 
     function updateVisibleTooltip(): void {
@@ -704,11 +699,6 @@ if (!rootWindow[API_NAME]?.version) {
         if (positionTrackingId !== null) {
             cancelAnimationFrame(positionTrackingId);
             positionTrackingId = null;
-        }
-
-        if (scrollFrameId !== null) {
-            cancelAnimationFrame(scrollFrameId);
-            scrollFrameId = null;
         }
 
         if (tooltipEl) {

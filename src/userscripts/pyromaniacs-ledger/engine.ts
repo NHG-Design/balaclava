@@ -1,11 +1,11 @@
 import { CATALOG, type ResourceId } from '../../data/catalog.js';
 import type { Strategy, ActionItem } from '../../data/strategies.js';
 
-export type ProfitBand = 'negative' | 'low' | 'good' | 'jackpot';
+export type ProfitBand = 'negative' | 'low' | 'good' | 'excellent';
 
 export interface ProfitThresholds {
     low: number;    // <= this → 'low'
-    good: number;   // <= this → 'good', else 'jackpot'
+    good: number;   // <= this → 'good', else 'excellent'
 }
 
 export const DEFAULT_THRESHOLDS: ProfitThresholds = { low: 5_000, good: 10_000 };
@@ -83,14 +83,14 @@ export function profitBand(ppn: number, thresholds: ProfitThresholds): ProfitBan
     if (ppn <= 0)                   return 'negative';
     if (ppn <= thresholds.low)      return 'low';
     if (ppn <= thresholds.good)     return 'good';
-    return 'jackpot';
+    return 'excellent';
 }
 
 export function formatPpn(ppn: number): string {
     const sign = ppn < 0 ? '-' : '';
     const rounded = Math.floor(Math.abs(ppn) / 100) * 100;
-    if (rounded >= 1_000) return `$${sign}${(rounded / 1_000).toFixed(1)}k/N`;
-    return `$${sign}${rounded}/N`;
+    if (rounded >= 1_000) return `~$${sign}${(rounded / 1_000).toFixed(1)}k`;
+    return `~$${sign}${rounded}`;
 }
 
 export function strategyNeedsFlamethrower(s: Strategy): boolean {
@@ -109,13 +109,13 @@ export function rankForScenario(
     hasFlamethrower: boolean,
     prices: PriceMap,
     thresholds: ProfitThresholds,
-): RankedStrategy[] {
+): RankedStrategy | null {
     const eligible = candidates.filter(s => {
         if (!hasFlamethrower && strategyNeedsFlamethrower(s)) return false;
         return true;
     });
 
-    if (eligible.length === 0) return [];
+    if (eligible.length === 0) return null;
 
     const ranked: RankedStrategy[] = eligible.map(s => {
         const ppn = calcProfitPerNerve(s, prices);
@@ -137,17 +137,5 @@ export function rankForScenario(
         return a.materialCost - b.materialCost;
     });
 
-    return ranked;
-}
-
-/** Pick the best confirmed strategy for a scenario (used for inline label/band). */
-export function bestForScenario(
-    candidates: Strategy[],
-    hasFlamethrower: boolean,
-    prices: PriceMap,
-    thresholds: ProfitThresholds,
-): RankedStrategy | null {
-    const all = rankForScenario(candidates, hasFlamethrower, prices, thresholds);
-    const confirmed = all.find(r => !r.strategy.needsVerification);
-    return confirmed ?? null;
+    return ranked[0]!;
 }

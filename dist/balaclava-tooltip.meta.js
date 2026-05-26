@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        Balaclava Tooltip
 // @namespace   https://github.com/NHG-Design/balaclava
-// @version     1.0.2
+// @version     1.0.3
 // @description Universal tooltip injection for userscript managers
 // @author      Yukio [906148]
 // @license     MIT

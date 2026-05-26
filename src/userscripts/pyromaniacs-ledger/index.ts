@@ -256,7 +256,7 @@ function injectHighlightStyles(): void {
         .arson-root .pyro-band--negative { box-shadow: inset -5px 0 0 ${BAND_COLOR.negative} !important; }
         .arson-root .pyro-band--low      { box-shadow: inset -5px 0 0 ${BAND_COLOR.low}      !important; }
         .arson-root .pyro-band--good     { box-shadow: inset -5px 0 0 ${BAND_COLOR.good}     !important; }
-        .arson-root .pyro-band--jackpot  { box-shadow: inset -5px 0 0 ${BAND_COLOR.jackpot}  !important; }
+        .arson-root .pyro-band--excellent  { box-shadow: inset -5px 0 0 ${BAND_COLOR.excellent}  !important; }
 
         .crime-image { position: relative !important; }
         .pyro-info-badge {
@@ -290,17 +290,13 @@ function injectTooltipContentStyles(): void {
 // ---------------------------------------------------------------------------
 // Scan and annotate
 // ---------------------------------------------------------------------------
-function applyToSection(section: HTMLElement, allRanked: RankedStrategy[], scenarioName: string): void {
+function applyToSection(section: HTMLElement, ranked: RankedStrategy | null, scenarioName: string): void {
     section.querySelector('.pyro-label')?.remove();
     section.classList.forEach(c => { if (c.startsWith('pyro-band--')) section.classList.remove(c); });
 
     const scenarioEl = section.querySelector<HTMLElement>(SEL.SCENARIO);
-    const titleSection = scenarioEl?.closest<HTMLElement>(SEL.TITLE_SECTION) ?? null;
 
-    const best = allRanked.find(r => !r.strategy.needsVerification) ?? null;
-    const bestUnconfirmed = best ? null : (allRanked[0] ?? null);
-
-    if (!best && !bestUnconfirmed) {
+    if (!ranked) {
         if (debugMode && !!section.querySelector(SEL.DESKTOP_STATUS_SECTION)) {
             const label = document.createElement('span');
             label.className = 'pyro-label pyro-label--unconfirmed';
@@ -311,8 +307,7 @@ function applyToSection(section: HTMLElement, allRanked: RankedStrategy[], scena
         return;
     }
 
-    const display = best ?? bestUnconfirmed!;
-    section.classList.add(`pyro-band--${display.band}`);
+    section.classList.add(`pyro-band--${ranked.band}`);
 
     const crimeImage = section.querySelector<HTMLElement>(SEL.CRIME_IMAGE);
     const hoverTarget = crimeImage ?? section;
@@ -320,11 +315,11 @@ function applyToSection(section: HTMLElement, allRanked: RankedStrategy[], scena
     if (crimeImage && !crimeImage.querySelector('.pyro-info-badge')) {
         const badge = document.createElement('span');
         badge.className = 'pyro-info-badge';
-        badge.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M12 10.941c2.333 -3.308 .167 -7.823 -1 -8.941c0 3.395 -2.235 5.299 -3.667 6.706c-1.43 1.408 -2.333 3.294 -2.333 5.588c0 3.704 3.134 6.706 7 6.706c3.866 0 7 -3.002 7 -6.706c0 -1.712 -1.232 -4.403 -2.333 -5.588c-2.084 3.353 -3.257 3.353 -4.667 2.235"/></svg>';
+        badge.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0"/><path d="M12 9h.01"/><path d="M11 12h1v4h1"/></svg>';
         crimeImage.appendChild(badge);
     }
 
-    wireTooltip(section, hoverTarget, allRanked);
+    wireTooltip(section, hoverTarget, ranked);
 }
 
 function isPendingCollect(section: HTMLElement): boolean {
@@ -333,21 +328,17 @@ function isPendingCollect(section: HTMLElement): boolean {
 
 // Per-card tooltip data, updated on each resetScans so a single set of listeners
 // always reflects the latest prices without accumulating stale closures.
-const tooltipData = new WeakMap<HTMLElement, RankedStrategy[]>();
+const tooltipData = new WeakMap<HTMLElement, RankedStrategy | null>();
 
-function wireTooltip(section: HTMLElement, hoverTarget: HTMLElement, allRanked: RankedStrategy[]): void {
-    tooltipData.set(section, allRanked);
+function wireTooltip(section: HTMLElement, hoverTarget: HTMLElement, ranked: RankedStrategy | null): void {
+    tooltipData.set(section, ranked);
     if (section.dataset.pyroTooltipWired) return;
     section.dataset.pyroTooltipWired = 'true';
 
     const getContent = (): HTMLElement => {
-        const ranked = tooltipData.get(section) ?? [];
-        // Pending-collect + fully verified: stats only (job done, no need to re-read actions).
-        // Pending-collect + any unconfirmed: full tooltip so author can compare against outcome.
-        const pending = isPendingCollect(section);
-        const allVerified = ranked.length > 0 && ranked.every(r => !r.strategy.needsVerification);
-        const statsOnly = pending && allVerified;
-        return buildTooltipContentWithStyles(ranked, statsOnly);
+        const r = tooltipData.get(section) ?? null;
+        const statsOnly = isPendingCollect(section) && !!r && !r.strategy.needsVerification;
+        return buildTooltipContentWithStyles(r, effectivePrices(), statsOnly);
     };
 
     hoverTarget.addEventListener('mouseenter', () => {
@@ -379,8 +370,8 @@ function wireTooltip(section: HTMLElement, hoverTarget: HTMLElement, allRanked: 
     }, { passive: true });
 }
 
-function buildTooltipContentWithStyles(allRanked: RankedStrategy[], statsOnly = false): HTMLElement {
-    const node = buildTooltipContent(allRanked, statsOnly);
+function buildTooltipContentWithStyles(ranked: RankedStrategy | null, prices: PriceMap, statsOnly = false): HTMLElement {
+    const node = buildTooltipContent(ranked, prices, statsOnly);
 
     const style = document.createElement('style');
     style.textContent = buildTooltipStyles();
@@ -419,8 +410,8 @@ function scanPage(): void {
             missingScenarios.add(rawName);
         }
 
-        const allRanked = rankForScenario(candidates, hasFlamethrower, prices, thresholds);
-        applyToSection(section, allRanked, rawName);
+        const ranked = rankForScenario(candidates, hasFlamethrower, prices, thresholds);
+        applyToSection(section, ranked, rawName);
     });
 }
 
@@ -428,7 +419,6 @@ function scanPage(): void {
 export function resetScans(): void {
     getRoot().querySelectorAll<HTMLElement>(SEL.CARD).forEach(section => {
         delete section.dataset.pyroScanned;
-        delete section.dataset.pyroTooltipWired;
     });
     scanPage();
 }
