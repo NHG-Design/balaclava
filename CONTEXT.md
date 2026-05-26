@@ -16,11 +16,11 @@ Balaclava (`balaclava.app`) is a platform of Torn tools built by a player, for p
 - **Personal Signature**: A Signature hardcoded to a specific Player. Exists only for Yukio and LeLeMiC. Not self-service. _Avoid_: "user signature", "player banner"
 - **Faction Signature**: A configurable Signature for a Member of a Whitelisted Faction. Parameters (stats, alignment, logo) are set via the Faction Builder. Displays last action status intentionally — this is public data and a deliberate design choice. _Avoid_: "faction image"
 - **Faction Builder**: The self-service UI at `/faction` where a Member enters their Faction ID and Player ID, configures display options, and receives a shareable Faction Signature URL.
-- **Whitelisted Faction**: A Faction whose numeric ID has been explicitly added to the allowlist in `src/lib/factions.tsx` by Yukio. Only Members of Whitelisted Factions can generate Faction Signatures. Yukio is the sole controller.
+- **Whitelisted Faction**: A Faction whose numeric ID has been explicitly added to the allowlist in `src/lib/factions.ts` by Yukio. Only Members of Whitelisted Factions can generate Faction Signatures. Yukio is the sole controller.
 - **Company**: A player-owned business in Torn with a numeric ID and a roster of Employees. _Avoid_: "guild", "org"
 - **Employee**: A Player who works at a Company. Has a position, effectiveness score, `days_in_company`, wage, and last action.
 - **Company Signature**: A Signature for an Employee, showing effectiveness, position, days in company, and last action. Requires a Limited API key provided by the Company owner. Currently scoped to a single company (Yukio's former company) — not a general multi-company service. _Avoid_: "company image"
-- **Userscript**: A JavaScript file installed via a userscript manager that modifies the Torn game UI in the browser. Balaclava hosts and distributes userscripts with landing pages, install links, and changelogs. The first userscript targets the Arson crime workflow.
+- **Userscript**: A JavaScript file installed via a userscript manager that modifies the Torn game UI in the browser. Balaclava hosts and distributes userscripts with landing pages, install links, and changelogs. The first userscript is **Arsonist's Ledger**, targeting the Arson crime workflow.
 - **Torn API**: The official HTTP API for Torn. Used by balaclava at request time — there is no local database. All data is fetched live.
 
 ### Arson Crime Domain
@@ -29,7 +29,12 @@ Balaclava (`balaclava.app`) is a platform of Torn tools built by a player, for p
 - **Job** (Arson): A single arson assignment with a location, requirements, and destruction target. Not to be confused with a Torn player's employment Job. _Avoid_: "task", "mission"
 - **Nerve**: The resource spent on Arson actions (Breach costs 3, most actions cost 5, Collect costs 2). Shared across all Torn activities.
 - **Crime Skill (CS)**: A player stat that governs which Arson jobs are visible, unlocks new accelerants and tools, and reduces critical failure rates.
-- **Accelerant**: A material placed or stoked during Arson. Divided into liquids (Gasoline, Diesel, Kerosene), solids (Magnesium, Thermite, Saltpetre), and gases (Oxygen, Methane, Hydrogen). Each has different intensity, momentum, spread, and suspicion effects.
+- **Accelerant**: A material placed or stoked during Arson. Divided into liquids (Gasoline, Diesel, Kerosene), solids (Magnesium, Thermite, Potassium Nitrate), and gases (Oxygen, Methane, Hydrogen). Each has different intensity, momentum, spread, and suspicion effects.
+- **Igniter**: A reusable or consumable tool used to start or boost a fire during Arson (Windproof Lighter, Molotov Cocktail, Flamethrower). Modelled as `kind: 'tool'`, `category: 'igniter'` in the Resource catalog. _Avoid_: "starter", "lighter" (too specific)
+- **Dampener**: A tool used to slow or control fire spread (Blanket, Sand, Fire Extinguisher). Modelled as `kind: 'tool'`, `category: 'dampener'` in the Resource catalog.
+- **Evidence**: An item planted at the crime scene during Arson to affect the job outcome (e.g. Ammonia, Cannabis, Diamond Ring). Modelled as `kind: 'evidence'` in the Resource catalog. _Avoid_: "plant item", "drop item"
+- **Resource**: Any material, tool, or evidence item usable in an Arson job. Typed in `src/data/catalog.ts` as `ResourceKind` (`fuel` | `tool` | `evidence`) and `ResourceCategory` (`liquid` | `solid` | `gaseous` | `igniter` | `dampener` | `misc`). _Avoid_: "item", "material" (too broad)
+- **stokeTime / dampenTime**: Optional timing hints on `ScenarioActions` (`'early'` | `'late'`) indicating when to stoke or dampen relative to ignition. Displayed to players in the Arsonist's Ledger tooltip.
 - **Intensity**: How fiercely the fire burns. Drives destruction rate. Decays at 0.2/sec when Momentum is zero; spikes to 1.0/sec decay after First Responders arrive.
 - **Momentum**: Unburned fuel pooling on the property. Consumed by flammability rate; only increases when stoking. High momentum risks accidents.
 - **Suspicion**: How obvious the arson is. All accelerants raise it except Methane (which lowers it). Exceeding the limit fails Insurance Claim jobs.
@@ -46,11 +51,12 @@ Balaclava (`balaclava.app`) is a platform of Torn tools built by a player, for p
 - **BalaclavaTooltip**: A foundational userscript library (`balaclava-tooltip.user.js`) providing a universal, viewport-aware tooltip system via Shadow DOM. Distributed as a `@require` dependency for other balaclava userscripts. Exposes `unsafeWindow.BalaclavaTooltip` with `.show()`, `.hide()`, `.configure()`, `.attach()`, `.rescan()`, and `.destroy()`.
 - **Consumer Script**: A balaclava userscript that depends on BalaclavaTooltip via `@require`. Accesses the tooltip API through `unsafeWindow.BalaclavaTooltip`.
 
-### Pyromaniac's Ledger
+### Arsonist's Ledger
 
-- **Strategy**: A recipe for completing a specific Arson Job scenario — which accelerants to place, ignite, stoke, or dampen, optional evidence to plant, and the expected base payout. Multiple strategies may exist per scenario (e.g. Flamethrower vs. non-FT variants); these share the same payout and are alternatives based on CS level. _Avoid_: "recipe", "build", "loadout"
-- **Strategy Dataset**: The canonical collection of Strategies for all known scenarios, served as a static JSON file from `balaclava.app` and delivered to the userscript via the userscript manager's `@resource` mechanism. Cached locally by the userscript manager; refreshed on script update.
-- **Strategy Override**: A locally stored author-only patch keyed by `scenarioName` that corrects payout or verification status for all matching Strategy entries. Stored via `GM_setValue`. Applied on top of the Strategy Dataset at runtime. Only accessible in debug mode. _Avoid_: "edit", "correction", "fix"
+- **Scenario**: A single Arson job entry as it appears on the Torn Arson crimes page, identified by its exact `scenarioName` string. The source data model is `Scenario` in `src/data/scenarios.ts`. _Avoid_: "job variant", "strategy entry"
+- **Strategy**: A recipe for completing a specific Arson Scenario — which accelerants to place, ignite, stoke, or dampen, optional evidence to plant, and the expected base payout. Multiple strategies may exist per scenario (e.g. Flamethrower vs. non-FT variants); these share the same payout and are alternatives based on CS level. _Avoid_: "recipe", "build", "loadout"
+- **Strategy Dataset**: The canonical collection of Strategies for all known scenarios, served as a static JSON file (`static/arsonists-ledger/strategies.json`) and delivered to the userscript via the userscript manager's `@resource` mechanism. Cached locally by the userscript manager; a content-hash suffix in the resource key busts stale caches on script update.
+- **Strategy Override**: A locally stored author-only patch keyed by `scenarioName` that corrects payout or verification status for all matching Strategy entries. Stored via `GM_setValue` under `pyroLedger.v1.*` keys. Applied on top of the Strategy Dataset at runtime. Only accessible in debug mode. _Avoid_: "edit", "correction", "fix"
 - **Profit Per Nerve (PPN)**: The primary ranking metric for Strategies. Calculated as `(payout − material cost) / nerve`. Used to surface the most efficient strategy for a given scenario. _Avoid_: "efficiency", "value"
 
 ### Torn API Key Tiers
@@ -71,7 +77,7 @@ Company Signatures require a Limited key provided by the company owner. Faction 
 - A Faction Signature is generated for one Member of one Whitelisted Faction
 - A Company Signature is generated for one Employee of one Company, using the Company owner's Limited key
 - Personal Stats are per Player; Derived Stats are computed from Personal Stats by balaclava
-- A Whitelisted Faction is a Faction whose ID appears in `src/lib/factions.tsx`
+- A Whitelisted Faction is a Faction whose ID appears in `src/lib/factions.ts`
 
 ## Architecture
 
@@ -82,26 +88,33 @@ All Signature endpoints are SvelteKit `+server.ts` route handlers deployed to Cl
 | Path | Purpose |
 |------|---------|
 | `src/routes/` | SvelteKit routes — pages (`+page.svelte`) and API handlers (`+server.ts`) |
-| `src/routes/api/sig/` | Proof-of-concept Signature endpoint |
-| `src/routes/api/sigs/` | Personal Signature endpoints — one directory per named player (planned) |
-| `src/routes/api/faction/` | Faction Signature endpoint (planned) |
-| `src/routes/faction/` | Faction Builder UI page (planned) |
-| `src/lib/` | Torn API wrappers, stat registry, faction whitelist |
+| `src/routes/api/sig/` | Legacy proof-of-concept Signature endpoint |
+| `src/routes/api/sigs/[id]/` | Personal Signature endpoint — dynamic by Torn player ID |
+| `src/routes/api/faction/[id]/` | Faction Signature endpoint — dynamic by faction ID |
+| `src/routes/faction/` | Faction Builder UI page (not yet built) |
+| `src/lib/` | Torn API wrappers (`users.ts`, `factions.ts`), stat registry, faction whitelist, sig helpers |
+| `src/lib/utils/` | Shared utilities (data formatting, HTML helpers) |
+| `src/lib/sigs/` | Shared signature rendering logic |
+| `src/data/` | Static typed data for userscripts: `catalog.ts` (resource catalog), `scenarios.ts` (scenario definitions), `*-version.ts` (cache-bust hashes) |
+| `src/userscripts/` | Userscript source — one subdirectory per script (e.g. `arsonists-ledger/`, `balaclava-tooltip/`) |
 | `static/factions/[id]/` | Static faction-specific assets: `banner.png`, `logo.svg` |
+| `static/arsonists-ledger/` | Built userscript data files: `strategies.json`, `scenarios.json`, `scenarios.js` |
 | `svelte.config.js` | Adapter config (`@sveltejs/adapter-cloudflare`) |
 | `wrangler.toml` | Cloudflare Pages deployment config |
 
 ## Key Patterns
 
 - **Stat registry**: All Personal Stats are defined in `src/lib/personal-stats.ts`. Derived Stats are defined in the `specialStats` export of the same file with a `calculate` function. Adding any stat requires editing this file.
+- **Resource catalog**: All Arson materials (fuels, tools, evidence) are defined in `src/data/catalog.ts` as the `CATALOG` record keyed by `ResourceId`. Default prices, Torn item IDs, and tool/consumable flags live here.
+- **Scenario data**: Arson job strategies are defined in `src/data/scenarios.ts` as the `SCENARIOS` array of `Scenario` objects. Built to `static/arsonists-ledger/strategies.json` for the userscript.
+- **Cache busting**: `src/data/strategies-version.ts` and `src/data/scenarios-version.ts` export a content-hash string used in the userscript `@resource` key. Updating the hash forces the userscript manager to re-fetch the JSON.
 - **Whitelist check**: `whitelisted.getAll` in `src/lib/factions.ts` is an array of faction ID strings. Adding a Whitelisted Faction is a code change, not a config or DB operation.
-- **Faction Signature URL**: Built client-side in `src/routes/faction/+page.svelte`. The URL encodes all display options as query params (`stats`, `align`, `rounded`, `factionLogo`, `daysInFaction`).
+- **Faction Signature URL**: Built client-side in `src/routes/faction/+page.svelte` (not yet built). The URL encodes all display options as query params (`stats`, `align`, `rounded`, `factionLogo`, `daysInFaction`).
 - **Image generation**: All Signature endpoints use `workers-og` via dynamic import. The pattern is established in `src/routes/api/sig/+server.ts`. WASM must not be initialized at module scope.
 - **Fallback assets**: `getFactionBanner` and `getFactionLogo` in `src/lib/factions.ts` fall back to generic assets (`/banners/1.png`, `/logos/1.png`) if the faction is not whitelisted or the asset is missing.
 
 ## Known Gaps
 
 - The whitelist is hardcoded — there is no admin UI or database-backed management.
-- Stat registry, faction whitelist, and Torn API wrappers exist in the old Next.js codebase and have not yet been migrated to `src/lib/`.
 - Faction Builder UI (`src/routes/faction/`) is not yet built.
-- Torn API key names are not yet finalized for the SvelteKit env system (`$env/static/private`).
+- Arsonist's Ledger storage keys still use the legacy `pyroLedger.v1.*` prefix — a remnant of the "Pyromaniac's Ledger" working title.
