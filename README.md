@@ -36,10 +36,10 @@ Use the pinned release URL in consumer userscripts:
 
 The tooltip supports declarative attributes, imperative `show()` / `attach()` calls, global configuration, viewport-aware positioning, and `system` / `dark` / `light` / `custom` themes. See [plans/tooltip/balaclava-tooltip.md](plans/tooltip/balaclava-tooltip.md).
 
-### Pyromaniac's Ledger
+### Arsonist's Ledger
 
-Source lives in `src/userscripts/pyromaniacs-ledger/` and builds to
-`dist/pyromaniacs-ledger.user.js`. Run `pnpm build:userscripts` to regenerate userscript bundles.
+Source lives in `src/userscripts/arsonists-ledger/` and builds to
+`dist/arsonists-ledger.user.js`. Run `pnpm build:userscripts` to regenerate userscript bundles.
 
 ## Signature Features
 

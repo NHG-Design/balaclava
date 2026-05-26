@@ -117,4 +117,3 @@ All Signature endpoints are SvelteKit `+server.ts` route handlers deployed to Cl
 
 - The whitelist is hardcoded — there is no admin UI or database-backed management.
 - Faction Builder UI (`src/routes/faction/`) is not yet built.
-- Arsonist's Ledger storage keys still use the legacy `pyroLedger.v1.*` prefix — a remnant of the "Pyromaniac's Ledger" working title.

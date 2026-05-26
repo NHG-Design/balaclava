@@ -1,6 +1,6 @@
 # Strategy Dataset delivered via userscript @resource
 
-The Pyromaniac's Ledger Strategy Dataset (~90% of the bundle by bytes) is served as a static JSON file from `balaclava.app` and declared in the userscript header via `@resource`. The userscript manager fetches and caches it locally at install/update time; at runtime it is read synchronously via `GM_getResourceText` — no network request, no async loading path, no server pressure during gameplay.
+The Arsonist's Ledger Strategy Dataset (~90% of the bundle by bytes) is served as a static JSON file from `balaclava.app` and declared in the userscript header via `@resource`. The userscript manager fetches and caches it locally at install/update time; at runtime it is read synchronously via `GM_getResourceText` — no network request, no async loading path, no server pressure during gameplay.
 
 ## Considered options
 
