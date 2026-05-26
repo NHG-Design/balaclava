@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        Torn Pyromaniac's Ledger
 // @namespace   https://github.com/NHG-Design/balaclava
-// @version     0.4.8
+// @version     0.4.9
 // @description Arson profit-per-nerve calculator and strategy guide for Torn's Crimes page
 // @icon        https://www.google.com/s2/favicons?sz=64&domain=torn.com
 // @author      Yukio [906148]
@@ -2929,6 +2929,9 @@
     }
   ];
 
+  // src/data/strategies-version.ts
+  var STRATEGIES_VERSION = "84c1d860";
+
   // src/userscripts/balaclava-tooltip/index.ts
   var API_NAME = "BalaclavaTooltip";
   var HOST_ID = "balaclava-tooltip-host";
@@ -4806,8 +4809,8 @@
     const m = btn.getAttribute("aria-label")?.match(/Skill:\s*([\d.]+)/);
     return m ? parseFloat(m[1]) : 0;
   }
-  var KEY_STRATEGIES_CACHE = "pyroLedger.v2.strategiesCache";
-  var KEY_STRATEGIES_TS = "pyroLedger.v2.strategiesTs";
+  var KEY_STRATEGIES_CACHE = `pyroLedger.${STRATEGIES_VERSION}.strategiesCache`;
+  var KEY_STRATEGIES_TS = `pyroLedger.${STRATEGIES_VERSION}.strategiesTs`;
   var STRATEGIES_URL = "https://balaclava.app/pyromaniacs-ledger/strategies.json";
   var STRATEGIES_TTL_MS = 24 * 60 * 60 * 1e3;
   var strategyIndex = /* @__PURE__ */ new Map();

@@ -1,4 +1,5 @@
 import { STRATEGIES, type Strategy } from '../../data/strategies.js';
+import { STRATEGIES_VERSION } from '../../data/strategies-version.js';
 import '../balaclava-tooltip/index.js';
 import {
     rankForScenario,
@@ -188,8 +189,8 @@ function getSkillValue(): number {
 // ---------------------------------------------------------------------------
 // Strategy index: scenarioName → Strategy[]
 // ---------------------------------------------------------------------------
-const KEY_STRATEGIES_CACHE = 'pyroLedger.v2.strategiesCache';
-const KEY_STRATEGIES_TS    = 'pyroLedger.v2.strategiesTs';
+const KEY_STRATEGIES_CACHE = `pyroLedger.${STRATEGIES_VERSION}.strategiesCache`;
+const KEY_STRATEGIES_TS    = `pyroLedger.${STRATEGIES_VERSION}.strategiesTs`;
 const STRATEGIES_URL       = 'https://balaclava.app/pyromaniacs-ledger/strategies.json';
 const STRATEGIES_TTL_MS    = 24 * 60 * 60 * 1000;
 
