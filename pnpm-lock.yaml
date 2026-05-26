@@ -27,6 +27,9 @@ importers:
       '@types/node':
         specifier: ^25.9.1
         version: 25.9.1
+      esbuild:
+        specifier: ^0.28.0
+        version: 0.28.0
       svelte:
         specifier: ^5.0.0
         version: 5.55.9
