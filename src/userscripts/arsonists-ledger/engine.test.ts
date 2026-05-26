@@ -252,27 +252,27 @@ describe('profitBand', () => {
 
 describe('formatPpn', () => {
     it('floors to nearest 100', () => {
-        assert.equal(formatPpn(8_450), '$8.4k/N');
-        assert.equal(formatPpn(8_499), '$8.4k/N');
-        assert.equal(formatPpn(8_400), '$8.4k/N');
+        assert.equal(formatPpn(8_450), '~$8.4k');
+        assert.equal(formatPpn(8_499), '~$8.4k');
+        assert.equal(formatPpn(8_400), '~$8.4k');
     });
 
-    it('formats values >= 1000 as $Xk/N', () => {
-        assert.equal(formatPpn(1_000), '$1.0k/N');
-        assert.equal(formatPpn(10_000), '$10.0k/N');
-        assert.equal(formatPpn(12_300), '$12.3k/N');
+    it('formats values >= 1000 as ~$Xk', () => {
+        assert.equal(formatPpn(1_000),  '~$1.0k');
+        assert.equal(formatPpn(10_000), '~$10.0k');
+        assert.equal(formatPpn(12_300), '~$12.3k');
     });
 
-    it('formats values < 1000 as $X/N', () => {
-        assert.equal(formatPpn(900),  '$900/N');
-        assert.equal(formatPpn(500),  '$500/N');
-        assert.equal(formatPpn(0),    '$0/N');
+    it('formats values < 1000 as ~$X', () => {
+        assert.equal(formatPpn(900), '~$900');
+        assert.equal(formatPpn(500), '~$500');
+        assert.equal(formatPpn(0),   '~$0');
     });
 
     it('abbreviates negative values with sign before dollar', () => {
-        assert.equal(formatPpn(-850),        '$-800/N');
-        assert.equal(formatPpn(-1_500),      '$-1.5k/N');
-        assert.equal(formatPpn(-331_700),    '$-331.7k/N');
+        assert.equal(formatPpn(-850),     '~$-800');
+        assert.equal(formatPpn(-1_500),   '~$-1.5k');
+        assert.equal(formatPpn(-331_700), '~$-331.7k');
     });
 });
 

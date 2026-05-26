@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        Torn Arsonist's Ledger
 // @namespace   https://github.com/NHG-Design/balaclava
-// @version     0.4.10
+// @version     0.4.11
 // @description Arson profit-per-nerve calculator and scenario guide for Torn's Crimes page
 // @icon        https://www.google.com/s2/favicons?sz=64&domain=torn.com
 // @author      Yukio [906148]
@@ -3746,19 +3746,19 @@
     }, 0);
   }
   function calcNerve(scenario) {
-    const { evidence, ignite, place, stoke, dampen } = strategy.actions;
+    const { evidence, ignite, place, stoke, dampen } = scenario.actions;
     const items = itemActionCount(evidence) + itemActionCount(place) + itemActionCount(stoke) + itemActionCount(dampen);
     void ignite;
     return 10 + items * 5;
   }
-  function calcMaterialCost(strategy2, prices) {
-    const { evidence, ignite, place, stoke, dampen } = strategy2.actions;
+  function calcMaterialCost(scenario, prices) {
+    const { evidence, ignite, place, stoke, dampen } = scenario.actions;
     return itemCost(evidence, prices) + itemCost(ignite, prices) + itemCost(place, prices) + itemCost(stoke, prices) + itemCost(dampen, prices);
   }
-  function calcProfitPerNerve(strategy2, prices) {
-    const nerve = calcNerve(strategy2);
-    const cost = calcMaterialCost(strategy2, prices);
-    return (strategy2.payout - cost) / nerve;
+  function calcProfitPerNerve(scenario, prices) {
+    const nerve = calcNerve(scenario);
+    const cost = calcMaterialCost(scenario, prices);
+    return (scenario.payout - cost) / nerve;
   }
   function profitBand(ppn, thresholds2) {
     if (ppn <= 0) return "negative";
@@ -3786,7 +3786,7 @@
     const ranked = eligible.map((s) => {
       const ppn = calcProfitPerNerve(s, prices);
       return {
-        scenario: s,
+        Scenario: s,
         materialCost: calcMaterialCost(s, prices),
         baseNerve: calcNerve(s),
         profitPerNerve: ppn,
@@ -3794,8 +3794,8 @@
       };
     });
     ranked.sort((a, b) => {
-      const aConf = a.strategy.needsVerification ? 0 : 1;
-      const bConf = b.strategy.needsVerification ? 0 : 1;
+      const aConf = a.Scenario.needsVerification ? 0 : 1;
+      const bConf = b.Scenario.needsVerification ? 0 : 1;
       if (aConf !== bConf) return bConf - aConf;
       if (b.profitPerNerve !== a.profitPerNerve) return b.profitPerNerve - a.profitPerNerve;
       if (a.baseNerve !== b.baseNerve) return a.baseNerve - b.baseNerve;

@@ -11,7 +11,7 @@ export interface ProfitThresholds {
 export const DEFAULT_THRESHOLDS: ProfitThresholds = { low: 5_000, good: 10_000 };
 
 export interface RankedScenario {
-    scenario: Scenario;
+    Scenario: Scenario;
     materialCost: number;
     baseNerve: number;
     profitPerNerve: number;
@@ -49,7 +49,7 @@ function itemActionCount(items: ActionItem[] | undefined): number {
  * Each qty on Place/Stoke/Dampen/Evidence = one action = 5 nerve.
  */
 export function calcNerve(scenario: Scenario): number {
-    const { evidence, ignite, place, stoke, dampen } = strategy.actions;
+    const { evidence, ignite, place, stoke, dampen } = scenario.actions;
     const items =
         itemActionCount(evidence) +
         itemActionCount(place) +
@@ -62,8 +62,8 @@ export function calcNerve(scenario: Scenario): number {
     return 10 + items * 5;
 }
 
-export function calcMaterialCost(strategy: Strategy, prices: PriceMap): number {
-    const { evidence, ignite, place, stoke, dampen } = strategy.actions;
+export function calcMaterialCost(scenario: Scenario, prices: PriceMap): number {
+    const { evidence, ignite, place, stoke, dampen } = scenario.actions;
     return (
         itemCost(evidence, prices) +
         itemCost(ignite, prices) +
@@ -73,10 +73,10 @@ export function calcMaterialCost(strategy: Strategy, prices: PriceMap): number {
     );
 }
 
-export function calcProfitPerNerve(strategy: Strategy, prices: PriceMap): number {
-    const nerve = calcNerve(strategy);
-    const cost = calcMaterialCost(strategy, prices);
-    return (strategy.payout - cost) / nerve;
+export function calcProfitPerNerve(scenario: Scenario, prices: PriceMap): number {
+    const nerve = calcNerve(scenario);
+    const cost = calcMaterialCost(scenario, prices);
+    return (scenario.payout - cost) / nerve;
 }
 
 export function profitBand(ppn: number, thresholds: ProfitThresholds): ProfitBand {
@@ -120,7 +120,7 @@ export function rankForScenario(
     const ranked: RankedScenario[] = eligible.map(s => {
         const ppn = calcProfitPerNerve(s, prices);
         return {
-            scenario: s,
+            Scenario: s,
             materialCost: calcMaterialCost(s, prices),
             baseNerve: calcNerve(s),
             profitPerNerve: ppn,
@@ -129,8 +129,8 @@ export function rankForScenario(
     });
 
     ranked.sort((a, b) => {
-        const aConf = a.strategy.needsVerification ? 0 : 1;
-        const bConf = b.strategy.needsVerification ? 0 : 1;
+        const aConf = a.Scenario.needsVerification ? 0 : 1;
+        const bConf = b.Scenario.needsVerification ? 0 : 1;
         if (aConf !== bConf) return bConf - aConf;
         if (b.profitPerNerve !== a.profitPerNerve) return b.profitPerNerve - a.profitPerNerve;
         if (a.baseNerve !== b.baseNerve) return a.baseNerve - b.baseNerve;
