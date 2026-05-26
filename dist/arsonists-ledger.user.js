@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        Torn Arsonist's Ledger
 // @namespace   https://github.com/NHG-Design/balaclava
-// @version     0.4.9
+// @version     0.4.10
 // @description Arson profit-per-nerve calculator and scenario guide for Torn's Crimes page
 // @icon        https://www.google.com/s2/favicons?sz=64&domain=torn.com
 // @author      Yukio [906148]
@@ -4811,7 +4811,7 @@
   }
   var KEY_SCENARIOS_CACHE = `pyroLedger.${SCENARIOS_VERSION}.scenariosCache`;
   var KEY_SCENARIOS_TS = `pyroLedger.${SCENARIOS_VERSION}.scenariosTs`;
-  var SCENARIOS_URL = "https://balaclava.app/pyromaniacs-ledger/SCENARIOS.json";
+  var SCENARIOS_URL = "https://balaclava.app/arsonists-ledger/scenarios.json";
   var STRATEGIES_TTL_MS = 24 * 60 * 60 * 1e3;
   var scenarioIndex = /* @__PURE__ */ new Map();
   function populatescenarioIndex(SCENARIOS2) {

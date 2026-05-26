@@ -191,7 +191,7 @@ function getSkillValue(): number {
 // ---------------------------------------------------------------------------
 const KEY_SCENARIOS_CACHE = `pyroLedger.${SCENARIOS_VERSION}.scenariosCache`;
 const KEY_SCENARIOS_TS    = `pyroLedger.${SCENARIOS_VERSION}.scenariosTs`;
-const SCENARIOS_URL       = 'https://balaclava.app/pyromaniacs-ledger/SCENARIOS.json';
+const SCENARIOS_URL       = 'https://balaclava.app/arsonists-ledger/scenarios.json';
 const STRATEGIES_TTL_MS    = 24 * 60 * 60 * 1000;
 
 const scenarioIndex = new Map<string, Scenario[]>();

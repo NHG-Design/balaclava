@@ -25,7 +25,7 @@ const STATIC_MODULES = [
     },
     {
         entry: 'src/userscripts/arsonists-ledger/scenarios.ts',
-        outfile: 'static/pyromaniacs-ledger/scenarios.js',
+        outfile: 'static/arsonists-ledger/scenarios.js',
     },
 ];
 
@@ -61,7 +61,7 @@ const USERSCRIPTS = [
             // TODO: uncomment + remove inline imports when TornPDA ships @require (PR #452):
             // require: [
             //     `${BALACLAVA_BASE}/balaclava-tooltip.js`,
-            //     `${BALACLAVA_BASE}/pyromaniacs-ledger/scenarios.js`,
+            //     `${BALACLAVA_BASE}/arsonists-ledger/scenarios.js`,
             // ],
         },
     },
