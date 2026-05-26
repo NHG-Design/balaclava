@@ -2,6 +2,8 @@ import { execSync } from 'node:child_process';
 import { readFileSync, writeFileSync } from 'fs';
 import { build } from 'esbuild';
 
+const versions = JSON.parse(readFileSync('versions.json', 'utf8'));
+
 const DIST_BASE = 'https://raw.githubusercontent.com/NHG-Design/balaclava/main/dist';
 const BALACLAVA_BASE = 'https://balaclava.app';
 
@@ -20,7 +22,7 @@ const USERSCRIPTS = [
         metadata: {
             ...COMMON_METADATA,
             name: 'Balaclava Tooltip',
-            version: '1.0.2',
+            version: versions['balaclava-tooltip'],
             description: 'Universal tooltip injection for userscript managers',
             updateURL: `${DIST_BASE}/balaclava-tooltip.meta.js`,
             downloadURL: `${DIST_BASE}/balaclava-tooltip.user.js`,
@@ -34,7 +36,7 @@ const USERSCRIPTS = [
         metadata: {
             ...COMMON_METADATA,
             name: "Torn Pyromaniac's Ledger",
-            version: '0.4.4',
+            version: versions['pyromaniacs-ledger'],
             description: "Arson profit-per-nerve calculator and strategy guide for Torn's Crimes page",
             icon: 'https://www.google.com/s2/favicons?sz=64&domain=torn.com',
             updateURL: `${DIST_BASE}/pyromaniacs-ledger.meta.js`,

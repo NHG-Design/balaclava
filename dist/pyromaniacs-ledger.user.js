@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        Torn Pyromaniac's Ledger
 // @namespace   https://github.com/NHG-Design/balaclava
-// @version     0.4.4
+// @version     0.4.5
 // @description Arson profit-per-nerve calculator and strategy guide for Torn's Crimes page
 // @icon        https://www.google.com/s2/favicons?sz=64&domain=torn.com
 // @author      Yukio [906148]
@@ -4820,20 +4820,15 @@
         }
         .pyro-label--unconfirmed { opacity: 0.55; }
 
-        .pyro-band--negative .pyro-label { color: #c44; }
-        .pyro-band--low      .pyro-label { color: #b90; }
-        .pyro-band--good     .pyro-label { color: #4a4; }
-        .pyro-band--jackpot  .pyro-label { color: #0cc; }
+        .pyro-band--negative .pyro-label { color: #d33; }
+        .pyro-band--low      .pyro-label { color: #dc3; }
+        .pyro-band--good     .pyro-label { color: #4a6; }
+        .pyro-band--jackpot  .pyro-label { color: #a6f; }
 
-        .arson-root .pyro-band--negative:has([class*="desktopStatusSection___"]) { background: rgba(120,40,40,0.25) !important; }
-        .arson-root .pyro-band--low:has([class*="desktopStatusSection___"]) { background: rgba(180,140,0,0.15) !important; }
-        .arson-root .pyro-band--good:has([class*="desktopStatusSection___"]) { background: rgba(40,140,60,0.15) !important; }
-        .arson-root .pyro-band--jackpot:has([class*="desktopStatusSection___"]) { background: rgba(0,200,200,0.15) !important; }
-
-        .arson-root .pyro-band--negative:not(:has([class*="desktopStatusSection___"])) { box-shadow: inset -5px 0 0 #c44 !important; }
-        .arson-root .pyro-band--low:not(:has([class*="desktopStatusSection___"])) { box-shadow: inset -5px 0 0 #b90 !important; }
-        .arson-root .pyro-band--good:not(:has([class*="desktopStatusSection___"])) { box-shadow: inset -5px 0 0 #4a4 !important; }
-        .arson-root .pyro-band--jackpot:not(:has([class*="desktopStatusSection___"])) { box-shadow: inset -5px 0 0 #0cc !important; }
+        .arson-root .pyro-band--negative { box-shadow: inset -5px 0 0 #d33 !important; }
+        .arson-root .pyro-band--low { box-shadow: inset -5px 0 0 #dc3 !important; }
+        .arson-root .pyro-band--good { box-shadow: inset -5px 0 0 #4a6 !important; }
+        .arson-root .pyro-band--jackpot { box-shadow: inset -5px 0 0 #a6f !important; }
     `;
     document.head.appendChild(style);
     injectTooltipContentStyles();
