@@ -1,0 +1,20 @@
+#!/bin/sh
+
+STAGED=$(git diff --cached --name-only)
+
+# If versions.json is already staged, the developer made an intentional version decision
+echo "$STAGED" | grep -q "^versions\.json$" && exit 0
+
+BUMP_ARGS=""
+for dir in src/userscripts/*/; do
+  name=$(basename "$dir")
+  echo "$STAGED" | grep -q "^src/userscripts/$name/" && BUMP_ARGS="$BUMP_ARGS $name"
+done
+
+if [ -z "$BUMP_ARGS" ]; then
+  exit 0
+fi
+
+node scripts/bump-versions.mjs $BUMP_ARGS || exit 1
+pnpm build:userscripts || exit 1
+git add versions.json dist/

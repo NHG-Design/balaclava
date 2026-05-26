@@ -10,7 +10,8 @@
     "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
     "cf:deploy": "pnpm build && wrangler pages deploy .svelte-kit/cloudflare",
     "build:userscripts": "node scripts/build-userscripts.mjs",
-    "test:userscripts": "node --import tsx/esm --test src/userscripts/pyromaniacs-ledger/engine.test.ts"
+    "test:userscripts": "node --import tsx/esm --test src/userscripts/pyromaniacs-ledger/engine.test.ts",
+    "prepare": "husky"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^4.0.0",
@@ -19,6 +20,7 @@
     "@sveltejs/vite-plugin-svelte": "^7.0.0",
     "@types/node": "^25.9.1",
     "esbuild": "^0.28.0",
+    "husky": "^9.1.7",
     "svelte": "^5.0.0",
     "svelte-check": "^4.0.0",
     "tsx": "^4.22.3",

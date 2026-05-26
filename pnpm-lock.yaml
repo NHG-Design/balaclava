@@ -30,6 +30,9 @@ importers:
       esbuild:
         specifier: ^0.28.0
         version: 0.28.0
+      husky:
+        specifier: ^9.1.7
+        version: 9.1.7
       svelte:
         specifier: ^5.0.0
         version: 5.55.9
@@ -880,6 +883,11 @@ packages:
   hex-rgb@4.3.0:
     resolution: {integrity: sha512-Ox1pJVrDCyGHMG9CFg1tmrRUMRPRsAWYc/PinY0XzJU4K7y7vjNoLKIQ7BR5UJMCxNN8EM1MNDmHWA/B3aZUuw==}
     engines: {node: '>=6'}
+
+  husky@9.1.7:
+    resolution: {integrity: sha512-5gs5ytaNjBrh5Ow3zrvdUUY+0VxIuWVL4i9irt6friV+BqdCfmV11CQTWMiBYWHbXhco+J1kHfTOUkePhCDvMA==}
+    engines: {node: '>=18'}
+    hasBin: true
 
   is-reference@3.0.3:
     resolution: {integrity: sha512-ixkJoqQvAP88E6wLydLGGqCJsrFUnqoH6HnaczB8XmDH1oaWU+xxdptvikTgaEhtZ53Ky6YXiBuUI2WXLMCwjw==}
@@ -1820,6 +1828,8 @@ snapshots:
     optional: true
 
   hex-rgb@4.3.0: {}
+
+  husky@9.1.7: {}
 
   is-reference@3.0.3:
     dependencies:

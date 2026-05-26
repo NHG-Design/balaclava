@@ -1,0 +1,74 @@
+name: Bump userscript versions
+
+on:
+  push:
+    paths:
+      - 'src/userscripts/**'
+
+jobs:
+  bump:
+    runs-on: ubuntu-latest
+    if: github.actor != 'github-actions[bot]'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: latest
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Detect which userscripts changed
+        id: detect
+        run: |
+          BEFORE="${{ github.event.before }}"
+          SHA="${{ github.sha }}"
+
+          if [ "$BEFORE" = "0000000000000000000000000000000000000000" ]; then
+            CHANGED=$(git diff --name-only HEAD~1 HEAD 2>/dev/null || echo "")
+          else
+            CHANGED=$(git diff --name-only "$BEFORE" "$SHA")
+          fi
+
+          echo "Changed files:"
+          echo "$CHANGED"
+
+          # If versions.json already changed in this push, the pre-commit hook handled it
+          if echo "$CHANGED" | grep -q "^versions\.json$"; then
+            echo "versions.json already bumped by pre-commit hook — skipping."
+            echo "skip=true" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+
+          BUMP_ARGS=""
+          for dir in src/userscripts/*/; do
+            name=$(basename "$dir")
+            echo "$CHANGED" | grep -q "^src/userscripts/$name/" && BUMP_ARGS="$BUMP_ARGS $name"
+          done
+
+          echo "args=$BUMP_ARGS" >> $GITHUB_OUTPUT
+
+      - name: Bump versions
+        if: steps.detect.outputs.skip != 'true' && steps.detect.outputs.args != ''
+        run: node scripts/bump-versions.mjs ${{ steps.detect.outputs.args }}
+
+      - name: Rebuild userscripts
+        if: steps.detect.outputs.skip != 'true' && steps.detect.outputs.args != ''
+        run: pnpm build:userscripts
+
+      - name: Commit bumped versions
+        if: steps.detect.outputs.skip != 'true' && steps.detect.outputs.args != ''
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add versions.json dist/
+          git diff --staged --quiet || git commit -m "chore: bump userscript versions [skip ci]"
+          git push
