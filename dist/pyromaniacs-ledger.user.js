@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        Torn Pyromaniac's Ledger
 // @namespace   https://github.com/NHG-Design/balaclava
-// @version     0.4.7
+// @version     0.4.8
 // @description Arson profit-per-nerve calculator and strategy guide for Torn's Crimes page
 // @icon        https://www.google.com/s2/favicons?sz=64&domain=torn.com
 // @author      Yukio [906148]
@@ -1044,7 +1044,7 @@
       actions: {
         ignite: [{ resourceId: RESOURCE.LIGHTER, qty: 1 }],
         place: [{ resourceId: RESOURCE.HYDROGEN, qty: 1 }],
-        stoke: [{ resourceId: RESOURCE.HYDROGEN, qty: 2 }],
+        stoke: [{ resourceId: RESOURCE.HYDROGEN, qty: 1 }],
         stokeTime: "early"
       },
       needsVerification: true
@@ -4806,8 +4806,8 @@
     const m = btn.getAttribute("aria-label")?.match(/Skill:\s*([\d.]+)/);
     return m ? parseFloat(m[1]) : 0;
   }
-  var KEY_STRATEGIES_CACHE = "pyroLedger.v1.strategiesCache";
-  var KEY_STRATEGIES_TS = "pyroLedger.v1.strategiesTs";
+  var KEY_STRATEGIES_CACHE = "pyroLedger.v2.strategiesCache";
+  var KEY_STRATEGIES_TS = "pyroLedger.v2.strategiesTs";
   var STRATEGIES_URL = "https://balaclava.app/pyromaniacs-ledger/strategies.json";
   var STRATEGIES_TTL_MS = 24 * 60 * 60 * 1e3;
   var strategyIndex = /* @__PURE__ */ new Map();

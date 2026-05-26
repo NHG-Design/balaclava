@@ -188,8 +188,8 @@ function getSkillValue(): number {
 // ---------------------------------------------------------------------------
 // Strategy index: scenarioName → Strategy[]
 // ---------------------------------------------------------------------------
-const KEY_STRATEGIES_CACHE = 'pyroLedger.v1.strategiesCache';
-const KEY_STRATEGIES_TS    = 'pyroLedger.v1.strategiesTs';
+const KEY_STRATEGIES_CACHE = 'pyroLedger.v2.strategiesCache';
+const KEY_STRATEGIES_TS    = 'pyroLedger.v2.strategiesTs';
 const STRATEGIES_URL       = 'https://balaclava.app/pyromaniacs-ledger/strategies.json';
 const STRATEGIES_TTL_MS    = 24 * 60 * 60 * 1000;
 
