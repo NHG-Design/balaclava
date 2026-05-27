@@ -17,9 +17,8 @@ const DIST_BASE = 'https://raw.githubusercontent.com/NHG-Design/balaclava/main/d
 const BALACLAVA_BASE = 'https://balaclava.app';
 
 const COMMON_METADATA = {
-    namespace: 'https://github.com/NHG-Design/balaclava',
+    namespace: 'https://greasyfork.org/en/users/942572-yukio-mizsima',
     author: 'Yukio [906148]',
-    supportURL: 'https://github.com/NHG-Design/balaclava/issues',
     license: 'MIT',
     runAt: 'document-idle',
 };
@@ -47,8 +46,6 @@ const USERSCRIPTS = [
             name: 'Balaclava Tooltip',
             version: versions['balaclava-tooltip'],
             description: 'Universal tooltip injection for userscript managers',
-            updateURL: `${DIST_BASE}/balaclava-tooltip.meta.js`,
-            downloadURL: `${DIST_BASE}/balaclava-tooltip.user.js`,
             match: '*://*/*',
             grant: 'unsafeWindow',
         },
@@ -65,8 +62,6 @@ const USERSCRIPTS = [
             version: versions['arsonists-ledger'],
             description: "Arson profit-per-nerve calculator and scenario guide for Torn's Crimes page",
             icon: 'https://www.google.com/s2/favicons?sz=64&domain=torn.com',
-            updateURL: `${DIST_BASE}/arsonists-ledger.meta.js`,
-            downloadURL: `${DIST_BASE}/arsonists-ledger.user.js`,
             match: 'https://www.torn.com/page.php?sid=crimes*',
             grant: ['GM_setValue', 'GM_getValue', 'unsafeWindow', 'GM_xmlhttpRequest'],
             connect: 'balaclava.app',
