@@ -351,7 +351,12 @@ function getRoot(): Element {
     return document.querySelector(SEL.ROOT) ?? document.body;
 }
 
+function isArsonPage(): boolean {
+    return !!document.querySelector(SEL.ROOT);
+}
+
 function scanPage(): void {
+    if (!isArsonPage()) return;
     const prices = effectivePrices();
 
     getRoot().querySelectorAll<HTMLElement>(SEL.CARD).forEach(section => {
@@ -404,6 +409,7 @@ function scheduleInjectSettings(): void {
     if (reInjectTimer !== null) return;
     reInjectTimer = setTimeout(() => {
         reInjectTimer = null;
+        if (!isArsonPage()) return;
         const root = getRoot();
         const btn = document.getElementById('pyro-settings-btn');
         if (!btn || !root.contains(btn)) {
@@ -420,10 +426,12 @@ const observer = new MutationObserver(() => {
 function start(): void {
     loadState();
     injectHighlightStyles();
-    scanPage();
-    injectSettings(getRoot(), settingsCtx);
     observer.observe(document.body, { childList: true, subtree: true });
     scheduleScenarioRefresh();
+    if (isArsonPage()) {
+        scanPage();
+        injectSettings(getRoot(), settingsCtx);
+    }
 }
 
 if (document.readyState === 'loading') {

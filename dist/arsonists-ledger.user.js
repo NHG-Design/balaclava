@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        Torn Arsonist's Ledger
 // @namespace   https://greasyfork.org/en/users/942572-yukio-mizsima
-// @version     0.4.13
+// @version     0.4.14
 // @description Arson profit-per-nerve calculator and scenario guide for Torn's Crimes page
 // @icon        https://www.google.com/s2/favicons?sz=64&domain=torn.com
 // @author      Yukio [906148]
@@ -2024,7 +2024,11 @@
   function getRoot() {
     return document.querySelector(SEL.ROOT) ?? document.body;
   }
+  function isArsonPage() {
+    return !!document.querySelector(SEL.ROOT);
+  }
   function scanPage() {
+    if (!isArsonPage()) return;
     const prices = effectivePrices();
     getRoot().querySelectorAll(SEL.CARD).forEach((section) => {
       if (section.dataset.pyroScanned) return;
@@ -2063,6 +2067,7 @@
     if (reInjectTimer !== null) return;
     reInjectTimer = setTimeout(() => {
       reInjectTimer = null;
+      if (!isArsonPage()) return;
       const root = getRoot();
       const btn = document.getElementById("pyro-settings-btn");
       if (!btn || !root.contains(btn)) {
@@ -2077,10 +2082,12 @@
   function start() {
     loadState();
     injectHighlightStyles();
-    scanPage();
-    injectSettings(getRoot(), settingsCtx);
     observer.observe(document.body, { childList: true, subtree: true });
     scheduleScenarioRefresh();
+    if (isArsonPage()) {
+      scanPage();
+      injectSettings(getRoot(), settingsCtx);
+    }
   }
   if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", start, { once: true });
