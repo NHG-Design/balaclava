@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        Torn Arsonist's Ledger
 // @namespace   https://greasyfork.org/en/users/942572-yukio-mizsima
-// @version     0.4.14
+// @version     0.4.15
 // @description Arson profit-per-nerve calculator and scenario guide for Torn's Crimes page
 // @icon        https://www.google.com/s2/favicons?sz=64&domain=torn.com
 // @author      Yukio [906148]
@@ -1299,7 +1299,9 @@
     justify-content: center;
     transition: transform 100ms ease-out;
 }
-#pyro-settings-btn:hover { background: rgba(255,255,255,0.08); color: #fff; }
+@media (hover: hover) and (pointer: fine) {
+    #pyro-settings-btn:hover { background: rgba(255,255,255,0.08); color: #fff; }
+}
 #pyro-settings-btn:active { transform: scale(0.94); }
 #pyro-settings-panel {
     --pyro-api-color: #6d6;
@@ -1330,6 +1332,9 @@
     pointer-events: auto;
     transition: transform 150ms ease-out, opacity 150ms ease-out, visibility 0ms linear 0ms;
 }
+#pyro-settings-panel:not(.is-open) {
+    transition: transform 100ms ease-out, opacity 100ms ease-out, visibility 0ms linear 100ms;
+}
 .pyro-tab-bar { display: flex; background: #161616; border-bottom: 1px solid #303030; }
 .pyro-tab {
     flex: 1;
@@ -1344,8 +1349,11 @@
     text-transform: uppercase;
     letter-spacing: 0.04em;
 }
-.pyro-tab:hover { color: #bbb; }
-.pyro-tab.active { color: #fff; border-bottom-color: ${BAND_COLOR.excellent}; }
+@media (hover: hover) and (pointer: fine) {
+    .pyro-tab:hover { color: #bbb; }
+}
+.pyro-tab:active { transform: scale(0.97); }
+.pyro-tab.active { color: oklch(97% 0.008 260); border-bottom-color: ${BAND_COLOR.excellent}; }
 .pyro-tab-content { padding: 10px; max-height: 380px; overflow-y: auto; }
 .pyro-s-group { margin-bottom: 10px; }
 .pyro-s-group:last-child { margin-bottom: 0; }
@@ -1382,7 +1390,7 @@
 }
 .pyro-s-input::-webkit-inner-spin-button,
 .pyro-s-input::-webkit-outer-spin-button { -webkit-appearance: none; }
-.pyro-s-input:focus { outline: none; border-color: ${BAND_COLOR.excellent}; }
+.pyro-s-input:focus-visible { outline: none; border-color: ${BAND_COLOR.excellent}; }
 .pyro-s-input.from-api   { border-color: #4a4; color: #6d6; }
 .pyro-s-input.overridden { border-color: #48a; color: #7af; }
 .pyro-s-divider { border: none; border-top: 1px solid #2a2a2a; margin: 8px 0; }
@@ -1398,7 +1406,7 @@
     min-width: 0;
     font-family: monospace;
 }
-.pyro-s-key-input:focus { outline: none; border-color: ${BAND_COLOR.excellent}; }
+.pyro-s-key-input:focus-visible { outline: none; border-color: ${BAND_COLOR.excellent}; }
 .pyro-s-btn {
     background: #252525;
     border: 1px solid #484848;
@@ -1410,7 +1418,9 @@
     white-space: nowrap;
     transition: transform 100ms ease-out;
 }
-.pyro-s-btn:hover:not(:disabled) { background: #303030; color: #fff; }
+@media (hover: hover) and (pointer: fine) {
+    .pyro-s-btn:hover:not(:disabled) { background: #303030; color: #fff; }
+}
 .pyro-s-btn:active:not(:disabled) { transform: scale(0.97); }
 .pyro-s-btn:disabled { opacity: 0.35; cursor: default; }
 .pyro-s-status {
