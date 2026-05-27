@@ -32,7 +32,10 @@
     "onlyBuiltDependencies": [
       "esbuild",
       "workerd"
-    ]
+    ],
+    "overrides": {
+      "cookie": ">=0.7.0"
+    }
   },
   "dependencies": {
     "workers-og": "^0.0.27"
