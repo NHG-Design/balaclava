@@ -117,14 +117,14 @@ While many jobs have no constraints, others demand strict parameters. Failing an
 
 | Icon | Requirement | Details / Strategy |
 | :---: | :--- | :--- |
-| 🛡️ | **Insurance Claim** | Keep suspicion low. Use Oxygen, Saltpetre, and Kerosene. Use Methane to actively remove suspicion. |
+| 🛡️ | **Insurance Claim** | Keep suspicion low. Use Oxygen, Potassium Nitrate, and Kerosene. Use Methane to actively remove suspicion. |
 | 🔥 | **Total Destruction** | Destruction must hit exactly 100%. |
 | 📈 | **Minimum Damage** | Damage must clear the specified X% (hitting exactly X% is successful). |
 | 📉 | **Maximum Damage** | Damage must remain *below* or equal to X% (do not exceed). |
 | 📊 | **Damage Range** | Destruction must land strictly between X% and Y% (inclusive). |
 | 🔍 | **Plant Evidence** | Require a miscellaneous item to be placed via the specialized action beforehand. |
 | 🧪 | **Specific Accelerant** | Using unauthorized types fails the job (e.g., if "Gaseous Only", use only Oxygen, Methane, Hydrogen). Igniters/dampeners are always exempt. |
-| 🍂 | **Accidental Cause** | Keep suspicion low using accidental-friendly items like Oxygen or Saltpetre. |
+| 🍂 | **Accidental Cause** | Keep suspicion low using accidental-friendly items like Oxygen or Potassium Nitrate. |
 | 🚨 | **Highly Suspicious** | Opposite of accidental; maximize suspicion. High-impact fuels like Gasoline and Magnesium are recommended. |
 | 👁️ | **High Visibility** | Maximize visibility. Utilize Magnesium and Diesel to build a massive glare. |
 
@@ -267,7 +267,7 @@ Repeatedly spamming the same action on a single target induces severe penalty de
 ### 1. The Efficient Path (Low Nerve, Slow Progression)
 Optimized for players conserving nerve for other crimes or avoiding expensive booster usage.
 * **Setup:** Start heavy. Deploy `(1 Gasoline or Diesel per Area) + 1 Solid`. For maximum efficiency, use exactly one accelerant.
-* **Execution:** Minimize your interaction footprint. Only stoke if required. For Insurance Claims, finish with a Methane stoke to wipe suspicion. For small targets requiring total destruction, a late Saltpetre stoke will suffice; for larger targets, use Diesel, Oxygen, or Molotovs.
+* **Execution:** Minimize your interaction footprint. Only stoke if required. For Insurance Claims, finish with a Methane stoke to wipe suspicion. For small targets requiring total destruction, a late Potassium Nitrate stoke will suffice; for larger targets, use Diesel, Oxygen, or Molotovs.
 * **Goal:** Focus on reaching the **Collect** phase using the fewest actions possible, exploiting the massive 600% collection multiplier. Skip complex requirements (High Suspicion, Specific Fuels) to maintain baseline optimization.
 
 ### 2. The Fast Path (High Nerve, Accelerated Progression)
@@ -295,14 +295,14 @@ Unlike other crimes, Arson features **16 unique jobs** tied directly to mileston
 | Accelerant | CS Unlock | Unique Target Job | Strategy Advice |
 | :--- | :---: | :--- | :--- |
 | **Oxygen** | 5 | Dental Surgery - *A Bitter Taste* | Run heavy Gasoline lines. |
-| **Saltpetre** | 10 | Barn - *The Bolted Horse* | Requires vast amounts of Oxygen for both starting and stoking. |
+| **Potassium Nitrate** | 10 | Barn - *The Bolted Horse* | Requires vast amounts of Oxygen for both starting and stoking. |
 | **Diesel** | 15 | Gas Station - *Blown to High Heaven* | High difficulty. Start with Oxygen and immediately dampen within 1 second. |
-| **Magnesium** | 20 | Firework Store - *Sky High Prices* | Gasoline + Saltpetre opener. Stoke with Saltpetre. Requires a Glitter Bomb. |
+| **Magnesium** | 20 | Firework Store - *Sky High Prices* | Gasoline + Potassium Nitrate opener. Stoke with Potassium Nitrate. Requires a Glitter Bomb. |
 | **Methane** | 25 | Restroom - *Shit Happens* | Un-failable. Proceed normally. |
 | **Molotov Cocktail** | 30 | Recording Studio - *Roast Beef* | 4 Diesel (dampen near end) OR 1 Gasoline followed by immediate dual Oxygen stokes. |
 | **Kerosene** | 40 | Aircraft Hangar - *Plane and Simple* | Open with Diesel/Methane mix, follow through with Oxygen stoking. |
 | **Thermite** | 50 | Foundry - *Hot Under the Collar* | Low flammability but exceptionally high rurality. Take your time. |
-| **Sand** | 60 | Raceway - *Finish Line* | Low Kerosene + 1 Saltpetre starter. Stoke with a tank of Methane. |
+| **Sand** | 60 | Raceway - *Finish Line* | Low Kerosene + 1 Potassium Nitrate starter. Stoke with a tank of Methane. |
 | **Hydrogen** | 70 | Homeless Camp - *Bummed Out* | Triple Kerosene opener, stoke with Methane 1-2 times near completion. |
 | **Flamethrower** | 80 | Pest Control Hub - *Bugging Me* | Massive Oxygen requirements. Start with 2-3, stoke near the end repeatedly for total destruction. |
 | **Fire Extinguisher** | Unknown | Undetermined | *Information currently restricted.* |

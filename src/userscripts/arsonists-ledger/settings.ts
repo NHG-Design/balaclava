@@ -3,6 +3,15 @@ import { type PriceMap, type ProfitThresholds } from './engine.js';
 import { fetchApiPrices } from './api.js';
 import { SEL } from './selectors.js';
 import { BAND_COLOR } from './colors.js';
+import { el, txt, svgEl } from './dom.js';
+import {
+    ICON_INFO,
+    ICON_CHECK,
+    ICON_X,
+    ICON_ARROW_RIGHT,
+    ICON_GEAR,
+    ICON_EXTERNAL_LINK,
+} from './icons.js';
 
 // ---------------------------------------------------------------------------
 // Context
@@ -14,9 +23,7 @@ export interface SettingsCtx {
     getThresholds(): ProfitThresholds;
     getApiKey(): string;
     getApiLastRefresh(): number;
-    getDebugMode(): boolean;
     getActiveTab(): string;
-    getMissingScenarios(): string[];
 
     setManualPrice(id: ResourceId, price: number): void;
     clearManualPrice(id: ResourceId): void;
@@ -24,57 +31,21 @@ export interface SettingsCtx {
     setApiPrices(prices: PriceMap, timestamp: number): void;
     clearApiPrices(): void;
     setApiKey(key: string): void;
-    setDebugMode(on: boolean): void;
     setActiveTab(tab: string): void;
 }
 
 // ---------------------------------------------------------------------------
-// DOM helpers
+// Status helpers
 // ---------------------------------------------------------------------------
 
-function el<K extends keyof HTMLElementTagNameMap>(
-    tag: K,
-    className?: string,
-): HTMLElementTagNameMap[K] {
-    const e = document.createElement(tag);
-    if (className) e.className = className;
-    return e;
+function setOkStatus(statusEl: HTMLElement, message: string): void {
+    statusEl.innerHTML = ICON_CHECK;
+    statusEl.appendChild(txt(message));
 }
 
-function txt(content: string): Text {
-    return document.createTextNode(content);
-}
-
-function checkIcon(): SVGSVGElement {
-    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-    svg.setAttribute('width', '16');
-    svg.setAttribute('height', '16');
-    svg.setAttribute('viewBox', '0 0 24 24');
-    svg.setAttribute('fill', 'none');
-    svg.setAttribute('stroke', 'currentColor');
-    svg.setAttribute('stroke-width', '2');
-    svg.setAttribute('stroke-linecap', 'round');
-    svg.setAttribute('stroke-linejoin', 'round');
-    svg.style.verticalAlign = 'middle';
-    svg.style.marginRight = '4px';
-    const blank = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-    blank.setAttribute('stroke', 'none');
-    blank.setAttribute('d', 'M0 0h24v24H0z');
-    blank.setAttribute('fill', 'none');
-    const circle = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-    circle.setAttribute('d', 'M3 12a9 9 0 1 0 18 0a9 9 0 1 0 -18 0');
-    const tick = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-    tick.setAttribute('d', 'M9 12l2 2l4 -4');
-    svg.appendChild(blank);
-    svg.appendChild(circle);
-    svg.appendChild(tick);
-    return svg;
-}
-
-function setOkStatus(el: HTMLElement, message: string): void {
-    el.textContent = '';
-    el.appendChild(checkIcon());
-    el.appendChild(txt(message));
+function setErrStatus(statusEl: HTMLElement, message: string): void {
+    statusEl.innerHTML = ICON_X;
+    statusEl.appendChild(txt(message));
 }
 
 // ---------------------------------------------------------------------------
@@ -138,11 +109,7 @@ export function injectSettingsStyles(): void {
     pointer-events: auto;
     transition: transform 150ms ease-out, opacity 150ms ease-out, visibility 0ms linear 0ms;
 }
-.pyro-tab-bar {
-    display: flex;
-    background: #161616;
-    border-bottom: 1px solid #303030;
-}
+.pyro-tab-bar { display: flex; background: #161616; border-bottom: 1px solid #303030; }
 .pyro-tab {
     flex: 1;
     background: none;
@@ -158,11 +125,7 @@ export function injectSettingsStyles(): void {
 }
 .pyro-tab:hover { color: #bbb; }
 .pyro-tab.active { color: #fff; border-bottom-color: ${BAND_COLOR.excellent}; }
-.pyro-tab-content {
-    padding: 10px;
-    max-height: 380px;
-    overflow-y: auto;
-}
+.pyro-tab-content { padding: 10px; max-height: 380px; overflow-y: auto; }
 .pyro-s-group { margin-bottom: 10px; }
 .pyro-s-group:last-child { margin-bottom: 0; }
 .pyro-s-group-title {
@@ -175,12 +138,7 @@ export function injectSettingsStyles(): void {
     padding-bottom: 3px;
     border-bottom: 1px solid #2a2a2a;
 }
-.pyro-s-row {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    margin-bottom: 3px;
-}
+.pyro-s-row { display: flex; align-items: center; gap: 6px; margin-bottom: 3px; }
 .pyro-s-label {
     flex: 1;
     font-size: 11px;
@@ -267,7 +225,6 @@ export function injectSettingsStyles(): void {
 .pyro-s-section-note a svg { width: 10px; height: 10px; flex-shrink: 0; }
 .pyro-s-missing-header { font-size: 10px; color: #666; margin: 8px 0 4px; }
 .pyro-s-missing-list { font-size: 10px; color: #777; padding-left: 14px; margin: 0; }
-.pyro-s-missing-list li { margin-bottom: 2px; font-family: monospace; }
 `;
     document.head.appendChild(style);
 }
@@ -275,7 +232,6 @@ export function injectSettingsStyles(): void {
 // ---------------------------------------------------------------------------
 // Price input helper
 // ---------------------------------------------------------------------------
-
 
 type PriceSource = 'manual' | 'api' | 'db';
 
@@ -328,18 +284,9 @@ function priceInput(id: ResourceId, ctx: SettingsCtx): HTMLInputElement {
 // ---------------------------------------------------------------------------
 
 const PRICE_GROUPS: Array<{ title: string; ids: ResourceId[] }> = [
-    {
-        title: 'Liquid fuels',
-        ids: ['gasoline', 'diesel', 'kerosene'],
-    },
-    {
-        title: 'Solid fuels',
-        ids: ['magnesium', 'thermite', 'potassium_nitrate'],
-    },
-    {
-        title: 'Gaseous fuels',
-        ids: ['oxygen', 'methane', 'hydrogen'],
-    },
+    { title: 'Liquid fuels',  ids: ['gasoline', 'diesel', 'kerosene'] },
+    { title: 'Solid fuels',   ids: ['magnesium', 'thermite', 'potassium_nitrate'] },
+    { title: 'Gaseous fuels', ids: ['oxygen', 'methane', 'hydrogen'] },
     {
         title: 'Evidence',
         ids: Object.values(CATALOG)
@@ -352,10 +299,9 @@ const PRICE_GROUPS: Array<{ title: string; ids: ResourceId[] }> = [
 function buildPricesTab(ctx: SettingsCtx, panel: HTMLElement): HTMLElement {
     const root = el('div');
 
-    // Action row: Refresh / Reset + timestamp
     const actionGroup = el('div', 'pyro-s-group');
-
     const actionRow = el('div', 'pyro-s-refresh-row');
+
     const refreshBtn = el('button', 'pyro-s-btn');
     refreshBtn.textContent = 'Refresh';
     if (!ctx.getApiKey()) refreshBtn.disabled = true;
@@ -391,7 +337,7 @@ function buildPricesTab(ctx: SettingsCtx, panel: HTMLElement): HTMLElement {
             actionStatus.className = 'pyro-s-status ok';
             rerenderTab(panel, 'prices', ctx);
         } else {
-            actionStatus.textContent = `✗ ${result.error ?? 'Unknown error'}`;
+            setErrStatus(actionStatus, result.error ?? 'Unknown error');
             actionStatus.className = 'pyro-s-status err';
         }
     });
@@ -401,7 +347,6 @@ function buildPricesTab(ctx: SettingsCtx, panel: HTMLElement): HTMLElement {
         rerenderTab(panel, 'prices', ctx);
     });
 
-    // Price groups
     for (const group of PRICE_GROUPS) {
         const g = el('div', 'pyro-s-group');
         const title = el('div', 'pyro-s-group-title');
@@ -424,7 +369,7 @@ function buildPricesTab(ctx: SettingsCtx, panel: HTMLElement): HTMLElement {
     }
 
     const note = el('p', 'pyro-s-section-note');
-    note.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0"/><path d="M12 9h.01"/><path d="M11 12h1v4h1"/></svg><span>Saved prices as of ${CATALOG_UPDATED}. API price active in <span style="color: var(--pyro-api-color);">green</span>. Manual override in <span style="color: var(--pyro-manual-color);">blue</span>. Clear manual price to revert to API or database <span style="color: var(--pyro-db-color);">default</span>.</span>`;
+    note.innerHTML = `${ICON_INFO}<span>Saved prices as of ${CATALOG_UPDATED}. API price active in <span style="color: var(--pyro-api-color);">green</span>. Manual override in <span style="color: var(--pyro-manual-color);">blue</span>. Clear manual price to revert to API or database <span style="color: var(--pyro-db-color);">default</span>.</span>`;
     root.appendChild(note);
 
     return root;
@@ -434,46 +379,16 @@ function buildPricesTab(ctx: SettingsCtx, panel: HTMLElement): HTMLElement {
 // Thresholds tab
 // ---------------------------------------------------------------------------
 
-function arrowIcon(): SVGSVGElement {
-    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-    svg.setAttribute('width', '12');
-    svg.setAttribute('height', '12');
-    svg.setAttribute('viewBox', '0 0 24 24');
-    svg.setAttribute('fill', 'none');
-    svg.setAttribute('stroke', 'currentColor');
-    svg.setAttribute('stroke-width', '2');
-    svg.setAttribute('stroke-linecap', 'round');
-    svg.setAttribute('stroke-linejoin', 'round');
-    svg.style.verticalAlign = 'middle';
-    svg.style.margin = '0 2px';
-    const blank = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-    blank.setAttribute('stroke', 'none');
-    blank.setAttribute('d', 'M0 0h24v24H0z');
-    blank.setAttribute('fill', 'none');
-    const line = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-    line.setAttribute('d', 'M5 12l14 0');
-    const upper = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-    upper.setAttribute('d', 'M15 16l4 -4');
-    const lower = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-    lower.setAttribute('d', 'M15 8l4 4');
-    svg.appendChild(blank);
-    svg.appendChild(line);
-    svg.appendChild(upper);
-    svg.appendChild(lower);
-    return svg;
-}
-
 function thresholdInput(
     label: string,
     getVal: () => number,
     setVal: (n: number) => void,
-    ctx: SettingsCtx,
 ): HTMLElement {
     const row = el('div', 'pyro-s-row');
     const lbl = el('span', 'pyro-s-label');
     const [before, after] = label.split('→');
     lbl.appendChild(txt(before.trim()));
-    lbl.appendChild(arrowIcon());
+    lbl.appendChild(svgEl(ICON_ARROW_RIGHT));
     lbl.appendChild(txt((after ?? '').trim()));
     const input = el('input', 'pyro-s-input');
     input.type = 'number';
@@ -496,11 +411,10 @@ function thresholdInput(
 
 function buildThresholdsTab(ctx: SettingsCtx): HTMLElement {
     const root = el('div');
-
     const g = el('div', 'pyro-s-group');
 
     const bandNote = el('p', 'pyro-s-section-note');
-    bandNote.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0"/><path d="M12 9h.01"/><path d="M11 12h1v4h1"/></svg><span>Cards are color-coded by profit/nerve: <span style="color:${BAND_COLOR.negative}">negative</span> (≤ 0), <span style="color:${BAND_COLOR.low}">low</span>, <span style="color:${BAND_COLOR.good}">good</span>, <span style="color:${BAND_COLOR.excellent}">excellent</span>.</span>`;
+    bandNote.innerHTML = `${ICON_INFO}<span>Cards are color-coded by profit/nerve: <span style="color:${BAND_COLOR.negative}">negative</span> (≤ 0), <span style="color:${BAND_COLOR.low}">low</span>, <span style="color:${BAND_COLOR.good}">good</span>, <span style="color:${BAND_COLOR.excellent}">excellent</span>.</span>`;
     g.appendChild(bandNote);
 
     g.appendChild(thresholdInput(
@@ -510,7 +424,6 @@ function buildThresholdsTab(ctx: SettingsCtx): HTMLElement {
             const t = ctx.getThresholds();
             ctx.setThresholds({ low: val, good: Math.max(val, t.good) });
         },
-        ctx,
     ));
     g.appendChild(thresholdInput(
         'Good → Excellent ($/N)',
@@ -519,7 +432,6 @@ function buildThresholdsTab(ctx: SettingsCtx): HTMLElement {
             const t = ctx.getThresholds();
             ctx.setThresholds({ low: Math.min(t.low, val), good: val });
         },
-        ctx,
     ));
 
     root.appendChild(g);
@@ -532,18 +444,16 @@ function buildThresholdsTab(ctx: SettingsCtx): HTMLElement {
 
 function buildApiTab(ctx: SettingsCtx): HTMLElement {
     const root = el('div');
-
-    // Key row
     const keyGroup = el('div', 'pyro-s-group');
 
     const keyNote = el('p', 'pyro-s-section-note');
-    keyNote.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0"/><path d="M12 9h.01"/><path d="M11 12h1v4h1"/></svg><span><strong>Public access</strong> only, used solely to fetch item market prices. <a href="https://www.torn.com/preferences.php#tab=api?step=addNewKey&title=Arsonist%27s+Ledger&torn=items" target="_blank" rel="noopener noreferrer">Create one <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M12 6h-6a2 2 0 0 0 -2 2v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-6"/><path d="M11 13l9 -9"/><path d="M15 4h5v5"/></svg></a></span>`;
+    keyNote.innerHTML = `${ICON_INFO}<span><strong>Public access</strong> only, used solely to fetch item market prices. <a href="https://www.torn.com/preferences.php#tab=api?step=addNewKey&title=Arsonist%27s+Ledger&torn=items" target="_blank" rel="noopener noreferrer">Create one ${ICON_EXTERNAL_LINK}</a></span>`;
     keyGroup.appendChild(keyNote);
 
     const storageNote = el('p', 'pyro-s-section-note');
-    storageNote.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0"/><path d="M12 9h.01"/><path d="M11 12h1v4h1"/></svg><span>Stored by your userscript manager only, <strong>never</strong> sent to any server other than Torn's API.</span>`;
+    storageNote.innerHTML = `${ICON_INFO}<span>Stored by your userscript manager only, <strong>never</strong> sent to any server other than Torn's API.</span>`;
     keyGroup.appendChild(storageNote);
-    
+
     const keyRow = el('div', 'pyro-s-key-row');
     const keyInput = el('input', 'pyro-s-key-input');
     keyInput.type = 'password';
@@ -568,7 +478,11 @@ function buildApiTab(ctx: SettingsCtx): HTMLElement {
 
     saveBtn.addEventListener('click', async () => {
         const key = keyInput.value.trim();
-        if (!key) { keyStatus.textContent = 'Enter a key first.'; keyStatus.className = 'pyro-s-status err'; return; }
+        if (!key) {
+            setErrStatus(keyStatus, 'Enter a key first.');
+            keyStatus.className = 'pyro-s-status err';
+            return;
+        }
 
         saveBtn.disabled = true;
         keyStatus.textContent = 'Validating…';
@@ -583,7 +497,7 @@ function buildApiTab(ctx: SettingsCtx): HTMLElement {
             setOkStatus(keyStatus, `Valid, ${result.updatedCount} prices updated`);
             keyStatus.className = 'pyro-s-status ok';
         } else {
-            keyStatus.textContent = `✗ ${result.error ?? 'Unknown error'}`;
+            setErrStatus(keyStatus, result.error ?? 'Unknown error');
             keyStatus.className = 'pyro-s-status err';
         }
     });
@@ -592,65 +506,26 @@ function buildApiTab(ctx: SettingsCtx): HTMLElement {
 }
 
 function formatTimestamp(ts: number): string {
-    const d = new Date(ts);
-    return d.toLocaleString(undefined, {
+    return new Date(ts).toLocaleString(undefined, {
         month: 'short', day: 'numeric',
         hour: '2-digit', minute: '2-digit',
     });
 }
 
 // ---------------------------------------------------------------------------
-// Debug tab
-// ---------------------------------------------------------------------------
-
-function buildDebugTab(ctx: SettingsCtx): HTMLElement {
-    const root = el('div');
-
-    const checkRow = el('label', 'pyro-s-check-row');
-    const checkbox = el('input');
-    checkbox.type = 'checkbox';
-    checkbox.checked = ctx.getDebugMode();
-    checkbox.addEventListener('change', () => ctx.setDebugMode(checkbox.checked));
-    checkRow.appendChild(checkbox);
-    checkRow.appendChild(txt('Debug mode'));
-    root.appendChild(checkRow);
-
-    const missing = ctx.getMissingScenarios();
-    const header = el('div', 'pyro-s-missing-header');
-    header.textContent = missing.length
-        ? `Missing scenarios observed this session (${missing.length}):`
-        : 'No Missing scenarios observed this session.';
-    root.appendChild(header);
-
-    if (missing.length > 0) {
-        const list = el('ul', 'pyro-s-missing-list');
-        for (const name of missing) {
-            const li = el('li');
-            li.textContent = name;
-            list.appendChild(li);
-        }
-        root.appendChild(list);
-    }
-
-    return root;
-}
-
-// ---------------------------------------------------------------------------
 // Tab switching
 // ---------------------------------------------------------------------------
 
-const TABS = [
-    { id: 'prices',     label: 'Prices'     },
-    { id: 'thresholds', label: 'Thresholds' },
-    { id: 'api',        label: 'API'        },
-    { id: 'debug',      label: 'Debug'      },
-] as const;
-
-type TabId = typeof TABS[number]['id'];
+type TabId = 'prices' | 'thresholds' | 'api';
 
 function buildTabBar(activeId: string, onSwitch: (id: TabId) => void): HTMLElement {
+    const tabs: Array<{ id: TabId; label: string }> = [
+        { id: 'prices',     label: 'Prices'     },
+        { id: 'thresholds', label: 'Thresholds' },
+        { id: 'api',        label: 'API'        },
+    ];
     const bar = el('div', 'pyro-tab-bar');
-    for (const tab of TABS) {
+    for (const tab of tabs) {
         const btn = el('button', tab.id === activeId ? 'pyro-tab active' : 'pyro-tab');
         btn.textContent = tab.label;
         btn.dataset.tab = tab.id;
@@ -676,7 +551,6 @@ function buildTabContent(tabId: string, ctx: SettingsCtx, panel: HTMLElement): H
         case 'prices':     return buildPricesTab(ctx, panel);
         case 'thresholds': return buildThresholdsTab(ctx);
         case 'api':        return buildApiTab(ctx);
-        case 'debug':      return buildDebugTab(ctx);
         default:           return buildPricesTab(ctx, panel);
     }
 }
@@ -689,7 +563,6 @@ export function injectSettings(root: Element, ctx: SettingsCtx): void {
     const existing = document.getElementById('pyro-settings-btn');
     if (existing) {
         if (root.contains(existing)) return;
-        // Orphaned (e.g. injected into body fallback) — remove and re-inject into correct anchor
         existing.closest('.pyro-settings-wrap')?.remove();
     }
 
@@ -703,19 +576,19 @@ export function injectSettings(root: Element, ctx: SettingsCtx): void {
     btn.id = 'pyro-settings-btn';
     btn.setAttribute('aria-label', "Arsonist's Ledger settings");
     btn.setAttribute('aria-expanded', 'false');
-    btn.innerHTML = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>';
+    btn.innerHTML = ICON_GEAR;
 
     const panel = el('div');
     panel.id = 'pyro-settings-panel';
 
-    const activeTab = ctx.getActiveTab() || 'prices';
-    panel.appendChild(buildTabBar(activeTab, tabId => {
+    const activeTabId = ctx.getActiveTab() || 'prices';
+    panel.appendChild(buildTabBar(activeTabId, tabId => {
         ctx.setActiveTab(tabId);
         rerenderTab(panel, tabId, ctx);
     }));
 
     const content = el('div', 'pyro-tab-content');
-    content.appendChild(buildTabContent(activeTab, ctx, panel));
+    content.appendChild(buildTabContent(activeTabId, ctx, panel));
     panel.appendChild(content);
 
     wrap.appendChild(btn);
@@ -727,9 +600,6 @@ export function injectSettings(root: Element, ctx: SettingsCtx): void {
         const isOpen = panel.classList.contains('is-open');
         panel.classList.toggle('is-open', !isOpen);
         btn.setAttribute('aria-expanded', String(!isOpen));
-        if (!isOpen && (ctx.getActiveTab() || 'prices') === 'debug') {
-            rerenderTab(panel, 'debug', ctx);
-        }
     });
 
     document.addEventListener('click', e => {

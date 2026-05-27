@@ -1,13 +1,8 @@
 import { CATALOG, RESOURCE } from '../../data/catalog.js';
 import type { ActionItem, Scenario } from '../../data/scenarios.js';
-import { type RankedScenario, type PriceMap, formatPpn, calcNerve } from './engine.js';
+import { type RankedScenario, type PriceMap, formatPpn } from './engine.js';
 import { BAND_COLOR } from './colors.js';
-
-function el(tag: string, className?: string): HTMLElement {
-    const e = document.createElement(tag);
-    if (className) e.className = className;
-    return e;
-}
+import { el } from './dom.js';
 
 function row(label: string, value: string, highlight?: boolean): HTMLElement {
     const div = el('div', 'pyro-tt-row');

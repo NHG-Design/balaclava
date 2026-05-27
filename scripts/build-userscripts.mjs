@@ -1,6 +1,15 @@
 import { execSync } from 'node:child_process';
-import { readFileSync, writeFileSync } from 'fs';
+import { existsSync, readFileSync, writeFileSync } from 'fs';
 import { build } from 'esbuild';
+
+// Load .env.local for local overrides (e.g. DEBUG_USERSCRIPTS=true).
+// .env.local is gitignored — safe for personal build flags.
+if (existsSync('.env.local')) {
+    for (const line of readFileSync('.env.local', 'utf8').split('\n')) {
+        const m = line.match(/^([^#\s][^=]*)=(.*)/);
+        if (m) process.env[m[1].trim()] ??= m[2].trim();
+    }
+}
 
 const versions = JSON.parse(readFileSync('versions.json', 'utf8'));
 
@@ -47,6 +56,9 @@ const USERSCRIPTS = [
     {
         entry: 'src/userscripts/arsonists-ledger/index.ts',
         outfile: 'dist/arsonists-ledger.user.js',
+        define: {
+            __DEBUG_BUILD__: process.env.DEBUG_USERSCRIPTS === 'true' ? 'true' : 'false',
+        },
         metadata: {
             ...COMMON_METADATA,
             name: "Torn Arsonist's Ledger",
@@ -127,6 +139,7 @@ for (const userscript of USERSCRIPTS) {
         treeShaking: true,
         outfile: userscript.outfile,
         logLevel: 'info',
+        ...(userscript.define ? { define: userscript.define } : {}),
     });
 
     const header = createUserscriptHeader(userscript.metadata);

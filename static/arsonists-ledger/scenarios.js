@@ -97,18 +97,9 @@
 
   // src/data/scenarios.ts
   var SCENARIOS = [
-    // --- Flamethrower variants listed after non-FT for the same scenario ---
     {
       scenarioName: "A Black Mark",
-      payout: 21e4,
-      actions: {
-        place: [{ resourceId: RESOURCE.GASOLINE, qty: 2 }],
-        stoke: [{ resourceId: RESOURCE.LIGHTER, qty: 1 }]
-      }
-    },
-    {
-      scenarioName: "A Black Mark",
-      payout: 21e4,
+      payout: 18e4,
       actions: {
         ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
         place: [{ resourceId: RESOURCE.GASOLINE, qty: 1 }]
@@ -120,13 +111,6 @@
       actions: {
         ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
         place: [{ resourceId: RESOURCE.GASOLINE, qty: 2 }]
-      }
-    },
-    {
-      scenarioName: "Burning Calories",
-      payout: 84e3,
-      actions: {
-        place: [{ resourceId: RESOURCE.GASOLINE, qty: 4 }]
       }
     },
     {
@@ -363,7 +347,7 @@
     },
     {
       scenarioName: "Blaze of Glory",
-      payout: 18e4,
+      payout: 16e4,
       actions: {
         evidence: [{ resourceId: RESOURCE.TOOTHBRUSH, qty: 1 }],
         ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
@@ -720,8 +704,7 @@
           { resourceId: RESOURCE.GASOLINE, qty: 5 },
           { resourceId: RESOURCE.THERMITE, qty: 2 }
         ]
-      },
-      needsVerification: true
+      }
     },
     {
       scenarioName: "Beyond Repair",
@@ -882,7 +865,7 @@
     },
     {
       scenarioName: "Burnt Ends",
-      payout: 17e4,
+      payout: 18e4,
       actions: {
         ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
         place: [{ resourceId: RESOURCE.GASOLINE, qty: 4 }]
@@ -1020,14 +1003,13 @@
     },
     {
       scenarioName: "Cold Brew Reality",
-      payout: 15e4,
+      payout: 9e4,
       actions: {
         ignite: [{ resourceId: RESOURCE.LIGHTER, qty: 1 }],
         place: [{ resourceId: RESOURCE.HYDROGEN, qty: 1 }],
         stoke: [{ resourceId: RESOURCE.HYDROGEN, qty: 1 }],
         stokeTime: "early"
-      },
-      needsVerification: true
+      }
     },
     {
       scenarioName: "Cold Feet",
@@ -1088,7 +1070,7 @@
     },
     {
       scenarioName: "Crafty Devil",
-      payout: 1e5,
+      payout: 106e3,
       actions: {
         ignite: [{ resourceId: RESOURCE.LIGHTER, qty: 1 }],
         place: [{ resourceId: RESOURCE.GASOLINE, qty: 1 }]
@@ -1140,7 +1122,7 @@
     },
     {
       scenarioName: "Damned If You Don't",
-      payout: 74e3,
+      payout: 44e3,
       actions: {
         ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
         place: [{ resourceId: RESOURCE.GASOLINE, qty: 1 }]
@@ -1320,7 +1302,7 @@
     },
     {
       scenarioName: "Fire and Brimstone",
-      payout: 125e3,
+      payout: 14e4,
       actions: {
         ignite: [{ resourceId: RESOURCE.LIGHTER, qty: 1 }],
         place: [{ resourceId: RESOURCE.GASOLINE, qty: 1 }]
@@ -1328,14 +1310,7 @@
     },
     {
       scenarioName: "Fire Burn and Cauldron Bubble",
-      payout: 17e4,
-      actions: {
-        place: [{ resourceId: RESOURCE.GASOLINE, qty: 5 }]
-      }
-    },
-    {
-      scenarioName: "Fire Burn and Cauldron Bubble",
-      payout: 17e4,
+      payout: 18e4,
       actions: {
         ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
         place: [{ resourceId: RESOURCE.GASOLINE, qty: 4 }]
@@ -1564,7 +1539,7 @@
     },
     {
       scenarioName: "Hostile Takeover",
-      payout: 3e5,
+      payout: 29e4,
       actions: {
         ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
         place: [{ resourceId: RESOURCE.GASOLINE, qty: 3 }]
@@ -2059,7 +2034,7 @@
     },
     {
       scenarioName: "Playing With Fire",
-      payout: 21e4,
+      payout: 2e5,
       actions: {
         ignite: [{ resourceId: RESOURCE.LIGHTER, qty: 1 }],
         place: [{ resourceId: RESOURCE.GASOLINE, qty: 2 }]
@@ -2366,7 +2341,7 @@
     },
     {
       scenarioName: "Strike While it's Hot",
-      payout: 265e3,
+      payout: 25e4,
       actions: {
         ignite: [{ resourceId: RESOURCE.LIGHTER, qty: 1 }],
         place: [{ resourceId: RESOURCE.HYDROGEN, qty: 1 }],
@@ -2425,7 +2400,7 @@
     },
     {
       scenarioName: "That Place Is History",
-      payout: 9e4,
+      payout: 1e5,
       actions: {
         place: [{ resourceId: RESOURCE.GASOLINE, qty: 4 }]
       }
@@ -2440,7 +2415,7 @@
     },
     {
       scenarioName: "The Ashes of Empire",
-      payout: 175e3,
+      payout: 19e4,
       actions: {
         ignite: [{ resourceId: RESOURCE.LIGHTER, qty: 1 }],
         place: [{ resourceId: RESOURCE.GASOLINE, qty: 2 }]
@@ -2487,11 +2462,12 @@
     },
     {
       scenarioName: "The Fat is in the Fire",
-      payout: 3e5,
+      payout: 33e4,
       actions: {
         ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
         place: [{ resourceId: RESOURCE.GASOLINE, qty: 5 }],
-        stoke: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }]
+        stoke: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
+        stokeTime: "late"
       }
     },
     {
@@ -2581,7 +2557,7 @@
     },
     {
       scenarioName: "The Savage Beast",
-      payout: 17e4,
+      payout: 16e4,
       actions: {
         ignite: [{ resourceId: RESOURCE.LIGHTER, qty: 1 }],
         place: [{ resourceId: RESOURCE.GASOLINE, qty: 3 }]

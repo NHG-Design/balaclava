@@ -10,7 +10,6 @@ import {
     profitBand,
     formatPpn,
     rankForScenario,
-    scenarioNeedsFlamethrower,
     DEFAULT_THRESHOLDS,
     type PriceMap,
 } from './engine.js';
@@ -281,8 +280,6 @@ describe('formatPpn', () => {
 // ---------------------------------------------------------------------------
 
 describe('rankForScenario', () => {
-    const noFT = false;
-    const hasFT = true;
     const prices: PriceMap = {};
 
     const confirmed: Scenario = {
@@ -290,56 +287,20 @@ describe('rankForScenario', () => {
         payout: 100_000,
         actions: { place: [{ resourceId: RESOURCE.GASOLINE, qty: 2 }] },
     };
-    const confirmedFT: Scenario = {
-        scenarioName: 'Test',
-        payout: 120_000,
-        actions: {
-            ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
-            place:  [{ resourceId: RESOURCE.GASOLINE,     qty: 1 }],
-        },
-    };
-    const unconfirmed: Scenario = {
-        scenarioName: 'Test',
-        payout: 200_000,
-        actions: { place: [{ resourceId: RESOURCE.DIESEL, qty: 1 }] },
-        needsVerification: true,
-    };
 
-    it('returns null for no candidates', () => {
-        assert.equal(rankForScenario([], noFT, prices, DEFAULT_THRESHOLDS), null);
+    it('returns correct profitPerNerve', () => {
+        const result = rankForScenario(confirmed, prices, DEFAULT_THRESHOLDS);
+        assert.equal(result.profitPerNerve, calcProfitPerNerve(confirmed, prices));
     });
 
-    it('excludes FT SCENARIOS when player lacks flamethrower', () => {
-        const result = rankForScenario([confirmed, confirmedFT], noFT, prices, DEFAULT_THRESHOLDS);
-        assert.equal(result?.Scenario, confirmed);
+    it('assigns band based on thresholds', () => {
+        const result = rankForScenario(confirmed, prices, DEFAULT_THRESHOLDS);
+        assert.equal(result.band, profitBand(result.profitPerNerve, DEFAULT_THRESHOLDS));
     });
 
-    it('returns best FT Scenario when player has flamethrower', () => {
-        const result = rankForScenario([confirmed, confirmedFT], hasFT, prices, DEFAULT_THRESHOLDS);
-        assert.equal(result?.Scenario, confirmedFT);
-    });
-
-    it('returns confirmed Scenario over higher-PPN unconfirmed', () => {
-        const result = rankForScenario([unconfirmed, confirmed], noFT, prices, DEFAULT_THRESHOLDS);
-        assert.equal(result?.Scenario.needsVerification, undefined);
-    });
-
-    it('returns unconfirmed when no confirmed Scenario exists', () => {
-        const result = rankForScenario([unconfirmed], noFT, prices, DEFAULT_THRESHOLDS);
-        assert.equal(result?.Scenario, unconfirmed);
-    });
-
-    it('within confirmed group, returns highest PPN', () => {
-        const highPayout: Scenario = { ...confirmed, payout: 500_000 };
-        const result = rankForScenario([confirmed, highPayout], noFT, prices, DEFAULT_THRESHOLDS);
-        assert.equal(result?.Scenario, highPayout);
-    });
-
-    it('tie-breaks by nerve asc', () => {
-        const lowNerve:  Scenario = { scenarioName: 'T', payout: 100_000, actions: { place: [{ resourceId: RESOURCE.GASOLINE, qty: 1 }] } };
-        const highNerve: Scenario = { scenarioName: 'T', payout: 100_000, actions: { place: [{ resourceId: RESOURCE.GASOLINE, qty: 1 }, { resourceId: RESOURCE.GASOLINE, qty: 1 }] } };
-        const result = rankForScenario([highNerve, lowNerve], noFT, prices, DEFAULT_THRESHOLDS);
-        assert.equal(result?.Scenario, lowNerve);
+    it('passes through the scenario unchanged', () => {
+        const result = rankForScenario(confirmed, prices, DEFAULT_THRESHOLDS);
+        assert.equal(result.Scenario, confirmed);
     });
 });
 
@@ -360,12 +321,4 @@ describe('SCENARIOS data', () => {
         }
     });
 
-    it('SCENARIOS using FLAMETHROWER are filtered out without CS>=80', () => {
-        const ftStrategies = SCENARIOS.filter(s => scenarioNeedsFlamethrower(s));
-        assert.ok(ftStrategies.length > 0, 'expected some FT SCENARIOS');
-        for (const s of ftStrategies) {
-            const hasIt = Object.values(s.actions).flat().some(i => i.resourceId === RESOURCE.FLAMETHROWER);
-            assert.ok(hasIt, `scenarioNeedsFlamethrower true but no FLAMETHROWER found in "${s.scenarioName}"`);
-        }
-    });
 });

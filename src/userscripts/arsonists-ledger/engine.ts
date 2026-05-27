@@ -93,49 +93,17 @@ export function formatPpn(ppn: number): string {
     return `~$${sign}${rounded}`;
 }
 
-export function scenarioNeedsFlamethrower(s: Scenario): boolean {
-    return Object.values(s.actions).flat().some(
-        item => item.resourceId === ('flamethrower' as ResourceId),
-    );
-}
-
-/**
- * Returns all skill-eligible strategies ranked for a scenario.
- * Confirmed strategies sort before unconfirmed; within each group: PPN desc,
- * then nerve asc, then cost asc.
- */
 export function rankForScenario(
-    candidates: Scenario[],
-    hasFlamethrower: boolean,
+    scenario: Scenario,
     prices: PriceMap,
     thresholds: ProfitThresholds,
-): RankedScenario | null {
-    const eligible = candidates.filter(s => {
-        if (!hasFlamethrower && scenarioNeedsFlamethrower(s)) return false;
-        return true;
-    });
-
-    if (eligible.length === 0) return null;
-
-    const ranked: RankedScenario[] = eligible.map(s => {
-        const ppn = calcProfitPerNerve(s, prices);
-        return {
-            Scenario: s,
-            materialCost: calcMaterialCost(s, prices),
-            baseNerve: calcNerve(s),
-            profitPerNerve: ppn,
-            band: profitBand(ppn, thresholds),
-        };
-    });
-
-    ranked.sort((a, b) => {
-        const aConf = a.Scenario.needsVerification ? 0 : 1;
-        const bConf = b.Scenario.needsVerification ? 0 : 1;
-        if (aConf !== bConf) return bConf - aConf;
-        if (b.profitPerNerve !== a.profitPerNerve) return b.profitPerNerve - a.profitPerNerve;
-        if (a.baseNerve !== b.baseNerve) return a.baseNerve - b.baseNerve;
-        return a.materialCost - b.materialCost;
-    });
-
-    return ranked[0]!;
+): RankedScenario {
+    const ppn = calcProfitPerNerve(scenario, prices);
+    return {
+        Scenario: scenario,
+        materialCost: calcMaterialCost(scenario, prices),
+        baseNerve: calcNerve(scenario),
+        profitPerNerve: ppn,
+        band: profitBand(ppn, thresholds),
+    };
 }

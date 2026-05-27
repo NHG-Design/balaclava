@@ -54,11 +54,8 @@ Balaclava (`balaclava.app`) is a platform of Torn tools built by a player, for p
 ### Arsonist's Ledger
 
 - **Scenario**: A single Arson job entry as it appears on the Torn Arson crimes page, identified by its exact `scenarioName` string. The `scenarioName` is the bare job name only (e.g. `'From the Ashes'`) — the location prefix shown in the Torn UI and API logs (e.g. `'Ad Agency (From the Ashes)'`) is display context, not part of the identifier. The source data model is `Scenario` in `src/data/scenarios.ts`. _Avoid_: "job variant", "strategy entry"
-- **Strategy**: A recipe for completing a specific Arson Scenario — which accelerants to place, ignite, stoke, or dampen, optional evidence to plant, and the expected base payout. Multiple strategies may exist per scenario (e.g. Flamethrower vs. non-FT variants); these share the same payout and are alternatives based on CS level. _Avoid_: "recipe", "build", "loadout"
-- **Strategy Dataset**: The canonical collection of Strategies for all known scenarios, served as a static JSON file (`static/arsonists-ledger/strategies.json`) and delivered to the userscript via the userscript manager's `@resource` mechanism. Cached locally by the userscript manager; a content-hash suffix in the resource key busts stale caches on script update.
-- **Strategy Override**: A locally stored author-only patch keyed by `scenarioName` that corrects payout, actions, or verification status for all matching Strategy entries. Stored via `GM_setValue` under `pyroLedger.v1.*` keys. Applied on top of the Strategy Dataset at runtime. Only compiled into debug builds (gated by a build-time `__DEBUG_PLAYER_ID__` constant). _Avoid_: "edit", "correction", "fix"
-- **Log Import**: A debug-only feature that fetches the author's Torn crime logs via the user log API (requires Full Access key) and parses arson action sequences — materials used, nerve per action, and observed payout — to pre-fill a Strategy Override draft. The location prefix in log entries (e.g. `'Ad Agency'` in `'Ad Agency (From the Ashes)'`) is stripped; only the parenthetical `scenarioName` is retained. Observed payout is shown as a hint but must be manually confirmed as a base payout due to ±10% variance. _Avoid_: "log sync", "auto-import"
-- **Profit Per Nerve (PPN)**: The primary ranking metric for Strategies. Calculated as `(payout − material cost) / nerve`. Used to surface the most efficient strategy for a given scenario. _Avoid_: "efficiency", "value"
+- **Scenario Dataset**: The canonical collection of Scenarios for all known arson jobs, served as a static JSON file (`static/arsonists-ledger/scenarios.json`) and fetched by the userscript via `GM_xmlhttpRequest` on first install and then cached locally with a 24-hour TTL. A content-hash in the GM storage key busts stale caches when the dataset changes.
+- **Profit Per Nerve (PPN)**: The primary ranking metric for Scenarios. Calculated as `(payout − material cost) / nerve`. Used to surface the most efficient scenario for a given arson job. _Avoid_: "efficiency", "value"
 
 ### Torn API Key Tiers
 
@@ -99,7 +96,7 @@ All Signature endpoints are SvelteKit `+server.ts` route handlers deployed to Cl
 | `src/data/` | Static typed data for userscripts: `catalog.ts` (resource catalog), `scenarios.ts` (scenario definitions), `*-version.ts` (cache-bust hashes) |
 | `src/userscripts/` | Userscript source — one subdirectory per script (e.g. `arsonists-ledger/`, `balaclava-tooltip/`) |
 | `static/factions/[id]/` | Static faction-specific assets: `banner.png`, `logo.svg` |
-| `static/arsonists-ledger/` | Built userscript data files: `strategies.json`, `scenarios.json`, `scenarios.js` |
+| `static/arsonists-ledger/` | Built userscript data files: `scenarios.json`, `scenarios.js` |
 | `svelte.config.js` | Adapter config (`@sveltejs/adapter-cloudflare`) |
 | `wrangler.toml` | Cloudflare Pages deployment config |
 
@@ -107,8 +104,8 @@ All Signature endpoints are SvelteKit `+server.ts` route handlers deployed to Cl
 
 - **Stat registry**: All Personal Stats are defined in `src/lib/personal-stats.ts`. Derived Stats are defined in the `specialStats` export of the same file with a `calculate` function. Adding any stat requires editing this file.
 - **Resource catalog**: All Arson materials (fuels, tools, evidence) are defined in `src/data/catalog.ts` as the `CATALOG` record keyed by `ResourceId`. Default prices, Torn item IDs, and tool/consumable flags live here.
-- **Scenario data**: Arson job strategies are defined in `src/data/scenarios.ts` as the `SCENARIOS` array of `Scenario` objects. Built to `static/arsonists-ledger/strategies.json` for the userscript.
-- **Cache busting**: `src/data/strategies-version.ts` and `src/data/scenarios-version.ts` export a content-hash string used in the userscript `@resource` key. Updating the hash forces the userscript manager to re-fetch the JSON.
+- **Scenario data**: Arson job scenarios are defined in `src/data/scenarios.ts` as the `SCENARIOS` array of `Scenario` objects. Deduplicated (FT version preferred) and built to `static/arsonists-ledger/scenarios.json` by `scripts/dump-scenarios.ts`.
+- **Cache busting**: `src/data/scenarios-version.ts` exports a content-hash string derived from the deduplicated scenario JSON. The userscript uses this hash as a GM storage namespace so stale cached data is abandoned when the dataset changes.
 - **Whitelist check**: `whitelisted.getAll` in `src/lib/factions.ts` is an array of faction ID strings. Adding a Whitelisted Faction is a code change, not a config or DB operation.
 - **Faction Signature URL**: Built client-side in `src/routes/faction/+page.svelte` (not yet built). The URL encodes all display options as query params (`stats`, `align`, `rounded`, `factionLogo`, `daysInFaction`).
 - **Image generation**: All Signature endpoints use `workers-og` via dynamic import. The pattern is established in `src/routes/api/sig/+server.ts`. WASM must not be initialized at module scope.

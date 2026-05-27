@@ -1,5 +1,5 @@
-import { SCENARIOS, type Scenario } from '../../data/scenarios.js';
 import { SCENARIOS_VERSION } from '../../data/scenarios-version.js';
+import type { Scenario } from '../../data/scenarios.js';
 import '../balaclava-tooltip/index.js';
 import {
     rankForScenario,
@@ -13,12 +13,13 @@ import { buildTooltipContent, buildTooltipStyles } from './tooltip.js';
 import { SEL } from './selectors.js';
 import { BAND_COLOR } from './colors.js';
 import { injectSettings, type SettingsCtx } from './settings.js';
+import { el } from './dom.js';
+import { ICON_INFO } from './icons.js';
 import type { ResourceId } from '../../data/catalog.js';
 
 // ---------------------------------------------------------------------------
 // Storage keys
 // ---------------------------------------------------------------------------
-const KEY_DEBUG          = 'pyroLedger.v1.debug';
 const KEY_MANUAL_PRICES  = 'pyroLedger.v1.manualPrices';
 const KEY_API_PRICES     = 'pyroLedger.v1.apiPrices';
 const KEY_API_KEY        = 'pyroLedger.v1.apiKey';
@@ -57,13 +58,9 @@ interface BalaclavaTooltipAPI {
 }
 
 function getTooltipAPI(): BalaclavaTooltipAPI | null {
-    // Check both unsafeWindow and window — @require'd scripts may run in a
-    // different execution context than the main script (e.g. TornPDA), so the
-    // API may be registered on a different object than the one we'd check first.
     const candidates: (typeof window)[] = [];
     if (typeof unsafeWindow !== 'undefined') candidates.push(unsafeWindow);
     if (!candidates.includes(window)) candidates.push(window);
-
     for (const w of candidates) {
         const api = (w as unknown as Record<string, unknown>)['BalaclavaTooltip'];
         if (api && typeof (api as BalaclavaTooltipAPI).show === 'function') {
@@ -79,7 +76,7 @@ function tryTooltip(callback: (api: BalaclavaTooltipAPI) => void): void {
     const api = getTooltipAPI();
     if (!api) {
         if (!tooltipWarned) {
-            console.warn('[PyroLedger] BalaclavaTooltip not found — tooltips disabled.');
+            console.warn('[ArsonistsLedger] BalaclavaTooltip not found — tooltips disabled.');
             tooltipWarned = true;
         }
         return;
@@ -95,19 +92,16 @@ let apiPrices: PriceMap = {};
 let apiKey = '';
 let apiLastRefresh = 0;
 let thresholds: ProfitThresholds = { ...DEFAULT_THRESHOLDS };
-let debugMode = false;
 let activeTab = 'prices';
 let visibleMobileSection: HTMLElement | null = null;
-const missingScenarios = new Set<string>();
 
 function effectivePrices(): PriceMap {
     return { ...apiPrices, ...manualPrices };
 }
 
 function loadState(): void {
-    debugMode = store_get(KEY_DEBUG) === 'true';
-    apiKey = store_get(KEY_API_KEY, '');
-    activeTab = store_get(KEY_ACTIVE_TAB, 'prices');
+    apiKey        = store_get(KEY_API_KEY, '');
+    activeTab     = store_get(KEY_ACTIVE_TAB, 'prices');
     apiLastRefresh = parseInt(store_get(KEY_API_REFRESH, '0'), 10) || 0;
 
     try { manualPrices = JSON.parse(store_get(KEY_MANUAL_PRICES, '{}')) as PriceMap; }
@@ -125,7 +119,7 @@ function loadState(): void {
 }
 
 // ---------------------------------------------------------------------------
-// State mutation helpers — persist + trigger re-scan where needed
+// State mutation helpers
 // ---------------------------------------------------------------------------
 function setManualPrice(id: ResourceId, price: number): void {
     manualPrices = { ...manualPrices, [id]: price };
@@ -164,65 +158,43 @@ function setApiKey(key: string): void {
     store_set(KEY_API_KEY, apiKey);
 }
 
-function setDebugMode(on: boolean): void {
-    debugMode = on;
-    store_set(KEY_DEBUG, String(debugMode));
-    resetScans();
-}
-
 function setActiveTab(tab: string): void {
     activeTab = tab;
     store_set(KEY_ACTIVE_TAB, activeTab);
 }
 
 // ---------------------------------------------------------------------------
-// Skill detection (CS >= 80 = has flamethrower)
-// ---------------------------------------------------------------------------
-function getSkillValue(): number {
-    const btn = document.querySelector(`${SEL.STATS_PANEL} ${SEL.SKILL_BTN}`)
-             ?? document.querySelector(SEL.SKILL_BTN);
-    if (!btn) return 0;
-    const m = btn.getAttribute('aria-label')?.match(/Skill:\s*([\d.]+)/);
-    return m ? parseFloat(m[1]) : 0;
-}
-
-// ---------------------------------------------------------------------------
-// Scenario index: scenarioName → Scenario[]
+// Scenario index: scenarioName (lowercase) → Scenario
 // ---------------------------------------------------------------------------
 const KEY_SCENARIOS_CACHE = `pyroLedger.${SCENARIOS_VERSION}.scenariosCache`;
 const KEY_SCENARIOS_TS    = `pyroLedger.${SCENARIOS_VERSION}.scenariosTs`;
 const SCENARIOS_URL       = 'https://balaclava.app/arsonists-ledger/scenarios.json';
-const STRATEGIES_TTL_MS    = 24 * 60 * 60 * 1000;
+const SCENARIOS_TTL_MS    = 24 * 60 * 60 * 1000;
 
-const scenarioIndex = new Map<string, Scenario[]>();
+const scenarioIndex = new Map<string, Scenario>();
 
-function populatescenarioIndex(SCENARIOS: Scenario[]): void {
+function populateScenarioIndex(scenarios: Scenario[]): void {
     scenarioIndex.clear();
-    for (const s of SCENARIOS) {
+    for (const s of scenarios) {
         const key = s.scenarioName.toLowerCase();
-        const existing = scenarioIndex.get(key);
-        if (existing) { existing.push(s); } else { scenarioIndex.set(key, [s]); }
+        if (!scenarioIndex.has(key)) scenarioIndex.set(key, s);
     }
 }
 
-function loadStrategies(): void {
-    populatescenarioIndex(SCENARIOS);
-}
-
-function scheduleStrategyRefresh(): void {
+function scheduleScenarioRefresh(): void {
     if (typeof GM_xmlhttpRequest === 'undefined') return;
 
     const ts = parseInt(store_get(KEY_SCENARIOS_TS, '0'), 10) || 0;
     const now = Date.now();
 
-    if (now - ts < STRATEGIES_TTL_MS) {
+    if (now - ts < SCENARIOS_TTL_MS) {
         try {
             const cached = JSON.parse(store_get(KEY_SCENARIOS_CACHE, '')) as Scenario[];
             if (Array.isArray(cached) && cached.length > 0) {
-                populatescenarioIndex(cached);
+                populateScenarioIndex(cached);
                 resetScans();
             }
-        } catch { /* keep bundled */ }
+        } catch { /* no cache */ }
         return;
     }
 
@@ -236,11 +208,11 @@ function scheduleStrategyRefresh(): void {
                 if (!Array.isArray(fresh) || fresh.length === 0) return;
                 store_set(KEY_SCENARIOS_CACHE, r.responseText);
                 store_set(KEY_SCENARIOS_TS, String(now));
-                populatescenarioIndex(fresh);
+                populateScenarioIndex(fresh);
                 resetScans();
-            } catch { /* keep bundled */ }
+            } catch { /* keep empty */ }
         },
-        onerror() { /* keep bundled */ },
+        onerror() { /* keep empty */ },
     });
 }
 
@@ -257,7 +229,8 @@ function injectHighlightStyles(): void {
         .arson-root .pyro-band--negative { box-shadow: inset -5px 0 0 ${BAND_COLOR.negative} !important; }
         .arson-root .pyro-band--low      { box-shadow: inset -5px 0 0 ${BAND_COLOR.low}      !important; }
         .arson-root .pyro-band--good     { box-shadow: inset -5px 0 0 ${BAND_COLOR.good}     !important; }
-        .arson-root .pyro-band--excellent  { box-shadow: inset -5px 0 0 ${BAND_COLOR.excellent}  !important; }
+        .arson-root .pyro-band--excellent { box-shadow: inset -5px 0 0 ${BAND_COLOR.excellent} !important; }
+        .arson-root .pyro-band--unknown  { box-shadow: inset -5px 0 0 ${BAND_COLOR.unknown}  !important; }
 
         .crime-image { position: relative !important; }
         .pyro-info-badge {
@@ -276,93 +249,88 @@ function injectHighlightStyles(): void {
         .pyro-info-badge svg { display: block; width: 100%; height: 100%; }
     `;
     document.head.appendChild(style);
-
-    injectTooltipContentStyles();
-}
-
-function injectTooltipContentStyles(): void {
-    if (document.getElementById('pyro-tt-styles')) return;
-    const style = document.createElement('style');
-    style.id = 'pyro-tt-styles';
-    style.textContent = '';
-    document.head.appendChild(style);
 }
 
 // ---------------------------------------------------------------------------
 // Scan and annotate
 // ---------------------------------------------------------------------------
-function applyToSection(section: HTMLElement, ranked: RankedScenario | null, scenarioName: string): void {
+function injectInfoBadge(crimeImage: HTMLElement): void {
+    if (crimeImage.querySelector('.pyro-info-badge')) return;
+    const badge = el('span', 'pyro-info-badge');
+    badge.innerHTML = ICON_INFO;
+    crimeImage.appendChild(badge);
+}
+
+function buildUnknownTooltip(): HTMLElement {
+    const wrap = el('div');
+    const style = el('style');
+    style.textContent = buildTooltipStyles();
+    wrap.appendChild(style);
+    const msg = el('div');
+    msg.style.cssText = 'padding:10px 12px;font-size:11px;color:#888;line-height:1.5;max-width:220px;';
+    msg.textContent = "This scenario isn't covered by Arsonist's Ledger yet — no scenario data available.";
+    wrap.appendChild(msg);
+    return wrap;
+}
+
+function applyToSection(section: HTMLElement, ranked: RankedScenario | null): void {
     section.querySelector('.pyro-label')?.remove();
     section.classList.forEach(c => { if (c.startsWith('pyro-band--')) section.classList.remove(c); });
-
-    const scenarioEl = section.querySelector<HTMLElement>(SEL.SCENARIO);
-
-    if (!ranked) {
-        if (debugMode && !!section.querySelector(SEL.DESKTOP_STATUS_SECTION)) {
-            const label = document.createElement('span');
-            label.className = 'pyro-label pyro-label--unconfirmed';
-            label.textContent = '?';
-            label.title = `No Scenario: ${scenarioName}`;
-            scenarioEl?.appendChild(label);
-        }
-        return;
-    }
-
-    section.classList.add(`pyro-band--${ranked.band}`);
 
     const crimeImage = section.querySelector<HTMLElement>(SEL.CRIME_IMAGE);
     const hoverTarget = crimeImage ?? section;
 
-    if (crimeImage && !crimeImage.querySelector('.pyro-info-badge')) {
-        const badge = document.createElement('span');
-        badge.className = 'pyro-info-badge';
-        badge.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0"/><path d="M12 9h.01"/><path d="M11 12h1v4h1"/></svg>';
-        crimeImage.appendChild(badge);
+    if (!ranked) {
+        section.classList.add('pyro-band--unknown');
+        if (crimeImage) injectInfoBadge(crimeImage);
+        wireTooltip(section, hoverTarget, () => buildUnknownTooltip());
+        return;
     }
 
-    wireTooltip(section, hoverTarget, ranked);
+    section.classList.add(`pyro-band--${ranked.band}`);
+    if (crimeImage) injectInfoBadge(crimeImage);
+    wireTooltip(section, hoverTarget, () => {
+        const statsOnly = isPendingCollect(section) && !ranked.Scenario.needsVerification;
+        return buildTooltipContentWithStyles(ranked, effectivePrices(), statsOnly);
+    });
 }
 
+// ---------------------------------------------------------------------------
+// Tooltip wiring
+// ---------------------------------------------------------------------------
 function isPendingCollect(section: HTMLElement): boolean {
     return section.classList.contains('pending-collect') || !!section.closest(SEL.PENDING_COLLECT);
 }
 
-// Per-card tooltip data, updated on each resetScans so a single set of listeners
-// always reflects the latest prices without accumulating stale closures.
-const tooltipData = new WeakMap<HTMLElement, RankedScenario | null>();
+const tooltipState = new WeakMap<HTMLElement, { getContent: () => HTMLElement }>();
 
-function wireTooltip(section: HTMLElement, hoverTarget: HTMLElement, ranked: RankedScenario | null): void {
-    tooltipData.set(section, ranked);
-    if (section.dataset.pyroTooltipWired) return;
-    section.dataset.pyroTooltipWired = 'true';
-
-    const getContent = (): HTMLElement => {
-        const r = tooltipData.get(section) ?? null;
-        const statsOnly = isPendingCollect(section) && !!r && !r.Scenario.needsVerification;
-        return buildTooltipContentWithStyles(r, effectivePrices(), statsOnly);
-    };
+function wireTooltip(section: HTMLElement, hoverTarget: HTMLElement, getContent: () => HTMLElement): void {
+    const existing = tooltipState.get(section);
+    if (existing) {
+        existing.getContent = getContent;
+        return;
+    }
+    const state = { getContent };
+    tooltipState.set(section, state);
 
     hoverTarget.addEventListener('mouseenter', () => {
-        tryTooltip(api => api.show(hoverTarget, getContent(), { position: 'top', theme: 'dark' }));
+        tryTooltip(api => api.show(hoverTarget, state.getContent(), { position: 'top', theme: 'dark' }));
     });
     hoverTarget.addEventListener('mouseleave', () => {
         tryTooltip(api => api.hide());
     });
-
     hoverTarget.addEventListener('click', e => {
         if ((e.target as HTMLElement).closest('button, a, input, select, textarea, [role="button"]')) return;
-
         tryTooltip(api => {
             if (visibleMobileSection === section) {
                 api.hide();
                 visibleMobileSection = null;
             } else {
-                api.show(hoverTarget, getContent(), { position: 'top', theme: 'dark' });
+                api.show(hoverTarget, state.getContent(), { position: 'top', theme: 'dark' });
                 visibleMobileSection = section;
             }
         });
     });
-
     document.addEventListener('click', e => {
         if (visibleMobileSection === section && !section.contains(e.target as Node)) {
             tryTooltip(api => api.hide());
@@ -373,11 +341,9 @@ function wireTooltip(section: HTMLElement, hoverTarget: HTMLElement, ranked: Ran
 
 function buildTooltipContentWithStyles(ranked: RankedScenario | null, prices: PriceMap, statsOnly = false): HTMLElement {
     const node = buildTooltipContent(ranked, prices, statsOnly);
-
-    const style = document.createElement('style');
+    const style = el('style');
     style.textContent = buildTooltipStyles();
     node.insertBefore(style, node.firstChild);
-
     return node;
 }
 
@@ -385,16 +351,7 @@ function getRoot(): Element {
     return document.querySelector(SEL.ROOT) ?? document.body;
 }
 
-function cleanupSection(section: HTMLElement): void {
-    section.querySelector('.pyro-label')?.remove();
-    section.querySelector('.pyro-info-badge')?.remove();
-    section.classList.forEach(c => { if (c.startsWith('pyro-band--')) section.classList.remove(c); });
-    delete section.dataset.pyroScanned;
-    delete section.dataset.pyroTooltipWired;
-}
-
 function scanPage(): void {
-    const hasFlamethrower = getSkillValue() >= 80;
     const prices = effectivePrices();
 
     getRoot().querySelectorAll<HTMLElement>(SEL.CARD).forEach(section => {
@@ -405,18 +362,12 @@ function scanPage(): void {
         const rawName = scenarioEl?.textContent?.trim() ?? '';
         if (!rawName) return;
 
-        const candidates = scenarioIndex.get(rawName.toLowerCase()) ?? [];
-
-        if (candidates.length === 0 && debugMode) {
-            missingScenarios.add(rawName);
-        }
-
-        const ranked = rankForScenario(candidates, hasFlamethrower, prices, thresholds);
-        applyToSection(section, ranked, rawName);
+        const scenario = scenarioIndex.get(rawName.toLowerCase()) ?? null;
+        const ranked = scenario ? rankForScenario(scenario, prices, thresholds) : null;
+        applyToSection(section, ranked);
     });
 }
 
-/** Re-annotate all cards with current prices/settings. Called by settings UI on any change. */
 export function resetScans(): void {
     getRoot().querySelectorAll<HTMLElement>(SEL.CARD).forEach(section => {
         delete section.dataset.pyroScanned;
@@ -428,14 +379,12 @@ export function resetScans(): void {
 // Settings context
 // ---------------------------------------------------------------------------
 const settingsCtx: SettingsCtx = {
-    getManualPrices: () => manualPrices,
-    getApiPrices: () => apiPrices,
-    getThresholds: () => thresholds,
-    getApiKey: () => apiKey,
+    getManualPrices:   () => manualPrices,
+    getApiPrices:      () => apiPrices,
+    getThresholds:     () => thresholds,
+    getApiKey:         () => apiKey,
     getApiLastRefresh: () => apiLastRefresh,
-    getDebugMode: () => debugMode,
-    getActiveTab: () => activeTab,
-    getMissingScenarios: () => Array.from(missingScenarios),
+    getActiveTab:      () => activeTab,
 
     setManualPrice,
     clearManualPrice,
@@ -443,18 +392,12 @@ const settingsCtx: SettingsCtx = {
     setApiPrices,
     clearApiPrices,
     setApiKey,
-    setDebugMode,
     setActiveTab,
 };
 
 // ---------------------------------------------------------------------------
 // MutationObserver loop
 // ---------------------------------------------------------------------------
-
-// Debounced re-injection: Torn's React replaces the titleBar node on each
-// render cycle. Injecting synchronously inside the observer fires mid-render,
-// causing the button to land in the body fallback or get wiped by the next
-// React batch. A 200 ms debounce lets React settle before we inject.
 let reInjectTimer: ReturnType<typeof setTimeout> | null = null;
 
 function scheduleInjectSettings(): void {
@@ -475,14 +418,12 @@ const observer = new MutationObserver(() => {
 });
 
 function start(): void {
-    loadStrategies();
     loadState();
     injectHighlightStyles();
     scanPage();
     injectSettings(getRoot(), settingsCtx);
     observer.observe(document.body, { childList: true, subtree: true });
-    scheduleStrategyRefresh();
-    if (debugMode) console.log('[PyroLedger] started, debug on');
+    scheduleScenarioRefresh();
 }
 
 if (document.readyState === 'loading') {
