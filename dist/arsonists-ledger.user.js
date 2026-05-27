@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        Torn Arsonist's Ledger
 // @namespace   https://greasyfork.org/en/users/942572-yukio-mizsima
-// @version     0.4.15
+// @version     0.4.16
 // @description Arson profit-per-nerve calculator and scenario guide for Torn's Crimes page
 // @icon        https://www.google.com/s2/favicons?sz=64&domain=torn.com
 // @author      Yukio [906148]
@@ -1285,9 +1285,9 @@
     margin-left: 8px;
 }
 #pyro-settings-btn {
-    background: none;
-    border: 1px solid rgba(255,255,255,0.18);
-    color: #bbb;
+    background: oklch(14% 0.012 285 / 0.7);
+    border: 1px solid oklch(30% 0.02 285);
+    color: oklch(52% 0.01 285);
     cursor: pointer;
     border-radius: 4px;
     padding: 3px 7px;
@@ -1297,26 +1297,26 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: transform 100ms ease-out;
+    transition: transform 100ms ease-out, background 120ms ease-out, color 120ms ease-out;
 }
 @media (hover: hover) and (pointer: fine) {
-    #pyro-settings-btn:hover { background: rgba(255,255,255,0.08); color: #fff; }
+    #pyro-settings-btn:hover { background: oklch(20% 0.018 285); color: oklch(88% 0.006 285); }
 }
 #pyro-settings-btn:active { transform: scale(0.94); }
 #pyro-settings-panel {
     --pyro-api-color: #6d6;
     --pyro-manual-color: #7af;
-    --pyro-db-color: #aaa;
+    --pyro-db-color: oklch(46% 0.008 285);
     position: absolute;
     top: calc(100% + 6px);
     right: 0;
     z-index: 9999;
-    background: #1c1c1c;
-    border: 1px solid #3a3a3a;
+    background: oklch(11% 0.012 285);
+    border: 1px solid oklch(24% 0.02 285);
     border-radius: 6px;
     min-width: 290px;
     max-width: 360px;
-    box-shadow: 0 8px 28px oklch(6% 0.01 260 / 0.6);
+    box-shadow: 0 16px 48px oklch(4% 0.015 285 / 0.8), inset 0 1px 0 oklch(32% 0.022 285 / 0.35);
     overflow: hidden;
     transform-origin: top right;
     transform: scale(0.95);
@@ -1335,43 +1335,51 @@
 #pyro-settings-panel:not(.is-open) {
     transition: transform 100ms ease-out, opacity 100ms ease-out, visibility 0ms linear 100ms;
 }
-.pyro-tab-bar { display: flex; background: #161616; border-bottom: 1px solid #303030; }
+.pyro-tab-bar { display: flex; background: oklch(8.5% 0.01 285); border-bottom: 1px solid oklch(22% 0.018 285); }
 .pyro-tab {
     flex: 1;
     background: none;
     border: none;
     border-bottom: 2px solid transparent;
-    color: #777;
+    color: oklch(38% 0.01 285);
     cursor: pointer;
-    padding: 7px 2px;
-    font-size: 11px;
+    padding: 8px 2px;
+    font-size: 10px;
     font-weight: 700;
     text-transform: uppercase;
-    letter-spacing: 0.04em;
+    letter-spacing: 0.06em;
+    transition: color 120ms ease-out;
 }
 @media (hover: hover) and (pointer: fine) {
-    .pyro-tab:hover { color: #bbb; }
+    .pyro-tab:hover { color: oklch(62% 0.01 285); }
 }
 .pyro-tab:active { transform: scale(0.97); }
-.pyro-tab.active { color: oklch(97% 0.008 260); border-bottom-color: ${BAND_COLOR.excellent}; }
+.pyro-tab.active {
+    color: oklch(92% 0.008 285);
+    border-bottom-color: ${BAND_COLOR.excellent};
+    background: oklch(13% 0.014 285);
+}
 .pyro-tab-content { padding: 10px; max-height: 380px; overflow-y: auto; }
-.pyro-s-group { margin-bottom: 10px; }
+.pyro-tab-content::-webkit-scrollbar { width: 3px; }
+.pyro-tab-content::-webkit-scrollbar-track { background: transparent; }
+.pyro-tab-content::-webkit-scrollbar-thumb { background: oklch(26% 0.016 285); border-radius: 2px; }
+.pyro-s-group { margin-bottom: 12px; }
 .pyro-s-group:last-child { margin-bottom: 0; }
 .pyro-s-group-title {
     font-size: 10px;
     font-weight: 700;
     text-transform: uppercase;
-    letter-spacing: 0.06em;
-    color: #555;
-    margin-bottom: 5px;
-    padding-bottom: 3px;
-    border-bottom: 1px solid #2a2a2a;
+    letter-spacing: 0.08em;
+    color: oklch(42% 0.012 285);
+    margin-bottom: 6px;
+    padding-bottom: 4px;
+    border-bottom: 1px solid oklch(20% 0.014 285);
 }
-.pyro-s-row { display: flex; align-items: center; gap: 6px; margin-bottom: 3px; }
+.pyro-s-row { display: flex; align-items: center; gap: 6px; margin-bottom: 4px; }
 .pyro-s-label {
     flex: 1;
     font-size: 11px;
-    color: #aaa;
+    color: oklch(62% 0.009 285);
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -1379,55 +1387,57 @@
 }
 .pyro-s-input {
     width: 76px;
-    background: #252525;
-    border: 1px solid #3a3a3a;
-    color: #ddd;
+    background: oklch(14.5% 0.011 285);
+    border: 1px solid oklch(27% 0.017 285);
+    color: oklch(82% 0.007 285);
     font-size: 11px;
     padding: 3px 5px;
     border-radius: 3px;
     text-align: right;
     -moz-appearance: textfield;
+    transition: border-color 120ms ease-out;
 }
 .pyro-s-input::-webkit-inner-spin-button,
 .pyro-s-input::-webkit-outer-spin-button { -webkit-appearance: none; }
 .pyro-s-input:focus-visible { outline: none; border-color: ${BAND_COLOR.excellent}; }
 .pyro-s-input.from-api   { border-color: #4a4; color: #6d6; }
 .pyro-s-input.overridden { border-color: #48a; color: #7af; }
-.pyro-s-divider { border: none; border-top: 1px solid #2a2a2a; margin: 8px 0; }
+.pyro-s-divider { border: none; border-top: 1px solid oklch(20% 0.014 285); margin: 8px 0; }
 .pyro-s-key-row { display: flex; gap: 6px; margin-bottom: 6px; }
 .pyro-s-key-input {
     flex: 1;
-    background: #252525;
-    border: 1px solid #3a3a3a;
-    color: #ddd;
+    background: oklch(14.5% 0.011 285);
+    border: 1px solid oklch(27% 0.017 285);
+    color: oklch(82% 0.007 285);
     font-size: 11px;
     padding: 4px 6px;
     border-radius: 3px;
     min-width: 0;
     font-family: monospace;
+    transition: border-color 120ms ease-out;
 }
 .pyro-s-key-input:focus-visible { outline: none; border-color: ${BAND_COLOR.excellent}; }
 .pyro-s-btn {
-    background: #252525;
-    border: 1px solid #484848;
-    color: #bbb;
+    background: oklch(15% 0.012 285);
+    border: 1px solid oklch(28% 0.018 285);
+    color: oklch(60% 0.009 285);
     cursor: pointer;
     border-radius: 3px;
     padding: 4px 9px;
     font-size: 11px;
     white-space: nowrap;
-    transition: transform 100ms ease-out;
+    transition: transform 100ms ease-out, background 120ms ease-out, color 120ms ease-out;
 }
 @media (hover: hover) and (pointer: fine) {
-    .pyro-s-btn:hover:not(:disabled) { background: #303030; color: #fff; }
+    .pyro-s-btn:hover:not(:disabled) { background: oklch(21% 0.016 285); color: oklch(85% 0.006 285); }
 }
 .pyro-s-btn:active:not(:disabled) { transform: scale(0.97); }
-.pyro-s-btn:disabled { opacity: 0.35; cursor: default; }
+.pyro-s-btn:disabled { opacity: 0.28; cursor: default; }
 .pyro-s-status {
     font-size: 10px;
     margin-bottom: 8px;
     min-height: 13px;
-    color: #666;
+    color: oklch(38% 0.008 285);
     display: flex;
     align-items: center;
     gap: 2px;
@@ -1436,26 +1446,26 @@
 .pyro-s-status.ok  { color: ${BAND_COLOR.good}; }
 .pyro-s-status.err { color: #c66; }
 .pyro-s-refresh-row { display: flex; align-items: center; gap: 8px; }
-.pyro-s-timestamp { font-size: 10px; color: #555; }
+.pyro-s-timestamp { font-size: 10px; color: oklch(36% 0.007 285); }
 .pyro-s-check-row {
     display: flex;
     align-items: center;
     gap: 7px;
     margin-bottom: 7px;
     font-size: 12px;
-    color: #bbb;
+    color: oklch(62% 0.009 285);
     cursor: pointer;
     user-select: none;
 }
 .pyro-s-check-row input[type=checkbox] { cursor: pointer; }
-.pyro-s-section-note { display: flex; align-items: flex-start; gap: 5px; font-size: 10px; line-height: 1.4; color: #555; margin-bottom: 6px; }
+.pyro-s-section-note { display: flex; align-items: flex-start; gap: 5px; font-size: 10px; line-height: 1.4; color: oklch(40% 0.007 285); margin-bottom: 6px; }
 .pyro-s-section-note > svg { width: 10px; height: 10px; flex-shrink: 0; margin-top: 1px; }
-.pyro-s-section-note strong { color: #999; font-weight: 600; }
+.pyro-s-section-note strong { color: oklch(64% 0.009 285); font-weight: 600; }
 .pyro-s-section-note a { color: ${BAND_COLOR.excellent}; text-decoration: none; display: inline-flex; align-items: center; gap: 3px; }
 .pyro-s-section-note a:hover { text-decoration: underline; }
 .pyro-s-section-note a svg { width: 10px; height: 10px; flex-shrink: 0; }
-.pyro-s-missing-header { font-size: 10px; color: #666; margin: 8px 0 4px; }
-.pyro-s-missing-list { font-size: 10px; color: #777; padding-left: 14px; margin: 0; }
+.pyro-s-missing-header { font-size: 10px; color: oklch(40% 0.007 285); margin: 8px 0 4px; }
+.pyro-s-missing-list { font-size: 10px; color: oklch(46% 0.008 285); padding-left: 14px; margin: 0; }
 `;
     document.head.appendChild(style);
   }
