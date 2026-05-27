@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        Torn Arsonist's Ledger
 // @namespace   https://greasyfork.org/en/users/942572-yukio-mizsima
-// @version     0.4.16
+// @version     0.4.17
 // @description Arson profit-per-nerve calculator and scenario guide for Torn's Crimes page
 // @icon        https://www.google.com/s2/favicons?sz=64&domain=torn.com
 // @author      Yukio [906148]
@@ -1043,7 +1043,7 @@
     const { Scenario, profitPerNerve, materialCost, baseNerve } = ranked;
     const header = el("div", "pyro-tt-header");
     const title = el("span", "pyro-tt-title");
-    title.textContent = "Profit";
+    title.textContent = "Profit per nerve";
     header.appendChild(title);
     const ppnEl = el("span", `pyro-tt-ppn pyro-tt-band--${ranked.band}`);
     ppnEl.textContent = formatPpn(profitPerNerve);
@@ -1102,6 +1102,7 @@
     margin-bottom: 6px;
 }
 .pyro-tt-title {
+    font: inherit;
     font-weight: bold;
     font-size: 14px;
 }
@@ -1261,7 +1262,7 @@
   var ICON_CHECK = `<svg ${S} width="16" height="16" style="vertical-align:middle;margin-right:4px">${BLANK}<path d="M3 12a9 9 0 1 0 18 0a9 9 0 1 0 -18 0"/><path d="M9 12l2 2l4 -4"/></svg>`;
   var ICON_X = `<svg ${S} width="16" height="16" style="vertical-align:middle;margin-right:4px">${BLANK}${CIRCLE}<path d="M10 10l4 4m0 -4l-4 4"/></svg>`;
   var ICON_ARROW_RIGHT = `<svg ${S} width="12" height="12" style="vertical-align:middle;margin:0 2px">${BLANK}<path d="M5 12l14 0"/><path d="M15 16l4 -4"/><path d="M15 8l4 4"/></svg>`;
-  var ICON_GEAR = `<svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>`;
+  var ICON_FLAME = `<svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M12 10.941c2.333 -3.308 .167 -7.823 -1 -8.941c0 3.395 -2.235 5.299 -3.667 6.706c-1.43 1.408 -2.333 3.294 -2.333 5.588c0 3.704 3.134 6.706 7 6.706c3.866 0 7 -3.002 7 -6.706c0 -1.712 -1.232 -4.403 -2.333 -5.588c-2.084 3.353 -3.257 3.353 -4.667 2.235"/></svg>`;
   var ICON_EXTERNAL_LINK = `<svg ${S}>${BLANK}<path d="M12 6h-6a2 2 0 0 0 -2 2v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-6"/><path d="M11 13l9 -9"/><path d="M15 4h5v5"/></svg>`;
 
   // src/userscripts/arsonists-ledger/settings.ts
@@ -1341,10 +1342,11 @@
     background: none;
     border: none;
     border-bottom: 2px solid transparent;
-    color: oklch(38% 0.01 285);
+    color: oklch(56% 0.01 285);
     cursor: pointer;
     padding: 8px 2px;
-    font-size: 10px;
+    font: inherit;
+    font-size: 12px;
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.06em;
@@ -1370,7 +1372,7 @@
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.08em;
-    color: oklch(42% 0.012 285);
+    color: oklch(58% 0.012 285);
     margin-bottom: 6px;
     padding-bottom: 4px;
     border-bottom: 1px solid oklch(20% 0.014 285);
@@ -1392,7 +1394,7 @@
     color: oklch(82% 0.007 285);
     font-size: 11px;
     padding: 3px 5px;
-    border-radius: 3px;
+    border-radius: 5px;
     text-align: right;
     -moz-appearance: textfield;
     transition: border-color 120ms ease-out;
@@ -1411,7 +1413,7 @@
     color: oklch(82% 0.007 285);
     font-size: 11px;
     padding: 4px 6px;
-    border-radius: 3px;
+    border-radius: 5px;
     min-width: 0;
     font-family: monospace;
     transition: border-color 120ms ease-out;
@@ -1422,7 +1424,7 @@
     border: 1px solid oklch(28% 0.018 285);
     color: oklch(60% 0.009 285);
     cursor: pointer;
-    border-radius: 3px;
+    border-radius: 5px;
     padding: 4px 9px;
     font-size: 11px;
     white-space: nowrap;
@@ -1458,7 +1460,7 @@
     user-select: none;
 }
 .pyro-s-check-row input[type=checkbox] { cursor: pointer; }
-.pyro-s-section-note { display: flex; align-items: flex-start; gap: 5px; font-size: 10px; line-height: 1.4; color: oklch(40% 0.007 285); margin-bottom: 6px; }
+.pyro-s-section-note { display: flex; align-items: flex-start; gap: 5px; font-size: 10px; line-height: 1.4; color: oklch(57% 0.008 285); margin-bottom: 6px; }
 .pyro-s-section-note > svg { width: 10px; height: 10px; flex-shrink: 0; margin-top: 1px; }
 .pyro-s-section-note strong { color: oklch(64% 0.009 285); font-weight: 600; }
 .pyro-s-section-note a { color: ${BAND_COLOR.excellent}; text-decoration: none; display: inline-flex; align-items: center; gap: 3px; }
@@ -1746,7 +1748,7 @@
     btn.id = "pyro-settings-btn";
     btn.setAttribute("aria-label", "Arsonist's Ledger settings");
     btn.setAttribute("aria-expanded", "false");
-    btn.innerHTML = ICON_GEAR;
+    btn.innerHTML = ICON_FLAME;
     const panel = el("div");
     panel.id = "pyro-settings-panel";
     const activeTabId = ctx.getActiveTab() || "prices";

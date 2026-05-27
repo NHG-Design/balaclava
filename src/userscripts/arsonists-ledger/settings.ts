@@ -9,7 +9,7 @@ import {
     ICON_CHECK,
     ICON_X,
     ICON_ARROW_RIGHT,
-    ICON_GEAR,
+    ICON_FLAME,
     ICON_EXTERNAL_LINK,
 } from './icons.js';
 
@@ -120,10 +120,11 @@ export function injectSettingsStyles(): void {
     background: none;
     border: none;
     border-bottom: 2px solid transparent;
-    color: oklch(38% 0.01 285);
+    color: oklch(56% 0.01 285);
     cursor: pointer;
     padding: 8px 2px;
-    font-size: 10px;
+    font: inherit;
+    font-size: 12px;
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.06em;
@@ -149,7 +150,7 @@ export function injectSettingsStyles(): void {
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.08em;
-    color: oklch(42% 0.012 285);
+    color: oklch(58% 0.012 285);
     margin-bottom: 6px;
     padding-bottom: 4px;
     border-bottom: 1px solid oklch(20% 0.014 285);
@@ -171,7 +172,7 @@ export function injectSettingsStyles(): void {
     color: oklch(82% 0.007 285);
     font-size: 11px;
     padding: 3px 5px;
-    border-radius: 3px;
+    border-radius: 5px;
     text-align: right;
     -moz-appearance: textfield;
     transition: border-color 120ms ease-out;
@@ -190,7 +191,7 @@ export function injectSettingsStyles(): void {
     color: oklch(82% 0.007 285);
     font-size: 11px;
     padding: 4px 6px;
-    border-radius: 3px;
+    border-radius: 5px;
     min-width: 0;
     font-family: monospace;
     transition: border-color 120ms ease-out;
@@ -201,7 +202,7 @@ export function injectSettingsStyles(): void {
     border: 1px solid oklch(28% 0.018 285);
     color: oklch(60% 0.009 285);
     cursor: pointer;
-    border-radius: 3px;
+    border-radius: 5px;
     padding: 4px 9px;
     font-size: 11px;
     white-space: nowrap;
@@ -237,7 +238,7 @@ export function injectSettingsStyles(): void {
     user-select: none;
 }
 .pyro-s-check-row input[type=checkbox] { cursor: pointer; }
-.pyro-s-section-note { display: flex; align-items: flex-start; gap: 5px; font-size: 10px; line-height: 1.4; color: oklch(40% 0.007 285); margin-bottom: 6px; }
+.pyro-s-section-note { display: flex; align-items: flex-start; gap: 5px; font-size: 10px; line-height: 1.4; color: oklch(57% 0.008 285); margin-bottom: 6px; }
 .pyro-s-section-note > svg { width: 10px; height: 10px; flex-shrink: 0; margin-top: 1px; }
 .pyro-s-section-note strong { color: oklch(64% 0.009 285); font-weight: 600; }
 .pyro-s-section-note a { color: ${BAND_COLOR.excellent}; text-decoration: none; display: inline-flex; align-items: center; gap: 3px; }
@@ -596,7 +597,7 @@ export function injectSettings(root: Element, ctx: SettingsCtx): void {
     btn.id = 'pyro-settings-btn';
     btn.setAttribute('aria-label', "Arsonist's Ledger settings");
     btn.setAttribute('aria-expanded', 'false');
-    btn.innerHTML = ICON_GEAR;
+    btn.innerHTML = ICON_FLAME;
 
     const panel = el('div');
     panel.id = 'pyro-settings-panel';

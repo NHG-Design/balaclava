@@ -63,7 +63,7 @@ function buildPrimaryBlock(ranked: RankedScenario, prices: PriceMap, statsOnly =
 
     const header = el('div', 'pyro-tt-header');
     const title = el('span', 'pyro-tt-title');
-    title.textContent = 'Profit';
+    title.textContent = 'Profit per nerve';
     header.appendChild(title);
     const ppnEl = el('span', `pyro-tt-ppn pyro-tt-band--${ranked.band}`);
     ppnEl.textContent = formatPpn(profitPerNerve);
@@ -130,6 +130,7 @@ export function buildTooltipStyles(): string {
     margin-bottom: 6px;
 }
 .pyro-tt-title {
+    font: inherit;
     font-weight: bold;
     font-size: 14px;
 }
