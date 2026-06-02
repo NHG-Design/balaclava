@@ -1,5 +1,5 @@
 import { SCENARIOS_VERSION } from '../../data/scenarios-version.js';
-import type { Scenario } from '../../data/scenarios.js';
+import { SCENARIOS, type Scenario } from '../../data/scenarios.js';
 import '../balaclava-tooltip/index.js';
 import {
     rankForScenario,
@@ -355,8 +355,12 @@ function isArsonPage(): boolean {
     return !!document.querySelector(SEL.ROOT);
 }
 
+function isPageActive(): boolean {
+    return document.visibilityState === 'visible' && document.hasFocus();
+}
+
 function scanPage(): void {
-    if (!isArsonPage()) return;
+    if (!isArsonPage() || !isPageActive()) return;
     const prices = effectivePrices();
 
     getRoot().querySelectorAll<HTMLElement>(SEL.CARD).forEach(section => {
@@ -419,15 +423,31 @@ function scheduleInjectSettings(): void {
 }
 
 const observer = new MutationObserver(() => {
+    if (!isPageActive()) return;
     scanPage();
     scheduleInjectSettings();
 });
 
+function handlePageActivityChange(): void {
+    if (!isPageActive()) {
+        visibleMobileSection = null;
+        tryTooltip(api => api.hide());
+        return;
+    }
+
+    resetScans();
+    scheduleInjectSettings();
+}
+
 function start(): void {
     loadState();
+    populateScenarioIndex(SCENARIOS);
     injectHighlightStyles();
     observer.observe(document.body, { childList: true, subtree: true });
     scheduleScenarioRefresh();
+    document.addEventListener('visibilitychange', handlePageActivityChange, { passive: true });
+    window.addEventListener('focus', handlePageActivityChange, { passive: true });
+    window.addEventListener('blur', handlePageActivityChange, { passive: true });
     if (isArsonPage()) {
         scanPage();
         injectSettings(getRoot(), settingsCtx);
