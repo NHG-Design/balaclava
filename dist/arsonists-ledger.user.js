@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        Torn Arsonist's Ledger
 // @namespace   https://greasyfork.org/en/users/942572-yukio-mizsima
-// @version     0.4.18
+// @version     0.4.19
 // @description Arson profit-per-nerve calculator and scenario guide for Torn's Crimes page
 // @icon        https://www.google.com/s2/favicons?sz=64&domain=torn.com
 // @author      Yukio [906148]
@@ -145,13 +145,6 @@
       scenarioName: "Child's Play",
       payout: 23e3,
       actions: {
-        place: [{ resourceId: RESOURCE.GASOLINE, qty: 2 }]
-      }
-    },
-    {
-      scenarioName: "Child's Play",
-      payout: 23e3,
-      actions: {
         ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
         place: [{ resourceId: RESOURCE.GASOLINE, qty: 1 }]
       }
@@ -185,13 +178,6 @@
       scenarioName: "Going Viral",
       payout: 19e4,
       actions: {
-        place: [{ resourceId: RESOURCE.GASOLINE, qty: 4 }]
-      }
-    },
-    {
-      scenarioName: "Going Viral",
-      payout: 19e4,
-      actions: {
         ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
         place: [{ resourceId: RESOURCE.GASOLINE, qty: 3 }],
         stoke: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1, optional: true, optionalLabel: "if needed" }]
@@ -203,13 +189,6 @@
       actions: {
         ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
         place: [{ resourceId: RESOURCE.GASOLINE, qty: 4 }]
-      }
-    },
-    {
-      scenarioName: "Hot Pursuit",
-      payout: 28e3,
-      actions: {
-        place: [{ resourceId: RESOURCE.GASOLINE, qty: 2 }]
       }
     },
     {
@@ -247,13 +226,6 @@
     },
     {
       scenarioName: "Old School",
-      payout: 62e3,
-      actions: {
-        place: [{ resourceId: RESOURCE.GASOLINE, qty: 4 }]
-      }
-    },
-    {
-      scenarioName: "Old School",
       payout: 62500,
       actions: {
         ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
@@ -264,22 +236,8 @@
       scenarioName: "One Rotten Apple",
       payout: 18e4,
       actions: {
-        place: [{ resourceId: RESOURCE.GASOLINE, qty: 3 }]
-      }
-    },
-    {
-      scenarioName: "One Rotten Apple",
-      payout: 18e4,
-      actions: {
         ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
         place: [{ resourceId: RESOURCE.GASOLINE, qty: 2 }]
-      }
-    },
-    {
-      scenarioName: "Party Pooper",
-      payout: 58e3,
-      actions: {
-        place: [{ resourceId: RESOURCE.GASOLINE, qty: 3 }]
       }
     },
     {
@@ -308,24 +266,9 @@
     },
     {
       scenarioName: "Boom Industry",
-      payout: 13e4,
-      actions: {
-        place: [{ resourceId: RESOURCE.GASOLINE, qty: 5 }]
-      }
-    },
-    {
-      scenarioName: "Boom Industry",
       payout: 1e5,
       actions: {
         ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
-        place: [{ resourceId: RESOURCE.GASOLINE, qty: 3 }]
-      }
-    },
-    {
-      scenarioName: "Igniting Curiosity",
-      payout: 1e5,
-      actions: {
-        evidence: [{ resourceId: RESOURCE.SUMO_DOLL, qty: 1 }],
         place: [{ resourceId: RESOURCE.GASOLINE, qty: 3 }]
       }
     },
@@ -462,16 +405,6 @@
     },
     {
       scenarioName: "A Burnt Child Dreads the Fire",
-      payout: 19e4,
-      actions: {
-        place: [
-          { resourceId: RESOURCE.KEROSENE, qty: 2 }
-        ],
-        stoke: [{ resourceId: RESOURCE.METHANE, qty: 1 }]
-      }
-    },
-    {
-      scenarioName: "A Burnt Child Dreads the Fire",
       payout: 235e3,
       actions: {
         ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
@@ -481,24 +414,10 @@
     },
     {
       scenarioName: "A Dirty Job",
-      payout: 3e4,
-      actions: {
-        place: [{ resourceId: RESOURCE.GASOLINE, qty: 2 }]
-      }
-    },
-    {
-      scenarioName: "A Dirty Job",
       payout: 32e3,
       actions: {
         ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
         place: [{ resourceId: RESOURCE.GASOLINE, qty: 1 }]
-      }
-    },
-    {
-      scenarioName: "A Fungus Among Us",
-      payout: 38e3,
-      actions: {
-        place: [{ resourceId: RESOURCE.GASOLINE, qty: 3 }]
       }
     },
     {
@@ -521,24 +440,8 @@
       scenarioName: "A Mug's Game",
       payout: 55e3,
       actions: {
-        ignite: [{ resourceId: RESOURCE.MOLOTOV, qty: 1 }],
-        place: [{ resourceId: RESOURCE.GASOLINE, qty: 2 }]
-      }
-    },
-    {
-      scenarioName: "A Mug's Game",
-      payout: 55e3,
-      actions: {
         ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
         place: [{ resourceId: RESOURCE.GASOLINE, qty: 2 }]
-      }
-    },
-    {
-      scenarioName: "A Problem Shared",
-      payout: 18e4,
-      actions: {
-        place: [{ resourceId: RESOURCE.GASOLINE, qty: 6 }],
-        stoke: [{ resourceId: RESOURCE.GASOLINE, qty: 1 }]
       }
     },
     {
@@ -556,14 +459,6 @@
       actions: {
         ignite: [{ resourceId: RESOURCE.LIGHTER, qty: 1 }],
         place: [{ resourceId: RESOURCE.GASOLINE, qty: 1 }]
-      }
-    },
-    {
-      scenarioName: "All Mouth and Trousers",
-      payout: 51e3,
-      actions: {
-        evidence: [{ resourceId: RESOURCE.DIAMOND_RING, qty: 1 }],
-        place: [{ resourceId: RESOURCE.GASOLINE, qty: 2 }]
       }
     },
     {
@@ -586,24 +481,10 @@
     },
     {
       scenarioName: "Anon Starter",
-      payout: 1200,
-      actions: {
-        place: [{ resourceId: RESOURCE.GASOLINE, qty: 1 }]
-      }
-    },
-    {
-      scenarioName: "Anon Starter",
       payout: 31e3,
       actions: {
         ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
         place: [{ resourceId: RESOURCE.GASOLINE, qty: 1 }]
-      }
-    },
-    {
-      scenarioName: "Apart of the Problem",
-      payout: 265e3,
-      actions: {
-        place: [{ resourceId: RESOURCE.GASOLINE, qty: 6 }]
       }
     },
     {
@@ -622,14 +503,6 @@
         ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
         place: [{ resourceId: RESOURCE.HYDROGEN, qty: 1 }],
         stoke: [{ resourceId: RESOURCE.HYDROGEN, qty: 1 }]
-      }
-    },
-    {
-      scenarioName: "Ashes to Ancestors",
-      payout: 9e4,
-      actions: {
-        place: [{ resourceId: RESOURCE.GASOLINE, qty: 4 }],
-        stoke: [{ resourceId: RESOURCE.GASOLINE, qty: 1 }]
       }
     },
     {
@@ -665,44 +538,12 @@
       }
     },
     {
-      scenarioName: "Bald Faced Destruction",
-      payout: 23e4,
-      actions: {
-        evidence: [{ resourceId: RESOURCE.RAW_IVORY, qty: 1 }],
-        place: [{ resourceId: RESOURCE.GASOLINE, qty: 4 }]
-      }
-    },
-    {
-      scenarioName: "Bang For Your Buck",
-      payout: 21e3,
-      actions: {
-        evidence: [{ resourceId: RESOURCE.GRENADE, qty: 1 }],
-        place: [{ resourceId: RESOURCE.GASOLINE, qty: 2 }]
-      }
-    },
-    {
       scenarioName: "Bang For Your Buck",
       payout: 44e3,
       actions: {
         evidence: [{ resourceId: RESOURCE.GRENADE, qty: 1 }],
         ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
         place: [{ resourceId: RESOURCE.GASOLINE, qty: 1 }]
-      }
-    },
-    {
-      scenarioName: "Banking on It",
-      payout: 12e4,
-      actions: {
-        evidence: [{ resourceId: RESOURCE.STAPLER, qty: 1 }],
-        place: [{ resourceId: RESOURCE.GASOLINE, qty: 3 }]
-      }
-    },
-    {
-      scenarioName: "Beach Bum",
-      payout: 2e4,
-      actions: {
-        place: [{ resourceId: RESOURCE.GASOLINE, qty: 1 }],
-        stoke: [{ resourceId: RESOURCE.GASOLINE, qty: 1 }]
       }
     },
     {
@@ -746,13 +587,6 @@
       scenarioName: "Body of Evidence",
       payout: 105e3,
       actions: {
-        place: [{ resourceId: RESOURCE.GASOLINE, qty: 6 }]
-      }
-    },
-    {
-      scenarioName: "Body of Evidence",
-      payout: 105e3,
-      actions: {
         ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
         place: [{ resourceId: RESOURCE.GASOLINE, qty: 5 }]
       }
@@ -785,13 +619,6 @@
     },
     {
       scenarioName: "Burn After Screening",
-      payout: 99e3,
-      actions: {
-        place: [{ resourceId: RESOURCE.GASOLINE, qty: 3 }]
-      }
-    },
-    {
-      scenarioName: "Burn After Screening",
       payout: 1e5,
       actions: {
         ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
@@ -802,33 +629,10 @@
       scenarioName: "Burn Notice",
       payout: 175e3,
       actions: {
-        place: [{ resourceId: RESOURCE.GASOLINE, qty: 4 }],
-        stoke: [{ resourceId: RESOURCE.GASOLINE, qty: 3 }]
-      }
-    },
-    {
-      scenarioName: "Burn Notice",
-      payout: 175e3,
-      actions: {
         ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
         place: [{ resourceId: RESOURCE.GASOLINE, qty: 5 }]
       },
       needsVerification: true
-    },
-    {
-      scenarioName: "Burn Rubber",
-      payout: 5e4,
-      actions: {
-        evidence: [{ resourceId: RESOURCE.MAYAN_STATUE, qty: 1 }],
-        place: [{ resourceId: RESOURCE.GASOLINE, qty: 2 }]
-      }
-    },
-    {
-      scenarioName: "Burn the Deck",
-      payout: 57e3,
-      actions: {
-        place: [{ resourceId: RESOURCE.GASOLINE, qty: 3 }]
-      }
     },
     {
       scenarioName: "Burned by Stupidity",
@@ -863,22 +667,8 @@
       scenarioName: "Burning Memory",
       payout: 32e3,
       actions: {
-        place: [{ resourceId: RESOURCE.GASOLINE, qty: 3 }]
-      }
-    },
-    {
-      scenarioName: "Burning Memory",
-      payout: 32e3,
-      actions: {
         ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
         place: [{ resourceId: RESOURCE.GASOLINE, qty: 2 }]
-      }
-    },
-    {
-      scenarioName: "Burning Through Cash",
-      payout: 58e3,
-      actions: {
-        place: [{ resourceId: RESOURCE.OXYGEN, qty: 1 }]
       }
     },
     {
@@ -900,25 +690,10 @@
     },
     {
       scenarioName: "Burn up the Dancefloor",
-      payout: 15e4,
-      actions: {
-        place: [{ resourceId: RESOURCE.GASOLINE, qty: 3 }]
-      }
-    },
-    {
-      scenarioName: "Burn up the Dancefloor",
       payout: 175e3,
       actions: {
         ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
         place: [{ resourceId: RESOURCE.GASOLINE, qty: 2 }]
-      }
-    },
-    {
-      scenarioName: "Camera Tricks",
-      payout: 115e3,
-      actions: {
-        place: [{ resourceId: RESOURCE.GASOLINE, qty: 5 }],
-        stoke: [{ resourceId: RESOURCE.GASOLINE, qty: 1 }]
       }
     },
     {
@@ -940,24 +715,10 @@
     },
     {
       scenarioName: "Chance of Redemption",
-      payout: 9e4,
-      actions: {
-        place: [{ resourceId: RESOURCE.GASOLINE, qty: 4 }]
-      }
-    },
-    {
-      scenarioName: "Chance of Redemption",
       payout: 59e3,
       actions: {
         ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
         place: [{ resourceId: RESOURCE.GASOLINE, qty: 2 }]
-      }
-    },
-    {
-      scenarioName: "Charcoal Sketch",
-      payout: 49e3,
-      actions: {
-        place: [{ resourceId: RESOURCE.GASOLINE, qty: 3 }]
       }
     },
     {
@@ -991,14 +752,6 @@
       actions: {
         ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
         place: [{ resourceId: RESOURCE.GASOLINE, qty: 2 }]
-      }
-    },
-    {
-      scenarioName: "Clean Sweep",
-      payout: 15e4,
-      actions: {
-        place: [{ resourceId: RESOURCE.GASOLINE, qty: 5 }],
-        stoke: [{ resourceId: RESOURCE.DIESEL, qty: 1 }]
       }
     },
     {
@@ -1039,14 +792,6 @@
     },
     {
       scenarioName: "Cold Feet",
-      payout: 1e5,
-      actions: {
-        place: [{ resourceId: RESOURCE.GASOLINE, qty: 6 }],
-        stoke: [{ resourceId: RESOURCE.DIESEL, qty: 1 }]
-      }
-    },
-    {
-      scenarioName: "Cold Feet",
       payout: 12e4,
       actions: {
         ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
@@ -1061,21 +806,6 @@
       actions: {
         ignite: [{ resourceId: RESOURCE.LIGHTER, qty: 1 }],
         place: [{ resourceId: RESOURCE.KEROSENE, qty: 3 }]
-      }
-    },
-    {
-      scenarioName: "Cooked and Burned",
-      payout: 7e4,
-      actions: {
-        evidence: [{ resourceId: RESOURCE.AMMONIA, qty: 1 }],
-        place: [{ resourceId: RESOURCE.GASOLINE, qty: 3 }]
-      }
-    },
-    {
-      scenarioName: "Cooking the Books",
-      payout: 22e3,
-      actions: {
-        place: [{ resourceId: RESOURCE.GASOLINE, qty: 2 }]
       }
     },
     {
@@ -1100,13 +830,6 @@
       actions: {
         ignite: [{ resourceId: RESOURCE.LIGHTER, qty: 1 }],
         place: [{ resourceId: RESOURCE.GASOLINE, qty: 1 }]
-      }
-    },
-    {
-      scenarioName: "Crisp Bills",
-      payout: 35e3,
-      actions: {
-        place: [{ resourceId: RESOURCE.GASOLINE, qty: 2 }]
       }
     },
     {
@@ -1164,13 +887,6 @@
     },
     {
       scenarioName: "The Devil's in the Details",
-      payout: 73e3,
-      actions: {
-        place: [{ resourceId: RESOURCE.DIESEL, qty: 3 }]
-      }
-    },
-    {
-      scenarioName: "The Devil's in the Details",
       payout: 13e4,
       actions: {
         ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
@@ -1206,24 +922,10 @@
     },
     {
       scenarioName: "Don't Hate the Player",
-      payout: 2e4,
-      actions: {
-        place: [{ resourceId: RESOURCE.GASOLINE, qty: 2 }]
-      }
-    },
-    {
-      scenarioName: "Don't Hate the Player",
       payout: 32e3,
       actions: {
         ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
         place: [{ resourceId: RESOURCE.GASOLINE, qty: 2 }]
-      }
-    },
-    {
-      scenarioName: "Eight Lives",
-      payout: 4200,
-      actions: {
-        place: [{ resourceId: RESOURCE.GASOLINE, qty: 1 }]
       }
     },
     {
@@ -1238,23 +940,9 @@
       scenarioName: "Emotional Wreck",
       payout: 14e4,
       actions: {
-        place: [{ resourceId: RESOURCE.GASOLINE, qty: 6 }]
-      }
-    },
-    {
-      scenarioName: "Emotional Wreck",
-      payout: 14e4,
-      actions: {
         ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
         place: [{ resourceId: RESOURCE.GASOLINE, qty: 4 }],
         stoke: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }]
-      }
-    },
-    {
-      scenarioName: "End of the Line",
-      payout: 1e5,
-      actions: {
-        place: [{ resourceId: RESOURCE.GASOLINE, qty: 5 }]
       }
     },
     {
@@ -1269,22 +957,8 @@
       scenarioName: "Faction Fiction",
       payout: 64500,
       actions: {
-        place: [{ resourceId: RESOURCE.GASOLINE, qty: 4 }]
-      }
-    },
-    {
-      scenarioName: "Faction Fiction",
-      payout: 64500,
-      actions: {
         ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
         place: [{ resourceId: RESOURCE.GASOLINE, qty: 3 }]
-      }
-    },
-    {
-      scenarioName: "Family Feud",
-      payout: 8e3,
-      actions: {
-        place: [{ resourceId: RESOURCE.GASOLINE, qty: 2 }]
       }
     },
     {
@@ -1309,13 +983,6 @@
       actions: {
         ignite: [{ resourceId: RESOURCE.LIGHTER, qty: 1 }],
         place: [{ resourceId: RESOURCE.GASOLINE, qty: 2 }]
-      }
-    },
-    {
-      scenarioName: "Final Cut",
-      payout: 15e4,
-      actions: {
-        place: [{ resourceId: RESOURCE.GASOLINE, qty: 4 }]
       }
     },
     {
@@ -1376,13 +1043,6 @@
     },
     {
       scenarioName: "For Closure",
-      payout: 22e3,
-      actions: {
-        place: [{ resourceId: RESOURCE.GASOLINE, qty: 2 }]
-      }
-    },
-    {
-      scenarioName: "For Closure",
       payout: 16e3,
       actions: {
         ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
@@ -1393,28 +1053,7 @@
       scenarioName: "Foul Play",
       payout: 12e4,
       actions: {
-        place: [{ resourceId: RESOURCE.GASOLINE, qty: 5 }]
-      }
-    },
-    {
-      scenarioName: "Foul Play",
-      payout: 12e4,
-      actions: {
         ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
-        place: [{ resourceId: RESOURCE.GASOLINE, qty: 4 }]
-      }
-    },
-    {
-      scenarioName: "From the Ashes",
-      payout: 12e4,
-      actions: {
-        place: [{ resourceId: RESOURCE.GASOLINE, qty: 5 }]
-      }
-    },
-    {
-      scenarioName: "Gay Frogs",
-      payout: 41e3,
-      actions: {
         place: [{ resourceId: RESOURCE.GASOLINE, qty: 4 }]
       }
     },
@@ -1428,31 +1067,10 @@
     },
     {
       scenarioName: "Get Wrecked",
-      payout: 9e4,
-      actions: {
-        place: [{ resourceId: RESOURCE.GASOLINE, qty: 4 }]
-      }
-    },
-    {
-      scenarioName: "Get Wrecked",
       payout: 84e3,
       actions: {
         ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
         place: [{ resourceId: RESOURCE.GASOLINE, qty: 2 }]
-      }
-    },
-    {
-      scenarioName: "Green With Envy",
-      payout: 12e4,
-      actions: {
-        place: [{ resourceId: RESOURCE.GASOLINE, qty: 6 }]
-      }
-    },
-    {
-      scenarioName: "Gym'll Fix It",
-      payout: 62e3,
-      actions: {
-        place: [{ resourceId: RESOURCE.GASOLINE, qty: 4 }]
       }
     },
     {
@@ -1474,13 +1092,6 @@
     },
     {
       scenarioName: "Heat the Rich",
-      payout: 34e3,
-      actions: {
-        place: [{ resourceId: RESOURCE.GASOLINE, qty: 3 }]
-      }
-    },
-    {
-      scenarioName: "Heat the Rich",
       payout: 4e4,
       actions: {
         ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
@@ -1491,22 +1102,8 @@
       scenarioName: "Hide and Seek",
       payout: 33e3,
       actions: {
-        place: [{ resourceId: RESOURCE.GASOLINE, qty: 4 }]
-      }
-    },
-    {
-      scenarioName: "Hide and Seek",
-      payout: 33e3,
-      actions: {
         ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
         place: [{ resourceId: RESOURCE.GASOLINE, qty: 2 }]
-      }
-    },
-    {
-      scenarioName: "High Time",
-      payout: 4300,
-      actions: {
-        place: [{ resourceId: RESOURCE.GASOLINE, qty: 1 }]
       }
     },
     {
@@ -1515,13 +1112,6 @@
       actions: {
         ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
         place: [{ resourceId: RESOURCE.GASOLINE, qty: 1 }]
-      }
-    },
-    {
-      scenarioName: "Hire and Fire",
-      payout: 49e3,
-      actions: {
-        place: [{ resourceId: RESOURCE.GASOLINE, qty: 3 }]
       }
     },
     {
@@ -1550,13 +1140,6 @@
     },
     {
       scenarioName: "Home and Dry",
-      payout: 35e3,
-      actions: {
-        place: [{ resourceId: RESOURCE.GASOLINE, qty: 3 }]
-      }
-    },
-    {
-      scenarioName: "Home and Dry",
       payout: 49e3,
       actions: {
         ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
@@ -1581,24 +1164,10 @@
     },
     {
       scenarioName: "Hot Dog",
-      payout: 38e3,
-      actions: {
-        place: [{ resourceId: RESOURCE.GASOLINE, qty: 3 }]
-      }
-    },
-    {
-      scenarioName: "Hot Dog",
       payout: 30500,
       actions: {
         ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
         place: [{ resourceId: RESOURCE.GASOLINE, qty: 1 }]
-      }
-    },
-    {
-      scenarioName: "Hot Gossip",
-      payout: 62e3,
-      actions: {
-        place: [{ resourceId: RESOURCE.GASOLINE, qty: 3 }]
       }
     },
     {
@@ -1626,21 +1195,6 @@
       }
     },
     {
-      scenarioName: "Hot out of the Gate",
-      payout: 53e3,
-      actions: {
-        evidence: [{ resourceId: RESOURCE.GOLD_TOOTH, qty: 1 }],
-        place: [{ resourceId: RESOURCE.GASOLINE, qty: 2 }]
-      }
-    },
-    {
-      scenarioName: "Hot Profit",
-      payout: 84e3,
-      actions: {
-        place: [{ resourceId: RESOURCE.GASOLINE, qty: 4 }]
-      }
-    },
-    {
       scenarioName: "Hot Profit",
       payout: 57500,
       actions: {
@@ -1654,13 +1208,6 @@
       actions: {
         ignite: [{ resourceId: RESOURCE.LIGHTER, qty: 1 }],
         place: [{ resourceId: RESOURCE.KEROSENE, qty: 1 }]
-      }
-    },
-    {
-      scenarioName: "House Edge",
-      payout: 19e4,
-      actions: {
-        place: [{ resourceId: RESOURCE.GASOLINE, qty: 5 }]
       }
     },
     {
@@ -1699,13 +1246,6 @@
     },
     {
       scenarioName: "It Cuts Both Ways",
-      payout: 19e3,
-      actions: {
-        place: [{ resourceId: RESOURCE.GASOLINE, qty: 2 }]
-      }
-    },
-    {
-      scenarioName: "It Cuts Both Ways",
       payout: 20500,
       actions: {
         ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
@@ -1730,13 +1270,6 @@
       }
     },
     {
-      scenarioName: "Kindling Spirits",
-      payout: 64e3,
-      actions: {
-        place: [{ resourceId: RESOURCE.GASOLINE, qty: 4 }]
-      }
-    },
-    {
       scenarioName: "Landmark Decision",
       payout: 3e5,
       actions: {
@@ -1751,20 +1284,6 @@
       actions: {
         ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
         place: [{ resourceId: RESOURCE.GASOLINE, qty: 2 }]
-      }
-    },
-    {
-      scenarioName: "Letter of the Law",
-      payout: 1e3,
-      actions: {
-        place: [{ resourceId: RESOURCE.KEROSENE, qty: 1 }]
-      }
-    },
-    {
-      scenarioName: "Light Fingered",
-      payout: 165e3,
-      actions: {
-        place: [{ resourceId: RESOURCE.GASOLINE, qty: 4 }]
       }
     },
     {
@@ -1786,24 +1305,10 @@
     },
     {
       scenarioName: "Liquor on the Back Row",
-      payout: 37e3,
-      actions: {
-        place: [{ resourceId: RESOURCE.GASOLINE, qty: 3 }]
-      }
-    },
-    {
-      scenarioName: "Liquor on the Back Row",
       payout: 5e4,
       actions: {
         ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
         place: [{ resourceId: RESOURCE.GASOLINE, qty: 2 }]
-      }
-    },
-    {
-      scenarioName: "Local Concerns",
-      payout: 2e4,
-      actions: {
-        place: [{ resourceId: RESOURCE.GASOLINE, qty: 3 }]
       }
     },
     {
@@ -1849,16 +1354,6 @@
     },
     {
       scenarioName: "Make a Killing",
-      payout: 26e4,
-      actions: {
-        place: [
-          { resourceId: RESOURCE.GASOLINE, qty: 1 },
-          { resourceId: RESOURCE.KEROSENE, qty: 2 }
-        ]
-      }
-    },
-    {
-      scenarioName: "Make a Killing",
       payout: 39e4,
       actions: {
         ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
@@ -1879,24 +1374,10 @@
     },
     {
       scenarioName: "Marked for Salvation",
-      payout: 3e4,
-      actions: {
-        place: [{ resourceId: RESOURCE.HYDROGEN, qty: 1 }]
-      }
-    },
-    {
-      scenarioName: "Marked for Salvation",
       payout: 8e4,
       actions: {
         ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
         place: [{ resourceId: RESOURCE.KEROSENE, qty: 1 }]
-      }
-    },
-    {
-      scenarioName: "Marx & Sparks",
-      payout: 14e4,
-      actions: {
-        place: [{ resourceId: RESOURCE.GASOLINE, qty: 4 }]
       }
     },
     {
@@ -1939,30 +1420,9 @@
       scenarioName: "Naked Aggression",
       payout: 31500,
       actions: {
-        place: [{ resourceId: RESOURCE.GASOLINE, qty: 4 }]
-      }
-    },
-    {
-      scenarioName: "Naked Aggression",
-      payout: 31500,
-      actions: {
         ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
         place: [{ resourceId: RESOURCE.GASOLINE, qty: 2 }],
         stoke: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }]
-      }
-    },
-    {
-      scenarioName: "Needles to Say",
-      payout: 23e3,
-      actions: {
-        place: [{ resourceId: RESOURCE.GASOLINE, qty: 2 }]
-      }
-    },
-    {
-      scenarioName: "Not a Leg to Stand on",
-      payout: 15e4,
-      actions: {
-        place: [{ resourceId: RESOURCE.GASOLINE, qty: 6 }]
       }
     },
     {
@@ -1974,25 +1434,11 @@
       }
     },
     {
-      scenarioName: "Off the Market",
-      payout: 3e4,
-      actions: {
-        place: [{ resourceId: RESOURCE.KEROSENE, qty: 1 }]
-      }
-    },
-    {
       scenarioName: "Oh God, Yes",
       payout: 17500,
       actions: {
         ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
         place: [{ resourceId: RESOURCE.GASOLINE, qty: 1 }]
-      }
-    },
-    {
-      scenarioName: "On Fire at the Box Office",
-      payout: 1e4,
-      actions: {
-        place: [{ resourceId: RESOURCE.HYDROGEN, qty: 1 }]
       }
     },
     {
@@ -2009,13 +1455,6 @@
       actions: {
         ignite: [{ resourceId: RESOURCE.LIGHTER, qty: 1 }],
         place: [{ resourceId: RESOURCE.GASOLINE, qty: 1 }]
-      }
-    },
-    {
-      scenarioName: "Out in the Wash",
-      payout: 235e3,
-      actions: {
-        place: [{ resourceId: RESOURCE.GASOLINE, qty: 3 }]
       }
     },
     {
@@ -2041,13 +1480,6 @@
       actions: {
         ignite: [{ resourceId: RESOURCE.LIGHTER, qty: 1 }],
         place: [{ resourceId: RESOURCE.HYDROGEN, qty: 1 }]
-      }
-    },
-    {
-      scenarioName: "Piggy in the Middle",
-      payout: 73e3,
-      actions: {
-        place: [{ resourceId: RESOURCE.GASOLINE, qty: 3 }]
       }
     },
     {
@@ -2080,13 +1512,6 @@
     },
     {
       scenarioName: "Political Firestorm",
-      payout: 22e3,
-      actions: {
-        place: [{ resourceId: RESOURCE.GASOLINE, qty: 2 }]
-      }
-    },
-    {
-      scenarioName: "Political Firestorm",
       payout: 4e4,
       actions: {
         ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
@@ -2105,13 +1530,6 @@
       scenarioName: "Raising Hell",
       payout: 17e4,
       actions: {
-        place: [{ resourceId: RESOURCE.GASOLINE, qty: 6 }]
-      }
-    },
-    {
-      scenarioName: "Raising Hell",
-      payout: 17e4,
-      actions: {
         ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
         place: [{ resourceId: RESOURCE.GASOLINE, qty: 3 }],
         stoke: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }]
@@ -2124,13 +1542,6 @@
         ignite: [{ resourceId: RESOURCE.LIGHTER, qty: 1 }],
         place: [{ resourceId: RESOURCE.HYDROGEN, qty: 1 }],
         stoke: [{ resourceId: RESOURCE.HYDROGEN, qty: 1 }]
-      }
-    },
-    {
-      scenarioName: "Read the Room",
-      payout: 125e3,
-      actions: {
-        place: [{ resourceId: RESOURCE.GASOLINE, qty: 5 }]
       }
     },
     {
@@ -2200,13 +1611,6 @@
     },
     {
       scenarioName: "See No Evil",
-      payout: 52e3,
-      actions: {
-        place: [{ resourceId: RESOURCE.GASOLINE, qty: 3 }]
-      }
-    },
-    {
-      scenarioName: "See No Evil",
       payout: 71e3,
       actions: {
         ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
@@ -2232,13 +1636,6 @@
     },
     {
       scenarioName: "Shielded from the Truth",
-      payout: 8900,
-      actions: {
-        place: [{ resourceId: RESOURCE.GASOLINE, qty: 1 }]
-      }
-    },
-    {
-      scenarioName: "Shielded from the Truth",
       payout: 16e3,
       actions: {
         ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
@@ -2259,24 +1656,9 @@
     },
     {
       scenarioName: "Smoke on the Water",
-      payout: 4200,
-      actions: {
-        place: [{ resourceId: RESOURCE.GASOLINE, qty: 1 }]
-      }
-    },
-    {
-      scenarioName: "Smoke on the Water",
       payout: 8600,
       actions: {
         ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
-        place: [{ resourceId: RESOURCE.GASOLINE, qty: 1 }]
-      }
-    },
-    {
-      scenarioName: "Smoke Out",
-      payout: 1e4,
-      actions: {
-        evidence: [{ resourceId: RESOURCE.CANNABIS, qty: 1 }],
         place: [{ resourceId: RESOURCE.GASOLINE, qty: 1 }]
       }
     },
@@ -2383,24 +1765,9 @@
       scenarioName: "Stroke of Fortune",
       payout: 12e4,
       actions: {
-        place: [{ resourceId: RESOURCE.GASOLINE, qty: 6 }]
-      }
-    },
-    {
-      scenarioName: "Stroke of Fortune",
-      payout: 12e4,
-      actions: {
         ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
         place: [{ resourceId: RESOURCE.GASOLINE, qty: 3 }],
         stoke: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }]
-      }
-    },
-    {
-      scenarioName: "Supermarket Sweep",
-      payout: 265e3,
-      actions: {
-        place: [{ resourceId: RESOURCE.GASOLINE, qty: 5 }],
-        stoke: [{ resourceId: RESOURCE.LIGHTER, qty: 1 }]
       }
     },
     {
@@ -2426,13 +1793,6 @@
         evidence: [{ resourceId: RESOURCE.HARD_DRIVE, qty: 1 }],
         ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
         place: [{ resourceId: RESOURCE.GASOLINE, qty: 3 }]
-      }
-    },
-    {
-      scenarioName: "That Place Is History",
-      payout: 1e5,
-      actions: {
-        place: [{ resourceId: RESOURCE.GASOLINE, qty: 4 }]
       }
     },
     {
@@ -2464,22 +1824,8 @@
       scenarioName: "The Declaration of Inebrience",
       payout: 115e3,
       actions: {
-        place: [{ resourceId: RESOURCE.GASOLINE, qty: 3 }]
-      }
-    },
-    {
-      scenarioName: "The Declaration of Inebrience",
-      payout: 115e3,
-      actions: {
         ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
         place: [{ resourceId: RESOURCE.GASOLINE, qty: 3 }]
-      }
-    },
-    {
-      scenarioName: "The Empyre Strikes Back",
-      payout: 49e3,
-      actions: {
-        place: [{ resourceId: RESOURCE.GASOLINE, qty: 5 }]
       }
     },
     {
@@ -2498,13 +1844,6 @@
         place: [{ resourceId: RESOURCE.GASOLINE, qty: 5 }],
         stoke: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
         stokeTime: "late"
-      }
-    },
-    {
-      scenarioName: "The Fire Chief",
-      payout: 13e4,
-      actions: {
-        place: [{ resourceId: RESOURCE.GASOLINE, qty: 6 }]
       }
     },
     {
@@ -2528,22 +1867,7 @@
       scenarioName: "The Grass Ain't Greener",
       payout: 85e3,
       actions: {
-        place: [{ resourceId: RESOURCE.GASOLINE, qty: 4 }],
-        stoke: [{ resourceId: RESOURCE.DIESEL, qty: 1 }]
-      }
-    },
-    {
-      scenarioName: "The Grass Ain't Greener",
-      payout: 85e3,
-      actions: {
         ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
-        place: [{ resourceId: RESOURCE.GASOLINE, qty: 4 }]
-      }
-    },
-    {
-      scenarioName: "The Male Gaze",
-      payout: 13e4,
-      actions: {
         place: [{ resourceId: RESOURCE.GASOLINE, qty: 4 }]
       }
     },
@@ -2557,23 +1881,9 @@
     },
     {
       scenarioName: "The Midnight Oil",
-      payout: 63e3,
-      actions: {
-        place: [{ resourceId: RESOURCE.GASOLINE, qty: 4 }]
-      }
-    },
-    {
-      scenarioName: "The Midnight Oil",
       payout: 75e3,
       actions: {
         ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
-        place: [{ resourceId: RESOURCE.GASOLINE, qty: 3 }]
-      }
-    },
-    {
-      scenarioName: "The Plane Truth",
-      payout: 38e3,
-      actions: {
         place: [{ resourceId: RESOURCE.GASOLINE, qty: 3 }]
       }
     },
@@ -2611,13 +1921,6 @@
     },
     {
       scenarioName: "Third-Degree Burn",
-      payout: 25500,
-      actions: {
-        place: [{ resourceId: RESOURCE.GASOLINE, qty: 2 }]
-      }
-    },
-    {
-      scenarioName: "Third-Degree Burn",
       payout: 29e3,
       actions: {
         ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
@@ -2634,25 +1937,10 @@
     },
     {
       scenarioName: "Totally Armless",
-      payout: 44e3,
-      actions: {
-        place: [{ resourceId: RESOURCE.KEROSENE, qty: 2 }]
-      }
-    },
-    {
-      scenarioName: "Totally Armless",
       payout: 35e3,
       actions: {
         ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
         place: [{ resourceId: RESOURCE.GASOLINE, qty: 1 }]
-      }
-    },
-    {
-      scenarioName: "Turn up the Heat",
-      payout: 9e4,
-      actions: {
-        evidence: [{ resourceId: RESOURCE.COMPASS, qty: 1 }],
-        place: [{ resourceId: RESOURCE.GASOLINE, qty: 4 }]
       }
     },
     {
@@ -2666,24 +1954,10 @@
     },
     {
       scenarioName: "Twisted Firestarter",
-      payout: 32e3,
-      actions: {
-        place: [{ resourceId: RESOURCE.GASOLINE, qty: 3 }]
-      }
-    },
-    {
-      scenarioName: "Twisted Firestarter",
       payout: 23e3,
       actions: {
         ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
         place: [{ resourceId: RESOURCE.GASOLINE, qty: 1 }]
-      }
-    },
-    {
-      scenarioName: "Uber Heats",
-      payout: 78e3,
-      actions: {
-        place: [{ resourceId: RESOURCE.GASOLINE, qty: 4 }]
       }
     },
     {
@@ -2705,13 +1979,6 @@
     },
     {
       scenarioName: "Unpopular Mechanics",
-      payout: 4500,
-      actions: {
-        place: [{ resourceId: RESOURCE.GASOLINE, qty: 1 }]
-      }
-    },
-    {
-      scenarioName: "Unpopular Mechanics",
       payout: 8600,
       actions: {
         ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
@@ -2725,14 +1992,6 @@
         ignite: [{ resourceId: RESOURCE.LIGHTER, qty: 1 }],
         place: [{ resourceId: RESOURCE.HYDROGEN, qty: 1 }],
         stoke: [{ resourceId: RESOURCE.HYDROGEN, qty: 2 }]
-      }
-    },
-    {
-      scenarioName: "Visions of the Savory",
-      payout: 7e4,
-      actions: {
-        evidence: [{ resourceId: RESOURCE.FAMILY_PHOTO, qty: 1 }],
-        place: [{ resourceId: RESOURCE.GASOLINE, qty: 3 }]
       }
     },
     {
@@ -2754,13 +2013,6 @@
     },
     {
       scenarioName: "Wedded to the Lie",
-      payout: 81e3,
-      actions: {
-        place: [{ resourceId: RESOURCE.GASOLINE, qty: 4 }]
-      }
-    },
-    {
-      scenarioName: "Wedded to the Lie",
       payout: 69e3,
       actions: {
         ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
@@ -2769,24 +2021,10 @@
     },
     {
       scenarioName: "Wet Behind the Ears",
-      payout: 24e4,
-      actions: {
-        place: [{ resourceId: RESOURCE.GASOLINE, qty: 2 }]
-      }
-    },
-    {
-      scenarioName: "Wet Behind the Ears",
       payout: 2e5,
       actions: {
         ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
         place: [{ resourceId: RESOURCE.GASOLINE, qty: 1 }]
-      }
-    },
-    {
-      scenarioName: "Where There's a Will",
-      payout: 23e3,
-      actions: {
-        place: [{ resourceId: RESOURCE.GASOLINE, qty: 2 }]
       }
     },
     {
@@ -2816,24 +2054,10 @@
     },
     {
       scenarioName: "Womb With a View",
-      payout: 95e3,
-      actions: {
-        place: [{ resourceId: RESOURCE.GASOLINE, qty: 4 }]
-      }
-    },
-    {
-      scenarioName: "Womb With a View",
       payout: 78500,
       actions: {
         ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
         place: [{ resourceId: RESOURCE.GASOLINE, qty: 2 }]
-      }
-    },
-    {
-      scenarioName: "Workplace Burnout",
-      payout: 1e5,
-      actions: {
-        place: [{ resourceId: RESOURCE.GASOLINE, qty: 4 }]
       }
     },
     {

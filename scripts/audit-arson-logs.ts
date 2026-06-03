@@ -124,8 +124,6 @@ interface ReportPayload {
 
 interface ScenarioEntryMeta {
     actionsNode: ts.ObjectLiteralExpression;
-    block: ts.ObjectLiteralExpression;
-    hasFlamethrowerIgnite: boolean;
     payoutNode: ts.Expression;
     scenario: Scenario;
     scenarioName: string;
@@ -464,9 +462,19 @@ function arraysEqual(a: string[], b: string[]): boolean {
     return a.every((value, index) => value === b[index]);
 }
 
+function indexScenariosByName(scenarios: Scenario[]): Map<string, Scenario> {
+    const map = new Map<string, Scenario>();
+    for (const scenario of scenarios) {
+        if (map.has(scenario.scenarioName)) {
+            throw new Error(`Duplicate scenarioName detected: ${scenario.scenarioName}`);
+        }
+        map.set(scenario.scenarioName, scenario);
+    }
+    return map;
+}
+
 function summarizeScenarioRuns(runs: SuccessfulRun[]): Map<string, ScenarioSummary> {
-    const deduped = deduplicateScenarios(SCENARIOS);
-    const scenarioMap = new Map(deduped.map((scenario) => [scenario.scenarioName, scenario]));
+    const scenarioMap = indexScenariosByName(SCENARIOS);
     const grouped = new Map<string, SuccessfulRun[]>();
 
     for (const run of runs) {
@@ -574,28 +582,6 @@ function summarizeScenarioRuns(runs: SuccessfulRun[]): Map<string, ScenarioSumma
     return summaries;
 }
 
-function deduplicateScenarios(scenarios: Scenario[]): Scenario[] {
-    const groups = new Map<string, Scenario[]>();
-    for (const scenario of scenarios) {
-        const bucket = groups.get(scenario.scenarioName) ?? [];
-        bucket.push(scenario);
-        groups.set(scenario.scenarioName, bucket);
-    }
-
-    const deduped: Scenario[] = [];
-    for (const group of groups.values()) {
-        if (group.length === 1) {
-            deduped.push(group[0]);
-            continue;
-        }
-        const flamethrowerVersions = group.filter((scenario) =>
-            scenario.actions.ignite?.some((item) => item.resourceId === RESOURCE.FLAMETHROWER) ?? false,
-        );
-        deduped.push(...(flamethrowerVersions.length > 0 ? flamethrowerVersions : [group[0]]));
-    }
-    return deduped;
-}
-
 function highestObservedPayoutByScenario(runs: SuccessfulRun[]): Map<string, number> {
     const result = new Map<string, number>();
     for (const run of runs) {
@@ -605,7 +591,7 @@ function highestObservedPayoutByScenario(runs: SuccessfulRun[]): Map<string, num
 }
 
 function bestObservedRecipeByScenario(runs: SuccessfulRun[]): Map<string, ObservedRecipe> {
-    const currentByScenario = new Map(deduplicateScenarios(SCENARIOS).map((scenario) => [scenario.scenarioName, scenario]));
+    const currentByScenario = indexScenariosByName(SCENARIOS);
     const result = new Map<string, ObservedRecipe>();
 
     for (const run of runs) {
@@ -689,7 +675,7 @@ function mergedActions(current: ScenarioActions, observed: ObservedRecipe): Scen
 
 function collectScenarioEntryMeta(sourceText: string): Map<string, ScenarioEntryMeta> {
     const sourceFile = ts.createSourceFile('scenarios.ts', sourceText, ts.ScriptTarget.Latest, true, ts.ScriptKind.TS);
-    const entries: ScenarioEntryMeta[] = [];
+    const entries = new Map<string, ScenarioEntryMeta>();
 
     function visit(node: ts.Node): void {
         if (
@@ -725,12 +711,12 @@ function collectScenarioEntryMeta(sourceText: string): Map<string, ScenarioEntry
                     scenario.scenarioName === scenarioName &&
                     scenario.payout === Number(payoutProp.initializer.getText(sourceFile).replace(/_/g, '')),
                 );
-                const hasFlamethrowerIgnite = actionsProp.initializer.getText(sourceFile).includes('RESOURCE.FLAMETHROWER');
+                if (entries.has(scenarioName)) {
+                    throw new Error(`Duplicate scenarioName in src/data/scenarios.ts: ${scenarioName}`);
+                }
 
-                entries.push({
+                entries.set(scenarioName, {
                     actionsNode: actionsProp.initializer,
-                    block: element,
-                    hasFlamethrowerIgnite,
                     payoutNode: payoutProp.initializer,
                     scenario: matchingScenario ?? SCENARIOS.find((scenario) => scenario.scenarioName === scenarioName)!,
                     scenarioName,
@@ -741,21 +727,7 @@ function collectScenarioEntryMeta(sourceText: string): Map<string, ScenarioEntry
     }
 
     visit(sourceFile);
-
-    const grouped = new Map<string, ScenarioEntryMeta[]>();
-    for (const entry of entries) {
-        const bucket = grouped.get(entry.scenarioName) ?? [];
-        bucket.push(entry);
-        grouped.set(entry.scenarioName, bucket);
-    }
-
-    const winners = new Map<string, ScenarioEntryMeta>();
-    for (const [scenarioName, bucket] of grouped.entries()) {
-        const flamethrower = bucket.filter((entry) => entry.hasFlamethrowerIgnite);
-        winners.set(scenarioName, flamethrower[0] ?? bucket[0]);
-    }
-
-    return winners;
+    return entries;
 }
 
 function applyScenarioUpdates(runs: SuccessfulRun[], options: CliOptions): { changed: boolean; updatedScenarios: string[] } {
@@ -763,13 +735,13 @@ function applyScenarioUpdates(runs: SuccessfulRun[], options: CliOptions): { cha
 
     const sourcePath = path.join(process.cwd(), 'src', 'data', 'scenarios.ts');
     const sourceText = readFileSync(sourcePath, 'utf8');
-    const winners = collectScenarioEntryMeta(sourceText);
+    const entries = collectScenarioEntryMeta(sourceText);
     const payoutMap = highestObservedPayoutByScenario(runs);
     const recipeMap = bestObservedRecipeByScenario(runs);
     const replacements: Replacement[] = [];
     const updatedScenarios = new Set<string>();
 
-    for (const [scenarioName, entry] of winners.entries()) {
+    for (const [scenarioName, entry] of entries.entries()) {
         if (options.updatePayouts) {
             const observedPayout = payoutMap.get(scenarioName);
             if (observedPayout && observedPayout > entry.scenario.payout) {
