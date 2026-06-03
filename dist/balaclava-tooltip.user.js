@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        Balaclava Tooltip
 // @namespace   https://greasyfork.org/en/users/942572-yukio-mizsima
-// @version     1.0.3
+// @version     1.0.4
 // @description Universal tooltip injection for userscript managers
 // @author      Yukio [906148]
 // @license     MIT
@@ -94,11 +94,9 @@
         opacity: 1;
         border: var(--balaclava-tooltip-border-size) solid var(--balaclava-tooltip-border);
         border-radius: var(--balaclava-tooltip-border-radius);
-        filter: drop-shadow(0 2px 8px var(--balaclava-tooltip-shadow));
-        transform: scale(1);
+        box-shadow: 0 2px 8px var(--balaclava-tooltip-shadow);
         transition:
-          opacity ${visualConfig.animationDuration} ease-out,
-          transform ${visualConfig.animationDuration} ease-out;
+          opacity ${visualConfig.animationDuration} ease-out;
       }
 
       .balaclava-tooltip-content {
@@ -181,29 +179,23 @@
       }
 
       .balaclava-tooltip.is-top {
-        transform-origin: var(--arrow-offset, 50%) calc(100% + var(--balaclava-tooltip-arrow-size));
       }
 
       .balaclava-tooltip.is-bottom {
-        transform-origin: var(--arrow-offset, 50%) calc(0px - var(--balaclava-tooltip-arrow-size));
       }
 
       .balaclava-tooltip.is-left {
-        transform-origin: calc(100% + var(--balaclava-tooltip-arrow-size)) var(--arrow-offset, 50%);
       }
 
       .balaclava-tooltip.is-right {
-        transform-origin: calc(0px - var(--balaclava-tooltip-arrow-size)) var(--arrow-offset, 50%);
       }
 
       .balaclava-tooltip.is-entering {
         opacity: 0;
-        transform: scale(0.97);
       }
 
       .balaclava-tooltip.is-exiting {
         opacity: 0;
-        transform: scale(0.97);
       }
 
       @media (prefers-color-scheme: light) {
