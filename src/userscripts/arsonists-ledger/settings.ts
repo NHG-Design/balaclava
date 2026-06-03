@@ -24,14 +24,17 @@ export interface SettingsCtx {
     getApiKey(): string;
     getApiLastRefresh(): number;
     getActiveTab(): string;
+    getShowObservedPayouts(): boolean;
 
     setManualPrice(id: ResourceId, price: number): void;
+    clearManualPrices(): void;
     clearManualPrice(id: ResourceId): void;
     setThresholds(t: ProfitThresholds): void;
     setApiPrices(prices: PriceMap, timestamp: number): void;
     clearApiPrices(): void;
     setApiKey(key: string): void;
     setActiveTab(tab: string): void;
+    setShowObservedPayouts(show: boolean): void;
 }
 
 // ---------------------------------------------------------------------------
@@ -58,18 +61,24 @@ export function injectSettingsStyles(): void {
     style.id = 'pyro-settings-styles';
     style.textContent = `
 .pyro-settings-wrap {
+    --pyro-tooltip-bg: oklch(24% 0 0);
+    --pyro-tooltip-border: oklch(30% 0 0);
+    --pyro-tooltip-shadow: oklch(12% 0.01 260 / 0.55);
+    --pyro-tooltip-radius: 8px;
+    --pyro-tooltip-arrow-size: 12px;
+    --pyro-settings-btn-size: 24px;
     position: relative;
     display: inline-flex;
     align-items: center;
     margin-left: 8px;
 }
 #pyro-settings-btn {
-    background: oklch(14% 0.012 285 / 0.7);
-    border: 1px solid oklch(30% 0.02 285);
-    color: oklch(52% 0.01 285);
+    padding: 4px 8px;
+    background: color-mix(in oklch, var(--pyro-tooltip-bg) 86%, black);
+    border: 1px solid var(--pyro-tooltip-border);
+    color: oklch(76% 0.006 95);
     cursor: pointer;
-    border-radius: 4px;
-    padding: 3px 7px;
+    border-radius: var(--pyro-tooltip-radius);
     font-size: 13px;
     line-height: 1;
     user-select: none;
@@ -79,7 +88,10 @@ export function injectSettingsStyles(): void {
     transition: transform 100ms ease-out, background 120ms ease-out, color 120ms ease-out;
 }
 @media (hover: hover) and (pointer: fine) {
-    #pyro-settings-btn:hover { background: oklch(20% 0.018 285); color: oklch(88% 0.006 285); }
+    #pyro-settings-btn:hover {
+        background: color-mix(in oklch, var(--pyro-tooltip-bg) 94%, white 6%);
+        color: oklch(96% 0.012 95);
+    }
 }
 #pyro-settings-btn:active { transform: scale(0.94); }
 #pyro-settings-panel {
@@ -87,22 +99,38 @@ export function injectSettingsStyles(): void {
     --pyro-manual-color: #7af;
     --pyro-db-color: oklch(46% 0.008 285);
     position: absolute;
-    top: calc(100% + 6px);
+    top: calc(100% + 10px);
     right: 0;
     z-index: 9999;
-    background: oklch(11% 0.012 285);
-    border: 1px solid oklch(24% 0.02 285);
-    border-radius: 6px;
+    background: var(--pyro-tooltip-bg);
+    color: oklch(96% 0.012 95);
+    border: 1px solid var(--pyro-tooltip-border);
+    border-radius: var(--pyro-tooltip-radius);
     min-width: 290px;
     max-width: 360px;
-    box-shadow: 0 16px 48px oklch(4% 0.015 285 / 0.8), inset 0 1px 0 oklch(32% 0.022 285 / 0.35);
-    overflow: hidden;
-    transform-origin: top right;
+    box-shadow: 0 2px 8px var(--pyro-tooltip-shadow);
+    overflow: visible;
+    transform-origin: calc(100% - (var(--pyro-settings-btn-size) / 2)) calc(0px - var(--pyro-tooltip-arrow-size));
     transform: scale(0.95);
     opacity: 0;
     visibility: hidden;
     pointer-events: none;
     transition: transform 150ms ease-out, opacity 150ms ease-out, visibility 0ms linear 150ms;
+}
+#pyro-settings-panel::before {
+    content: '';
+    position: absolute;
+    top: calc(var(--pyro-tooltip-arrow-size) / -2);
+    right: calc((var(--pyro-settings-btn-size) / 2) - (var(--pyro-tooltip-arrow-size) / 2));
+    width: var(--pyro-tooltip-arrow-size);
+    height: var(--pyro-tooltip-arrow-size);
+    background: var(--pyro-tooltip-bg);
+    border: 1px solid var(--pyro-tooltip-border);
+    transform: rotate(45deg);
+    box-sizing: border-box;
+    border-right: none;
+    border-bottom: none;
+    border-radius: 3px;
 }
 #pyro-settings-panel.is-open {
     transform: scale(1);
@@ -114,48 +142,39 @@ export function injectSettingsStyles(): void {
 #pyro-settings-panel:not(.is-open) {
     transition: transform 100ms ease-out, opacity 100ms ease-out, visibility 0ms linear 100ms;
 }
-.pyro-tab-bar { display: flex; background: oklch(8.5% 0.01 285); border-bottom: 1px solid oklch(22% 0.018 285); }
+.pyro-tab-bar { display: flex; border-bottom: 1px solid var(--pyro-tooltip-border); }
 .pyro-tab {
     flex: 1;
     background: none;
     border: none;
-    border-bottom: 2px solid transparent;
-    color: oklch(56% 0.01 285);
+    border-bottom: 1px solid transparent;
+    color: oklch(70% 0.008 95 / 0.8);
     cursor: pointer;
     padding: 8px 2px;
     font: inherit;
-    font-size: 12px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
+    font-size: 14px;
     transition: color 120ms ease-out;
 }
 @media (hover: hover) and (pointer: fine) {
-    .pyro-tab:hover { color: oklch(62% 0.01 285); }
+    .pyro-tab:hover { color: oklch(96% 0.012 95); }
 }
-.pyro-tab:active { transform: scale(0.97); }
 .pyro-tab.active {
-    color: oklch(92% 0.008 285);
+    color: oklch(96% 0.012 95);
     border-bottom-color: ${BAND_COLOR.excellent};
-    background: oklch(13% 0.014 285);
+    background: linear-gradient(0deg, color-mix(in oklch, ${BAND_COLOR.excellent} 20%, transparent 80%), transparent 55%);
 }
 .pyro-tab-content { padding: 10px; max-height: 380px; overflow-y: auto; }
+.pyro-tab-content>div { display: flex; flex-direction: column; gap: 14px; }
 .pyro-tab-content::-webkit-scrollbar { width: 3px; }
 .pyro-tab-content::-webkit-scrollbar-track { background: transparent; }
-.pyro-tab-content::-webkit-scrollbar-thumb { background: oklch(26% 0.016 285); border-radius: 2px; }
-.pyro-s-group { margin-bottom: 12px; }
-.pyro-s-group:last-child { margin-bottom: 0; }
+.pyro-tab-content::-webkit-scrollbar-thumb { background: oklch(57% 0.008 285); border-radius: 2px; }
+.pyro-s-group { display: flex; flex-direction: column; gap: 4px; }
 .pyro-s-group-title {
-    font-size: 10px;
-    font-weight: 700;
+    font-size: 14px;
     text-transform: uppercase;
-    letter-spacing: 0.08em;
     color: oklch(58% 0.012 285);
-    margin-bottom: 6px;
-    padding-bottom: 4px;
-    border-bottom: 1px solid oklch(20% 0.014 285);
 }
-.pyro-s-row { display: flex; align-items: center; gap: 6px; margin-bottom: 4px; }
+.pyro-s-row { display: flex; align-items: center; gap: 6px; }
 .pyro-s-label {
     flex: 1;
     font-size: 11px;
@@ -182,7 +201,7 @@ export function injectSettingsStyles(): void {
 .pyro-s-input:focus-visible { outline: none; border-color: ${BAND_COLOR.excellent}; }
 .pyro-s-input.from-api   { border-color: #4a4; color: #6d6; }
 .pyro-s-input.overridden { border-color: #48a; color: #7af; }
-.pyro-s-divider { border: none; border-top: 1px solid oklch(20% 0.014 285); margin: 8px 0; }
+.pyro-s-divider { border: none; border-top: 1px solid var(--pyro-tooltip-border); margin: 8px 0; }
 .pyro-s-key-row { display: flex; gap: 6px; margin-bottom: 6px; }
 .pyro-s-key-input {
     flex: 1;
@@ -215,7 +234,6 @@ export function injectSettingsStyles(): void {
 .pyro-s-btn:disabled { opacity: 0.28; cursor: default; }
 .pyro-s-status {
     font-size: 10px;
-    margin-bottom: 8px;
     min-height: 13px;
     color: oklch(38% 0.008 285);
     display: flex;
@@ -226,7 +244,7 @@ export function injectSettingsStyles(): void {
 .pyro-s-status.ok  { color: ${BAND_COLOR.good}; }
 .pyro-s-status.err { color: #c66; }
 .pyro-s-refresh-row { display: flex; align-items: center; gap: 8px; }
-.pyro-s-timestamp { font-size: 10px; color: oklch(36% 0.007 285); }
+.pyro-s-timestamp { font-size: 10px; color: oklch(57% 0.008 285); }
 .pyro-s-check-row {
     display: flex;
     align-items: center;
@@ -266,6 +284,8 @@ function priceInput(id: ResourceId, ctx: SettingsCtx): HTMLInputElement {
     const input = el('input', 'pyro-s-input');
     input.type = 'number';
     input.min = '0';
+    let initialValue = '';
+    let isDirty = false;
 
     const refresh = () => {
         const manual = ctx.getManualPrices()[id];
@@ -282,10 +302,17 @@ function priceInput(id: ResourceId, ctx: SettingsCtx): HTMLInputElement {
             input.placeholder = String(db);
             applyPriceStyle(input, 'db');
         }
+        initialValue = input.value;
+        isDirty = false;
     };
     refresh();
 
     const commit = () => {
+        if (!isDirty) {
+            refresh();
+            return;
+        }
+
         const raw = input.value.trim();
         if (raw === '') {
             ctx.clearManualPrice(id);
@@ -295,6 +322,13 @@ function priceInput(id: ResourceId, ctx: SettingsCtx): HTMLInputElement {
         }
         refresh();
     };
+    input.addEventListener('focus', () => {
+        initialValue = input.value;
+        isDirty = false;
+    });
+    input.addEventListener('input', () => {
+        isDirty = input.value !== initialValue;
+    });
     input.addEventListener('blur', commit);
     input.addEventListener('keydown', e => { if (e.key === 'Enter') input.blur(); });
     return input;
@@ -305,9 +339,9 @@ function priceInput(id: ResourceId, ctx: SettingsCtx): HTMLInputElement {
 // ---------------------------------------------------------------------------
 
 const PRICE_GROUPS: Array<{ title: string; ids: ResourceId[] }> = [
-    { title: 'Liquid fuels',  ids: ['gasoline', 'diesel', 'kerosene'] },
-    { title: 'Solid fuels',   ids: ['magnesium', 'thermite', 'potassium_nitrate'] },
-    { title: 'Gaseous fuels', ids: ['oxygen', 'methane', 'hydrogen'] },
+    { title: 'Liquids',  ids: ['gasoline', 'diesel', 'kerosene'] },
+    { title: 'Solids',   ids: ['magnesium', 'thermite', 'potassium_nitrate'] },
+    { title: 'Gases', ids: ['oxygen', 'methane', 'hydrogen'] },
     {
         title: 'Evidence',
         ids: Object.values(CATALOG)
@@ -319,6 +353,8 @@ const PRICE_GROUPS: Array<{ title: string; ids: ResourceId[] }> = [
 
 function buildPricesTab(ctx: SettingsCtx, panel: HTMLElement): HTMLElement {
     const root = el('div');
+    const hasManualOverrides = Object.keys(ctx.getManualPrices()).length > 0;
+    const hasApiPrices = ctx.getApiLastRefresh() > 0 || Object.keys(ctx.getApiPrices()).length > 0;
 
     const actionGroup = el('div', 'pyro-s-group');
     const actionRow = el('div', 'pyro-s-refresh-row');
@@ -329,7 +365,7 @@ function buildPricesTab(ctx: SettingsCtx, panel: HTMLElement): HTMLElement {
 
     const resetBtn = el('button', 'pyro-s-btn');
     resetBtn.textContent = 'Reset';
-    if (!ctx.getApiLastRefresh()) resetBtn.disabled = true;
+    if (!hasManualOverrides && !hasApiPrices) resetBtn.disabled = true;
 
     const tsEl = el('span', 'pyro-s-timestamp');
     const ts = ctx.getApiLastRefresh();
@@ -363,8 +399,12 @@ function buildPricesTab(ctx: SettingsCtx, panel: HTMLElement): HTMLElement {
         }
     });
 
-    resetBtn.addEventListener('click', () => {
+    resetBtn.addEventListener('click', event => {
+        event.stopPropagation();
+        ctx.clearManualPrices();
         ctx.clearApiPrices();
+        actionStatus.textContent = 'Reset to bundled prices';
+        actionStatus.className = 'pyro-s-status';
         rerenderTab(panel, 'prices', ctx);
     });
 
@@ -384,6 +424,11 @@ function buildPricesTab(ctx: SettingsCtx, panel: HTMLElement): HTMLElement {
             row.appendChild(label);
             row.appendChild(priceInput(id, ctx));
             g.appendChild(row);
+        }
+
+        if (group !== PRICE_GROUPS[0]) {
+            const divider = el('hr', 'pyro-s-divider');
+            root.appendChild(divider);
         }
 
         root.appendChild(g);
@@ -432,13 +477,13 @@ function thresholdInput(
 
 function buildThresholdsTab(ctx: SettingsCtx): HTMLElement {
     const root = el('div');
-    const g = el('div', 'pyro-s-group');
+    const thresholdsGroup = el('div', 'pyro-s-group');
 
     const bandNote = el('p', 'pyro-s-section-note');
     bandNote.innerHTML = `${ICON_INFO}<span>Cards are color-coded by profit/nerve: <span style="color:${BAND_COLOR.negative}">negative</span> (≤ 0), <span style="color:${BAND_COLOR.low}">low</span>, <span style="color:${BAND_COLOR.good}">good</span>, <span style="color:${BAND_COLOR.excellent}">excellent</span>.</span>`;
-    g.appendChild(bandNote);
+    thresholdsGroup.appendChild(bandNote);
 
-    g.appendChild(thresholdInput(
+    thresholdsGroup.appendChild(thresholdInput(
         'Low → Good ($/N)',
         () => ctx.getThresholds().low,
         val => {
@@ -446,7 +491,7 @@ function buildThresholdsTab(ctx: SettingsCtx): HTMLElement {
             ctx.setThresholds({ low: val, good: Math.max(val, t.good) });
         },
     ));
-    g.appendChild(thresholdInput(
+    thresholdsGroup.appendChild(thresholdInput(
         'Good → Excellent ($/N)',
         () => ctx.getThresholds().good,
         val => {
@@ -454,8 +499,30 @@ function buildThresholdsTab(ctx: SettingsCtx): HTMLElement {
             ctx.setThresholds({ low: Math.min(t.low, val), good: val });
         },
     ));
+    root.appendChild(thresholdsGroup);
 
-    root.appendChild(g);
+    const divider = el('hr', 'pyro-s-divider');
+    root.appendChild(divider);
+
+    const tooltipGroup = el('div', 'pyro-s-group');
+    const tooltipTitle = el('div', 'pyro-s-group-title');
+    tooltipTitle.textContent = 'Tooltip';
+    tooltipGroup.appendChild(tooltipTitle);
+
+    const observedToggle = el('label', 'pyro-s-check-row');
+    const observedCheckbox = document.createElement('input');
+    observedCheckbox.type = 'checkbox';
+    observedCheckbox.checked = ctx.getShowObservedPayouts();
+    observedCheckbox.addEventListener('change', () => {
+        ctx.setShowObservedPayouts(observedCheckbox.checked);
+    });
+    const observedLabel = el('span');
+    observedLabel.textContent = 'Show observed payout and runs';
+    observedToggle.appendChild(observedCheckbox);
+    observedToggle.appendChild(observedLabel);
+    tooltipGroup.appendChild(observedToggle);
+
+    root.appendChild(tooltipGroup);
     return root;
 }
 
@@ -623,8 +690,14 @@ export function injectSettings(root: Element, ctx: SettingsCtx): void {
         btn.setAttribute('aria-expanded', String(!isOpen));
     });
 
+    panel.addEventListener('click', e => {
+        e.stopPropagation();
+    });
+
     document.addEventListener('click', e => {
-        if (!wrap.contains(e.target as Node)) {
+        const path = typeof e.composedPath === 'function' ? e.composedPath() : [];
+        const clickedInside = path.length > 0 ? path.includes(wrap) : wrap.contains(e.target as Node);
+        if (!clickedInside) {
             panel.classList.remove('is-open');
             btn.setAttribute('aria-expanded', 'false');
         }

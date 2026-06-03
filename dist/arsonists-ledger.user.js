@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        Torn Arsonist's Ledger
 // @namespace   https://greasyfork.org/en/users/942572-yukio-mizsima
-// @version     0.4.19
+// @version     0.4.20
 // @description Arson profit-per-nerve calculator and scenario guide for Torn's Crimes page
 // @icon        https://www.google.com/s2/favicons?sz=64&domain=torn.com
 // @author      Yukio [906148]
@@ -18,7 +18,7 @@
 "use strict";
 (() => {
   // src/data/scenarios-version.ts
-  var SCENARIOS_VERSION = "0710f1e1";
+  var SCENARIOS_VERSION = "ea5710c1";
 
   // src/data/catalog.ts
   var CATALOG_UPDATED = "2026-06-03";
@@ -2139,6 +2139,205 @@
     }
   ];
 
+  // src/data/scenario-observations.ts
+  var OBSERVED_PAYOUTS = {
+    "A Burnt Child Dreads the Fire": {
+      "min": 21e4,
+      "max": 21e4,
+      "runs": 1
+    },
+    "Back, Sack, and Crack": {
+      "min": 3e5,
+      "max": 3e5,
+      "runs": 1
+    },
+    "Blaze of Glory": {
+      "min": 2e5,
+      "max": 2e5,
+      "runs": 1
+    },
+    "Boxing Clever": {
+      "min": 3e5,
+      "max": 3e5,
+      "runs": 1
+    },
+    "Bright Spark": {
+      "min": 25e4,
+      "max": 25e4,
+      "runs": 1
+    },
+    "Burn After Screening": {
+      "min": 1e5,
+      "max": 1e5,
+      "runs": 1
+    },
+    "Cache and Burn": {
+      "min": 56e4,
+      "max": 56e4,
+      "runs": 1
+    },
+    "Cook it Rare": {
+      "min": 32e4,
+      "max": 32e4,
+      "runs": 1
+    },
+    "Crafty Devil": {
+      "min": 106e3,
+      "max": 106e3,
+      "runs": 1
+    },
+    "Daddy's Girl": {
+      "min": 21e4,
+      "max": 21e4,
+      "runs": 1
+    },
+    "Final Cut": {
+      "min": 14e4,
+      "max": 14e4,
+      "runs": 1
+    },
+    "Fire and Brimstone": {
+      "min": 14e4,
+      "max": 14e4,
+      "runs": 1
+    },
+    "Fire Burn and Cauldron Bubble": {
+      "min": 16e4,
+      "max": 16e4,
+      "runs": 1
+    },
+    "Fire Kills 99.9% of Bacteria": {
+      "min": 31e4,
+      "max": 31e4,
+      "runs": 1
+    },
+    "Hold Fire": {
+      "min": 1e5,
+      "max": 1e5,
+      "runs": 1
+    },
+    "Hot on the Trail": {
+      "min": 43e4,
+      "max": 43e4,
+      "runs": 1
+    },
+    "House Edge": {
+      "min": 16e4,
+      "max": 16e4,
+      "runs": 1
+    },
+    "Igniting Curiosity": {
+      "min": 21e4,
+      "max": 21e4,
+      "runs": 1
+    },
+    "Insert Coin to Continue": {
+      "min": 11e4,
+      "max": 11e4,
+      "runs": 1
+    },
+    "It's a Write Off": {
+      "min": 23e4,
+      "max": 23e4,
+      "runs": 1
+    },
+    "It's Not All White": {
+      "min": 18e4,
+      "max": 18e4,
+      "runs": 1
+    },
+    "Landmark Decision": {
+      "min": 3e5,
+      "max": 3e5,
+      "runs": 1
+    },
+    "Letter of the Law": {
+      "min": 41e4,
+      "max": 41e4,
+      "runs": 1
+    },
+    "Light Fingered": {
+      "min": 15e4,
+      "max": 15e4,
+      "runs": 1
+    },
+    "Lock, Stock, and Barrel": {
+      "min": 2e5,
+      "max": 2e5,
+      "runs": 1
+    },
+    "Mental Block": {
+      "min": 54e4,
+      "max": 54e4,
+      "runs": 1
+    },
+    "Milk Milk, Lemonade": {
+      "min": 14e4,
+      "max": 14e4,
+      "runs": 1
+    },
+    "Planted": {
+      "min": 12e4,
+      "max": 12e4,
+      "runs": 1
+    },
+    "Raze the Steaks": {
+      "min": 23e4,
+      "max": 23e4,
+      "runs": 1
+    },
+    "Ring of Fire": {
+      "min": 1e5,
+      "max": 1e5,
+      "runs": 1
+    },
+    "Set 'Em Straight": {
+      "min": 24e4,
+      "max": 24e4,
+      "runs": 1
+    },
+    "Short Shelf Life": {
+      "min": 4e5,
+      "max": 4e5,
+      "runs": 1
+    },
+    "Stick to the Script": {
+      "min": 17e4,
+      "max": 17e4,
+      "runs": 1
+    },
+    "Supermarket Sweep": {
+      "min": 26e4,
+      "max": 26e4,
+      "runs": 1
+    },
+    "The Fat is in the Fire": {
+      "min": 36e4,
+      "max": 36e4,
+      "runs": 1
+    },
+    "The Savage Beast": {
+      "min": 19e4,
+      "max": 19e4,
+      "runs": 1
+    },
+    "Unspilled Beans": {
+      "min": 14e4,
+      "max": 14e4,
+      "runs": 1
+    },
+    "Waist Not, Want Not": {
+      "min": 24e4,
+      "max": 24e4,
+      "runs": 1
+    },
+    "Wired for War": {
+      "min": 41e4,
+      "max": 41e4,
+      "runs": 1
+    }
+  };
+
   // src/userscripts/balaclava-tooltip/index.ts
   var API_NAME = "BalaclavaTooltip";
   var HOST_ID = "balaclava-tooltip-host";
@@ -3036,6 +3235,18 @@
     if (total >= 1e3) return `$${(total / 1e3).toFixed(1)}k`;
     return `$${total}`;
   }
+  function formatObservedPayout(amount) {
+    if (amount >= 1e6) return `$${(amount / 1e6).toFixed(2).replace(/\.00$/, "")}m`;
+    if (amount >= 1e3) return `$${(amount / 1e3).toFixed(0)}k`;
+    return `$${amount}`;
+  }
+  function observedPayoutLabel(scenario) {
+    const observed = scenario.observedPayout;
+    if (!observed || observed.runs <= 0) return null;
+    const payout = observed.min === observed.max ? formatObservedPayout(observed.max) : `${formatObservedPayout(observed.min)}\u2013${formatObservedPayout(observed.max)}`;
+    const runs = `${observed.runs} run${observed.runs === 1 ? "" : "s"}`;
+    return `${payout}, ${runs}`;
+  }
   function actionSection(label, items, prices, timing) {
     if (!items || items.length === 0) return null;
     const div = el("div", "pyro-tt-action");
@@ -3062,12 +3273,12 @@
     div.appendChild(valueEl);
     return div;
   }
-  function buildPrimaryBlock(ranked, prices, statsOnly = false) {
+  function buildPrimaryBlock(ranked, prices, statsOnly = false, options) {
     const frag = document.createDocumentFragment();
     const { Scenario, profitPerNerve, materialCost, baseNerve } = ranked;
     const header = el("div", "pyro-tt-header");
     const title = el("span", "pyro-tt-title");
-    title.textContent = "Profit per nerve";
+    title.textContent = "Per nerve";
     header.appendChild(title);
     const ppnEl = el("span", `pyro-tt-ppn pyro-tt-band--${ranked.band}`);
     ppnEl.textContent = formatPpn(profitPerNerve);
@@ -3083,6 +3294,14 @@
     stats.appendChild(row("Cost", `~$${(materialCost / 1e3).toFixed(1)}k`));
     stats.appendChild(row("Nerve", String(baseNerve)));
     frag.appendChild(stats);
+    if (options?.showObservedPayout !== false) {
+      const observed = observedPayoutLabel(Scenario);
+      if (observed) {
+        const observedRow = el("div", "pyro-tt-observed");
+        observedRow.textContent = `Observed ${observed}`;
+        frag.appendChild(observedRow);
+      }
+    }
     if (statsOnly) return frag;
     frag.appendChild(el("hr", "pyro-tt-divider"));
     const { evidence, place, stoke, stokeTime, dampen, dampenTime } = Scenario.actions;
@@ -3105,10 +3324,10 @@
     }
     return frag;
   }
-  function buildTooltipContent(ranked, prices, statsOnly = false) {
+  function buildTooltipContent(ranked, prices, statsOnly = false, options) {
     const root = el("div", "pyro-tt");
     if (!ranked) return root;
-    root.appendChild(buildPrimaryBlock(ranked, prices, statsOnly));
+    root.appendChild(buildPrimaryBlock(ranked, prices, statsOnly, options));
     return root;
   }
   function buildTooltipStyles() {
@@ -3154,6 +3373,11 @@
     display: flex;
     flex-direction: column;
     font-size: 11px;
+}
+.pyro-tt-observed {
+    margin: -2px 0 6px;
+    font-size: 10px;
+    color: oklch(66% 0 0);
 }
 .pyro-tt-label {
     color: oklch(66% 0 0);
@@ -3286,7 +3510,7 @@
   var ICON_CHECK = `<svg ${S} width="16" height="16" style="vertical-align:middle;margin-right:4px">${BLANK}<path d="M3 12a9 9 0 1 0 18 0a9 9 0 1 0 -18 0"/><path d="M9 12l2 2l4 -4"/></svg>`;
   var ICON_X = `<svg ${S} width="16" height="16" style="vertical-align:middle;margin-right:4px">${BLANK}${CIRCLE}<path d="M10 10l4 4m0 -4l-4 4"/></svg>`;
   var ICON_ARROW_RIGHT = `<svg ${S} width="12" height="12" style="vertical-align:middle;margin:0 2px">${BLANK}<path d="M5 12l14 0"/><path d="M15 16l4 -4"/><path d="M15 8l4 4"/></svg>`;
-  var ICON_FLAME = `<svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M12 10.941c2.333 -3.308 .167 -7.823 -1 -8.941c0 3.395 -2.235 5.299 -3.667 6.706c-1.43 1.408 -2.333 3.294 -2.333 5.588c0 3.704 3.134 6.706 7 6.706c3.866 0 7 -3.002 7 -6.706c0 -1.712 -1.232 -4.403 -2.333 -5.588c-2.084 3.353 -3.257 3.353 -4.667 2.235"/></svg>`;
+  var ICON_FLAME = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M12 10.941c2.333 -3.308 .167 -7.823 -1 -8.941c0 3.395 -2.235 5.299 -3.667 6.706c-1.43 1.408 -2.333 3.294 -2.333 5.588c0 3.704 3.134 6.706 7 6.706c3.866 0 7 -3.002 7 -6.706c0 -1.712 -1.232 -4.403 -2.333 -5.588c-2.084 3.353 -3.257 3.353 -4.667 2.235"/></svg>`;
   var ICON_EXTERNAL_LINK = `<svg ${S}>${BLANK}<path d="M12 6h-6a2 2 0 0 0 -2 2v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-6"/><path d="M11 13l9 -9"/><path d="M15 4h5v5"/></svg>`;
 
   // src/userscripts/arsonists-ledger/settings.ts
@@ -3304,18 +3528,24 @@
     style.id = "pyro-settings-styles";
     style.textContent = `
 .pyro-settings-wrap {
+    --pyro-tooltip-bg: oklch(24% 0 0);
+    --pyro-tooltip-border: oklch(30% 0 0);
+    --pyro-tooltip-shadow: oklch(12% 0.01 260 / 0.55);
+    --pyro-tooltip-radius: 8px;
+    --pyro-tooltip-arrow-size: 12px;
+    --pyro-settings-btn-size: 24px;
     position: relative;
     display: inline-flex;
     align-items: center;
     margin-left: 8px;
 }
 #pyro-settings-btn {
-    background: oklch(14% 0.012 285 / 0.7);
-    border: 1px solid oklch(30% 0.02 285);
-    color: oklch(52% 0.01 285);
+    padding: 4px 8px;
+    background: color-mix(in oklch, var(--pyro-tooltip-bg) 86%, black);
+    border: 1px solid var(--pyro-tooltip-border);
+    color: oklch(76% 0.006 95);
     cursor: pointer;
-    border-radius: 4px;
-    padding: 3px 7px;
+    border-radius: var(--pyro-tooltip-radius);
     font-size: 13px;
     line-height: 1;
     user-select: none;
@@ -3325,7 +3555,10 @@
     transition: transform 100ms ease-out, background 120ms ease-out, color 120ms ease-out;
 }
 @media (hover: hover) and (pointer: fine) {
-    #pyro-settings-btn:hover { background: oklch(20% 0.018 285); color: oklch(88% 0.006 285); }
+    #pyro-settings-btn:hover {
+        background: color-mix(in oklch, var(--pyro-tooltip-bg) 94%, white 6%);
+        color: oklch(96% 0.012 95);
+    }
 }
 #pyro-settings-btn:active { transform: scale(0.94); }
 #pyro-settings-panel {
@@ -3333,22 +3566,38 @@
     --pyro-manual-color: #7af;
     --pyro-db-color: oklch(46% 0.008 285);
     position: absolute;
-    top: calc(100% + 6px);
+    top: calc(100% + 10px);
     right: 0;
     z-index: 9999;
-    background: oklch(11% 0.012 285);
-    border: 1px solid oklch(24% 0.02 285);
-    border-radius: 6px;
+    background: var(--pyro-tooltip-bg);
+    color: oklch(96% 0.012 95);
+    border: 1px solid var(--pyro-tooltip-border);
+    border-radius: var(--pyro-tooltip-radius);
     min-width: 290px;
     max-width: 360px;
-    box-shadow: 0 16px 48px oklch(4% 0.015 285 / 0.8), inset 0 1px 0 oklch(32% 0.022 285 / 0.35);
-    overflow: hidden;
-    transform-origin: top right;
+    box-shadow: 0 2px 8px var(--pyro-tooltip-shadow);
+    overflow: visible;
+    transform-origin: calc(100% - (var(--pyro-settings-btn-size) / 2)) calc(0px - var(--pyro-tooltip-arrow-size));
     transform: scale(0.95);
     opacity: 0;
     visibility: hidden;
     pointer-events: none;
     transition: transform 150ms ease-out, opacity 150ms ease-out, visibility 0ms linear 150ms;
+}
+#pyro-settings-panel::before {
+    content: '';
+    position: absolute;
+    top: calc(var(--pyro-tooltip-arrow-size) / -2);
+    right: calc((var(--pyro-settings-btn-size) / 2) - (var(--pyro-tooltip-arrow-size) / 2));
+    width: var(--pyro-tooltip-arrow-size);
+    height: var(--pyro-tooltip-arrow-size);
+    background: var(--pyro-tooltip-bg);
+    border: 1px solid var(--pyro-tooltip-border);
+    transform: rotate(45deg);
+    box-sizing: border-box;
+    border-right: none;
+    border-bottom: none;
+    border-radius: 3px;
 }
 #pyro-settings-panel.is-open {
     transform: scale(1);
@@ -3360,48 +3609,39 @@
 #pyro-settings-panel:not(.is-open) {
     transition: transform 100ms ease-out, opacity 100ms ease-out, visibility 0ms linear 100ms;
 }
-.pyro-tab-bar { display: flex; background: oklch(8.5% 0.01 285); border-bottom: 1px solid oklch(22% 0.018 285); }
+.pyro-tab-bar { display: flex; border-bottom: 1px solid var(--pyro-tooltip-border); }
 .pyro-tab {
     flex: 1;
     background: none;
     border: none;
-    border-bottom: 2px solid transparent;
-    color: oklch(56% 0.01 285);
+    border-bottom: 1px solid transparent;
+    color: oklch(70% 0.008 95 / 0.8);
     cursor: pointer;
     padding: 8px 2px;
     font: inherit;
-    font-size: 12px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
+    font-size: 14px;
     transition: color 120ms ease-out;
 }
 @media (hover: hover) and (pointer: fine) {
-    .pyro-tab:hover { color: oklch(62% 0.01 285); }
+    .pyro-tab:hover { color: oklch(96% 0.012 95); }
 }
-.pyro-tab:active { transform: scale(0.97); }
 .pyro-tab.active {
-    color: oklch(92% 0.008 285);
+    color: oklch(96% 0.012 95);
     border-bottom-color: ${BAND_COLOR.excellent};
-    background: oklch(13% 0.014 285);
+    background: linear-gradient(0deg, color-mix(in oklch, ${BAND_COLOR.excellent} 20%, transparent 80%), transparent 55%);
 }
 .pyro-tab-content { padding: 10px; max-height: 380px; overflow-y: auto; }
+.pyro-tab-content>div { display: flex; flex-direction: column; gap: 14px; }
 .pyro-tab-content::-webkit-scrollbar { width: 3px; }
 .pyro-tab-content::-webkit-scrollbar-track { background: transparent; }
-.pyro-tab-content::-webkit-scrollbar-thumb { background: oklch(26% 0.016 285); border-radius: 2px; }
-.pyro-s-group { margin-bottom: 12px; }
-.pyro-s-group:last-child { margin-bottom: 0; }
+.pyro-tab-content::-webkit-scrollbar-thumb { background: oklch(57% 0.008 285); border-radius: 2px; }
+.pyro-s-group { display: flex; flex-direction: column; gap: 4px; }
 .pyro-s-group-title {
-    font-size: 10px;
-    font-weight: 700;
+    font-size: 14px;
     text-transform: uppercase;
-    letter-spacing: 0.08em;
     color: oklch(58% 0.012 285);
-    margin-bottom: 6px;
-    padding-bottom: 4px;
-    border-bottom: 1px solid oklch(20% 0.014 285);
 }
-.pyro-s-row { display: flex; align-items: center; gap: 6px; margin-bottom: 4px; }
+.pyro-s-row { display: flex; align-items: center; gap: 6px; }
 .pyro-s-label {
     flex: 1;
     font-size: 11px;
@@ -3428,7 +3668,7 @@
 .pyro-s-input:focus-visible { outline: none; border-color: ${BAND_COLOR.excellent}; }
 .pyro-s-input.from-api   { border-color: #4a4; color: #6d6; }
 .pyro-s-input.overridden { border-color: #48a; color: #7af; }
-.pyro-s-divider { border: none; border-top: 1px solid oklch(20% 0.014 285); margin: 8px 0; }
+.pyro-s-divider { border: none; border-top: 1px solid var(--pyro-tooltip-border); margin: 8px 0; }
 .pyro-s-key-row { display: flex; gap: 6px; margin-bottom: 6px; }
 .pyro-s-key-input {
     flex: 1;
@@ -3461,7 +3701,6 @@
 .pyro-s-btn:disabled { opacity: 0.28; cursor: default; }
 .pyro-s-status {
     font-size: 10px;
-    margin-bottom: 8px;
     min-height: 13px;
     color: oklch(38% 0.008 285);
     display: flex;
@@ -3472,7 +3711,7 @@
 .pyro-s-status.ok  { color: ${BAND_COLOR.good}; }
 .pyro-s-status.err { color: #c66; }
 .pyro-s-refresh-row { display: flex; align-items: center; gap: 8px; }
-.pyro-s-timestamp { font-size: 10px; color: oklch(36% 0.007 285); }
+.pyro-s-timestamp { font-size: 10px; color: oklch(57% 0.008 285); }
 .pyro-s-check-row {
     display: flex;
     align-items: center;
@@ -3504,6 +3743,8 @@
     const input = el("input", "pyro-s-input");
     input.type = "number";
     input.min = "0";
+    let initialValue = "";
+    let isDirty = false;
     const refresh = () => {
       const manual = ctx.getManualPrices()[id];
       const api = ctx.getApiPrices()[id];
@@ -3519,9 +3760,15 @@
         input.placeholder = String(db);
         applyPriceStyle(input, "db");
       }
+      initialValue = input.value;
+      isDirty = false;
     };
     refresh();
     const commit = () => {
+      if (!isDirty) {
+        refresh();
+        return;
+      }
       const raw = input.value.trim();
       if (raw === "") {
         ctx.clearManualPrice(id);
@@ -3531,6 +3778,13 @@
       }
       refresh();
     };
+    input.addEventListener("focus", () => {
+      initialValue = input.value;
+      isDirty = false;
+    });
+    input.addEventListener("input", () => {
+      isDirty = input.value !== initialValue;
+    });
     input.addEventListener("blur", commit);
     input.addEventListener("keydown", (e) => {
       if (e.key === "Enter") input.blur();
@@ -3538,9 +3792,9 @@
     return input;
   }
   var PRICE_GROUPS = [
-    { title: "Liquid fuels", ids: ["gasoline", "diesel", "kerosene"] },
-    { title: "Solid fuels", ids: ["magnesium", "thermite", "potassium_nitrate"] },
-    { title: "Gaseous fuels", ids: ["oxygen", "methane", "hydrogen"] },
+    { title: "Liquids", ids: ["gasoline", "diesel", "kerosene"] },
+    { title: "Solids", ids: ["magnesium", "thermite", "potassium_nitrate"] },
+    { title: "Gases", ids: ["oxygen", "methane", "hydrogen"] },
     {
       title: "Evidence",
       ids: Object.values(CATALOG).filter((r) => r.kind === "evidence").sort((a, b) => a.name.localeCompare(b.name)).map((r) => r.id)
@@ -3548,6 +3802,8 @@
   ];
   function buildPricesTab(ctx, panel) {
     const root = el("div");
+    const hasManualOverrides = Object.keys(ctx.getManualPrices()).length > 0;
+    const hasApiPrices = ctx.getApiLastRefresh() > 0 || Object.keys(ctx.getApiPrices()).length > 0;
     const actionGroup = el("div", "pyro-s-group");
     const actionRow = el("div", "pyro-s-refresh-row");
     const refreshBtn = el("button", "pyro-s-btn");
@@ -3555,7 +3811,7 @@
     if (!ctx.getApiKey()) refreshBtn.disabled = true;
     const resetBtn = el("button", "pyro-s-btn");
     resetBtn.textContent = "Reset";
-    if (!ctx.getApiLastRefresh()) resetBtn.disabled = true;
+    if (!hasManualOverrides && !hasApiPrices) resetBtn.disabled = true;
     const tsEl = el("span", "pyro-s-timestamp");
     const ts = ctx.getApiLastRefresh();
     tsEl.textContent = ts ? `Fetched: ${formatTimestamp(ts)}` : `DB: ${CATALOG_UPDATED}`;
@@ -3582,8 +3838,12 @@
         actionStatus.className = "pyro-s-status err";
       }
     });
-    resetBtn.addEventListener("click", () => {
+    resetBtn.addEventListener("click", (event) => {
+      event.stopPropagation();
+      ctx.clearManualPrices();
       ctx.clearApiPrices();
+      actionStatus.textContent = "Reset to bundled prices";
+      actionStatus.className = "pyro-s-status";
       rerenderTab(panel, "prices", ctx);
     });
     for (const group of PRICE_GROUPS) {
@@ -3601,6 +3861,10 @@
         row2.appendChild(label);
         row2.appendChild(priceInput(id, ctx));
         g.appendChild(row2);
+      }
+      if (group !== PRICE_GROUPS[0]) {
+        const divider = el("hr", "pyro-s-divider");
+        root.appendChild(divider);
       }
       root.appendChild(g);
     }
@@ -3638,11 +3902,11 @@
   }
   function buildThresholdsTab(ctx) {
     const root = el("div");
-    const g = el("div", "pyro-s-group");
+    const thresholdsGroup = el("div", "pyro-s-group");
     const bandNote = el("p", "pyro-s-section-note");
     bandNote.innerHTML = `${ICON_INFO}<span>Cards are color-coded by profit/nerve: <span style="color:${BAND_COLOR.negative}">negative</span> (\u2264 0), <span style="color:${BAND_COLOR.low}">low</span>, <span style="color:${BAND_COLOR.good}">good</span>, <span style="color:${BAND_COLOR.excellent}">excellent</span>.</span>`;
-    g.appendChild(bandNote);
-    g.appendChild(thresholdInput(
+    thresholdsGroup.appendChild(bandNote);
+    thresholdsGroup.appendChild(thresholdInput(
       "Low \u2192 Good ($/N)",
       () => ctx.getThresholds().low,
       (val) => {
@@ -3650,7 +3914,7 @@
         ctx.setThresholds({ low: val, good: Math.max(val, t.good) });
       }
     ));
-    g.appendChild(thresholdInput(
+    thresholdsGroup.appendChild(thresholdInput(
       "Good \u2192 Excellent ($/N)",
       () => ctx.getThresholds().good,
       (val) => {
@@ -3658,7 +3922,26 @@
         ctx.setThresholds({ low: Math.min(t.low, val), good: val });
       }
     ));
-    root.appendChild(g);
+    root.appendChild(thresholdsGroup);
+    const divider = el("hr", "pyro-s-divider");
+    root.appendChild(divider);
+    const tooltipGroup = el("div", "pyro-s-group");
+    const tooltipTitle = el("div", "pyro-s-group-title");
+    tooltipTitle.textContent = "Tooltip";
+    tooltipGroup.appendChild(tooltipTitle);
+    const observedToggle = el("label", "pyro-s-check-row");
+    const observedCheckbox = document.createElement("input");
+    observedCheckbox.type = "checkbox";
+    observedCheckbox.checked = ctx.getShowObservedPayouts();
+    observedCheckbox.addEventListener("change", () => {
+      ctx.setShowObservedPayouts(observedCheckbox.checked);
+    });
+    const observedLabel = el("span");
+    observedLabel.textContent = "Show observed payout and runs";
+    observedToggle.appendChild(observedCheckbox);
+    observedToggle.appendChild(observedLabel);
+    tooltipGroup.appendChild(observedToggle);
+    root.appendChild(tooltipGroup);
     return root;
   }
   function buildApiTab(ctx) {
@@ -3792,8 +4075,13 @@
       panel.classList.toggle("is-open", !isOpen);
       btn.setAttribute("aria-expanded", String(!isOpen));
     });
+    panel.addEventListener("click", (e) => {
+      e.stopPropagation();
+    });
     document.addEventListener("click", (e) => {
-      if (!wrap.contains(e.target)) {
+      const path = typeof e.composedPath === "function" ? e.composedPath() : [];
+      const clickedInside = path.length > 0 ? path.includes(wrap) : wrap.contains(e.target);
+      if (!clickedInside) {
         panel.classList.remove("is-open");
         btn.setAttribute("aria-expanded", "false");
       }
@@ -3805,8 +4093,10 @@
   var KEY_API_PRICES = "pyroLedger.v1.apiPrices";
   var KEY_API_KEY = "pyroLedger.v1.apiKey";
   var KEY_API_REFRESH = "pyroLedger.v1.apiRefresh";
+  var KEY_CATALOG_UPDATED = "pyroLedger.v1.catalogUpdated";
   var KEY_THRESHOLDS = "pyroLedger.v1.thresholds";
   var KEY_ACTIVE_TAB = "pyroLedger.v1.activeTab";
+  var KEY_SHOW_OBSERVED_PAYOUTS = "pyroLedger.v1.showObservedPayouts";
   function store_get(key, def = "") {
     if (typeof GM_getValue !== "undefined") return GM_getValue(key, def);
     return localStorage.getItem(key) ?? def;
@@ -3848,6 +4138,7 @@
   var apiLastRefresh = 0;
   var thresholds = { ...DEFAULT_THRESHOLDS };
   var activeTab = "prices";
+  var showObservedPayouts = true;
   var visibleMobileSection = null;
   function effectivePrices() {
     return { ...apiPrices, ...manualPrices };
@@ -3856,6 +4147,7 @@
     apiKey = store_get(KEY_API_KEY, "");
     activeTab = store_get(KEY_ACTIVE_TAB, "prices");
     apiLastRefresh = parseInt(store_get(KEY_API_REFRESH, "0"), 10) || 0;
+    showObservedPayouts = store_get(KEY_SHOW_OBSERVED_PAYOUTS, "1") !== "0";
     try {
       manualPrices = JSON.parse(store_get(KEY_MANUAL_PRICES, "{}"));
     } catch {
@@ -3873,6 +4165,7 @@
       }
     } catch {
     }
+    syncStoredPricesToCatalog();
   }
   function setManualPrice(id, price) {
     manualPrices = { ...manualPrices, [id]: price };
@@ -3891,11 +4184,17 @@
     store_set(KEY_THRESHOLDS, JSON.stringify(thresholds));
     resetScans();
   }
+  function setShowObservedPayoutsEnabled(show) {
+    showObservedPayouts = show;
+    store_set(KEY_SHOW_OBSERVED_PAYOUTS, show ? "1" : "0");
+    resetScans();
+  }
   function setApiPrices(prices, timestamp) {
     apiPrices = prices;
     apiLastRefresh = timestamp;
     store_set(KEY_API_PRICES, JSON.stringify(apiPrices));
     store_set(KEY_API_REFRESH, String(apiLastRefresh));
+    store_set(KEY_CATALOG_UPDATED, CATALOG_UPDATED);
     resetScans();
   }
   function clearApiPrices() {
@@ -3909,16 +4208,40 @@
     activeTab = tab;
     store_set(KEY_ACTIVE_TAB, activeTab);
   }
+  function clearManualPrices() {
+    manualPrices = {};
+    store_set(KEY_MANUAL_PRICES, JSON.stringify(manualPrices));
+    resetScans();
+  }
+  function catalogUpdatedTimestamp() {
+    return Date.parse(`${CATALOG_UPDATED}T00:00:00Z`);
+  }
+  function syncStoredPricesToCatalog() {
+    const storedCatalogUpdated = store_get(KEY_CATALOG_UPDATED, "");
+    if (storedCatalogUpdated === CATALOG_UPDATED) return;
+    if (Object.keys(apiPrices).length > 0 && apiLastRefresh < catalogUpdatedTimestamp()) {
+      apiPrices = {};
+      apiLastRefresh = 0;
+      store_set(KEY_API_PRICES, JSON.stringify(apiPrices));
+      store_set(KEY_API_REFRESH, "0");
+    }
+    store_set(KEY_CATALOG_UPDATED, CATALOG_UPDATED);
+  }
   var KEY_SCENARIOS_CACHE = `pyroLedger.${SCENARIOS_VERSION}.scenariosCache`;
   var KEY_SCENARIOS_TS = `pyroLedger.${SCENARIOS_VERSION}.scenariosTs`;
   var SCENARIOS_URL = "https://balaclava.app/arsonists-ledger/scenarios.json";
   var SCENARIOS_TTL_MS = 24 * 60 * 60 * 1e3;
   var scenarioIndex = /* @__PURE__ */ new Map();
+  function withObservedPayout(scenario) {
+    const observedPayout = scenario.observedPayout ?? OBSERVED_PAYOUTS[scenario.scenarioName];
+    return observedPayout ? { ...scenario, observedPayout } : scenario;
+  }
   function populateScenarioIndex(scenarios) {
     scenarioIndex.clear();
     for (const s of scenarios) {
+      const scenario = withObservedPayout(s);
       const key = s.scenarioName.toLowerCase();
-      if (!scenarioIndex.has(key)) scenarioIndex.set(key, s);
+      if (!scenarioIndex.has(key)) scenarioIndex.set(key, scenario);
     }
   }
   function scheduleScenarioRefresh() {
@@ -4020,7 +4343,7 @@
     if (crimeImage) injectInfoBadge(crimeImage);
     wireTooltip(section, hoverTarget, () => {
       const statsOnly = isPendingCollect(section) && !ranked.Scenario.needsVerification;
-      return buildTooltipContentWithStyles(ranked, effectivePrices(), statsOnly);
+      return buildTooltipContentWithStyles(ranked, effectivePrices(), statsOnly, showObservedPayouts);
     });
   }
   function isPendingCollect(section) {
@@ -4060,8 +4383,8 @@
       }
     }, { passive: true });
   }
-  function buildTooltipContentWithStyles(ranked, prices, statsOnly = false) {
-    const node = buildTooltipContent(ranked, prices, statsOnly);
+  function buildTooltipContentWithStyles(ranked, prices, statsOnly = false, showObservedPayout = true) {
+    const node = buildTooltipContent(ranked, prices, statsOnly, { showObservedPayout });
     const style = el("style");
     style.textContent = buildTooltipStyles();
     node.insertBefore(style, node.firstChild);
@@ -4103,13 +4426,16 @@
     getApiKey: () => apiKey,
     getApiLastRefresh: () => apiLastRefresh,
     getActiveTab: () => activeTab,
+    getShowObservedPayouts: () => showObservedPayouts,
     setManualPrice,
+    clearManualPrices,
     clearManualPrice,
     setThresholds,
     setApiPrices,
     clearApiPrices,
     setApiKey,
-    setActiveTab
+    setActiveTab,
+    setShowObservedPayouts: setShowObservedPayoutsEnabled
   };
   var reInjectTimer = null;
   function scheduleInjectSettings() {

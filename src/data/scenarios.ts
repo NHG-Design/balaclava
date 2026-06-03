@@ -20,11 +20,19 @@ export interface ScenarioActions {
     dampenTime?: 'early' | 'late';
 }
 
+export interface ObservedPayout {
+    min: number;
+    max: number;
+    runs: number;
+}
+
 export interface Scenario {
     /** Exact scenario name as it appears on the Torn Arson crimes page. */
     scenarioName: string;
     /** Base listed payout in Torn dollars (ignoring ±10% variance). */
     payout: number;
+    /** Optional observed payout stats from the latest committed audit report. */
+    observedPayout?: ObservedPayout;
     actions: ScenarioActions;
     notes?: string;
     /**

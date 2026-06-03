@@ -1,5 +1,6 @@
 import { SCENARIOS_VERSION } from '../../data/scenarios-version.js';
 import { SCENARIOS, type Scenario } from '../../data/scenarios.js';
+import { OBSERVED_PAYOUTS } from '../../data/scenario-observations.js';
 import '../balaclava-tooltip/index.js';
 import {
     rankForScenario,
@@ -15,7 +16,7 @@ import { BAND_COLOR } from './colors.js';
 import { injectSettings, type SettingsCtx } from './settings.js';
 import { el } from './dom.js';
 import { ICON_INFO } from './icons.js';
-import type { ResourceId } from '../../data/catalog.js';
+import { CATALOG_UPDATED, type ResourceId } from '../../data/catalog.js';
 
 // ---------------------------------------------------------------------------
 // Storage keys
@@ -24,8 +25,10 @@ const KEY_MANUAL_PRICES  = 'pyroLedger.v1.manualPrices';
 const KEY_API_PRICES     = 'pyroLedger.v1.apiPrices';
 const KEY_API_KEY        = 'pyroLedger.v1.apiKey';
 const KEY_API_REFRESH    = 'pyroLedger.v1.apiRefresh';
+const KEY_CATALOG_UPDATED = 'pyroLedger.v1.catalogUpdated';
 const KEY_THRESHOLDS     = 'pyroLedger.v1.thresholds';
 const KEY_ACTIVE_TAB     = 'pyroLedger.v1.activeTab';
+const KEY_SHOW_OBSERVED_PAYOUTS = 'pyroLedger.v1.showObservedPayouts';
 
 // ---------------------------------------------------------------------------
 // Minimal GM storage shim (falls back to localStorage in dev/non-GM contexts)
@@ -93,6 +96,7 @@ let apiKey = '';
 let apiLastRefresh = 0;
 let thresholds: ProfitThresholds = { ...DEFAULT_THRESHOLDS };
 let activeTab = 'prices';
+let showObservedPayouts = true;
 let visibleMobileSection: HTMLElement | null = null;
 
 function effectivePrices(): PriceMap {
@@ -103,6 +107,7 @@ function loadState(): void {
     apiKey        = store_get(KEY_API_KEY, '');
     activeTab     = store_get(KEY_ACTIVE_TAB, 'prices');
     apiLastRefresh = parseInt(store_get(KEY_API_REFRESH, '0'), 10) || 0;
+    showObservedPayouts = store_get(KEY_SHOW_OBSERVED_PAYOUTS, '1') !== '0';
 
     try { manualPrices = JSON.parse(store_get(KEY_MANUAL_PRICES, '{}')) as PriceMap; }
     catch { manualPrices = {}; }
@@ -116,6 +121,8 @@ function loadState(): void {
             thresholds = { low: saved.low, good: saved.good };
         }
     } catch { /* use defaults */ }
+
+    syncStoredPricesToCatalog();
 }
 
 // ---------------------------------------------------------------------------
@@ -141,11 +148,18 @@ function setThresholds(t: ProfitThresholds): void {
     resetScans();
 }
 
+function setShowObservedPayoutsEnabled(show: boolean): void {
+    showObservedPayouts = show;
+    store_set(KEY_SHOW_OBSERVED_PAYOUTS, show ? '1' : '0');
+    resetScans();
+}
+
 function setApiPrices(prices: PriceMap, timestamp: number): void {
     apiPrices = prices;
     apiLastRefresh = timestamp;
     store_set(KEY_API_PRICES, JSON.stringify(apiPrices));
     store_set(KEY_API_REFRESH, String(apiLastRefresh));
+    store_set(KEY_CATALOG_UPDATED, CATALOG_UPDATED);
     resetScans();
 }
 
@@ -163,6 +177,30 @@ function setActiveTab(tab: string): void {
     store_set(KEY_ACTIVE_TAB, activeTab);
 }
 
+function clearManualPrices(): void {
+    manualPrices = {};
+    store_set(KEY_MANUAL_PRICES, JSON.stringify(manualPrices));
+    resetScans();
+}
+
+function catalogUpdatedTimestamp(): number {
+    return Date.parse(`${CATALOG_UPDATED}T00:00:00Z`);
+}
+
+function syncStoredPricesToCatalog(): void {
+    const storedCatalogUpdated = store_get(KEY_CATALOG_UPDATED, '');
+    if (storedCatalogUpdated === CATALOG_UPDATED) return;
+
+    if (Object.keys(apiPrices).length > 0 && apiLastRefresh < catalogUpdatedTimestamp()) {
+        apiPrices = {};
+        apiLastRefresh = 0;
+        store_set(KEY_API_PRICES, JSON.stringify(apiPrices));
+        store_set(KEY_API_REFRESH, '0');
+    }
+
+    store_set(KEY_CATALOG_UPDATED, CATALOG_UPDATED);
+}
+
 // ---------------------------------------------------------------------------
 // Scenario index: scenarioName (lowercase) → Scenario
 // ---------------------------------------------------------------------------
@@ -173,11 +211,17 @@ const SCENARIOS_TTL_MS    = 24 * 60 * 60 * 1000;
 
 const scenarioIndex = new Map<string, Scenario>();
 
+function withObservedPayout(scenario: Scenario): Scenario {
+    const observedPayout = scenario.observedPayout ?? OBSERVED_PAYOUTS[scenario.scenarioName];
+    return observedPayout ? { ...scenario, observedPayout } : scenario;
+}
+
 function populateScenarioIndex(scenarios: Scenario[]): void {
     scenarioIndex.clear();
     for (const s of scenarios) {
+        const scenario = withObservedPayout(s);
         const key = s.scenarioName.toLowerCase();
-        if (!scenarioIndex.has(key)) scenarioIndex.set(key, s);
+        if (!scenarioIndex.has(key)) scenarioIndex.set(key, scenario);
     }
 }
 
@@ -291,7 +335,7 @@ function applyToSection(section: HTMLElement, ranked: RankedScenario | null): vo
     if (crimeImage) injectInfoBadge(crimeImage);
     wireTooltip(section, hoverTarget, () => {
         const statsOnly = isPendingCollect(section) && !ranked.Scenario.needsVerification;
-        return buildTooltipContentWithStyles(ranked, effectivePrices(), statsOnly);
+        return buildTooltipContentWithStyles(ranked, effectivePrices(), statsOnly, showObservedPayouts);
     });
 }
 
@@ -339,8 +383,8 @@ function wireTooltip(section: HTMLElement, hoverTarget: HTMLElement, getContent:
     }, { passive: true });
 }
 
-function buildTooltipContentWithStyles(ranked: RankedScenario | null, prices: PriceMap, statsOnly = false): HTMLElement {
-    const node = buildTooltipContent(ranked, prices, statsOnly);
+function buildTooltipContentWithStyles(ranked: RankedScenario | null, prices: PriceMap, statsOnly = false, showObservedPayout = true): HTMLElement {
+    const node = buildTooltipContent(ranked, prices, statsOnly, { showObservedPayout });
     const style = el('style');
     style.textContent = buildTooltipStyles();
     node.insertBefore(style, node.firstChild);
@@ -394,14 +438,17 @@ const settingsCtx: SettingsCtx = {
     getApiKey:         () => apiKey,
     getApiLastRefresh: () => apiLastRefresh,
     getActiveTab:      () => activeTab,
+    getShowObservedPayouts: () => showObservedPayouts,
 
     setManualPrice,
+    clearManualPrices,
     clearManualPrice,
     setThresholds,
     setApiPrices,
     clearApiPrices,
     setApiKey,
     setActiveTab,
+    setShowObservedPayouts: setShowObservedPayoutsEnabled,
 };
 
 // ---------------------------------------------------------------------------

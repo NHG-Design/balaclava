@@ -28,6 +28,24 @@ function formatCost(total: number): string {
     return `$${total}`;
 }
 
+function formatObservedPayout(amount: number): string {
+    if (amount >= 1_000_000) return `$${(amount / 1_000_000).toFixed(2).replace(/\.00$/, '')}m`;
+    if (amount >= 1_000) return `$${(amount / 1_000).toFixed(0)}k`;
+    return `$${amount}`;
+}
+
+function observedPayoutLabel(scenario: Scenario): string | null {
+    const observed = scenario.observedPayout;
+    if (!observed || observed.runs <= 0) return null;
+
+    const payout =
+        observed.min === observed.max
+            ? formatObservedPayout(observed.max)
+            : `${formatObservedPayout(observed.min)}–${formatObservedPayout(observed.max)}`;
+    const runs = `${observed.runs} run${observed.runs === 1 ? '' : 's'}`;
+    return `${payout}, ${runs}`;
+}
+
 function actionSection(label: string, items: ActionItem[] | undefined, prices: PriceMap, timing?: 'early' | 'late'): HTMLElement | null {
     if (!items || items.length === 0) return null;
     const div = el('div', 'pyro-tt-action');
@@ -57,13 +75,18 @@ function actionSection(label: string, items: ActionItem[] | undefined, prices: P
     return div;
 }
 
-function buildPrimaryBlock(ranked: RankedScenario, prices: PriceMap, statsOnly = false): DocumentFragment {
+function buildPrimaryBlock(
+    ranked: RankedScenario,
+    prices: PriceMap,
+    statsOnly = false,
+    options?: { showObservedPayout?: boolean },
+): DocumentFragment {
     const frag = document.createDocumentFragment();
     const { Scenario, profitPerNerve, materialCost, baseNerve } = ranked;
 
     const header = el('div', 'pyro-tt-header');
     const title = el('span', 'pyro-tt-title');
-    title.textContent = 'Profit per nerve';
+    title.textContent = 'Per nerve';
     header.appendChild(title);
     const ppnEl = el('span', `pyro-tt-ppn pyro-tt-band--${ranked.band}`);
     ppnEl.textContent = formatPpn(profitPerNerve);
@@ -80,6 +103,15 @@ function buildPrimaryBlock(ranked: RankedScenario, prices: PriceMap, statsOnly =
     stats.appendChild(row('Cost',   `~$${(materialCost / 1000).toFixed(1)}k`));
     stats.appendChild(row('Nerve',  String(baseNerve)));
     frag.appendChild(stats);
+
+    if (options?.showObservedPayout !== false) {
+        const observed = observedPayoutLabel(Scenario);
+        if (observed) {
+            const observedRow = el('div', 'pyro-tt-observed');
+            observedRow.textContent = `Observed ${observed}`;
+            frag.appendChild(observedRow);
+        }
+    }
 
     if (statsOnly) return frag;
 
@@ -108,10 +140,15 @@ function buildPrimaryBlock(ranked: RankedScenario, prices: PriceMap, statsOnly =
     return frag;
 }
 
-export function buildTooltipContent(ranked: RankedScenario | null, prices: PriceMap, statsOnly = false): HTMLElement {
+export function buildTooltipContent(
+    ranked: RankedScenario | null,
+    prices: PriceMap,
+    statsOnly = false,
+    options?: { showObservedPayout?: boolean },
+): HTMLElement {
     const root = el('div', 'pyro-tt');
     if (!ranked) return root;
-    root.appendChild(buildPrimaryBlock(ranked, prices, statsOnly));
+    root.appendChild(buildPrimaryBlock(ranked, prices, statsOnly, options));
     return root;
 }
 
@@ -158,6 +195,11 @@ export function buildTooltipStyles(): string {
     display: flex;
     flex-direction: column;
     font-size: 11px;
+}
+.pyro-tt-observed {
+    margin: -2px 0 6px;
+    font-size: 10px;
+    color: oklch(66% 0 0);
 }
 .pyro-tt-label {
     color: oklch(66% 0 0);
