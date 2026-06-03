@@ -1,0 +1,1645 @@
+{
+  "generatedAtUtc": "2026-06-03T16:47:35.447Z",
+  "reportWindowDays": 30,
+  "scenarios": [
+    {
+      "bestObservedConsumables": [
+        "Hydrogen Tank x1 (place)",
+        "Hydrogen Tank x1 (stoke)"
+      ],
+      "bestObservedPayout": 210000,
+      "bestObservedProfitPerNerve": 9090.9,
+      "currentConsumables": [
+        "Hydrogen Tank x1 (place)",
+        "Hydrogen Tank x1 (stoke)"
+      ],
+      "currentPayout": 235000,
+      "currentProfitPerNerve": 10340.9,
+      "evidenceSummary": {
+        "collectOnlyRuns": 0,
+        "completeRuns": 1,
+        "partialRuns": 0
+      },
+      "locations": [
+        "Warehouse"
+      ],
+      "matchedCurrentRecipe": true,
+      "observedRunCount": 1,
+      "payoutRange": {
+        "max": 210000,
+        "min": 210000
+      },
+      "recommendedUpdates": [
+        "none"
+      ],
+      "scenarioName": "A Burnt Child Dreads the Fire",
+      "supportingRuns": [
+        {
+          "collectedAtUtc": "2026-06-03T14:37:56.000Z",
+          "consumables": [
+            "Hydrogen Tank x1 (place)",
+            "Hydrogen Tank x1 (stoke)"
+          ],
+          "evidenceStatus": "complete",
+          "itemUpdateReason": "matches_current",
+          "location": "Warehouse",
+          "matchedCurrentRecipe": true,
+          "payout": 210000,
+          "profitPerNerve": 9090.9,
+          "recipeCompleteForUpdate": true
+        }
+      ]
+    },
+    {
+      "bestObservedConsumables": null,
+      "bestObservedPayout": 300000,
+      "bestObservedProfitPerNerve": null,
+      "currentConsumables": [
+        "Hydrogen Tank x2 (place)"
+      ],
+      "currentPayout": 300000,
+      "currentProfitPerNerve": 13590.9,
+      "evidenceSummary": {
+        "collectOnlyRuns": 1,
+        "completeRuns": 0,
+        "partialRuns": 0
+      },
+      "locations": [
+        "Chiropractors Office"
+      ],
+      "matchedCurrentRecipe": null,
+      "observedRunCount": 1,
+      "payoutRange": {
+        "max": 300000,
+        "min": 300000
+      },
+      "recommendedUpdates": [
+        "none"
+      ],
+      "scenarioName": "Back, Sack, and Crack",
+      "supportingRuns": [
+        {
+          "collectedAtUtc": "2026-06-03T14:37:45.000Z",
+          "consumables": [],
+          "evidenceStatus": "collect_only",
+          "itemUpdateReason": "insufficient_evidence",
+          "location": "Chiropractors Office",
+          "matchedCurrentRecipe": null,
+          "payout": 300000,
+          "profitPerNerve": null,
+          "recipeCompleteForUpdate": false
+        }
+      ]
+    },
+    {
+      "bestObservedConsumables": null,
+      "bestObservedPayout": 200000,
+      "bestObservedProfitPerNerve": null,
+      "currentConsumables": [
+        "Gasoline x2 (place)",
+        "Toothbrush x1 (evidence)"
+      ],
+      "currentPayout": 200000,
+      "currentProfitPerNerve": 6536.333333333333,
+      "evidenceSummary": {
+        "collectOnlyRuns": 1,
+        "completeRuns": 0,
+        "partialRuns": 0
+      },
+      "locations": [
+        "Toy Shop"
+      ],
+      "matchedCurrentRecipe": null,
+      "observedRunCount": 1,
+      "payoutRange": {
+        "max": 200000,
+        "min": 200000
+      },
+      "recommendedUpdates": [
+        "none"
+      ],
+      "scenarioName": "Blaze of Glory",
+      "supportingRuns": [
+        {
+          "collectedAtUtc": "2026-06-03T14:36:35.000Z",
+          "consumables": [],
+          "evidenceStatus": "collect_only",
+          "itemUpdateReason": "insufficient_evidence",
+          "location": "Toy Shop",
+          "matchedCurrentRecipe": null,
+          "payout": 200000,
+          "profitPerNerve": null,
+          "recipeCompleteForUpdate": false
+        }
+      ]
+    },
+    {
+      "bestObservedConsumables": null,
+      "bestObservedPayout": 300000,
+      "bestObservedProfitPerNerve": null,
+      "currentConsumables": [
+        "Gasoline x2 (place)"
+      ],
+      "currentPayout": 325000,
+      "currentProfitPerNerve": 16197,
+      "evidenceSummary": {
+        "collectOnlyRuns": 1,
+        "completeRuns": 0,
+        "partialRuns": 0
+      },
+      "locations": [
+        "Sports Arena"
+      ],
+      "matchedCurrentRecipe": null,
+      "observedRunCount": 1,
+      "payoutRange": {
+        "max": 300000,
+        "min": 300000
+      },
+      "recommendedUpdates": [
+        "none"
+      ],
+      "scenarioName": "Boxing Clever",
+      "supportingRuns": [
+        {
+          "collectedAtUtc": "2026-06-03T14:37:55.000Z",
+          "consumables": [],
+          "evidenceStatus": "collect_only",
+          "itemUpdateReason": "insufficient_evidence",
+          "location": "Sports Arena",
+          "matchedCurrentRecipe": null,
+          "payout": 300000,
+          "profitPerNerve": null,
+          "recipeCompleteForUpdate": false
+        }
+      ]
+    },
+    {
+      "bestObservedConsumables": null,
+      "bestObservedPayout": 250000,
+      "bestObservedProfitPerNerve": null,
+      "currentConsumables": [
+        "Hydrogen Tank x1 (place)",
+        "Hydrogen Tank x2 (stoke)"
+      ],
+      "currentPayout": 275000,
+      "currentProfitPerNerve": 9309.08,
+      "evidenceSummary": {
+        "collectOnlyRuns": 1,
+        "completeRuns": 0,
+        "partialRuns": 0
+      },
+      "locations": [
+        "Car Showroom"
+      ],
+      "matchedCurrentRecipe": null,
+      "observedRunCount": 1,
+      "payoutRange": {
+        "max": 250000,
+        "min": 250000
+      },
+      "recommendedUpdates": [
+        "none"
+      ],
+      "scenarioName": "Bright Spark",
+      "supportingRuns": [
+        {
+          "collectedAtUtc": "2026-06-03T14:37:55.000Z",
+          "consumables": [],
+          "evidenceStatus": "collect_only",
+          "itemUpdateReason": "insufficient_evidence",
+          "location": "Car Showroom",
+          "matchedCurrentRecipe": null,
+          "payout": 250000,
+          "profitPerNerve": null,
+          "recipeCompleteForUpdate": false
+        }
+      ]
+    },
+    {
+      "bestObservedConsumables": null,
+      "bestObservedPayout": 100000,
+      "bestObservedProfitPerNerve": null,
+      "currentConsumables": [
+        "Gasoline x2 (place)"
+      ],
+      "currentPayout": 100000,
+      "currentProfitPerNerve": 4947,
+      "evidenceSummary": {
+        "collectOnlyRuns": 1,
+        "completeRuns": 0,
+        "partialRuns": 0
+      },
+      "locations": [
+        "Cinema"
+      ],
+      "matchedCurrentRecipe": null,
+      "observedRunCount": 1,
+      "payoutRange": {
+        "max": 100000,
+        "min": 100000
+      },
+      "recommendedUpdates": [
+        "none"
+      ],
+      "scenarioName": "Burn After Screening",
+      "supportingRuns": [
+        {
+          "collectedAtUtc": "2026-06-03T14:35:36.000Z",
+          "consumables": [],
+          "evidenceStatus": "collect_only",
+          "itemUpdateReason": "insufficient_evidence",
+          "location": "Cinema",
+          "matchedCurrentRecipe": null,
+          "payout": 100000,
+          "profitPerNerve": null,
+          "recipeCompleteForUpdate": false
+        }
+      ]
+    },
+    {
+      "bestObservedConsumables": null,
+      "bestObservedPayout": 560000,
+      "bestObservedProfitPerNerve": null,
+      "currentConsumables": [
+        "Kerosene x4 (place)"
+      ],
+      "currentPayout": 560000,
+      "currentProfitPerNerve": 17325.466666666667,
+      "evidenceSummary": {
+        "collectOnlyRuns": 1,
+        "completeRuns": 0,
+        "partialRuns": 0
+      },
+      "locations": [
+        "Data Center"
+      ],
+      "matchedCurrentRecipe": null,
+      "observedRunCount": 1,
+      "payoutRange": {
+        "max": 560000,
+        "min": 560000
+      },
+      "recommendedUpdates": [
+        "none"
+      ],
+      "scenarioName": "Cache and Burn",
+      "supportingRuns": [
+        {
+          "collectedAtUtc": "2026-06-03T14:38:00.000Z",
+          "consumables": [],
+          "evidenceStatus": "collect_only",
+          "itemUpdateReason": "insufficient_evidence",
+          "location": "Data Center",
+          "matchedCurrentRecipe": null,
+          "payout": 560000,
+          "profitPerNerve": null,
+          "recipeCompleteForUpdate": false
+        }
+      ]
+    },
+    {
+      "bestObservedConsumables": null,
+      "bestObservedPayout": 320000,
+      "bestObservedProfitPerNerve": null,
+      "currentConsumables": [
+        "Kerosene x3 (place)"
+      ],
+      "currentPayout": 330000,
+      "currentProfitPerNerve": 11992.92,
+      "evidenceSummary": {
+        "collectOnlyRuns": 1,
+        "completeRuns": 0,
+        "partialRuns": 0
+      },
+      "locations": [
+        "Luxury Villa"
+      ],
+      "matchedCurrentRecipe": null,
+      "observedRunCount": 1,
+      "payoutRange": {
+        "max": 320000,
+        "min": 320000
+      },
+      "recommendedUpdates": [
+        "none"
+      ],
+      "scenarioName": "Cook it Rare",
+      "supportingRuns": [
+        {
+          "collectedAtUtc": "2026-06-03T14:37:50.000Z",
+          "consumables": [],
+          "evidenceStatus": "collect_only",
+          "itemUpdateReason": "insufficient_evidence",
+          "location": "Luxury Villa",
+          "matchedCurrentRecipe": null,
+          "payout": 320000,
+          "profitPerNerve": null,
+          "recipeCompleteForUpdate": false
+        }
+      ]
+    },
+    {
+      "bestObservedConsumables": null,
+      "bestObservedPayout": 106000,
+      "bestObservedProfitPerNerve": null,
+      "currentConsumables": [
+        "Gasoline x1 (place)"
+      ],
+      "currentPayout": 106000,
+      "currentProfitPerNerve": 7031.333333333333,
+      "evidenceSummary": {
+        "collectOnlyRuns": 1,
+        "completeRuns": 0,
+        "partialRuns": 0
+      },
+      "locations": [
+        "Liquor Store"
+      ],
+      "matchedCurrentRecipe": null,
+      "observedRunCount": 1,
+      "payoutRange": {
+        "max": 106000,
+        "min": 106000
+      },
+      "recommendedUpdates": [
+        "none"
+      ],
+      "scenarioName": "Crafty Devil",
+      "supportingRuns": [
+        {
+          "collectedAtUtc": "2026-06-03T14:35:22.000Z",
+          "consumables": [],
+          "evidenceStatus": "collect_only",
+          "itemUpdateReason": "insufficient_evidence",
+          "location": "Liquor Store",
+          "matchedCurrentRecipe": null,
+          "payout": 106000,
+          "profitPerNerve": null,
+          "recipeCompleteForUpdate": false
+        }
+      ]
+    },
+    {
+      "bestObservedConsumables": null,
+      "bestObservedPayout": 210000,
+      "bestObservedProfitPerNerve": null,
+      "currentConsumables": [
+        "Hydrogen Tank x1 (stoke)",
+        "Kerosene x1 (place)",
+        "Methane Tank x1 (stoke)"
+      ],
+      "currentPayout": 330000,
+      "currentProfitPerNerve": 11671.44,
+      "evidenceSummary": {
+        "collectOnlyRuns": 1,
+        "completeRuns": 0,
+        "partialRuns": 0
+      },
+      "locations": [
+        "Townhouse"
+      ],
+      "matchedCurrentRecipe": null,
+      "observedRunCount": 1,
+      "payoutRange": {
+        "max": 210000,
+        "min": 210000
+      },
+      "recommendedUpdates": [
+        "none"
+      ],
+      "scenarioName": "Daddy's Girl",
+      "supportingRuns": [
+        {
+          "collectedAtUtc": "2026-06-03T14:37:54.000Z",
+          "consumables": [],
+          "evidenceStatus": "collect_only",
+          "itemUpdateReason": "insufficient_evidence",
+          "location": "Townhouse",
+          "matchedCurrentRecipe": null,
+          "payout": 210000,
+          "profitPerNerve": null,
+          "recipeCompleteForUpdate": false
+        }
+      ]
+    },
+    {
+      "bestObservedConsumables": null,
+      "bestObservedPayout": 140000,
+      "bestObservedProfitPerNerve": null,
+      "currentConsumables": [
+        "Gasoline x4 (place)"
+      ],
+      "currentPayout": 150000,
+      "currentProfitPerNerve": 4929.333333333333,
+      "evidenceSummary": {
+        "collectOnlyRuns": 1,
+        "completeRuns": 0,
+        "partialRuns": 0
+      },
+      "locations": [
+        "Cinema"
+      ],
+      "matchedCurrentRecipe": null,
+      "observedRunCount": 1,
+      "payoutRange": {
+        "max": 140000,
+        "min": 140000
+      },
+      "recommendedUpdates": [
+        "none"
+      ],
+      "scenarioName": "Final Cut",
+      "supportingRuns": [
+        {
+          "collectedAtUtc": "2026-06-03T14:36:17.000Z",
+          "consumables": [],
+          "evidenceStatus": "collect_only",
+          "itemUpdateReason": "insufficient_evidence",
+          "location": "Cinema",
+          "matchedCurrentRecipe": null,
+          "payout": 140000,
+          "profitPerNerve": null,
+          "recipeCompleteForUpdate": false
+        }
+      ]
+    },
+    {
+      "bestObservedConsumables": null,
+      "bestObservedPayout": 140000,
+      "bestObservedProfitPerNerve": null,
+      "currentConsumables": [
+        "Gasoline x1 (place)"
+      ],
+      "currentPayout": 140000,
+      "currentProfitPerNerve": 9298,
+      "evidenceSummary": {
+        "collectOnlyRuns": 1,
+        "completeRuns": 0,
+        "partialRuns": 0
+      },
+      "locations": [
+        "Shopping Mall"
+      ],
+      "matchedCurrentRecipe": null,
+      "observedRunCount": 1,
+      "payoutRange": {
+        "max": 140000,
+        "min": 140000
+      },
+      "recommendedUpdates": [
+        "none"
+      ],
+      "scenarioName": "Fire and Brimstone",
+      "supportingRuns": [
+        {
+          "collectedAtUtc": "2026-06-03T14:37:21.000Z",
+          "consumables": [],
+          "evidenceStatus": "collect_only",
+          "itemUpdateReason": "insufficient_evidence",
+          "location": "Shopping Mall",
+          "matchedCurrentRecipe": null,
+          "payout": 140000,
+          "profitPerNerve": null,
+          "recipeCompleteForUpdate": false
+        }
+      ]
+    },
+    {
+      "bestObservedConsumables": null,
+      "bestObservedPayout": 160000,
+      "bestObservedProfitPerNerve": null,
+      "currentConsumables": [
+        "Gasoline x4 (place)"
+      ],
+      "currentPayout": 180000,
+      "currentProfitPerNerve": 5929.333333333333,
+      "evidenceSummary": {
+        "collectOnlyRuns": 1,
+        "completeRuns": 0,
+        "partialRuns": 0
+      },
+      "locations": [
+        "Theater"
+      ],
+      "matchedCurrentRecipe": null,
+      "observedRunCount": 1,
+      "payoutRange": {
+        "max": 160000,
+        "min": 160000
+      },
+      "recommendedUpdates": [
+        "none"
+      ],
+      "scenarioName": "Fire Burn and Cauldron Bubble",
+      "supportingRuns": [
+        {
+          "collectedAtUtc": "2026-06-03T14:36:14.000Z",
+          "consumables": [],
+          "evidenceStatus": "collect_only",
+          "itemUpdateReason": "insufficient_evidence",
+          "location": "Theater",
+          "matchedCurrentRecipe": null,
+          "payout": 160000,
+          "profitPerNerve": null,
+          "recipeCompleteForUpdate": false
+        }
+      ]
+    },
+    {
+      "bestObservedConsumables": null,
+      "bestObservedPayout": 310000,
+      "bestObservedProfitPerNerve": null,
+      "currentConsumables": [
+        "Hydrogen Tank x1 (place)"
+      ],
+      "currentPayout": 310000,
+      "currentProfitPerNerve": 19727.266666666666,
+      "evidenceSummary": {
+        "collectOnlyRuns": 1,
+        "completeRuns": 0,
+        "partialRuns": 0
+      },
+      "locations": [
+        "Restaurant"
+      ],
+      "matchedCurrentRecipe": null,
+      "observedRunCount": 1,
+      "payoutRange": {
+        "max": 310000,
+        "min": 310000
+      },
+      "recommendedUpdates": [
+        "none"
+      ],
+      "scenarioName": "Fire Kills 99.9% of Bacteria",
+      "supportingRuns": [
+        {
+          "collectedAtUtc": "2026-06-03T14:37:49.000Z",
+          "consumables": [],
+          "evidenceStatus": "collect_only",
+          "itemUpdateReason": "insufficient_evidence",
+          "location": "Restaurant",
+          "matchedCurrentRecipe": null,
+          "payout": 310000,
+          "profitPerNerve": null,
+          "recipeCompleteForUpdate": false
+        }
+      ]
+    },
+    {
+      "bestObservedConsumables": null,
+      "bestObservedPayout": 100000,
+      "bestObservedProfitPerNerve": null,
+      "currentConsumables": [
+        "Gasoline x1 (place)"
+      ],
+      "currentPayout": 110000,
+      "currentProfitPerNerve": 7298,
+      "evidenceSummary": {
+        "collectOnlyRuns": 1,
+        "completeRuns": 0,
+        "partialRuns": 0
+      },
+      "locations": [
+        "Post Office"
+      ],
+      "matchedCurrentRecipe": null,
+      "observedRunCount": 1,
+      "payoutRange": {
+        "max": 100000,
+        "min": 100000
+      },
+      "recommendedUpdates": [
+        "none"
+      ],
+      "scenarioName": "Hold Fire",
+      "supportingRuns": [
+        {
+          "collectedAtUtc": "2026-06-03T14:36:31.000Z",
+          "consumables": [],
+          "evidenceStatus": "collect_only",
+          "itemUpdateReason": "insufficient_evidence",
+          "location": "Post Office",
+          "matchedCurrentRecipe": null,
+          "payout": 100000,
+          "profitPerNerve": null,
+          "recipeCompleteForUpdate": false
+        }
+      ]
+    },
+    {
+      "bestObservedConsumables": null,
+      "bestObservedPayout": 430000,
+      "bestObservedProfitPerNerve": null,
+      "currentConsumables": [
+        "Gasoline x2 (place)"
+      ],
+      "currentPayout": 430000,
+      "currentProfitPerNerve": 21447,
+      "evidenceSummary": {
+        "collectOnlyRuns": 1,
+        "completeRuns": 0,
+        "partialRuns": 0
+      },
+      "locations": [
+        "Bank"
+      ],
+      "matchedCurrentRecipe": null,
+      "observedRunCount": 1,
+      "payoutRange": {
+        "max": 430000,
+        "min": 430000
+      },
+      "recommendedUpdates": [
+        "none"
+      ],
+      "scenarioName": "Hot on the Trail",
+      "supportingRuns": [
+        {
+          "collectedAtUtc": "2026-06-03T14:38:02.000Z",
+          "consumables": [],
+          "evidenceStatus": "collect_only",
+          "itemUpdateReason": "insufficient_evidence",
+          "location": "Bank",
+          "matchedCurrentRecipe": null,
+          "payout": 430000,
+          "profitPerNerve": null,
+          "recipeCompleteForUpdate": false
+        }
+      ]
+    },
+    {
+      "bestObservedConsumables": null,
+      "bestObservedPayout": 160000,
+      "bestObservedProfitPerNerve": null,
+      "currentConsumables": [
+        "Gasoline x3 (place)"
+      ],
+      "currentPayout": 160000,
+      "currentProfitPerNerve": 6336.4,
+      "evidenceSummary": {
+        "collectOnlyRuns": 1,
+        "completeRuns": 0,
+        "partialRuns": 0
+      },
+      "locations": [
+        "Casino"
+      ],
+      "matchedCurrentRecipe": null,
+      "observedRunCount": 1,
+      "payoutRange": {
+        "max": 160000,
+        "min": 160000
+      },
+      "recommendedUpdates": [
+        "none"
+      ],
+      "scenarioName": "House Edge",
+      "supportingRuns": [
+        {
+          "collectedAtUtc": "2026-06-03T14:36:49.000Z",
+          "consumables": [],
+          "evidenceStatus": "collect_only",
+          "itemUpdateReason": "insufficient_evidence",
+          "location": "Casino",
+          "matchedCurrentRecipe": null,
+          "payout": 160000,
+          "profitPerNerve": null,
+          "recipeCompleteForUpdate": false
+        }
+      ]
+    },
+    {
+      "bestObservedConsumables": null,
+      "bestObservedPayout": 210000,
+      "bestObservedProfitPerNerve": null,
+      "currentConsumables": [
+        "Gasoline x4 (place)",
+        "Sumo Doll x1 (evidence)"
+      ],
+      "currentPayout": 260000,
+      "currentProfitPerNerve": 7083.5142857142855,
+      "evidenceSummary": {
+        "collectOnlyRuns": 1,
+        "completeRuns": 0,
+        "partialRuns": 0
+      },
+      "locations": [
+        "College"
+      ],
+      "matchedCurrentRecipe": null,
+      "observedRunCount": 1,
+      "payoutRange": {
+        "max": 210000,
+        "min": 210000
+      },
+      "recommendedUpdates": [
+        "none"
+      ],
+      "scenarioName": "Igniting Curiosity",
+      "supportingRuns": [
+        {
+          "collectedAtUtc": "2026-06-03T14:37:29.000Z",
+          "consumables": [],
+          "evidenceStatus": "collect_only",
+          "itemUpdateReason": "insufficient_evidence",
+          "location": "College",
+          "matchedCurrentRecipe": null,
+          "payout": 210000,
+          "profitPerNerve": null,
+          "recipeCompleteForUpdate": false
+        }
+      ]
+    },
+    {
+      "bestObservedConsumables": null,
+      "bestObservedPayout": 110000,
+      "bestObservedProfitPerNerve": null,
+      "currentConsumables": [
+        "Hydrogen Tank x1 (place)",
+        "Hydrogen Tank x1 (stoke)"
+      ],
+      "currentPayout": 120000,
+      "currentProfitPerNerve": 4590.9,
+      "evidenceSummary": {
+        "collectOnlyRuns": 1,
+        "completeRuns": 0,
+        "partialRuns": 0
+      },
+      "locations": [
+        "Arcade"
+      ],
+      "matchedCurrentRecipe": null,
+      "observedRunCount": 1,
+      "payoutRange": {
+        "max": 110000,
+        "min": 110000
+      },
+      "recommendedUpdates": [
+        "none"
+      ],
+      "scenarioName": "Insert Coin to Continue",
+      "supportingRuns": [
+        {
+          "collectedAtUtc": "2026-06-03T14:36:42.000Z",
+          "consumables": [],
+          "evidenceStatus": "collect_only",
+          "itemUpdateReason": "insufficient_evidence",
+          "location": "Arcade",
+          "matchedCurrentRecipe": null,
+          "payout": 110000,
+          "profitPerNerve": null,
+          "recipeCompleteForUpdate": false
+        }
+      ]
+    },
+    {
+      "bestObservedConsumables": null,
+      "bestObservedPayout": 230000,
+      "bestObservedProfitPerNerve": null,
+      "currentConsumables": [
+        "Gasoline x3 (place)"
+      ],
+      "currentPayout": 230000,
+      "currentProfitPerNerve": 9136.4,
+      "evidenceSummary": {
+        "collectOnlyRuns": 1,
+        "completeRuns": 0,
+        "partialRuns": 0
+      },
+      "locations": [
+        "Lakehouse"
+      ],
+      "matchedCurrentRecipe": null,
+      "observedRunCount": 1,
+      "payoutRange": {
+        "max": 230000,
+        "min": 230000
+      },
+      "recommendedUpdates": [
+        "none"
+      ],
+      "scenarioName": "It's a Write Off",
+      "supportingRuns": [
+        {
+          "collectedAtUtc": "2026-06-03T14:36:54.000Z",
+          "consumables": [],
+          "evidenceStatus": "collect_only",
+          "itemUpdateReason": "insufficient_evidence",
+          "location": "Lakehouse",
+          "matchedCurrentRecipe": null,
+          "payout": 230000,
+          "profitPerNerve": null,
+          "recipeCompleteForUpdate": false
+        }
+      ]
+    },
+    {
+      "bestObservedConsumables": null,
+      "bestObservedPayout": 180000,
+      "bestObservedProfitPerNerve": null,
+      "currentConsumables": [
+        "Hydrogen Tank x1 (place)",
+        "Hydrogen Tank x1 (stoke)"
+      ],
+      "currentPayout": 180000,
+      "currentProfitPerNerve": 7590.9,
+      "evidenceSummary": {
+        "collectOnlyRuns": 1,
+        "completeRuns": 0,
+        "partialRuns": 0
+      },
+      "locations": [
+        "Paper Mill"
+      ],
+      "matchedCurrentRecipe": null,
+      "observedRunCount": 1,
+      "payoutRange": {
+        "max": 180000,
+        "min": 180000
+      },
+      "recommendedUpdates": [
+        "none"
+      ],
+      "scenarioName": "It's Not All White",
+      "supportingRuns": [
+        {
+          "collectedAtUtc": "2026-06-03T14:36:39.000Z",
+          "consumables": [],
+          "evidenceStatus": "collect_only",
+          "itemUpdateReason": "insufficient_evidence",
+          "location": "Paper Mill",
+          "matchedCurrentRecipe": null,
+          "payout": 180000,
+          "profitPerNerve": null,
+          "recipeCompleteForUpdate": false
+        }
+      ]
+    },
+    {
+      "bestObservedConsumables": null,
+      "bestObservedPayout": 300000,
+      "bestObservedProfitPerNerve": null,
+      "currentConsumables": [
+        "Gasoline x5 (place)"
+      ],
+      "currentPayout": 300000,
+      "currentProfitPerNerve": 8495.714285714286,
+      "evidenceSummary": {
+        "collectOnlyRuns": 1,
+        "completeRuns": 0,
+        "partialRuns": 0
+      },
+      "locations": [
+        "Hotel"
+      ],
+      "matchedCurrentRecipe": null,
+      "observedRunCount": 1,
+      "payoutRange": {
+        "max": 300000,
+        "min": 300000
+      },
+      "recommendedUpdates": [
+        "none"
+      ],
+      "scenarioName": "Landmark Decision",
+      "supportingRuns": [
+        {
+          "collectedAtUtc": "2026-06-03T14:37:48.000Z",
+          "consumables": [],
+          "evidenceStatus": "collect_only",
+          "itemUpdateReason": "insufficient_evidence",
+          "location": "Hotel",
+          "matchedCurrentRecipe": null,
+          "payout": 300000,
+          "profitPerNerve": null,
+          "recipeCompleteForUpdate": false
+        }
+      ]
+    },
+    {
+      "bestObservedConsumables": [
+        "Hydrogen Tank x1 (place)",
+        "Hydrogen Tank x2 (stoke)"
+      ],
+      "bestObservedPayout": 410000,
+      "bestObservedProfitPerNerve": 14709.08,
+      "currentConsumables": [
+        "Hydrogen Tank x1 (place)",
+        "Hydrogen Tank x2 (stoke)"
+      ],
+      "currentPayout": 410000,
+      "currentProfitPerNerve": 14709.08,
+      "evidenceSummary": {
+        "collectOnlyRuns": 0,
+        "completeRuns": 1,
+        "partialRuns": 0
+      },
+      "locations": [
+        "Post Office"
+      ],
+      "matchedCurrentRecipe": true,
+      "observedRunCount": 1,
+      "payoutRange": {
+        "max": 410000,
+        "min": 410000
+      },
+      "recommendedUpdates": [
+        "none"
+      ],
+      "scenarioName": "Letter of the Law",
+      "supportingRuns": [
+        {
+          "collectedAtUtc": "2026-06-03T14:38:03.000Z",
+          "consumables": [
+            "Hydrogen Tank x1 (place)",
+            "Hydrogen Tank x2 (stoke)"
+          ],
+          "evidenceStatus": "complete",
+          "itemUpdateReason": "matches_current",
+          "location": "Post Office",
+          "matchedCurrentRecipe": true,
+          "payout": 410000,
+          "profitPerNerve": 14709.08,
+          "recipeCompleteForUpdate": true
+        }
+      ]
+    },
+    {
+      "bestObservedConsumables": null,
+      "bestObservedPayout": 150000,
+      "bestObservedProfitPerNerve": null,
+      "currentConsumables": [
+        "Gasoline x3 (place)"
+      ],
+      "currentPayout": 165000,
+      "currentProfitPerNerve": 6536.4,
+      "evidenceSummary": {
+        "collectOnlyRuns": 1,
+        "completeRuns": 0,
+        "partialRuns": 0
+      },
+      "locations": [
+        "Post Office"
+      ],
+      "matchedCurrentRecipe": null,
+      "observedRunCount": 1,
+      "payoutRange": {
+        "max": 150000,
+        "min": 150000
+      },
+      "recommendedUpdates": [
+        "none"
+      ],
+      "scenarioName": "Light Fingered",
+      "supportingRuns": [
+        {
+          "collectedAtUtc": "2026-06-03T14:36:24.000Z",
+          "consumables": [],
+          "evidenceStatus": "collect_only",
+          "itemUpdateReason": "insufficient_evidence",
+          "location": "Post Office",
+          "matchedCurrentRecipe": null,
+          "payout": 150000,
+          "profitPerNerve": null,
+          "recipeCompleteForUpdate": false
+        }
+      ]
+    },
+    {
+      "bestObservedConsumables": null,
+      "bestObservedPayout": 200000,
+      "bestObservedProfitPerNerve": null,
+      "currentConsumables": [
+        "Hydrogen Tank x1 (place)",
+        "Hydrogen Tank x1 (stoke)"
+      ],
+      "currentPayout": 210000,
+      "currentProfitPerNerve": 9090.9,
+      "evidenceSummary": {
+        "collectOnlyRuns": 1,
+        "completeRuns": 0,
+        "partialRuns": 0
+      },
+      "locations": [
+        "Warehouse"
+      ],
+      "matchedCurrentRecipe": null,
+      "observedRunCount": 1,
+      "payoutRange": {
+        "max": 200000,
+        "min": 200000
+      },
+      "recommendedUpdates": [
+        "none"
+      ],
+      "scenarioName": "Lock, Stock, and Barrel",
+      "supportingRuns": [
+        {
+          "collectedAtUtc": "2026-06-03T14:37:26.000Z",
+          "consumables": [],
+          "evidenceStatus": "collect_only",
+          "itemUpdateReason": "insufficient_evidence",
+          "location": "Warehouse",
+          "matchedCurrentRecipe": null,
+          "payout": 200000,
+          "profitPerNerve": null,
+          "recipeCompleteForUpdate": false
+        }
+      ]
+    },
+    {
+      "bestObservedConsumables": null,
+      "bestObservedPayout": 540000,
+      "bestObservedProfitPerNerve": null,
+      "currentConsumables": [
+        "Gasoline x5 (place)",
+        "Thermite x1 (place)"
+      ],
+      "currentPayout": 580000,
+      "currentProfitPerNerve": 11824.575,
+      "evidenceSummary": {
+        "collectOnlyRuns": 1,
+        "completeRuns": 0,
+        "partialRuns": 0
+      },
+      "locations": [
+        "Hospital"
+      ],
+      "matchedCurrentRecipe": null,
+      "observedRunCount": 1,
+      "payoutRange": {
+        "max": 540000,
+        "min": 540000
+      },
+      "recommendedUpdates": [
+        "none"
+      ],
+      "scenarioName": "Mental Block",
+      "supportingRuns": [
+        {
+          "collectedAtUtc": "2026-06-03T14:38:00.000Z",
+          "consumables": [],
+          "evidenceStatus": "collect_only",
+          "itemUpdateReason": "insufficient_evidence",
+          "location": "Hospital",
+          "matchedCurrentRecipe": null,
+          "payout": 540000,
+          "profitPerNerve": null,
+          "recipeCompleteForUpdate": false
+        }
+      ]
+    },
+    {
+      "bestObservedConsumables": null,
+      "bestObservedPayout": 140000,
+      "bestObservedProfitPerNerve": null,
+      "currentConsumables": [
+        "Gasoline x1 (place)"
+      ],
+      "currentPayout": 155000,
+      "currentProfitPerNerve": 10298,
+      "evidenceSummary": {
+        "collectOnlyRuns": 1,
+        "completeRuns": 0,
+        "partialRuns": 0
+      },
+      "locations": [
+        "Bordello"
+      ],
+      "matchedCurrentRecipe": null,
+      "observedRunCount": 1,
+      "payoutRange": {
+        "max": 140000,
+        "min": 140000
+      },
+      "recommendedUpdates": [
+        "none"
+      ],
+      "scenarioName": "Milk Milk, Lemonade",
+      "supportingRuns": [
+        {
+          "collectedAtUtc": "2026-06-03T14:36:12.000Z",
+          "consumables": [],
+          "evidenceStatus": "collect_only",
+          "itemUpdateReason": "insufficient_evidence",
+          "location": "Bordello",
+          "matchedCurrentRecipe": null,
+          "payout": 140000,
+          "profitPerNerve": null,
+          "recipeCompleteForUpdate": false
+        }
+      ]
+    },
+    {
+      "bestObservedConsumables": null,
+      "bestObservedPayout": 120000,
+      "bestObservedProfitPerNerve": null,
+      "currentConsumables": [
+        "Gasoline x1 (place)",
+        "Pele Charm x1 (evidence)"
+      ],
+      "currentPayout": 120000,
+      "currentProfitPerNerve": 5799.35,
+      "evidenceSummary": {
+        "collectOnlyRuns": 1,
+        "completeRuns": 0,
+        "partialRuns": 0
+      },
+      "locations": [
+        "Flower Shop"
+      ],
+      "matchedCurrentRecipe": null,
+      "observedRunCount": 1,
+      "payoutRange": {
+        "max": 120000,
+        "min": 120000
+      },
+      "recommendedUpdates": [
+        "none"
+      ],
+      "scenarioName": "Planted",
+      "supportingRuns": [
+        {
+          "collectedAtUtc": "2026-06-03T14:36:45.000Z",
+          "consumables": [],
+          "evidenceStatus": "collect_only",
+          "itemUpdateReason": "insufficient_evidence",
+          "location": "Flower Shop",
+          "matchedCurrentRecipe": null,
+          "payout": 120000,
+          "profitPerNerve": null,
+          "recipeCompleteForUpdate": false
+        }
+      ]
+    },
+    {
+      "bestObservedConsumables": null,
+      "bestObservedPayout": 230000,
+      "bestObservedProfitPerNerve": null,
+      "currentConsumables": [
+        "Gasoline x5 (place)"
+      ],
+      "currentPayout": 250000,
+      "currentProfitPerNerve": 7067.142857142857,
+      "evidenceSummary": {
+        "collectOnlyRuns": 1,
+        "completeRuns": 0,
+        "partialRuns": 0
+      },
+      "locations": [
+        "Slaughterhouse"
+      ],
+      "matchedCurrentRecipe": null,
+      "observedRunCount": 1,
+      "payoutRange": {
+        "max": 230000,
+        "min": 230000
+      },
+      "recommendedUpdates": [
+        "none"
+      ],
+      "scenarioName": "Raze the Steaks",
+      "supportingRuns": [
+        {
+          "collectedAtUtc": "2026-06-03T14:37:18.000Z",
+          "consumables": [],
+          "evidenceStatus": "collect_only",
+          "itemUpdateReason": "insufficient_evidence",
+          "location": "Slaughterhouse",
+          "matchedCurrentRecipe": null,
+          "payout": 230000,
+          "profitPerNerve": null,
+          "recipeCompleteForUpdate": false
+        }
+      ]
+    },
+    {
+      "bestObservedConsumables": null,
+      "bestObservedPayout": 100000,
+      "bestObservedProfitPerNerve": null,
+      "currentConsumables": [
+        "Hydrogen Tank x1 (place)",
+        "Hydrogen Tank x1 (stoke)"
+      ],
+      "currentPayout": 160000,
+      "currentProfitPerNerve": 6590.9,
+      "evidenceSummary": {
+        "collectOnlyRuns": 1,
+        "completeRuns": 0,
+        "partialRuns": 0
+      },
+      "locations": [
+        "Jewelry Store"
+      ],
+      "matchedCurrentRecipe": null,
+      "observedRunCount": 1,
+      "payoutRange": {
+        "max": 100000,
+        "min": 100000
+      },
+      "recommendedUpdates": [
+        "none"
+      ],
+      "scenarioName": "Ring of Fire",
+      "supportingRuns": [
+        {
+          "collectedAtUtc": "2026-06-03T14:37:24.000Z",
+          "consumables": [],
+          "evidenceStatus": "collect_only",
+          "itemUpdateReason": "insufficient_evidence",
+          "location": "Jewelry Store",
+          "matchedCurrentRecipe": null,
+          "payout": 100000,
+          "profitPerNerve": null,
+          "recipeCompleteForUpdate": false
+        }
+      ]
+    },
+    {
+      "bestObservedConsumables": null,
+      "bestObservedPayout": 240000,
+      "bestObservedProfitPerNerve": null,
+      "currentConsumables": [
+        "Hydrogen Tank x1 (place)",
+        "Hydrogen Tank x1 (stoke)"
+      ],
+      "currentPayout": 310000,
+      "currentProfitPerNerve": 14090.9,
+      "evidenceSummary": {
+        "collectOnlyRuns": 1,
+        "completeRuns": 0,
+        "partialRuns": 0
+      },
+      "locations": [
+        "Ad Agency"
+      ],
+      "matchedCurrentRecipe": null,
+      "observedRunCount": 1,
+      "payoutRange": {
+        "max": 240000,
+        "min": 240000
+      },
+      "recommendedUpdates": [
+        "none"
+      ],
+      "scenarioName": "Set 'Em Straight",
+      "supportingRuns": [
+        {
+          "collectedAtUtc": "2026-06-03T14:38:02.000Z",
+          "consumables": [],
+          "evidenceStatus": "collect_only",
+          "itemUpdateReason": "insufficient_evidence",
+          "location": "Ad Agency",
+          "matchedCurrentRecipe": null,
+          "payout": 240000,
+          "profitPerNerve": null,
+          "recipeCompleteForUpdate": false
+        }
+      ]
+    },
+    {
+      "bestObservedConsumables": [
+        "Gasoline x2 (place)"
+      ],
+      "bestObservedPayout": 400000,
+      "bestObservedProfitPerNerve": 19947,
+      "currentConsumables": [
+        "Gasoline x2 (place)"
+      ],
+      "currentPayout": 400000,
+      "currentProfitPerNerve": 19947,
+      "evidenceSummary": {
+        "collectOnlyRuns": 0,
+        "completeRuns": 1,
+        "partialRuns": 0
+      },
+      "locations": [
+        "Grocery Store"
+      ],
+      "matchedCurrentRecipe": true,
+      "observedRunCount": 1,
+      "payoutRange": {
+        "max": 400000,
+        "min": 400000
+      },
+      "recommendedUpdates": [
+        "none"
+      ],
+      "scenarioName": "Short Shelf Life",
+      "supportingRuns": [
+        {
+          "collectedAtUtc": "2026-06-03T14:37:50.000Z",
+          "consumables": [
+            "Gasoline x2 (place)"
+          ],
+          "evidenceStatus": "complete",
+          "itemUpdateReason": "matches_current",
+          "location": "Grocery Store",
+          "matchedCurrentRecipe": true,
+          "payout": 400000,
+          "profitPerNerve": 19947,
+          "recipeCompleteForUpdate": true
+        }
+      ]
+    },
+    {
+      "bestObservedConsumables": null,
+      "bestObservedPayout": 170000,
+      "bestObservedProfitPerNerve": null,
+      "currentConsumables": [
+        "Hydrogen Tank x1 (place)",
+        "Hydrogen Tank x2 (stoke)"
+      ],
+      "currentPayout": 170000,
+      "currentProfitPerNerve": 5109.08,
+      "evidenceSummary": {
+        "collectOnlyRuns": 1,
+        "completeRuns": 0,
+        "partialRuns": 0
+      },
+      "locations": [
+        "Pharmacy"
+      ],
+      "matchedCurrentRecipe": null,
+      "observedRunCount": 1,
+      "payoutRange": {
+        "max": 170000,
+        "min": 170000
+      },
+      "recommendedUpdates": [
+        "none"
+      ],
+      "scenarioName": "Stick to the Script",
+      "supportingRuns": [
+        {
+          "collectedAtUtc": "2026-06-03T14:37:06.000Z",
+          "consumables": [],
+          "evidenceStatus": "collect_only",
+          "itemUpdateReason": "insufficient_evidence",
+          "location": "Pharmacy",
+          "matchedCurrentRecipe": null,
+          "payout": 170000,
+          "profitPerNerve": null,
+          "recipeCompleteForUpdate": false
+        }
+      ]
+    },
+    {
+      "bestObservedConsumables": null,
+      "bestObservedPayout": 260000,
+      "bestObservedProfitPerNerve": null,
+      "currentConsumables": [
+        "Gasoline x5 (place)"
+      ],
+      "currentPayout": 265000,
+      "currentProfitPerNerve": 7495.714285714285,
+      "evidenceSummary": {
+        "collectOnlyRuns": 1,
+        "completeRuns": 0,
+        "partialRuns": 0
+      },
+      "locations": [
+        "Supermarket"
+      ],
+      "matchedCurrentRecipe": null,
+      "observedRunCount": 1,
+      "payoutRange": {
+        "max": 260000,
+        "min": 260000
+      },
+      "recommendedUpdates": [
+        "none"
+      ],
+      "scenarioName": "Supermarket Sweep",
+      "supportingRuns": [
+        {
+          "collectedAtUtc": "2026-06-03T14:37:43.000Z",
+          "consumables": [],
+          "evidenceStatus": "collect_only",
+          "itemUpdateReason": "insufficient_evidence",
+          "location": "Supermarket",
+          "matchedCurrentRecipe": null,
+          "payout": 260000,
+          "profitPerNerve": null,
+          "recipeCompleteForUpdate": false
+        }
+      ]
+    },
+    {
+      "bestObservedConsumables": null,
+      "bestObservedPayout": 360000,
+      "bestObservedProfitPerNerve": null,
+      "currentConsumables": [
+        "Gasoline x5 (place)"
+      ],
+      "currentPayout": 360000,
+      "currentProfitPerNerve": 8933.75,
+      "evidenceSummary": {
+        "collectOnlyRuns": 1,
+        "completeRuns": 0,
+        "partialRuns": 0
+      },
+      "locations": [
+        "College"
+      ],
+      "matchedCurrentRecipe": null,
+      "observedRunCount": 1,
+      "payoutRange": {
+        "max": 360000,
+        "min": 360000
+      },
+      "recommendedUpdates": [
+        "none"
+      ],
+      "scenarioName": "The Fat is in the Fire",
+      "supportingRuns": [
+        {
+          "collectedAtUtc": "2026-06-03T14:37:54.000Z",
+          "consumables": [],
+          "evidenceStatus": "collect_only",
+          "itemUpdateReason": "insufficient_evidence",
+          "location": "College",
+          "matchedCurrentRecipe": null,
+          "payout": 360000,
+          "profitPerNerve": null,
+          "recipeCompleteForUpdate": false
+        }
+      ]
+    },
+    {
+      "bestObservedConsumables": null,
+      "bestObservedPayout": 190000,
+      "bestObservedProfitPerNerve": null,
+      "currentConsumables": [
+        "Gasoline x3 (place)"
+      ],
+      "currentPayout": 190000,
+      "currentProfitPerNerve": 7536.4,
+      "evidenceSummary": {
+        "collectOnlyRuns": 1,
+        "completeRuns": 0,
+        "partialRuns": 0
+      },
+      "locations": [
+        "Music Store"
+      ],
+      "matchedCurrentRecipe": null,
+      "observedRunCount": 1,
+      "payoutRange": {
+        "max": 190000,
+        "min": 190000
+      },
+      "recommendedUpdates": [
+        "none"
+      ],
+      "scenarioName": "The Savage Beast",
+      "supportingRuns": [
+        {
+          "collectedAtUtc": "2026-06-03T14:36:20.000Z",
+          "consumables": [],
+          "evidenceStatus": "collect_only",
+          "itemUpdateReason": "insufficient_evidence",
+          "location": "Music Store",
+          "matchedCurrentRecipe": null,
+          "payout": 190000,
+          "profitPerNerve": null,
+          "recipeCompleteForUpdate": false
+        }
+      ]
+    },
+    {
+      "bestObservedConsumables": null,
+      "bestObservedPayout": 140000,
+      "bestObservedProfitPerNerve": null,
+      "currentConsumables": [
+        "Hydrogen Tank x1 (place)",
+        "Hydrogen Tank x2 (stoke)"
+      ],
+      "currentPayout": 220000,
+      "currentProfitPerNerve": 7109.08,
+      "evidenceSummary": {
+        "collectOnlyRuns": 1,
+        "completeRuns": 0,
+        "partialRuns": 0
+      },
+      "locations": [
+        "Grocery Store"
+      ],
+      "matchedCurrentRecipe": null,
+      "observedRunCount": 1,
+      "payoutRange": {
+        "max": 140000,
+        "min": 140000
+      },
+      "recommendedUpdates": [
+        "none"
+      ],
+      "scenarioName": "Unspilled Beans",
+      "supportingRuns": [
+        {
+          "collectedAtUtc": "2026-06-03T14:37:56.000Z",
+          "consumables": [],
+          "evidenceStatus": "collect_only",
+          "itemUpdateReason": "insufficient_evidence",
+          "location": "Grocery Store",
+          "matchedCurrentRecipe": null,
+          "payout": 140000,
+          "profitPerNerve": null,
+          "recipeCompleteForUpdate": false
+        }
+      ]
+    },
+    {
+      "bestObservedConsumables": null,
+      "bestObservedPayout": 240000,
+      "bestObservedProfitPerNerve": null,
+      "currentConsumables": [
+        "Gasoline x4 (place)"
+      ],
+      "currentPayout": 240000,
+      "currentProfitPerNerve": 7929.333333333333,
+      "evidenceSummary": {
+        "collectOnlyRuns": 1,
+        "completeRuns": 0,
+        "partialRuns": 0
+      },
+      "locations": [
+        "Hospital"
+      ],
+      "matchedCurrentRecipe": null,
+      "observedRunCount": 1,
+      "payoutRange": {
+        "max": 240000,
+        "min": 240000
+      },
+      "recommendedUpdates": [
+        "none"
+      ],
+      "scenarioName": "Waist Not, Want Not",
+      "supportingRuns": [
+        {
+          "collectedAtUtc": "2026-06-03T14:37:15.000Z",
+          "consumables": [],
+          "evidenceStatus": "collect_only",
+          "itemUpdateReason": "insufficient_evidence",
+          "location": "Hospital",
+          "matchedCurrentRecipe": null,
+          "payout": 240000,
+          "profitPerNerve": null,
+          "recipeCompleteForUpdate": false
+        }
+      ]
+    },
+    {
+      "bestObservedConsumables": null,
+      "bestObservedPayout": 410000,
+      "bestObservedProfitPerNerve": null,
+      "currentConsumables": [
+        "Gasoline x8 (place)"
+      ],
+      "currentPayout": 430000,
+      "currentProfitPerNerve": 8515.2,
+      "evidenceSummary": {
+        "collectOnlyRuns": 1,
+        "completeRuns": 0,
+        "partialRuns": 0
+      },
+      "locations": [
+        "Electrical Substation"
+      ],
+      "matchedCurrentRecipe": null,
+      "observedRunCount": 1,
+      "payoutRange": {
+        "max": 410000,
+        "min": 410000
+      },
+      "recommendedUpdates": [
+        "none"
+      ],
+      "scenarioName": "Wired for War",
+      "supportingRuns": [
+        {
+          "collectedAtUtc": "2026-06-03T14:38:03.000Z",
+          "consumables": [],
+          "evidenceStatus": "collect_only",
+          "itemUpdateReason": "insufficient_evidence",
+          "location": "Electrical Substation",
+          "matchedCurrentRecipe": null,
+          "payout": 410000,
+          "profitPerNerve": null,
+          "recipeCompleteForUpdate": false
+        }
+      ]
+    }
+  ],
+  "summary": {
+    "apiRequests": 3,
+    "scenariosObserved": 39,
+    "successfulRuns": 39,
+    "totalArsonLogs": 49,
+    "totalItemLogs": 7
+  },
+  "windowStartUtc": "2026-05-04T16:47:35.448Z"
+}

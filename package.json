@@ -10,7 +10,9 @@
     "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
     "cf:deploy": "pnpm build && wrangler pages deploy .svelte-kit/cloudflare",
     "build:userscripts": "node scripts/build-userscripts.mjs",
+    "audit:arson": "tsx scripts/audit-arson-logs.ts --days 14 --write-report",
     "test:userscripts": "node --import tsx/esm --test src/userscripts/arsonists-ledger/engine.test.ts",
+    "update:arson-prices": "tsx scripts/update-arson-prices.ts",
     "prepare": "husky"
   },
   "devDependencies": {

@@ -307,7 +307,7 @@ export const SCENARIOS: Scenario[] = [
 
     {
         scenarioName: 'Blaze of Glory',
-        payout: 160_000,
+        payout: 200_000,
         actions: {
             evidence: [{ resourceId: RESOURCE.TOOTHBRUSH,   qty: 1 }],
             ignite:   [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
@@ -367,7 +367,7 @@ export const SCENARIOS: Scenario[] = [
 
     {
         scenarioName: 'Cache and Burn',
-        payout: 490_000,
+        payout: 560_000,
         actions: {
             ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
             place:  [{ resourceId: RESOURCE.KEROSENE,     qty: 4 }],
@@ -386,11 +386,17 @@ export const SCENARIOS: Scenario[] = [
 
     {
         scenarioName: 'Letter of the Law',
-        payout: 360_000,
+        payout: 410_000,
         actions: {
-            ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
-            place:  [{ resourceId: RESOURCE.HYDROGEN,     qty: 1 }],
-            stoke:  [{ resourceId: RESOURCE.HYDROGEN,     qty: 2 }],
+            ignite: [
+                { resourceId: RESOURCE.FLAMETHROWER, qty: 1 },
+            ],
+            place: [
+                { resourceId: RESOURCE.HYDROGEN, qty: 1 },
+            ],
+            stoke: [
+                { resourceId: RESOURCE.HYDROGEN, qty: 2 },
+            ],
         },
     },
 
@@ -1369,7 +1375,7 @@ export const SCENARIOS: Scenario[] = [
     },
     {
         scenarioName: 'Fire Kills 99.9% of Bacteria',
-        payout: 305_000,
+        payout: 310_000,
         actions: {
             ignite: [{ resourceId: RESOURCE.LIGHTER,  qty: 1 }],
             place:  [{ resourceId: RESOURCE.HYDROGEN, qty: 1 }],
@@ -1651,7 +1657,7 @@ export const SCENARIOS: Scenario[] = [
 
     {
         scenarioName: 'Hot on the Trail',
-        payout: 390_000,
+        payout: 430_000,
         actions: {
             ignite: [{ resourceId: RESOURCE.LIGHTER,  qty: 1 }],
             place:  [{ resourceId: RESOURCE.GASOLINE, qty: 2 }],
@@ -1701,7 +1707,7 @@ export const SCENARIOS: Scenario[] = [
     },
     {
         scenarioName: 'House Edge',
-        payout: 135_000,
+        payout: 160_000,
         actions: {
             ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
             place:  [{ resourceId: RESOURCE.GASOLINE, qty: 3 }],
@@ -1755,7 +1761,7 @@ export const SCENARIOS: Scenario[] = [
 
     {
         scenarioName: "It's a Write Off",
-        payout: 225_000,
+        payout: 230_000,
         actions: {
             ignite: [{ resourceId: RESOURCE.LIGHTER,  qty: 1 }],
             place:  [{ resourceId: RESOURCE.GASOLINE, qty: 3 }],
@@ -1764,7 +1770,7 @@ export const SCENARIOS: Scenario[] = [
 
     {
         scenarioName: "It's Not All White",
-        payout: 140_000,
+        payout: 180_000,
         actions: {
             ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
             place:  [{ resourceId: RESOURCE.HYDROGEN, qty: 1 }],
@@ -1782,7 +1788,7 @@ export const SCENARIOS: Scenario[] = [
 
     {
         scenarioName: 'Landmark Decision',
-        payout: 280_000,
+        payout: 300_000,
         actions: {
             ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
             place:  [{ resourceId: RESOURCE.GASOLINE, qty: 5 }],
@@ -2338,10 +2344,14 @@ export const SCENARIOS: Scenario[] = [
 
     {
         scenarioName: 'Short Shelf Life',
-        payout: 395_000,
+        payout: 400_000,
         actions: {
-            ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
-            place:  [{ resourceId: RESOURCE.GASOLINE, qty: 2 }],
+            ignite: [
+                { resourceId: RESOURCE.FLAMETHROWER, qty: 1 },
+            ],
+            place: [
+                { resourceId: RESOURCE.GASOLINE, qty: 2 },
+            ],
         },
     },
 
@@ -2451,7 +2461,7 @@ export const SCENARIOS: Scenario[] = [
 
     {
         scenarioName: 'Stick to the Script',
-        payout: 160_000,
+        payout: 170_000,
         actions: {
             ignite: [{ resourceId: RESOURCE.LIGHTER,  qty: 1 }],
             place:  [{ resourceId: RESOURCE.HYDROGEN, qty: 1 }],
@@ -2601,7 +2611,7 @@ export const SCENARIOS: Scenario[] = [
 
     {
         scenarioName: 'The Fat is in the Fire',
-        payout: 330_000,
+        payout: 360_000,
         actions: {
             ignite:   [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
             place:    [{ resourceId: RESOURCE.GASOLINE, qty: 5 }],
@@ -2703,7 +2713,7 @@ export const SCENARIOS: Scenario[] = [
 
     {
         scenarioName: 'The Savage Beast',
-        payout: 160_000,
+        payout: 190_000,
         actions: {
             ignite: [{ resourceId: RESOURCE.LIGHTER,  qty: 1 }],
             place:  [{ resourceId: RESOURCE.GASOLINE, qty: 3 }],
@@ -2875,7 +2885,7 @@ export const SCENARIOS: Scenario[] = [
 
     {
         scenarioName: 'Waist Not, Want Not',
-        payout: 210_000,
+        payout: 240_000,
         actions: {
             ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
             place:  [{ resourceId: RESOURCE.GASOLINE, qty: 4 }],
