@@ -51,6 +51,12 @@ export const SEL = {
     /** Card that has already been committed and is waiting to be collected. */
     PENDING_COLLECT: '.pending-collect',
 
-    /** Crime image thumbnail — used as the mobile tooltip anchor. */
+    /**
+     * Fire meter on the arson card.
+     * Torn uses obfuscated classes here, so keep matching broad and local.
+     */
+    FIRE_METER: '[class*="fireMeter"]',
+
+    /** Crime image thumbnail — retained as a fallback tooltip anchor. */
     CRIME_IMAGE: '.crime-image',
 } as const;

@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        Torn Arsonist's Ledger
 // @namespace   https://greasyfork.org/en/users/942572-yukio-mizsima
-// @version     1.0.1
+// @version     1.0.2
 // @description Arson profit-per-nerve calculator and scenario guide for Torn's Crimes page
 // @icon        https://www.google.com/s2/favicons?sz=64&domain=torn.com
 // @author      Yukio [906148]
@@ -3482,7 +3482,12 @@
     RESULT_COUNTS: '[class*="resultCounts___"]',
     /** Card that has already been committed and is waiting to be collected. */
     PENDING_COLLECT: ".pending-collect",
-    /** Crime image thumbnail — used as the mobile tooltip anchor. */
+    /**
+     * Fire meter on the arson card.
+     * Torn uses obfuscated classes here, so keep matching broad and local.
+     */
+    FIRE_METER: '[class*="fireMeter"]',
+    /** Crime image thumbnail — retained as a fallback tooltip anchor. */
     CRIME_IMAGE: ".crime-image"
   };
 
@@ -4134,7 +4139,9 @@
     const api = getTooltipAPI();
     if (!api) {
       if (!tooltipWarned) {
-        console.warn("[ArsonistsLedger] BalaclavaTooltip not found \u2014 tooltips disabled.");
+        console.warn(
+          "[ArsonistsLedger] BalaclavaTooltip not found \u2014 tooltips disabled."
+        );
         tooltipWarned = true;
       }
       return;
@@ -4175,7 +4182,9 @@
       apiPrices = {};
     }
     try {
-      const saved = JSON.parse(store_get(KEY_THRESHOLDS, "{}"));
+      const saved = JSON.parse(
+        store_get(KEY_THRESHOLDS, "{}")
+      );
       if (typeof saved.low === "number" && typeof saved.good === "number") {
         thresholds = { low: saved.low, good: saved.good };
       }
@@ -4266,7 +4275,9 @@
     const now = Date.now();
     if (now - ts < SCENARIOS_TTL_MS) {
       try {
-        const cached = JSON.parse(store_get(KEY_SCENARIOS_CACHE, ""));
+        const cached = JSON.parse(
+          store_get(KEY_SCENARIOS_CACHE, "")
+        );
         if (Array.isArray(cached) && cached.length > 0) {
           populateScenarioIndex(cached);
           resetScans();
@@ -4307,29 +4318,54 @@
         .arson-root .pyro-band--excellent { box-shadow: inset -5px 0 0 ${BAND_COLOR.excellent} !important; }
         .arson-root .pyro-band--unknown  { box-shadow: inset -5px 0 0 ${BAND_COLOR.unknown}  !important; }
 
+        ${SEL.FIRE_METER},
         .crime-image { position: relative !important; }
-        .pyro-info-badge {
+        .pyro-value-pill {
             position: absolute;
-            bottom: 2px;
-            right: 2px;
-            width: 14px;
-            height: 14px;
-            padding: 1px;
-            background: #fff;
-            border-radius: 50%;
-            color: #2a2a2a;
+            top: 3px;
+            right: 3px;
+            padding: 2px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--crimes-crimeOption-bgColor, #222);
+            border: 1px solid var(--crimes-outcomeDivider-color, #444);
+            border-radius: 3px;
+            color: var(--crimes-subText-color, #eee);
+            font-size: 10px;
+            letter-spacing: 0.04em;
+            line-height: 1;
             pointer-events: none;
             user-select: none;
+            white-space: nowrap;
+            z-index: 10;
         }
-        .pyro-info-badge svg { display: block; width: 100%; height: 100%; }
     `;
     document.head.appendChild(style);
   }
-  function injectInfoBadge(crimeImage) {
-    if (crimeImage.querySelector(".pyro-info-badge")) return;
-    const badge = el("span", "pyro-info-badge");
-    badge.innerHTML = ICON_INFO;
-    crimeImage.appendChild(badge);
+  function getPillText(ranked) {
+    if (!ranked) return "?";
+    switch (ranked.band) {
+      case "excellent":
+        return "$$$";
+      case "good":
+        return "$$";
+      case "low":
+        return "$";
+      case "negative":
+        return "-";
+      default:
+        return "?";
+    }
+  }
+  function ensureValuePill(target, ranked) {
+    let pill = target.querySelector(".pyro-value-pill");
+    if (!pill) {
+      pill = el("span", "pyro-value-pill");
+      pill.setAttribute("aria-hidden", "true");
+      target.appendChild(pill);
+    }
+    pill.textContent = getPillText(ranked);
   }
   function buildUnknownTooltip() {
     const wrap = el("div");
@@ -4347,19 +4383,25 @@
     section.classList.forEach((c) => {
       if (c.startsWith("pyro-band--")) section.classList.remove(c);
     });
+    const fireMeter = section.querySelector(SEL.FIRE_METER);
     const crimeImage = section.querySelector(SEL.CRIME_IMAGE);
-    const hoverTarget = crimeImage ?? section;
+    const hoverTarget = fireMeter ?? crimeImage ?? section;
     if (!ranked) {
       section.classList.add("pyro-band--unknown");
-      if (crimeImage) injectInfoBadge(crimeImage);
+      if (hoverTarget !== section) ensureValuePill(hoverTarget, ranked);
       wireTooltip(section, hoverTarget, () => buildUnknownTooltip());
       return;
     }
     section.classList.add(`pyro-band--${ranked.band}`);
-    if (crimeImage) injectInfoBadge(crimeImage);
+    if (hoverTarget !== section) ensureValuePill(hoverTarget, ranked);
     wireTooltip(section, hoverTarget, () => {
       const statsOnly = isPendingCollect(section) && !ranked.Scenario.needsVerification;
-      return buildTooltipContentWithStyles(ranked, effectivePrices(), statsOnly, showObservedPayouts);
+      return buildTooltipContentWithStyles(
+        ranked,
+        effectivePrices(),
+        statsOnly,
+        showObservedPayouts
+      );
     });
   }
   function isPendingCollect(section) {
@@ -4377,33 +4419,50 @@
     const useTapOnlyTooltip = isIosDevice();
     if (!useTapOnlyTooltip) {
       hoverTarget.addEventListener("mouseenter", () => {
-        tryTooltip((api) => api.show(hoverTarget, state.getContent(), { position: "top", theme: "dark" }));
+        tryTooltip(
+          (api) => api.show(hoverTarget, state.getContent(), {
+            position: "top",
+            theme: "dark"
+          })
+        );
       });
       hoverTarget.addEventListener("mouseleave", () => {
         tryTooltip((api) => api.hide());
       });
     }
     hoverTarget.addEventListener("click", (e) => {
-      if (e.target.closest('button, a, input, select, textarea, [role="button"]')) return;
+      if (e.target.closest(
+        'button, a, input, select, textarea, [role="button"]'
+      ))
+        return;
       tryTooltip((api) => {
         if (visibleMobileSection === section) {
           api.hide();
           visibleMobileSection = null;
         } else {
-          api.show(hoverTarget, state.getContent(), { position: "top", theme: "dark" });
+          api.show(hoverTarget, state.getContent(), {
+            position: "top",
+            theme: "dark"
+          });
           visibleMobileSection = section;
         }
       });
     });
-    document.addEventListener("click", (e) => {
-      if (visibleMobileSection === section && !section.contains(e.target)) {
-        tryTooltip((api) => api.hide());
-        visibleMobileSection = null;
-      }
-    }, { passive: true });
+    document.addEventListener(
+      "click",
+      (e) => {
+        if (visibleMobileSection === section && !section.contains(e.target)) {
+          tryTooltip((api) => api.hide());
+          visibleMobileSection = null;
+        }
+      },
+      { passive: true }
+    );
   }
   function buildTooltipContentWithStyles(ranked, prices, statsOnly = false, showObservedPayout = true) {
-    const node = buildTooltipContent(ranked, prices, statsOnly, { showObservedPayout });
+    const node = buildTooltipContent(ranked, prices, statsOnly, {
+      showObservedPayout
+    });
     const style = el("style");
     style.textContent = buildTooltipStyles();
     node.insertBefore(style, node.firstChild);
@@ -4415,11 +4474,8 @@
   function isArsonPage() {
     return !!document.querySelector(SEL.ROOT);
   }
-  function isPageActive() {
-    return document.visibilityState === "visible" && document.hasFocus();
-  }
   function scanPage() {
-    if (!isArsonPage() || !isPageActive()) return;
+    if (!isArsonPage()) return;
     const prices = effectivePrices();
     getRoot().querySelectorAll(SEL.CARD).forEach((section) => {
       if (section.dataset.pyroScanned) return;
@@ -4470,28 +4526,15 @@
     }, 200);
   }
   var observer = new MutationObserver(() => {
-    if (!isPageActive()) return;
     scanPage();
     scheduleInjectSettings();
   });
-  function handlePageActivityChange() {
-    if (!isPageActive()) {
-      visibleMobileSection = null;
-      tryTooltip((api) => api.hide());
-      return;
-    }
-    resetScans();
-    scheduleInjectSettings();
-  }
   function start() {
     loadState();
     populateScenarioIndex(SCENARIOS);
     injectHighlightStyles();
     observer.observe(document.body, { childList: true, subtree: true });
     scheduleScenarioRefresh();
-    document.addEventListener("visibilitychange", handlePageActivityChange, { passive: true });
-    window.addEventListener("focus", handlePageActivityChange, { passive: true });
-    window.addEventListener("blur", handlePageActivityChange, { passive: true });
     if (isArsonPage()) {
       scanPage();
       injectSettings(getRoot(), settingsCtx);
