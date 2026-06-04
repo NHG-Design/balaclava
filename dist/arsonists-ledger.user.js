@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        Torn Arsonist's Ledger
 // @namespace   https://greasyfork.org/en/users/942572-yukio-mizsima
-// @version     1.0.0
+// @version     1.0.1
 // @description Arson profit-per-nerve calculator and scenario guide for Torn's Crimes page
 // @icon        https://www.google.com/s2/favicons?sz=64&domain=torn.com
 // @author      Yukio [906148]
@@ -18,7 +18,7 @@
 "use strict";
 (() => {
   // src/data/scenarios-version.ts
-  var SCENARIOS_VERSION = "ea5710c1";
+  var SCENARIOS_VERSION = "e62e83bfc99d";
 
   // src/data/catalog.ts
   var CATALOG_UPDATED = "2026-06-03";
@@ -179,8 +179,7 @@
       payout: 19e4,
       actions: {
         ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
-        place: [{ resourceId: RESOURCE.GASOLINE, qty: 3 }],
-        stoke: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1, optional: true, optionalLabel: "if needed" }]
+        place: [{ resourceId: RESOURCE.GASOLINE, qty: 3 }]
       }
     },
     {
@@ -221,7 +220,8 @@
       actions: {
         ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
         place: [{ resourceId: RESOURCE.HYDROGEN, qty: 1 }],
-        stoke: [{ resourceId: RESOURCE.HYDROGEN, qty: 1 }]
+        stoke: [{ resourceId: RESOURCE.HYDROGEN, qty: 1 }],
+        stokeTime: "early"
       }
     },
     {
@@ -376,22 +376,18 @@
       actions: {
         ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
         place: [{ resourceId: RESOURCE.HYDROGEN, qty: 1 }],
-        stoke: [{ resourceId: RESOURCE.HYDROGEN, qty: 1 }]
+        stoke: [{ resourceId: RESOURCE.HYDROGEN, qty: 1 }],
+        stokeTime: "early"
       }
     },
     {
       scenarioName: "Letter of the Law",
       payout: 41e4,
       actions: {
-        ignite: [
-          { resourceId: RESOURCE.FLAMETHROWER, qty: 1 }
-        ],
-        place: [
-          { resourceId: RESOURCE.HYDROGEN, qty: 1 }
-        ],
-        stoke: [
-          { resourceId: RESOURCE.HYDROGEN, qty: 2 }
-        ]
+        ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
+        place: [{ resourceId: RESOURCE.HYDROGEN, qty: 1 }],
+        stoke: [{ resourceId: RESOURCE.HYDROGEN, qty: 2 }],
+        stokeTime: "early"
       }
     },
     {
@@ -409,7 +405,8 @@
       actions: {
         ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
         place: [{ resourceId: RESOURCE.HYDROGEN, qty: 1 }],
-        stoke: [{ resourceId: RESOURCE.HYDROGEN, qty: 1 }]
+        stoke: [{ resourceId: RESOURCE.HYDROGEN, qty: 1 }],
+        stokeTime: "early"
       }
     },
     {
@@ -502,7 +499,8 @@
       actions: {
         ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
         place: [{ resourceId: RESOURCE.HYDROGEN, qty: 1 }],
-        stoke: [{ resourceId: RESOURCE.HYDROGEN, qty: 1 }]
+        stoke: [{ resourceId: RESOURCE.HYDROGEN, qty: 1 }],
+        stokeTime: "early"
       }
     },
     {
@@ -614,7 +612,8 @@
       actions: {
         ignite: [{ resourceId: RESOURCE.LIGHTER, qty: 1 }],
         place: [{ resourceId: RESOURCE.HYDROGEN, qty: 1 }],
-        stoke: [{ resourceId: RESOURCE.HYDROGEN, qty: 2 }]
+        stoke: [{ resourceId: RESOURCE.HYDROGEN, qty: 2 }],
+        stokeTime: "early"
       }
     },
     {
@@ -854,7 +853,8 @@
       actions: {
         ignite: [{ resourceId: RESOURCE.LIGHTER, qty: 1 }],
         place: [{ resourceId: RESOURCE.HYDROGEN, qty: 1 }],
-        stoke: [{ resourceId: RESOURCE.HYDROGEN, qty: 1 }]
+        stoke: [{ resourceId: RESOURCE.HYDROGEN, qty: 1 }],
+        stokeTime: "early"
       }
     },
     {
@@ -866,7 +866,8 @@
         stoke: [
           { resourceId: RESOURCE.METHANE, qty: 1 },
           { resourceId: RESOURCE.HYDROGEN, qty: 1 }
-        ]
+        ],
+        stokeTime: "early"
       }
     },
     {
@@ -901,7 +902,8 @@
       actions: {
         ignite: [{ resourceId: RESOURCE.LIGHTER, qty: 1 }],
         place: [{ resourceId: RESOURCE.HYDROGEN, qty: 1 }],
-        stoke: [{ resourceId: RESOURCE.HYDROGEN, qty: 1 }]
+        stoke: [{ resourceId: RESOURCE.HYDROGEN, qty: 1 }],
+        stokeTime: "early"
       }
     },
     {
@@ -1087,7 +1089,8 @@
       actions: {
         ignite: [{ resourceId: RESOURCE.LIGHTER, qty: 1 }],
         place: [{ resourceId: RESOURCE.HYDROGEN, qty: 1 }],
-        stoke: [{ resourceId: RESOURCE.HYDROGEN, qty: 1 }]
+        stoke: [{ resourceId: RESOURCE.HYDROGEN, qty: 1 }],
+        stokeTime: "early"
       }
     },
     {
@@ -1224,7 +1227,8 @@
       actions: {
         ignite: [{ resourceId: RESOURCE.LIGHTER, qty: 1 }],
         place: [{ resourceId: RESOURCE.HYDROGEN, qty: 1 }],
-        stoke: [{ resourceId: RESOURCE.HYDROGEN, qty: 2 }]
+        stoke: [{ resourceId: RESOURCE.HYDROGEN, qty: 2 }],
+        stokeTime: "early"
       }
     },
     {
@@ -1241,7 +1245,8 @@
       actions: {
         ignite: [{ resourceId: RESOURCE.LIGHTER, qty: 1 }],
         place: [{ resourceId: RESOURCE.HYDROGEN, qty: 1 }],
-        stoke: [{ resourceId: RESOURCE.HYDROGEN, qty: 1 }]
+        stoke: [{ resourceId: RESOURCE.HYDROGEN, qty: 1 }],
+        stokeTime: "early"
       }
     },
     {
@@ -1300,7 +1305,8 @@
       actions: {
         ignite: [{ resourceId: RESOURCE.LIGHTER, qty: 1 }],
         place: [{ resourceId: RESOURCE.HYDROGEN, qty: 1 }],
-        stoke: [{ resourceId: RESOURCE.HYDROGEN, qty: 1 }]
+        stoke: [{ resourceId: RESOURCE.HYDROGEN, qty: 1 }],
+        stokeTime: "early"
       }
     },
     {
@@ -1349,7 +1355,8 @@
       actions: {
         ignite: [{ resourceId: RESOURCE.LIGHTER, qty: 1 }],
         place: [{ resourceId: RESOURCE.HYDROGEN, qty: 1 }],
-        stoke: [{ resourceId: RESOURCE.HYDROGEN, qty: 1 }]
+        stoke: [{ resourceId: RESOURCE.HYDROGEN, qty: 1 }],
+        stokeTime: "early"
       }
     },
     {
@@ -1541,7 +1548,8 @@
       actions: {
         ignite: [{ resourceId: RESOURCE.LIGHTER, qty: 1 }],
         place: [{ resourceId: RESOURCE.HYDROGEN, qty: 1 }],
-        stoke: [{ resourceId: RESOURCE.HYDROGEN, qty: 1 }]
+        stoke: [{ resourceId: RESOURCE.HYDROGEN, qty: 1 }],
+        stokeTime: "early"
       }
     },
     {
@@ -1623,7 +1631,8 @@
       actions: {
         ignite: [{ resourceId: RESOURCE.LIGHTER, qty: 1 }],
         place: [{ resourceId: RESOURCE.HYDROGEN, qty: 1 }],
-        stoke: [{ resourceId: RESOURCE.HYDROGEN, qty: 1 }]
+        stoke: [{ resourceId: RESOURCE.HYDROGEN, qty: 1 }],
+        stokeTime: "early"
       }
     },
     {
@@ -1646,12 +1655,8 @@
       scenarioName: "Short Shelf Life",
       payout: 4e5,
       actions: {
-        ignite: [
-          { resourceId: RESOURCE.FLAMETHROWER, qty: 1 }
-        ],
-        place: [
-          { resourceId: RESOURCE.GASOLINE, qty: 2 }
-        ]
+        ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
+        place: [{ resourceId: RESOURCE.GASOLINE, qty: 2 }]
       }
     },
     {
@@ -1714,7 +1719,8 @@
       actions: {
         ignite: [{ resourceId: RESOURCE.LIGHTER, qty: 1 }],
         place: [{ resourceId: RESOURCE.HYDROGEN, qty: 1 }],
-        stoke: [{ resourceId: RESOURCE.HYDROGEN, qty: 1 }]
+        stoke: [{ resourceId: RESOURCE.HYDROGEN, qty: 1 }],
+        stokeTime: "early"
       }
     },
     {
@@ -1991,7 +1997,8 @@
       actions: {
         ignite: [{ resourceId: RESOURCE.LIGHTER, qty: 1 }],
         place: [{ resourceId: RESOURCE.HYDROGEN, qty: 1 }],
-        stoke: [{ resourceId: RESOURCE.HYDROGEN, qty: 2 }]
+        stoke: [{ resourceId: RESOURCE.HYDROGEN, qty: 2 }],
+        stokeTime: "early"
       }
     },
     {
@@ -2023,7 +2030,7 @@
       scenarioName: "Wet Behind the Ears",
       payout: 2e5,
       actions: {
-        ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
+        ignite: [{ resourceId: RESOURCE.LIGHTER, qty: 1 }],
         place: [{ resourceId: RESOURCE.GASOLINE, qty: 1 }]
       }
     },
@@ -2041,7 +2048,8 @@
       actions: {
         ignite: [{ resourceId: RESOURCE.LIGHTER, qty: 1 }],
         place: [{ resourceId: RESOURCE.HYDROGEN, qty: 1 }],
-        stoke: [{ resourceId: RESOURCE.HYDROGEN, qty: 1 }]
+        stoke: [{ resourceId: RESOURCE.HYDROGEN, qty: 1 }],
+        stokeTime: "early"
       }
     },
     {
@@ -2110,7 +2118,10 @@
     {
       scenarioName: "Finish Line",
       payout: 0,
-      actions: { place: [{ resourceId: RESOURCE.KEROSENE, qty: 1 }], stoke: [{ resourceId: RESOURCE.METHANE, qty: 1 }] },
+      actions: {
+        place: [{ resourceId: RESOURCE.KEROSENE, qty: 1 }],
+        stoke: [{ resourceId: RESOURCE.METHANE, qty: 1 }]
+      },
       needsVerification: true
     },
     {
@@ -2128,13 +2139,19 @@
     {
       scenarioName: "Improving the Odds",
       payout: 0,
-      actions: { place: [{ resourceId: RESOURCE.DIESEL, qty: 1 }], stoke: [{ resourceId: RESOURCE.DIESEL, qty: 1 }] },
+      actions: {
+        place: [{ resourceId: RESOURCE.DIESEL, qty: 1 }],
+        stoke: [{ resourceId: RESOURCE.DIESEL, qty: 1 }]
+      },
       needsVerification: true
     },
     {
       scenarioName: "Cooking Time",
       payout: 0,
-      actions: { place: [{ resourceId: RESOURCE.DIESEL, qty: 1 }], stoke: [{ resourceId: RESOURCE.DIESEL, qty: 1 }] },
+      actions: {
+        place: [{ resourceId: RESOURCE.DIESEL, qty: 1 }],
+        stoke: [{ resourceId: RESOURCE.DIESEL, qty: 1 }]
+      },
       needsVerification: true
     }
   ];
@@ -2574,7 +2591,7 @@
       }
     }, scheduleScrollUpdate = function() {
       if (!isVisible) return;
-      hideTooltip();
+      updateVisibleTooltip();
     }, updateVisibleTooltip = function() {
       if (!isVisible || !targetElement) return;
       if (!targetElement.isConnected) {
@@ -4132,6 +4149,13 @@
   var activeTab = "prices";
   var showObservedPayouts = true;
   var visibleMobileSection = null;
+  var IOS_USER_AGENT_RE = /iPad|iPhone|iPod/i;
+  function isIosDevice() {
+    const platform = navigator.platform || "";
+    const userAgent = navigator.userAgent || "";
+    const maxTouchPoints = navigator.maxTouchPoints || 0;
+    return IOS_USER_AGENT_RE.test(userAgent) || platform === "MacIntel" && maxTouchPoints > 1;
+  }
   function effectivePrices() {
     return { ...apiPrices, ...manualPrices };
   }
@@ -4350,12 +4374,15 @@
     }
     const state = { getContent };
     tooltipState.set(section, state);
-    hoverTarget.addEventListener("mouseenter", () => {
-      tryTooltip((api) => api.show(hoverTarget, state.getContent(), { position: "top", theme: "dark" }));
-    });
-    hoverTarget.addEventListener("mouseleave", () => {
-      tryTooltip((api) => api.hide());
-    });
+    const useTapOnlyTooltip = isIosDevice();
+    if (!useTapOnlyTooltip) {
+      hoverTarget.addEventListener("mouseenter", () => {
+        tryTooltip((api) => api.show(hoverTarget, state.getContent(), { position: "top", theme: "dark" }));
+      });
+      hoverTarget.addEventListener("mouseleave", () => {
+        tryTooltip((api) => api.hide());
+      });
+    }
     hoverTarget.addEventListener("click", (e) => {
       if (e.target.closest('button, a, input, select, textarea, [role="button"]')) return;
       tryTooltip((api) => {

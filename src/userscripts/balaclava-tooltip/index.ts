@@ -365,7 +365,7 @@ if (!rootWindow[API_NAME]?.version) {
 
     function scheduleScrollUpdate(): void {
         if (!isVisible) return;
-        hideTooltip();
+        updateVisibleTooltip();
     }
 
     function updateVisibleTooltip(): void {

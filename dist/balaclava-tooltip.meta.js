@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        Balaclava Tooltip
 // @namespace   https://greasyfork.org/en/users/942572-yukio-mizsima
-// @version     1.0.4
+// @version     1.0.5
 // @description Universal tooltip injection for userscript managers
 // @author      Yukio [906148]
 // @license     MIT

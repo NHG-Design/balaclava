@@ -98,6 +98,15 @@ let thresholds: ProfitThresholds = { ...DEFAULT_THRESHOLDS };
 let activeTab = 'prices';
 let showObservedPayouts = true;
 let visibleMobileSection: HTMLElement | null = null;
+const IOS_USER_AGENT_RE = /iPad|iPhone|iPod/i;
+
+function isIosDevice(): boolean {
+    const platform = navigator.platform || '';
+    const userAgent = navigator.userAgent || '';
+    const maxTouchPoints = navigator.maxTouchPoints || 0;
+
+    return IOS_USER_AGENT_RE.test(userAgent) || (platform === 'MacIntel' && maxTouchPoints > 1);
+}
 
 function effectivePrices(): PriceMap {
     return { ...apiPrices, ...manualPrices };
@@ -356,13 +365,17 @@ function wireTooltip(section: HTMLElement, hoverTarget: HTMLElement, getContent:
     }
     const state = { getContent };
     tooltipState.set(section, state);
+    const useTapOnlyTooltip = isIosDevice();
 
-    hoverTarget.addEventListener('mouseenter', () => {
-        tryTooltip(api => api.show(hoverTarget, state.getContent(), { position: 'top', theme: 'dark' }));
-    });
-    hoverTarget.addEventListener('mouseleave', () => {
-        tryTooltip(api => api.hide());
-    });
+    if (!useTapOnlyTooltip) {
+        hoverTarget.addEventListener('mouseenter', () => {
+            tryTooltip(api => api.show(hoverTarget, state.getContent(), { position: 'top', theme: 'dark' }));
+        });
+        hoverTarget.addEventListener('mouseleave', () => {
+            tryTooltip(api => api.hide());
+        });
+    }
+
     hoverTarget.addEventListener('click', e => {
         if ((e.target as HTMLElement).closest('button, a, input, select, textarea, [role="button"]')) return;
         tryTooltip(api => {

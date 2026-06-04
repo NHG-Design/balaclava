@@ -236,7 +236,7 @@
       }
     }, scheduleScrollUpdate = function() {
       if (!isVisible) return;
-      hideTooltip();
+      updateVisibleTooltip();
     }, updateVisibleTooltip = function() {
       if (!isVisible || !targetElement) return;
       if (!targetElement.isConnected) {

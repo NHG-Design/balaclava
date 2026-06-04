@@ -69,7 +69,7 @@ const scenarios = SCENARIOS.map((scenario): Scenario => {
     return observedPayout ? { ...scenario, observedPayout } : scenario;
 });
 const json = JSON.stringify(scenarios);
-const hash = createHash('sha1').update(json).digest('hex').slice(0, 8);
+const hash = createHash('sha1').update(json).digest('hex').slice(0, 12);
 const observationsModule = [
     "import type { ObservedPayout } from './scenarios.js';",
     '',
