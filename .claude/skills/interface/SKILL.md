@@ -33,7 +33,9 @@ Every design task is **brand** (marketing, landing, portfolio — design IS the 
 |---|---|
 | Animation, motion, easing, transitions, springs, gestures, performance | MANDATORY READ [reference/animation.md](reference/animation.md) |
 | Components: buttons, popovers, tooltips, forms, loading/empty/error states | MANDATORY READ [reference/components.md](reference/components.md) |
-| Color, typography, theme (dark/light), layout, spacing, shadows | MANDATORY READ [reference/design-laws.md](reference/design-laws.md) |
+| Color, theme (dark/light), layout, spacing, shadows | MANDATORY READ [reference/design-laws.md](reference/design-laws.md) |
+| Typography, measure, text wrapping, font rendering, numeric alignment | MANDATORY READ [reference/typography.md](reference/typography.md) |
+| Final refinement, micro-details, visual rhythm, "make this feel better" | MANDATORY READ [reference/polish.md](reference/polish.md) |
 | Code review, "what's wrong with this", "make this better", UX critique | MANDATORY READ [reference/review.md](reference/review.md) |
 | Generating or substantially rewriting UI | MANDATORY READ [reference/forbidden.md](reference/forbidden.md) |
 
@@ -50,13 +52,11 @@ For deeper content beyond the primary references above:
 | Cognitive load and IA | [reference/cognitive-load.md](reference/cognitive-load.md) |
 | Color and contrast deep-dive | [reference/color-and-contrast.md](reference/color-and-contrast.md) |
 | UX writing and microcopy | [reference/ux-writing.md](reference/ux-writing.md) |
-| Typography deep-dive | [reference/typography.md](reference/typography.md) |
 | Responsive design | [reference/responsive-design.md](reference/responsive-design.md) |
 | Interaction design patterns | [reference/interaction-design.md](reference/interaction-design.md) |
 | Spatial design | [reference/spatial-design.md](reference/spatial-design.md) |
 | Amplifying bland designs | [reference/bolder.md](reference/bolder.md) |
 | Quieting overstimulating designs | [reference/quieter.md](reference/quieter.md) |
-| Polish pass before shipping | [reference/polish.md](reference/polish.md) |
 | Delight and personality | [reference/delight.md](reference/delight.md) |
 | First-run / onboarding flows | [reference/onboard.md](reference/onboard.md) |
 | Error states, i18n, edge cases | [reference/harden.md](reference/harden.md) |
@@ -65,7 +65,7 @@ For deeper content beyond the primary references above:
 | Overdrive: push past conventional limits | [reference/overdrive.md](reference/overdrive.md) |
 | Live browser iteration | MANDATORY READ [reference/live.md](reference/live.md) — invoke `node scripts/live.mjs` |
 
-If the request doesn't map clearly to any reference ("make this feel better", "this isn't working") — treat it as a UX critique: load `review.md` first, diagnose, then load additional references based on what you find. Multiple references may be loaded simultaneously when a task genuinely spans domains (e.g., "review this animated component" → load both `animation.md` and `review.md`). When generating any UI — not just reviewing — always load `reference/forbidden.md` regardless of which other reference the task maps to.
+If the request doesn't map clearly to any reference, decide whether the problem is diagnosis or refinement. "This isn't working" and other failure-language requests are UX critique: load `review.md` first, diagnose, then load additional references based on what you find. "Make this feel better", "polish this", and other refinement-language requests are polish tasks: load `polish.md` first, then pull in additional references where the defects cluster. Multiple references may be loaded simultaneously when a task genuinely spans domains (e.g., "review this animated component" → load both `animation.md` and `review.md`). When generating any UI — not just reviewing — always load `reference/forbidden.md` regardless of which other reference the task maps to.
 
 ## NEVER
 

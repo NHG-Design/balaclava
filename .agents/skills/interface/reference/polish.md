@@ -57,6 +57,8 @@ Work through these dimensions methodically:
 - **Optical alignment**: Adjust for visual weight (icons may need offset for optical centering)
 - **Responsive consistency**: Spacing and alignment work at all breakpoints
 - **Grid adherence**: Elements snap to baseline grid
+- **Concentric border radius**: For tightly nested rounded surfaces, `outer radius = inner radius + padding`. If the gap is large, treat them as separate surfaces instead of forcing the math.
+- **Icon-side asymmetry is often correct**: Text-plus-icon buttons frequently need about 2px less padding on the icon side. Play triangles and directional glyphs usually need optical nudges too.
 
 **Check**:
 - Enable grid overlay and verify alignment
@@ -133,6 +135,8 @@ Every interactive element needs all states:
 - **Alt text**: All images have descriptive alt text
 - **Loading states**: Images don't cause layout shift, proper aspect ratios
 - **Retina support**: 2x assets for high-DPI screens
+- **Image outlines**: Use `outline`, not `border`, for subtle image separation. In light mode use `rgba(0, 0, 0, 0.1)`; in dark mode use `rgba(255, 255, 255, 0.1)` with `outline-offset: -1px`. This is one of the rare justified pure black/white exceptions.
+- **Shadows over borders for depth**: Cards, buttons, and floating containers usually want layered transparent shadows instead of solid borders. Keep borders for dividers, separators, and focusable form controls where edge definition matters more than depth.
 
 ### Forms & Inputs
 

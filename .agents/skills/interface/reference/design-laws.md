@@ -6,6 +6,8 @@
 
 **Never `#000` or `#fff`.** Tint every neutral toward the brand hue. Chroma of 0.005–0.01 is enough to feel intentional without being visible.
 
+**Exception:** image outlines are one of the rare cases where pure black or pure white at low opacity is correct. The outline is a neutral separator, not a themed surface. See [reference/polish.md](polish.md).
+
 **Pick a color strategy before picking colors:**
 
 | Strategy | Surface coverage | Use case |
