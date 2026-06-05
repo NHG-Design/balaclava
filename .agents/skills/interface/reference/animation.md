@@ -163,6 +163,21 @@ Press: slow and deliberate. Release: always snappy.
 .item:nth-child(3) { animation-delay: 100ms; }
 ```
 
+### Contextual icon swaps
+
+When an icon appears or swaps because state changed, animate the icon itself instead of hard-toggling visibility. `opacity`, `scale`, and a small `blur` create a more physical handoff than a binary swap.
+
+- **Reliable values**: `scale(0.25)` to `scale(1)`, `opacity: 0` to `1`, `filter: blur(4px)` to `blur(0)`
+- **With a motion library**: use a spring with `bounce: 0` for these tiny stateful transitions
+- **Without a motion library**: keep both icons in the DOM, absolutely stack them, and crossfade with CSS transitions
+
+### Skip first-render entrance motion
+
+Default-state UI should not replay its enter animation on initial page load. Save entrance motion for intentional arrivals, not for "this component existed when the page mounted."
+
+- In React Motion / Framer Motion, `initial={false}` is the usual fix for default-state elements.
+- Verify that disabling first-render motion does not suppress a deliberate hero or onboarding entrance.
+
 ### List item enter/exit: opacity + height
 
 When animating list items in and out, animating `opacity` alone looks wrong (item disappears but space remains) and `height` alone is janky (layout triggers). The correct combination is `opacity` + `max-height` (or `height` via JS). There is no formula — tune both values together. A good starting point: `opacity 200ms ease-out, max-height 250ms ease-out`.

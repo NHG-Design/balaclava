@@ -135,9 +135,20 @@ h1, h2, h3 { text-wrap: balance; }
 /* Reduce orphans and ragged endings in long prose */
 article p { text-wrap: pretty; }
 
+/* Root-level rendering polish for macOS */
+html {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
 /* Variable fonts: pick the right optical-size master automatically */
 body { font-optical-sizing: auto; }
 ```
+
+- **Use `text-wrap: balance` only on short headings and short text blocks.** Browsers cap how much text they will rebalance, so applying it to long paragraphs signals intent the browser will ignore.
+- **Use `text-wrap: pretty` as the default for short-to-medium body copy.** Captions, descriptions, list items, and UI text benefit. Very long text can keep default wrapping.
+- **Apply font smoothing once at the root, not per element.** Inconsistent smoothing between headings and body text reads as a rendering bug, not polish.
+- **Use `tabular-nums` for numbers that change or need alignment.** Counters, timers, prices, dashboards, and numeric table columns qualify. Phone numbers, version strings, and decorative numerals usually do not.
 
 **ALL-CAPS tracking**: capitals sit too close at default spacing. Add 5–12% letter-spacing (`letter-spacing: 0.05em` to `0.12em`) to short all-caps labels, eyebrows, and small headings. Real small caps (via `font-variant-caps`) need the same treatment, slightly gentler.
 

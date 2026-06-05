@@ -40,6 +40,14 @@ button:focus-visible {
 - Offset from element (not inside it)
 - Consistent across all interactive elements
 
+## Hit Areas and Press Feedback
+
+**Minimum hit area**: 44x44px on touch-first UI, or at least 40x40px where density is unavoidable. If the visible control is smaller, expand the interactive box with padding or a pseudo-element rather than scaling the artwork up.
+
+**Collision rule**: Expanded hit areas must never overlap neighboring controls. Shrink the invisible area if needed, but keep it as large as possible without creating ambiguity.
+
+**Pressed state should feel tactile**: For buttons, chips, icon buttons, and tappable cards, a subtle `scale(0.96)` on press is usually enough. Do not go smaller than `0.95`; it turns theatrical fast. Skip press animation on extremely high-frequency keyboard-driven actions or contexts where any motion reads as latency.
+
 ## Form Design: The Non-Obvious
 
 **Placeholders aren't labels.** They disappear on input. Always use visible `<label>` elements. **Validate on blur**, not on every keystroke (exception: password strength). Place errors **below** fields with `aria-describedby` connecting them.
