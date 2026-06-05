@@ -11,6 +11,9 @@
     "cf:deploy": "pnpm build && wrangler pages deploy .svelte-kit/cloudflare",
     "build:userscripts": "node scripts/build-userscripts.mjs",
     "audit:arson": "tsx scripts/audit-arson-logs.ts --days 14 --write-report",
+    "audit:arson:cookbooks": "tsx scripts/audit-arson-cookbooks.ts",
+    "audit:arson:cookbooks:triage": "tsx scripts/triage-arson-cookbook-conflicts.ts",
+    "audit:arson:cookbooks:apply": "tsx scripts/apply-arson-cookbook-triage.ts",
     "test:userscripts": "node --import tsx/esm --test src/userscripts/arsonists-ledger/engine.test.ts",
     "update:arson-prices": "tsx scripts/update-arson-prices.ts",
     "prepare": "husky"
