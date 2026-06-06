@@ -2,3 +2,12 @@ name = "balaclava"
 compatibility_date = "2024-09-23"
 compatibility_flags = ["nodejs_compat"]
 pages_build_output_dir = ".svelte-kit/cloudflare"
+
+# Configure after:
+#   pnpm exec wrangler d1 create balaclava-scenario-proposals
+# Then uncomment and replace <database_id>.
+# [[d1_databases]]
+# binding = "SCENARIO_PROPOSALS_DB"
+# database_name = "balaclava-scenario-proposals"
+# database_id = "<database_id>"
+# migrations_dir = "migrations"
