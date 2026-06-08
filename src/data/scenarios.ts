@@ -156,7 +156,11 @@ export const SCENARIOS: Scenario[] = [
     payout: 210_000,
     actions: {
       ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
-      place: [{ resourceId: RESOURCE.HYDROGEN, qty: 1 }, { resourceId: RESOURCE.KEROSENE, qty: 1 }, { resourceId: RESOURCE.POTASSIUM_NITRATE, qty: 1 }],
+      place: [
+        { resourceId: RESOURCE.HYDROGEN, qty: 1 },
+        { resourceId: RESOURCE.KEROSENE, qty: 1 },
+        { resourceId: RESOURCE.POTASSIUM_NITRATE, qty: 1 },
+      ],
     },
   },
 
@@ -281,7 +285,10 @@ export const SCENARIOS: Scenario[] = [
     actions: {
       evidence: [{ resourceId: RESOURCE.SYRINGE, qty: 1 }],
       ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
-      place: [{ resourceId: RESOURCE.GASOLINE, qty: 2 }, { resourceId: RESOURCE.MAGNESIUM, qty: 1 }],
+      place: [
+        { resourceId: RESOURCE.GASOLINE, qty: 2 },
+        { resourceId: RESOURCE.MAGNESIUM, qty: 1 },
+      ],
     },
   },
 
@@ -320,6 +327,8 @@ export const SCENARIOS: Scenario[] = [
     actions: {
       ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
       place: [{ resourceId: RESOURCE.KEROSENE, qty: 4 }],
+      stoke: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
+      stokeTime: "late",
     },
   },
 
@@ -359,7 +368,10 @@ export const SCENARIOS: Scenario[] = [
     payout: 290_000,
     actions: {
       ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
-      place: [{ resourceId: RESOURCE.GASOLINE, qty: 1 }, { resourceId: RESOURCE.HYDROGEN, qty: 1 }],
+      place: [
+        { resourceId: RESOURCE.GASOLINE, qty: 1 },
+        { resourceId: RESOURCE.HYDROGEN, qty: 1 },
+      ],
       stoke: [{ resourceId: RESOURCE.METHANE, qty: 1 }],
       stokeTime: "late",
     },
@@ -457,6 +469,8 @@ export const SCENARIOS: Scenario[] = [
     actions: {
       ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
       place: [{ resourceId: RESOURCE.GASOLINE, qty: 4 }],
+      stoke: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
+      stokeTime: "late",
     },
   },
 
@@ -540,9 +554,11 @@ export const SCENARIOS: Scenario[] = [
     payout: 510_000,
     actions: {
       ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
-      place: [{ resourceId: RESOURCE.GASOLINE, qty: 4 }, { resourceId: RESOURCE.THERMITE, qty: 1 }],
-      stoke: [{ resourceId: RESOURCE.DIESEL, qty: 1 }, { resourceId: RESOURCE.HYDROGEN, qty: 3 }],
-      stokeTime: "late",
+      place: [
+        { resourceId: RESOURCE.GASOLINE, qty: 5 },
+        { resourceId: RESOURCE.THERMITE, qty: 1 },
+        { resourceId: RESOURCE.MAGNESIUM, qty: 1 },
+      ],
     },
   },
 
@@ -562,7 +578,10 @@ export const SCENARIOS: Scenario[] = [
     payout: 120_000,
     actions: {
       ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
-      place: [{ resourceId: RESOURCE.GASOLINE, qty: 3 }, { resourceId: RESOURCE.MAGNESIUM, qty: 1 }],
+      place: [
+        { resourceId: RESOURCE.GASOLINE, qty: 3 },
+        { resourceId: RESOURCE.MAGNESIUM, qty: 1 },
+      ],
     },
   },
 
@@ -576,14 +595,14 @@ export const SCENARIOS: Scenario[] = [
     },
   },
 
-    {
-      scenarioName: "Boxing Clever",
-      payout: 360_000,
-      actions: {
-        ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
-        place: [{ resourceId: RESOURCE.GASOLINE, qty: 2 }],
-      },
+  {
+    scenarioName: "Boxing Clever",
+    payout: 360_000,
+    actions: {
+      ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
+      place: [{ resourceId: RESOURCE.GASOLINE, qty: 2 }],
     },
+  },
 
   {
     scenarioName: "Bright Spark",
@@ -610,8 +629,11 @@ export const SCENARIOS: Scenario[] = [
     payout: 180_000,
     actions: {
       ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
-      place: [{ resourceId: RESOURCE.GASOLINE, qty: 2 }, { resourceId: RESOURCE.THERMITE, qty: 1 }],
-    },
+      place: [
+        { resourceId: RESOURCE.GASOLINE, qty: 2 },
+        { resourceId: RESOURCE.THERMITE, qty: 1 },
+      ],
+    },
   },
 
   {
@@ -671,7 +693,7 @@ export const SCENARIOS: Scenario[] = [
     actions: {
       ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
       place: [{ resourceId: RESOURCE.GASOLINE, qty: 5 }],
-    },
+    },
   },
 
   {
@@ -735,7 +757,10 @@ export const SCENARIOS: Scenario[] = [
     payout: 360_000,
     actions: {
       ignite: [{ resourceId: RESOURCE.LIGHTER, qty: 1 }],
-      place: [{ resourceId: RESOURCE.GASOLINE, qty: 1 }, { resourceId: RESOURCE.HYDROGEN, qty: 1 }],
+      place: [
+        { resourceId: RESOURCE.GASOLINE, qty: 1 },
+        { resourceId: RESOURCE.HYDROGEN, qty: 1 },
+      ],
       stoke: [{ resourceId: RESOURCE.METHANE, qty: 1 }],
       stokeTime: "late",
     },
@@ -765,7 +790,10 @@ export const SCENARIOS: Scenario[] = [
     payout: 230_000,
     actions: {
       ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
-      place: [{ resourceId: RESOURCE.DIESEL, qty: 2 }, { resourceId: RESOURCE.MAGNESIUM, qty: 1 }],
+      place: [
+        { resourceId: RESOURCE.DIESEL, qty: 2 },
+        { resourceId: RESOURCE.MAGNESIUM, qty: 1 },
+      ],
     },
   },
 
@@ -795,10 +823,13 @@ export const SCENARIOS: Scenario[] = [
     payout: 120_000,
     actions: {
       ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
-      place: [{ resourceId: RESOURCE.GASOLINE, qty: 2 }, { resourceId: RESOURCE.POTASSIUM_NITRATE, qty: 1 }],
+      place: [
+        { resourceId: RESOURCE.GASOLINE, qty: 2 },
+        { resourceId: RESOURCE.POTASSIUM_NITRATE, qty: 1 },
+      ],
       stoke: [{ resourceId: RESOURCE.DIESEL, qty: 1 }],
       stokeTime: "late",
-    },
+    },
   },
 
   {
@@ -860,7 +891,11 @@ export const SCENARIOS: Scenario[] = [
     payout: 230_000,
     actions: {
       ignite: [{ resourceId: RESOURCE.LIGHTER, qty: 1 }],
-      place: [{ resourceId: RESOURCE.GASOLINE, qty: 1 }, { resourceId: RESOURCE.HYDROGEN, qty: 1 }, { resourceId: RESOURCE.OXYGEN, qty: 1 }],
+      place: [
+        { resourceId: RESOURCE.GASOLINE, qty: 1 },
+        { resourceId: RESOURCE.HYDROGEN, qty: 1 },
+        { resourceId: RESOURCE.OXYGEN, qty: 1 },
+      ],
     },
   },
 
@@ -918,21 +953,25 @@ export const SCENARIOS: Scenario[] = [
     },
   },
 
-    {
-      scenarioName: "Dirty Money",
-      payout: 420_000,
-      actions: {
-        ignite: [{ resourceId: RESOURCE.LIGHTER, qty: 1 }],
-        place: [{ resourceId: RESOURCE.KEROSENE, qty: 3 }],
-      },
+  {
+    scenarioName: "Dirty Money",
+    payout: 420_000,
+    actions: {
+      ignite: [{ resourceId: RESOURCE.LIGHTER, qty: 1 }],
+      place: [{ resourceId: RESOURCE.KEROSENE, qty: 3 }],
     },
+  },
 
   {
     scenarioName: "Disco Inferno",
     payout: 140_000,
     actions: {
       ignite: [{ resourceId: RESOURCE.LIGHTER, qty: 1 }],
-      place: [{ resourceId: RESOURCE.GASOLINE, qty: 1 }, { resourceId: RESOURCE.HYDROGEN, qty: 1 }, { resourceId: RESOURCE.METHANE, qty: 1 }],
+      place: [
+        { resourceId: RESOURCE.GASOLINE, qty: 1 },
+        { resourceId: RESOURCE.HYDROGEN, qty: 1 },
+        { resourceId: RESOURCE.METHANE, qty: 1 },
+      ],
     },
   },
 
@@ -959,7 +998,10 @@ export const SCENARIOS: Scenario[] = [
     payout: 160_000,
     actions: {
       ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
-      place: [{ resourceId: RESOURCE.GASOLINE, qty: 3 }, { resourceId: RESOURCE.MAGNESIUM, qty: 1 }],
+      place: [
+        { resourceId: RESOURCE.GASOLINE, qty: 3 },
+        { resourceId: RESOURCE.MAGNESIUM, qty: 1 },
+      ],
     },
   },
 
@@ -995,7 +1037,10 @@ export const SCENARIOS: Scenario[] = [
     payout: 96_000,
     actions: {
       ignite: [{ resourceId: RESOURCE.LIGHTER, qty: 1 }],
-      place: [{ resourceId: RESOURCE.GASOLINE, qty: 1 }, { resourceId: RESOURCE.METHANE, qty: 1 }],
+      place: [
+        { resourceId: RESOURCE.GASOLINE, qty: 1 },
+        { resourceId: RESOURCE.METHANE, qty: 1 },
+      ],
       stoke: [{ resourceId: RESOURCE.HYDROGEN, qty: 1 }],
       stokeTime: "late",
     },
@@ -1042,14 +1087,14 @@ export const SCENARIOS: Scenario[] = [
       place: [{ resourceId: RESOURCE.GASOLINE, qty: 3 }],
     },
   },
-    {
-      scenarioName: "Fire Kills 99.9% of Bacteria",
-      payout: 330_000,
-      actions: {
-        ignite: [{ resourceId: RESOURCE.LIGHTER, qty: 1 }],
-        place: [{ resourceId: RESOURCE.HYDROGEN, qty: 1 }],
-      },
+  {
+    scenarioName: "Fire Kills 99.9% of Bacteria",
+    payout: 330_000,
+    actions: {
+      ignite: [{ resourceId: RESOURCE.LIGHTER, qty: 1 }],
+      place: [{ resourceId: RESOURCE.HYDROGEN, qty: 1 }],
     },
+  },
   {
     scenarioName: "Fire Sale",
     payout: 12_000,
@@ -1329,7 +1374,9 @@ export const SCENARIOS: Scenario[] = [
     actions: {
       ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
       place: [{ resourceId: RESOURCE.GASOLINE, qty: 4 }],
-    },
+      stoke: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
+      stokeTime: "late",
+    },
   },
 
   {
@@ -1415,14 +1462,14 @@ export const SCENARIOS: Scenario[] = [
     },
   },
 
-    {
-      scenarioName: "Make a Killing",
-      payout: 480_000,
-      actions: {
-        ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
-        place: [
-          { resourceId: RESOURCE.GASOLINE, qty: 1 },
-          { resourceId: RESOURCE.KEROSENE, qty: 2 },
+  {
+    scenarioName: "Make a Killing",
+    payout: 480_000,
+    actions: {
+      ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
+      place: [
+        { resourceId: RESOURCE.GASOLINE, qty: 1 },
+        { resourceId: RESOURCE.KEROSENE, qty: 2 },
       ],
     },
   },
@@ -1442,7 +1489,10 @@ export const SCENARIOS: Scenario[] = [
     payout: 110_000,
     actions: {
       ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
-      place: [{ resourceId: RESOURCE.GASOLINE, qty: 1 }, { resourceId: RESOURCE.METHANE, qty: 1 }],
+      place: [
+        { resourceId: RESOURCE.GASOLINE, qty: 1 },
+        { resourceId: RESOURCE.METHANE, qty: 1 },
+      ],
       stoke: [{ resourceId: RESOURCE.HYDROGEN, qty: 1 }],
       stokeTime: "late",
     },
@@ -1618,6 +1668,7 @@ export const SCENARIOS: Scenario[] = [
       ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
       place: [{ resourceId: RESOURCE.GASOLINE, qty: 3 }],
       stoke: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
+      stokeTime: "late",
     },
   },
 
@@ -1699,7 +1750,10 @@ export const SCENARIOS: Scenario[] = [
     payout: 100_000,
     actions: {
       ignite: [{ resourceId: RESOURCE.LIGHTER, qty: 1 }],
-      place: [{ resourceId: RESOURCE.GASOLINE, qty: 1 }, { resourceId: RESOURCE.HYDROGEN, qty: 1 }],
+      place: [
+        { resourceId: RESOURCE.GASOLINE, qty: 1 },
+        { resourceId: RESOURCE.HYDROGEN, qty: 1 },
+      ],
       stoke: [{ resourceId: RESOURCE.METHANE, qty: 1 }],
       stokeTime: "late",
     },
@@ -1730,7 +1784,10 @@ export const SCENARIOS: Scenario[] = [
     payout: 110_000,
     actions: {
       ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
-      place: [{ resourceId: RESOURCE.HYDROGEN, qty: 1 }, { resourceId: RESOURCE.KEROSENE, qty: 1 }],
+      place: [
+        { resourceId: RESOURCE.HYDROGEN, qty: 1 },
+        { resourceId: RESOURCE.KEROSENE, qty: 1 },
+      ],
     },
   },
 
@@ -1790,7 +1847,7 @@ export const SCENARIOS: Scenario[] = [
     actions: {
       ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
       place: [{ resourceId: RESOURCE.GASOLINE, qty: 3 }],
-    },
+    },
   },
 
   {
@@ -1856,7 +1913,10 @@ export const SCENARIOS: Scenario[] = [
     payout: 74_000,
     actions: {
       ignite: [{ resourceId: RESOURCE.LIGHTER, qty: 1 }],
-      place: [{ resourceId: RESOURCE.HYDROGEN, qty: 1 }, { resourceId: RESOURCE.KEROSENE, qty: 1 }],
+      place: [
+        { resourceId: RESOURCE.HYDROGEN, qty: 1 },
+        { resourceId: RESOURCE.KEROSENE, qty: 1 },
+      ],
     },
   },
 
@@ -1905,7 +1965,10 @@ export const SCENARIOS: Scenario[] = [
     actions: {
       evidence: [{ resourceId: RESOURCE.HARD_DRIVE, qty: 1 }],
       ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
-      place: [{ resourceId: RESOURCE.GASOLINE, qty: 2 }, { resourceId: RESOURCE.KEROSENE, qty: 2 }],
+      place: [
+        { resourceId: RESOURCE.GASOLINE, qty: 2 },
+        { resourceId: RESOURCE.KEROSENE, qty: 2 },
+      ],
     },
   },
 
@@ -2110,7 +2173,7 @@ export const SCENARIOS: Scenario[] = [
     actions: {
       ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
       place: [{ resourceId: RESOURCE.GASOLINE, qty: 4 }],
-    },
+    },
   },
 
   {
@@ -2161,14 +2224,14 @@ export const SCENARIOS: Scenario[] = [
     },
   },
 
-    {
-      scenarioName: "Wet Behind the Ears",
-      payout: 250_000,
-      actions: {
-        ignite: [{ resourceId: RESOURCE.LIGHTER, qty: 1 }],
-        place: [{ resourceId: RESOURCE.GASOLINE, qty: 1 }],
-      },
+  {
+    scenarioName: "Wet Behind the Ears",
+    payout: 250_000,
+    actions: {
+      ignite: [{ resourceId: RESOURCE.LIGHTER, qty: 1 }],
+      place: [{ resourceId: RESOURCE.KEROSENE, qty: 1 }],
     },
+  },
 
   {
     scenarioName: "Where There's a Will",
