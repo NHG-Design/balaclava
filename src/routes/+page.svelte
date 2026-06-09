@@ -5,6 +5,10 @@
 <main style="font-family: sans-serif; padding: 2rem;">
   <h1>Balaclava</h1>
 
+  <h2>Scenario Proposals</h2>
+  <p><a href="/scenario-proposals">/scenario-proposals</a> submitter form</p>
+  <p><a href="/scenario-proposals/admin/login">/scenario-proposals/admin/login</a> protected inbox</p>
+
   <h2>Personal Signatures</h2>
   <p><a href="/api/sigs/906148">/api/sigs/906148</a> (Yukio)</p>
   <img src="/api/sigs/906148" alt="Yukio signature" width="600" height="100" style="display:block;margin-top:1rem;border-radius:8px;" />
