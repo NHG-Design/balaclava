@@ -575,13 +575,11 @@ export const SCENARIOS: Scenario[] = [
 
   {
     scenarioName: "Body of Evidence",
-    payout: 120_000,
+    payout: 105_000,
     actions: {
       ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
-      place: [
-        { resourceId: RESOURCE.GASOLINE, qty: 3 },
-        { resourceId: RESOURCE.MAGNESIUM, qty: 1 },
-      ],
+      place: [{ resourceId: RESOURCE.GASOLINE, qty: 4 }],
+      stoke: [{ resourceId: RESOURCE.POTASSIUM_NITRATE, qty: 1 }],
     },
   },
 
@@ -780,7 +778,10 @@ export const SCENARIOS: Scenario[] = [
     payout: 150_000,
     actions: {
       ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
-      place: [{ resourceId: RESOURCE.GASOLINE, qty: 4 }],
+      place: [
+        { resourceId: RESOURCE.GASOLINE, qty: 4 },
+        { resourceId: RESOURCE.THERMITE, qty: 1 },
+      ],
       stoke: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
     },
   },

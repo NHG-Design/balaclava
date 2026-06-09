@@ -577,13 +577,11 @@
     },
     {
       scenarioName: "Body of Evidence",
-      payout: 12e4,
+      payout: 105e3,
       actions: {
         ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
-        place: [
-          { resourceId: RESOURCE.GASOLINE, qty: 3 },
-          { resourceId: RESOURCE.MAGNESIUM, qty: 1 }
-        ]
+        place: [{ resourceId: RESOURCE.GASOLINE, qty: 4 }],
+        stoke: [{ resourceId: RESOURCE.POTASSIUM_NITRATE, qty: 1 }]
       }
     },
     {
@@ -762,7 +760,10 @@
       payout: 15e4,
       actions: {
         ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
-        place: [{ resourceId: RESOURCE.GASOLINE, qty: 4 }],
+        place: [
+          { resourceId: RESOURCE.GASOLINE, qty: 4 },
+          { resourceId: RESOURCE.THERMITE, qty: 1 }
+        ],
         stoke: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }]
       }
     },

@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        Torn Arsonist's Ledger
 // @namespace   https://greasyfork.org/en/users/942572-yukio-mizsima
-// @version     1.0.3
+// @version     1.0.4
 // @description Arson profit-per-nerve calculator and scenario guide for Torn's Crimes page
 // @icon        https://www.google.com/s2/favicons?sz=64&domain=torn.com
 // @author      Yukio [906148]
@@ -18,7 +18,7 @@
 "use strict";
 (() => {
   // src/data/scenarios-version.ts
-  var SCENARIOS_VERSION = "ef964bbd1398";
+  var SCENARIOS_VERSION = "62485e76b64c";
 
   // src/data/catalog.ts
   var CATALOG_UPDATED = "2026-06-08";
@@ -597,13 +597,11 @@
     },
     {
       scenarioName: "Body of Evidence",
-      payout: 12e4,
+      payout: 105e3,
       actions: {
         ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
-        place: [
-          { resourceId: RESOURCE.GASOLINE, qty: 3 },
-          { resourceId: RESOURCE.MAGNESIUM, qty: 1 }
-        ]
+        place: [{ resourceId: RESOURCE.GASOLINE, qty: 4 }],
+        stoke: [{ resourceId: RESOURCE.POTASSIUM_NITRATE, qty: 1 }]
       }
     },
     {
@@ -782,7 +780,10 @@
       payout: 15e4,
       actions: {
         ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
-        place: [{ resourceId: RESOURCE.GASOLINE, qty: 4 }],
+        place: [
+          { resourceId: RESOURCE.GASOLINE, qty: 4 },
+          { resourceId: RESOURCE.THERMITE, qty: 1 }
+        ],
         stoke: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }]
       }
     },
