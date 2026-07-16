@@ -49,6 +49,8 @@ export const SCENARIOS: Scenario[] = [
     actions: {
       ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
       place: [{ resourceId: RESOURCE.GASOLINE, qty: 1 }],
+      stoke: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 2 }],
+      stokeTime: "late",
     },
   },
 
@@ -111,7 +113,7 @@ export const SCENARIOS: Scenario[] = [
     payout: 180_000,
     actions: {
       ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
-      place: [{ resourceId: RESOURCE.GASOLINE, qty: 2 }],
+      place: [{ resourceId: RESOURCE.GASOLINE, qty: 3 }],
     },
   },
 
@@ -264,8 +266,9 @@ export const SCENARIOS: Scenario[] = [
     actions: {
       evidence: [{ resourceId: RESOURCE.TOOTHBRUSH, qty: 1 }],
       ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
-      place: [{ resourceId: RESOURCE.GASOLINE, qty: 2 }],
-      stoke: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
+      place: [{ resourceId: RESOURCE.GASOLINE, qty: 3 }],
+      stoke: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1, optional: true }],
+      stokeTime: "late",
     },
   },
 
@@ -323,12 +326,10 @@ export const SCENARIOS: Scenario[] = [
 
   {
     scenarioName: "Cache and Burn",
-    payout: 560_000,
+    payout: 510_000,
     actions: {
       ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
       place: [{ resourceId: RESOURCE.KEROSENE, qty: 4 }],
-      stoke: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
-      stokeTime: "late",
     },
   },
 
@@ -347,7 +348,7 @@ export const SCENARIOS: Scenario[] = [
     scenarioName: "Letter of the Law",
     payout: 410_000,
     actions: {
-      ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
+      ignite: [{ resourceId: RESOURCE.LIGHTER, qty: 1 }],
       place: [{ resourceId: RESOURCE.HYDROGEN, qty: 1 }],
       stoke: [{ resourceId: RESOURCE.HYDROGEN, qty: 2 }],
       stokeTime: "early",
@@ -649,7 +650,7 @@ export const SCENARIOS: Scenario[] = [
     actions: {
       place: [
         { resourceId: RESOURCE.DIESEL, qty: 2 },
-        { resourceId: RESOURCE.MAGNESIUM, qty: 2 },
+        { resourceId: RESOURCE.GASOLINE, qty: 2 },
       ],
       stoke: [{ resourceId: RESOURCE.DIESEL, qty: 1 }],
     },
@@ -916,7 +917,12 @@ export const SCENARIOS: Scenario[] = [
 
   {
     scenarioName: "Damned If You Don't",
-    payout: 130_000,
+    payout: 150_000,
+    observedPayout: {
+      min: 130_000,
+      max: 150_000,
+      runs: 2,
+    },
     actions: {
       ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
       place: [{ resourceId: RESOURCE.GASOLINE, qty: 4 }],
@@ -940,7 +946,6 @@ export const SCENARIOS: Scenario[] = [
       place: [{ resourceId: RESOURCE.DIESEL, qty: 1 }],
       stoke: [{ resourceId: RESOURCE.POTASSIUM_NITRATE, qty: 1 }],
     },
-    needsVerification: true,
   },
 
   {
@@ -1847,7 +1852,7 @@ export const SCENARIOS: Scenario[] = [
     payout: 600_000,
     actions: {
       ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
-      place: [{ resourceId: RESOURCE.GASOLINE, qty: 3 }],
+      place: [{ resourceId: RESOURCE.GASOLINE, qty: 4 }],
     },
   },
 
@@ -1895,7 +1900,7 @@ export const SCENARIOS: Scenario[] = [
     payout: 330_000,
     actions: {
       ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
-      place: [{ resourceId: RESOURCE.GASOLINE, qty: 5 }],
+      place: [{ resourceId: RESOURCE.GASOLINE, qty: 4 }],
     },
   },
 
@@ -1984,10 +1989,10 @@ export const SCENARIOS: Scenario[] = [
 
   {
     scenarioName: "The Ashes of Empire",
-    payout: 210_000,
+    payout: 160_000,
     actions: {
       ignite: [{ resourceId: RESOURCE.LIGHTER, qty: 1 }],
-      place: [{ resourceId: RESOURCE.GASOLINE, qty: 1 }],
+      place: [{ resourceId: RESOURCE.GASOLINE, qty: 2 }],
     },
   },
 
@@ -2173,7 +2178,9 @@ export const SCENARIOS: Scenario[] = [
     payout: 430_000,
     actions: {
       ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
-      place: [{ resourceId: RESOURCE.GASOLINE, qty: 4 }],
+      place: [{ resourceId: RESOURCE.GASOLINE, qty: 1 }],
+      stoke: [{ resourceId: RESOURCE.METHANE, qty: 2, optional: true }],
+      stokeTime: "late",
     },
   },
 

@@ -1,159 +1,177 @@
-import { CATALOG, RESOURCE } from '../../data/catalog.js';
-import type { ActionItem, Scenario } from '../../data/scenarios.js';
-import { type RankedScenario, type PriceMap, formatPpn } from './engine.js';
-import { BAND_COLOR } from './colors.js';
-import { el } from './dom.js';
+import { CATALOG, RESOURCE } from "../../data/catalog.js";
+import type { ActionItem, Scenario } from "../../data/scenarios.js";
+import { type RankedScenario, type PriceMap, formatPpn } from "./engine.js";
+import { BAND_COLOR } from "./colors.js";
+import { el } from "./dom.js";
 
 function row(label: string, value: string, highlight?: boolean): HTMLElement {
-    const div = el('div', 'pyro-tt-row');
-    const l = el('span', 'pyro-tt-label');
-    l.textContent = label;
-    const v = el('span', highlight ? 'pyro-tt-value pyro-tt-value--highlight' : 'pyro-tt-value');
-    v.textContent = value;
-    div.appendChild(l);
-    div.appendChild(v);
-    return div;
+  const div = el("div", "pyro-tt-row");
+  const l = el("span", "pyro-tt-label");
+  l.textContent = label;
+  const v = el(
+    "span",
+    highlight ? "pyro-tt-value pyro-tt-value--highlight" : "pyro-tt-value",
+  );
+  v.textContent = value;
+  div.appendChild(l);
+  div.appendChild(v);
+  return div;
 }
 
 function itemCost(item: ActionItem, prices: PriceMap): number | null {
-    const resource = CATALOG[item.resourceId];
-    if (!resource || resource.isTool) return null;
-    const unitPrice = prices[item.resourceId] ?? resource.defaultPrice;
-    const total = item.qty * unitPrice;
-    return total > 0 ? total : null;
+  const resource = CATALOG[item.resourceId];
+  if (!resource || resource.isTool) return null;
+  const unitPrice = prices[item.resourceId] ?? resource.defaultPrice;
+  const total = item.qty * unitPrice;
+  return total > 0 ? total : null;
 }
 
 function formatCost(total: number): string {
-    if (total >= 1_000) return `$${(total / 1_000).toFixed(1)}k`;
-    return `$${total}`;
+  if (total >= 1_000) return `$${(total / 1_000).toFixed(1)}k`;
+  return `$${total}`;
 }
 
 function formatObservedPayout(amount: number): string {
-    if (amount >= 1_000_000) return `$${(amount / 1_000_000).toFixed(2).replace(/\.00$/, '')}m`;
-    if (amount >= 1_000) return `$${(amount / 1_000).toFixed(0)}k`;
-    return `$${amount}`;
+  if (amount >= 1_000_000)
+    return `$${(amount / 1_000_000).toFixed(2).replace(/\.00$/, "")}m`;
+  if (amount >= 1_000) return `$${(amount / 1_000).toFixed(0)}k`;
+  return `$${amount}`;
 }
 
 function observedPayoutLabel(scenario: Scenario): string | null {
-    const observed = scenario.observedPayout;
-    if (!observed || observed.runs <= 0) return null;
+  const observed = scenario.observedPayout;
+  if (!observed || observed.runs <= 0) return null;
 
-    const payout =
-        observed.min === observed.max
-            ? formatObservedPayout(observed.max)
-            : `${formatObservedPayout(observed.min)}–${formatObservedPayout(observed.max)}`;
-    const runs = `${observed.runs} run${observed.runs === 1 ? '' : 's'}`;
-    return `${payout}, ${runs}`;
+  const payout =
+    observed.min === observed.max
+      ? formatObservedPayout(observed.max)
+      : `${formatObservedPayout(observed.min)}–${formatObservedPayout(observed.max)}`;
+  const runs = `${observed.runs} run${observed.runs === 1 ? "" : "s"}`;
+  return `${payout}, ${runs}`;
 }
 
-function actionSection(label: string, items: ActionItem[] | undefined, prices: PriceMap, timing?: 'early' | 'late'): HTMLElement | null {
-    if (!items || items.length === 0) return null;
-    const div = el('div', 'pyro-tt-action');
-    const labelEl = el('span', 'pyro-tt-action-label');
-    if (timing) {
-        labelEl.innerHTML = `${label} <span class="pyro-tt-timing">${timing}</span>`;
-    } else {
-        labelEl.textContent = label;
+function actionSection(
+  label: string,
+  items: ActionItem[] | undefined,
+  prices: PriceMap,
+  timing?: "early" | "late",
+): HTMLElement | null {
+  if (!items || items.length === 0) return null;
+  const div = el("div", "pyro-tt-action");
+  const labelEl = el("span", "pyro-tt-action-label");
+  if (timing) {
+    labelEl.innerHTML = `${label} <span class="pyro-tt-timing">${timing}</span>`;
+  } else {
+    labelEl.textContent = label;
+  }
+  const valueEl = el("span", "pyro-tt-action-value");
+
+  items.forEach((item, i) => {
+    if (i > 0) valueEl.appendChild(document.createTextNode(", "));
+    const name = CATALOG[item.resourceId]?.name ?? item.resourceId;
+    const prefix = item.optional ? "~" : "";
+    valueEl.appendChild(
+      document.createTextNode(`${prefix}${item.qty}× ${name}`),
+    );
+    const cost = itemCost(item, prices);
+    if (cost !== null) {
+      const costEl = el("span", "pyro-tt-item-cost");
+      costEl.textContent = ` (${formatCost(cost)})`;
+      valueEl.appendChild(costEl);
     }
-    const valueEl = el('span', 'pyro-tt-action-value');
+  });
 
-    items.forEach((item, i) => {
-        if (i > 0) valueEl.appendChild(document.createTextNode(', '));
-        const name = CATALOG[item.resourceId]?.name ?? item.resourceId;
-        const prefix = item.optional ? '~' : '';
-        valueEl.appendChild(document.createTextNode(`${prefix}${item.qty}× ${name}`));
-        const cost = itemCost(item, prices);
-        if (cost !== null) {
-            const costEl = el('span', 'pyro-tt-item-cost');
-            costEl.textContent = ` (${formatCost(cost)})`;
-            valueEl.appendChild(costEl);
-        }
-    });
-
-    div.appendChild(labelEl);
-    div.appendChild(valueEl);
-    return div;
+  div.appendChild(labelEl);
+  div.appendChild(valueEl);
+  return div;
 }
 
 function buildPrimaryBlock(
-    ranked: RankedScenario,
-    prices: PriceMap,
-    statsOnly = false,
-    options?: { showObservedPayout?: boolean },
+  ranked: RankedScenario,
+  prices: PriceMap,
+  statsOnly = false,
+  options?: { showObservedPayout?: boolean },
 ): DocumentFragment {
-    const frag = document.createDocumentFragment();
-    const { Scenario, profitPerNerve, materialCost, baseNerve } = ranked;
+  const frag = document.createDocumentFragment();
+  const { Scenario, profitPerNerve, materialCost, baseNerve } = ranked;
 
-    const header = el('div', 'pyro-tt-header');
-    const title = el('span', 'pyro-tt-title');
-    title.textContent = 'Per nerve';
-    header.appendChild(title);
-    const ppnEl = el('span', `pyro-tt-ppn pyro-tt-band--${ranked.band}`);
-    ppnEl.textContent = formatPpn(profitPerNerve);
-    header.appendChild(ppnEl);
-    if (Scenario.needsVerification) {
-        const badge = el('span', 'pyro-tt-unconfirmed');
-        badge.textContent = 'unconfirmed';
-        header.appendChild(badge);
+  const header = el("div", "pyro-tt-header");
+  const title = el("span", "pyro-tt-title");
+  title.textContent = "Per nerve";
+  header.appendChild(title);
+  const ppnEl = el("span", `pyro-tt-ppn pyro-tt-band--${ranked.band}`);
+  ppnEl.textContent = formatPpn(profitPerNerve);
+  header.appendChild(ppnEl);
+  if (Scenario.needsVerification) {
+    const badge = el("span", "pyro-tt-unconfirmed");
+    badge.textContent = "unconfirmed";
+    header.appendChild(badge);
+  }
+  frag.appendChild(header);
+
+  const stats = el("div", "pyro-tt-stats");
+  stats.appendChild(row("Payout", `~$${(Scenario.payout / 1000).toFixed(0)}k`));
+  stats.appendChild(row("Cost", `~$${(materialCost / 1000).toFixed(1)}k`));
+  stats.appendChild(row("Nerve", String(baseNerve)));
+  frag.appendChild(stats);
+
+  if (options?.showObservedPayout !== false) {
+    const observed = observedPayoutLabel(Scenario);
+    if (observed) {
+      const observedRow = el("div", "pyro-tt-observed");
+      observedRow.textContent = `Observed ${observed}`;
+      frag.appendChild(observedRow);
     }
-    frag.appendChild(header);
+  }
 
-    const stats = el('div', 'pyro-tt-stats');
-    stats.appendChild(row('Payout', `~$${(Scenario.payout / 1000).toFixed(0)}k`));
-    stats.appendChild(row('Cost',   `~$${(materialCost / 1000).toFixed(1)}k`));
-    stats.appendChild(row('Nerve',  String(baseNerve)));
-    frag.appendChild(stats);
+  if (statsOnly) return frag;
 
-    if (options?.showObservedPayout !== false) {
-        const observed = observedPayoutLabel(Scenario);
-        if (observed) {
-            const observedRow = el('div', 'pyro-tt-observed');
-            observedRow.textContent = `Observed ${observed}`;
-            frag.appendChild(observedRow);
-        }
-    }
+  frag.appendChild(el("hr", "pyro-tt-divider"));
 
-    if (statsOnly) return frag;
+  const { evidence, place, stoke, stokeTime, dampen, dampenTime } =
+    Scenario.actions;
+  const ignite = Scenario.actions.ignite ?? [
+    { resourceId: RESOURCE.LIGHTER, qty: 1 },
+  ];
+  const actionOrder: [
+    string,
+    ActionItem[] | undefined,
+    "early" | "late" | undefined,
+  ][] = [
+    ["Evidence", evidence, undefined],
+    ["Place", place, undefined],
+    ["Ignite", ignite, undefined],
+    ["Stoke", stoke, stokeTime],
+    ["Dampen", dampen, dampenTime],
+  ];
+  for (const [label, items, timing] of actionOrder) {
+    const s = actionSection(label, items, prices, timing);
+    if (s) frag.appendChild(s);
+  }
 
-    frag.appendChild(el('hr', 'pyro-tt-divider'));
+  if (Scenario.notes) {
+    const note = el("div", "pyro-tt-notes");
+    note.textContent = Scenario.notes;
+    frag.appendChild(note);
+  }
 
-    const { evidence, place, stoke, stokeTime, dampen, dampenTime } = Scenario.actions;
-    const ignite = Scenario.actions.ignite ?? [{ resourceId: RESOURCE.LIGHTER, qty: 1 }];
-    const actionOrder: [string, ActionItem[] | undefined, 'early' | 'late' | undefined][] = [
-        ['Evidence', evidence,  undefined],
-        ['Place',    place,     undefined],
-        ['Ignite',   ignite,    undefined],
-        ['Stoke',    stoke,     stokeTime],
-        ['Dampen',   dampen,    dampenTime],
-    ];
-    for (const [label, items, timing] of actionOrder) {
-        const s = actionSection(label, items, prices, timing);
-        if (s) frag.appendChild(s);
-    }
-
-    if (Scenario.notes) {
-        const note = el('div', 'pyro-tt-notes');
-        note.textContent = Scenario.notes;
-        frag.appendChild(note);
-    }
-
-    return frag;
+  return frag;
 }
 
 export function buildTooltipContent(
-    ranked: RankedScenario | null,
-    prices: PriceMap,
-    statsOnly = false,
-    options?: { showObservedPayout?: boolean },
+  ranked: RankedScenario | null,
+  prices: PriceMap,
+  statsOnly = false,
+  options?: { showObservedPayout?: boolean },
 ): HTMLElement {
-    const root = el('div', 'pyro-tt');
-    if (!ranked) return root;
-    root.appendChild(buildPrimaryBlock(ranked, prices, statsOnly, options));
-    return root;
+  const root = el("div", "pyro-tt");
+  if (!ranked) return root;
+  root.appendChild(buildPrimaryBlock(ranked, prices, statsOnly, options));
+  return root;
 }
 
 export function buildTooltipStyles(): string {
-    return `
+  return `
 .pyro-tt {
     font-size: 12px;
     line-height: 1.5;
@@ -225,8 +243,12 @@ export function buildTooltipStyles(): string {
 }
 .pyro-tt-timing {
     font-size: 9px;
-    opacity: 0.55;
     margin-left: 4px;
+    background-color: oklch(0.9 0 0);
+    color: oklch(0.23 0 0);
+    font-weight: 700;
+    padding: 0 2px;
+    border-radius: 2px;
 }
 .pyro-tt-action-value {
     font-size: 11px;

@@ -1,4 +1,4 @@
-import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { mkdirSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import process from 'node:process';
 
@@ -8,7 +8,7 @@ import { OBSERVED_PAYOUTS } from '../src/data/scenario-observations.js';
 import { calcMaterialCost, calcNerve, calcProfitPerNerve } from '../src/userscripts/arsonists-ledger/engine.js';
 import { SCENARIOS, type ActionItem, type Scenario } from '../src/data/scenarios.js';
 
-type SourceLabel = 'cookbook-1' | 'cookbook-2';
+type SourceLabel = string;
 type SupportStatus = 'supported' | 'unsupported' | 'missing';
 type Recommendation = 'add_missing' | 'investigate_conflict' | 'validate_consensus' | 'validate_payout_only';
 
@@ -106,11 +106,15 @@ interface ReportPayload {
     unsupportedCurrentMatches: ScenarioComparison[];
 }
 
-const DEFAULT_CSVS = [
-    path.join('plans', 'arson', 'scenarios', 'arson_cookbook-1.csv'),
-    path.join('plans', 'arson', 'scenarios', 'arson_cookbook-2.csv'),
-];
+const DEFAULT_COOKBOOKS_DIR = path.join('plans', 'arson', 'scenarios', 'cookbooks');
 const DEFAULT_REPORT_DIR = path.join('reports', 'userscripts', 'arsonists-ledger');
+
+function discoverCookbookCsvs(dir: string): string[] {
+    return readdirSync(dir)
+        .filter((f: string) => f.endsWith('.csv'))
+        .sort()
+        .map((f: string) => path.join(dir, f));
+}
 
 const RESOURCE_BY_NAME = new Map<string, ResourceId>(
     Object.values(CATALOG).map((resource) => [normalizeName(resource.name), resource.id]),
@@ -159,7 +163,7 @@ function parseArgs(argv: string[]): CliOptions {
     }
 
     return {
-        csvPaths: csvPaths.length > 0 ? csvPaths : DEFAULT_CSVS,
+        csvPaths: csvPaths.length > 0 ? csvPaths : discoverCookbookCsvs(DEFAULT_COOKBOOKS_DIR),
         reportDir,
         writeReport,
     };
@@ -295,7 +299,7 @@ function variantSignature(actions: ParsedRecipeActions): string {
 }
 
 function sourceLabelFromPath(csvPath: string): SourceLabel {
-    return csvPath.includes('cookbook-2') ? 'cookbook-2' : 'cookbook-1';
+    return path.basename(csvPath, '.csv');
 }
 
 function buildCookbookVariants(csvPath: string): CookbookVariant[] {

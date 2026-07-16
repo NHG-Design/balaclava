@@ -287,8 +287,12 @@ function buildConsensusReplacements(
         const node = scenarioNodes.get(match.scenarioName);
         if (!current || !node) continue;
 
+        const best = bestCookbookVariant(match.variants);
+        const allSteps = [...best.recipeActions.place, ...best.recipeActions.stoke, ...best.recipeActions.dampen];
+        if (allSteps.some((step) => step.unknown || !step.resourceId)) continue;
+
         const original = sourceText.slice(node.getStart(sourceFile), node.getEnd());
-        const updatedPayout = bestCookbookVariant(match.variants).reward.toLocaleString('en-US').replace(/,/g, '_');
+        const updatedPayout = best.reward.toLocaleString('en-US').replace(/,/g, '_');
         const payoutMatch = original.match(/payout:\s*[0-9_]+,/);
         const actionsMatch = original.match(/actions:\s*\{[\s\S]*?\n    \}/);
         if (!payoutMatch || !actionsMatch) {
@@ -296,7 +300,7 @@ function buildConsensusReplacements(
         }
 
         let next = original.replace(payoutMatch[0], `payout: ${updatedPayout},`);
-        next = next.replace(actionsMatch[0], `actions: ${renderUpdatedActions(current, bestCookbookVariant(match.variants).recipeActions)}`);
+        next = next.replace(actionsMatch[0], `actions: ${renderUpdatedActions(current, best.recipeActions)}`);
         next = next.replace(/\n\s*needsVerification:\s*true,/, '');
 
         replacements.push({
