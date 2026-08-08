@@ -25,6 +25,10 @@ export interface SettingsCtx {
     getApiLastRefresh(): number;
     getActiveTab(): string;
     getShowObservedPayouts(): boolean;
+    getShowOptionalBadges(): boolean;
+    getShowResourcePrices(): boolean;
+    getShowScenarioName(): boolean;
+    getStackResources(): boolean;
 
     setManualPrice(id: ResourceId, price: number): void;
     clearManualPrices(): void;
@@ -35,6 +39,10 @@ export interface SettingsCtx {
     setApiKey(key: string): void;
     setActiveTab(tab: string): void;
     setShowObservedPayouts(show: boolean): void;
+    setShowOptionalBadges(show: boolean): void;
+    setShowResourcePrices(show: boolean): void;
+    setShowScenarioName(show: boolean): void;
+    setStackResources(stack: boolean): void;
 }
 
 // ---------------------------------------------------------------------------
@@ -500,29 +508,66 @@ function buildThresholdsTab(ctx: SettingsCtx): HTMLElement {
         },
     ));
     root.appendChild(thresholdsGroup);
+    return root;
+}
 
-    const divider = el('hr', 'pyro-s-divider');
-    root.appendChild(divider);
+// ---------------------------------------------------------------------------
+// Visuals tab
+// ---------------------------------------------------------------------------
 
-    const tooltipGroup = el('div', 'pyro-s-group');
-    const tooltipTitle = el('div', 'pyro-s-group-title');
-    tooltipTitle.textContent = 'Tooltip';
-    tooltipGroup.appendChild(tooltipTitle);
-
-    const observedToggle = el('label', 'pyro-s-check-row');
-    const observedCheckbox = document.createElement('input');
-    observedCheckbox.type = 'checkbox';
-    observedCheckbox.checked = ctx.getShowObservedPayouts();
-    observedCheckbox.addEventListener('change', () => {
-        ctx.setShowObservedPayouts(observedCheckbox.checked);
+function checkboxRow(
+    label: string,
+    getVal: () => boolean,
+    setVal: (v: boolean) => void,
+): HTMLElement {
+    const toggle = el('label', 'pyro-s-check-row');
+    const checkbox = document.createElement('input');
+    checkbox.type = 'checkbox';
+    checkbox.checked = getVal();
+    checkbox.addEventListener('change', () => {
+        setVal(checkbox.checked);
     });
-    const observedLabel = el('span');
-    observedLabel.textContent = 'Show observed payout and runs';
-    observedToggle.appendChild(observedCheckbox);
-    observedToggle.appendChild(observedLabel);
-    tooltipGroup.appendChild(observedToggle);
+    const lbl = el('span');
+    lbl.textContent = label;
+    toggle.appendChild(checkbox);
+    toggle.appendChild(lbl);
+    return toggle;
+}
 
-    root.appendChild(tooltipGroup);
+function buildVisualsTab(ctx: SettingsCtx): HTMLElement {
+    const root = el('div');
+    const group = el('div', 'pyro-s-group');
+    const title = el('div', 'pyro-s-group-title');
+    title.textContent = 'Tooltip elements';
+    group.appendChild(title);
+
+    group.appendChild(checkboxRow(
+        'Show scenario name',
+        ctx.getShowScenarioName,
+        ctx.setShowScenarioName,
+    ));
+    group.appendChild(checkboxRow(
+        'Show "optional" badges',
+        ctx.getShowOptionalBadges,
+        ctx.setShowOptionalBadges,
+    ));
+    group.appendChild(checkboxRow(
+        'Stack multiple resources on separate lines',
+        ctx.getStackResources,
+        ctx.setStackResources,
+    ));
+    group.appendChild(checkboxRow(
+        'Show resource prices',
+        ctx.getShowResourcePrices,
+        ctx.setShowResourcePrices,
+    ));
+    group.appendChild(checkboxRow(
+        'Show observed payout and runs',
+        ctx.getShowObservedPayouts,
+        ctx.setShowObservedPayouts,
+    ));
+
+    root.appendChild(group);
     return root;
 }
 
@@ -604,12 +649,13 @@ function formatTimestamp(ts: number): string {
 // Tab switching
 // ---------------------------------------------------------------------------
 
-type TabId = 'prices' | 'thresholds' | 'api';
+type TabId = 'prices' | 'thresholds' | 'visuals' | 'api';
 
 function buildTabBar(activeId: string, onSwitch: (id: TabId) => void): HTMLElement {
     const tabs: Array<{ id: TabId; label: string }> = [
         { id: 'prices',     label: 'Prices'     },
         { id: 'thresholds', label: 'Thresholds' },
+        { id: 'visuals',    label: 'Visuals'    },
         { id: 'api',        label: 'API'        },
     ];
     const bar = el('div', 'pyro-tab-bar');
@@ -638,6 +684,7 @@ function buildTabContent(tabId: string, ctx: SettingsCtx, panel: HTMLElement): H
     switch (tabId) {
         case 'prices':     return buildPricesTab(ctx, panel);
         case 'thresholds': return buildThresholdsTab(ctx);
+        case 'visuals':    return buildVisualsTab(ctx);
         case 'api':        return buildApiTab(ctx);
         default:           return buildPricesTab(ctx, panel);
     }

@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        Torn Arsonist's Ledger
 // @namespace   https://greasyfork.org/en/users/942572-yukio-mizsima
-// @version     1.0.5
+// @version     1.0.6
 // @description Arson profit-per-nerve calculator and scenario guide for Torn's Crimes page
 // @icon        https://www.google.com/s2/favicons?sz=64&domain=torn.com
 // @author      Yukio [906148]
@@ -18,10 +18,10 @@
 "use strict";
 (() => {
   // src/data/scenarios-version.ts
-  var SCENARIOS_VERSION = "2ce2744ab756";
+  var SCENARIOS_VERSION = "5e016068c75c";
 
   // src/data/catalog.ts
-  var CATALOG_UPDATED = "2026-06-09";
+  var CATALOG_UPDATED = "2026-08-08";
   var RESOURCE = {
     // Liquids
     GASOLINE: "gasoline",
@@ -70,49 +70,49 @@
   };
   var CATALOG = {
     // Liquids
-    [RESOURCE.GASOLINE]: { id: RESOURCE.GASOLINE, name: "Gasoline", kind: "fuel", category: "liquid", isTool: false, defaultPrice: 553, tornId: 172 },
-    [RESOURCE.DIESEL]: { id: RESOURCE.DIESEL, name: "Diesel", kind: "fuel", category: "liquid", isTool: false, defaultPrice: 5013, tornId: 1458 },
-    [RESOURCE.KEROSENE]: { id: RESOURCE.KEROSENE, name: "Kerosene", kind: "fuel", category: "liquid", isTool: false, defaultPrice: 10157, tornId: 1457 },
+    [RESOURCE.GASOLINE]: { id: RESOURCE.GASOLINE, name: "Gasoline", kind: "fuel", category: "liquid", isTool: false, defaultPrice: 495, tornId: 172 },
+    [RESOURCE.DIESEL]: { id: RESOURCE.DIESEL, name: "Diesel", kind: "fuel", category: "liquid", isTool: false, defaultPrice: 4849, tornId: 1458 },
+    [RESOURCE.KEROSENE]: { id: RESOURCE.KEROSENE, name: "Kerosene", kind: "fuel", category: "liquid", isTool: false, defaultPrice: 19497, tornId: 1457 },
     // Solids
-    [RESOURCE.MAGNESIUM]: { id: RESOURCE.MAGNESIUM, name: "Magnesium Shavings", kind: "fuel", category: "solid", isTool: false, defaultPrice: 60703, tornId: 1462 },
-    [RESOURCE.THERMITE]: { id: RESOURCE.THERMITE, name: "Thermite", kind: "fuel", category: "solid", isTool: false, defaultPrice: 107115, tornId: 1461 },
-    [RESOURCE.POTASSIUM_NITRATE]: { id: RESOURCE.POTASSIUM_NITRATE, name: "Potassium Nitrate", kind: "fuel", category: "solid", isTool: false, defaultPrice: 49276, tornId: 1264 },
+    [RESOURCE.MAGNESIUM]: { id: RESOURCE.MAGNESIUM, name: "Magnesium Shavings", kind: "fuel", category: "solid", isTool: false, defaultPrice: 63370, tornId: 1462 },
+    [RESOURCE.THERMITE]: { id: RESOURCE.THERMITE, name: "Thermite", kind: "fuel", category: "solid", isTool: false, defaultPrice: 110360, tornId: 1461 },
+    [RESOURCE.POTASSIUM_NITRATE]: { id: RESOURCE.POTASSIUM_NITRATE, name: "Potassium Nitrate", kind: "fuel", category: "solid", isTool: false, defaultPrice: 51684, tornId: 1264 },
     // Gases
-    [RESOURCE.OXYGEN]: { id: RESOURCE.OXYGEN, name: "Oxygen Tank", kind: "fuel", category: "gaseous", isTool: false, defaultPrice: 24277, tornId: 1219 },
-    [RESOURCE.METHANE]: { id: RESOURCE.METHANE, name: "Methane Tank", kind: "fuel", category: "gaseous", isTool: false, defaultPrice: 14075, tornId: 1460 },
-    [RESOURCE.HYDROGEN]: { id: RESOURCE.HYDROGEN, name: "Hydrogen Tank", kind: "fuel", category: "gaseous", isTool: false, defaultPrice: 14088, tornId: 1459 },
+    [RESOURCE.OXYGEN]: { id: RESOURCE.OXYGEN, name: "Oxygen Tank", kind: "fuel", category: "gaseous", isTool: false, defaultPrice: 26975, tornId: 1219 },
+    [RESOURCE.METHANE]: { id: RESOURCE.METHANE, name: "Methane Tank", kind: "fuel", category: "gaseous", isTool: false, defaultPrice: 19761, tornId: 1460 },
+    [RESOURCE.HYDROGEN]: { id: RESOURCE.HYDROGEN, name: "Hydrogen Tank", kind: "fuel", category: "gaseous", isTool: false, defaultPrice: 19956, tornId: 1459 },
     // Igniters
     [RESOURCE.LIGHTER]: { id: RESOURCE.LIGHTER, name: "Windproof Lighter", kind: "tool", category: "igniter", isTool: true, defaultPrice: 0, tornId: 544 },
-    [RESOURCE.MOLOTOV]: { id: RESOURCE.MOLOTOV, name: "Molotov Cocktail", kind: "tool", category: "igniter", isTool: false, defaultPrice: 85296, tornId: 742 },
+    [RESOURCE.MOLOTOV]: { id: RESOURCE.MOLOTOV, name: "Molotov Cocktail", kind: "tool", category: "igniter", isTool: false, defaultPrice: 76922, tornId: 742 },
     [RESOURCE.FLAMETHROWER]: { id: RESOURCE.FLAMETHROWER, name: "Flamethrower", kind: "tool", category: "igniter", isTool: true, defaultPrice: 0 },
     // Dampeners
     [RESOURCE.BLANKET]: { id: RESOURCE.BLANKET, name: "Blanket", kind: "tool", category: "dampener", isTool: true, defaultPrice: 0 },
-    [RESOURCE.SAND]: { id: RESOURCE.SAND, name: "Sand", kind: "tool", category: "dampener", isTool: false, defaultPrice: 30752, tornId: 833 },
+    [RESOURCE.SAND]: { id: RESOURCE.SAND, name: "Sand", kind: "tool", category: "dampener", isTool: false, defaultPrice: 27302, tornId: 833 },
     [RESOURCE.FIRE_EXTINGUISHER]: { id: RESOURCE.FIRE_EXTINGUISHER, name: "Fire Extinguisher", kind: "tool", category: "dampener", isTool: true, defaultPrice: 0, tornId: 1463 },
     // Evidence
-    [RESOURCE.AMMONIA]: { id: RESOURCE.AMMONIA, name: "Ammonia", kind: "evidence", category: "misc", isTool: false, defaultPrice: 2012, tornId: 1248 },
-    [RESOURCE.CANNABIS]: { id: RESOURCE.CANNABIS, name: "Cannabis", kind: "evidence", category: "misc", isTool: false, defaultPrice: 6029, tornId: 196 },
-    [RESOURCE.COMPASS]: { id: RESOURCE.COMPASS, name: "Compass", kind: "evidence", category: "misc", isTool: false, defaultPrice: 14159, tornId: 407 },
-    [RESOURCE.DIAMOND_RING]: { id: RESOURCE.DIAMOND_RING, name: "Diamond Ring", kind: "evidence", category: "misc", isTool: false, defaultPrice: 2626, tornId: 54 },
-    [RESOURCE.ELEPHANT_STATUE]: { id: RESOURCE.ELEPHANT_STATUE, name: "Elephant Statue", kind: "evidence", category: "misc", isTool: false, defaultPrice: 4759, tornId: 280 },
-    [RESOURCE.FAMILY_PHOTO]: { id: RESOURCE.FAMILY_PHOTO, name: "Family Photo", kind: "evidence", category: "misc", isTool: false, defaultPrice: 773, tornId: 1089 },
-    [RESOURCE.GLITTER_BOMB]: { id: RESOURCE.GLITTER_BOMB, name: "Glitter Bomb", kind: "evidence", category: "misc", isTool: false, defaultPrice: 627194, tornId: 1294 },
-    [RESOURCE.GOLD_TOOTH]: { id: RESOURCE.GOLD_TOOTH, name: "Gold Tooth", kind: "evidence", category: "misc", isTool: false, defaultPrice: 14508, tornId: 1282 },
-    [RESOURCE.GRENADE]: { id: RESOURCE.GRENADE, name: "Grenade", kind: "evidence", category: "misc", isTool: false, defaultPrice: 6960, tornId: 220 },
-    [RESOURCE.HARD_DRIVE]: { id: RESOURCE.HARD_DRIVE, name: "Hard Drive", kind: "evidence", category: "misc", isTool: false, defaultPrice: 255, tornId: 45 },
-    [RESOURCE.JADE_BUDDHA]: { id: RESOURCE.JADE_BUDDHA, name: "Jade Buddha", kind: "evidence", category: "misc", isTool: false, defaultPrice: 10228, tornId: 275 },
-    [RESOURCE.KABUKI_MASK]: { id: RESOURCE.KABUKI_MASK, name: "Kabuki Mask", kind: "evidence", category: "misc", isTool: false, defaultPrice: 17169, tornId: 278 },
-    [RESOURCE.LIPSTICK]: { id: RESOURCE.LIPSTICK, name: "Lipstick", kind: "evidence", category: "misc", isTool: false, defaultPrice: 202, tornId: 1085 },
-    [RESOURCE.MAYAN_STATUE]: { id: RESOURCE.MAYAN_STATUE, name: "Mayan Statue", kind: "evidence", category: "misc", isTool: false, defaultPrice: 2315, tornId: 259 },
-    [RESOURCE.OPIUM]: { id: RESOURCE.OPIUM, name: "Opium", kind: "evidence", category: "misc", isTool: false, defaultPrice: 26819, tornId: 200 },
-    [RESOURCE.PCP]: { id: RESOURCE.PCP, name: "PCP", kind: "evidence", category: "misc", isTool: false, defaultPrice: 3007, tornId: 201 },
-    [RESOURCE.PELE_CHARM]: { id: RESOURCE.PELE_CHARM, name: "Pele Charm", kind: "evidence", category: "misc", isTool: false, defaultPrice: 3296, tornId: 265 },
-    [RESOURCE.RAW_IVORY]: { id: RESOURCE.RAW_IVORY, name: "Raw Ivory", kind: "evidence", category: "misc", isTool: false, defaultPrice: 69988, tornId: 358 },
-    [RESOURCE.STAPLER]: { id: RESOURCE.STAPLER, name: "Stapler", kind: "evidence", category: "misc", isTool: false, defaultPrice: 6753, tornId: 1286 },
-    [RESOURCE.STICK_GRENADE]: { id: RESOURCE.STICK_GRENADE, name: "Stick Grenade", kind: "evidence", category: "misc", isTool: false, defaultPrice: 13911, tornId: 221 },
-    [RESOURCE.SUMO_DOLL]: { id: RESOURCE.SUMO_DOLL, name: "Sumo Doll", kind: "evidence", category: "misc", isTool: false, defaultPrice: 15307, tornId: 427 },
-    [RESOURCE.SYRINGE]: { id: RESOURCE.SYRINGE, name: "Syringe", kind: "evidence", category: "misc", isTool: false, defaultPrice: 511, tornId: 1094 },
-    [RESOURCE.TOOTHBRUSH]: { id: RESOURCE.TOOTHBRUSH, name: "Toothbrush", kind: "evidence", category: "misc", isTool: false, defaultPrice: 2772, tornId: 1272 }
+    [RESOURCE.AMMONIA]: { id: RESOURCE.AMMONIA, name: "Ammonia", kind: "evidence", category: "misc", isTool: false, defaultPrice: 2101, tornId: 1248 },
+    [RESOURCE.CANNABIS]: { id: RESOURCE.CANNABIS, name: "Cannabis", kind: "evidence", category: "misc", isTool: false, defaultPrice: 6134, tornId: 196 },
+    [RESOURCE.COMPASS]: { id: RESOURCE.COMPASS, name: "Compass", kind: "evidence", category: "misc", isTool: false, defaultPrice: 15297, tornId: 407 },
+    [RESOURCE.DIAMOND_RING]: { id: RESOURCE.DIAMOND_RING, name: "Diamond Ring", kind: "evidence", category: "misc", isTool: false, defaultPrice: 2648, tornId: 54 },
+    [RESOURCE.ELEPHANT_STATUE]: { id: RESOURCE.ELEPHANT_STATUE, name: "Elephant Statue", kind: "evidence", category: "misc", isTool: false, defaultPrice: 4099, tornId: 280 },
+    [RESOURCE.FAMILY_PHOTO]: { id: RESOURCE.FAMILY_PHOTO, name: "Family Photo", kind: "evidence", category: "misc", isTool: false, defaultPrice: 602, tornId: 1089 },
+    [RESOURCE.GLITTER_BOMB]: { id: RESOURCE.GLITTER_BOMB, name: "Glitter Bomb", kind: "evidence", category: "misc", isTool: false, defaultPrice: 363182, tornId: 1294 },
+    [RESOURCE.GOLD_TOOTH]: { id: RESOURCE.GOLD_TOOTH, name: "Gold Tooth", kind: "evidence", category: "misc", isTool: false, defaultPrice: 14015, tornId: 1282 },
+    [RESOURCE.GRENADE]: { id: RESOURCE.GRENADE, name: "Grenade", kind: "evidence", category: "misc", isTool: false, defaultPrice: 6983, tornId: 220 },
+    [RESOURCE.HARD_DRIVE]: { id: RESOURCE.HARD_DRIVE, name: "Hard Drive", kind: "evidence", category: "misc", isTool: false, defaultPrice: 303, tornId: 45 },
+    [RESOURCE.JADE_BUDDHA]: { id: RESOURCE.JADE_BUDDHA, name: "Jade Buddha", kind: "evidence", category: "misc", isTool: false, defaultPrice: 10383, tornId: 275 },
+    [RESOURCE.KABUKI_MASK]: { id: RESOURCE.KABUKI_MASK, name: "Kabuki Mask", kind: "evidence", category: "misc", isTool: false, defaultPrice: 28127, tornId: 278 },
+    [RESOURCE.LIPSTICK]: { id: RESOURCE.LIPSTICK, name: "Lipstick", kind: "evidence", category: "misc", isTool: false, defaultPrice: 205, tornId: 1085 },
+    [RESOURCE.MAYAN_STATUE]: { id: RESOURCE.MAYAN_STATUE, name: "Mayan Statue", kind: "evidence", category: "misc", isTool: false, defaultPrice: 2726, tornId: 259 },
+    [RESOURCE.OPIUM]: { id: RESOURCE.OPIUM, name: "Opium", kind: "evidence", category: "misc", isTool: false, defaultPrice: 25242, tornId: 200 },
+    [RESOURCE.PCP]: { id: RESOURCE.PCP, name: "PCP", kind: "evidence", category: "misc", isTool: false, defaultPrice: 2507, tornId: 201 },
+    [RESOURCE.PELE_CHARM]: { id: RESOURCE.PELE_CHARM, name: "Pele Charm", kind: "evidence", category: "misc", isTool: false, defaultPrice: 3031, tornId: 265 },
+    [RESOURCE.RAW_IVORY]: { id: RESOURCE.RAW_IVORY, name: "Raw Ivory", kind: "evidence", category: "misc", isTool: false, defaultPrice: 69699, tornId: 358 },
+    [RESOURCE.STAPLER]: { id: RESOURCE.STAPLER, name: "Stapler", kind: "evidence", category: "misc", isTool: false, defaultPrice: 6583, tornId: 1286 },
+    [RESOURCE.STICK_GRENADE]: { id: RESOURCE.STICK_GRENADE, name: "Stick Grenade", kind: "evidence", category: "misc", isTool: false, defaultPrice: 13605, tornId: 221 },
+    [RESOURCE.SUMO_DOLL]: { id: RESOURCE.SUMO_DOLL, name: "Sumo Doll", kind: "evidence", category: "misc", isTool: false, defaultPrice: 13498, tornId: 427 },
+    [RESOURCE.SYRINGE]: { id: RESOURCE.SYRINGE, name: "Syringe", kind: "evidence", category: "misc", isTool: false, defaultPrice: 484, tornId: 1094 },
+    [RESOURCE.TOOTHBRUSH]: { id: RESOURCE.TOOTHBRUSH, name: "Toothbrush", kind: "evidence", category: "misc", isTool: false, defaultPrice: 3472, tornId: 1272 }
   };
 
   // src/data/scenarios.ts
@@ -122,9 +122,19 @@
       payout: 22e4,
       actions: {
         ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
-        place: [{ resourceId: RESOURCE.GASOLINE, qty: 1 }],
-        stoke: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 2 }],
+        place: [{ resourceId: RESOURCE.DIESEL, qty: 1 }],
+        stoke: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1, optional: true }],
         stokeTime: "late"
+      }
+    },
+    {
+      scenarioName: "A Thong of Lice and Fire",
+      payout: 22e4,
+      actions: {
+        ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
+        place: [{ resourceId: RESOURCE.HYDROGEN, qty: 1 }],
+        stoke: [{ resourceId: RESOURCE.METHANE, qty: 1 }],
+        stokeTime: "early"
       }
     },
     {
@@ -624,12 +634,12 @@
     },
     {
       scenarioName: "Bright Spark",
-      payout: 27e4,
+      payout: 16e4,
       actions: {
         ignite: [{ resourceId: RESOURCE.LIGHTER, qty: 1 }],
         place: [{ resourceId: RESOURCE.HYDROGEN, qty: 1 }],
         stoke: [{ resourceId: RESOURCE.METHANE, qty: 1 }],
-        stokeTime: "late"
+        stokeTime: "52s"
       }
     },
     {
@@ -661,15 +671,13 @@
     },
     {
       scenarioName: "Burned Cookies",
-      payout: 81e3,
+      payout: 31e4,
       actions: {
-        place: [
-          { resourceId: RESOURCE.DIESEL, qty: 2 },
-          { resourceId: RESOURCE.GASOLINE, qty: 2 }
-        ],
-        stoke: [{ resourceId: RESOURCE.DIESEL, qty: 1 }]
-      },
-      needsVerification: true
+        place: [{ resourceId: RESOURCE.DIESEL, qty: 8 }],
+        ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
+        stoke: [{ resourceId: RESOURCE.OXYGEN, qty: 1 }],
+        stokeTime: "early"
+      }
     },
     {
       scenarioName: "Burning Liability",
@@ -702,7 +710,9 @@
       payout: 19e4,
       actions: {
         ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
-        place: [{ resourceId: RESOURCE.GASOLINE, qty: 5 }]
+        place: [{ resourceId: RESOURCE.GASOLINE, qty: 6 }],
+        stoke: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
+        stokeTime: "late"
       }
     },
     {
@@ -1562,15 +1572,14 @@
     },
     {
       scenarioName: "Point of No Return",
-      payout: 9e4,
+      payout: 16e4,
       actions: {
         place: [
-          { resourceId: RESOURCE.GASOLINE, qty: 1 },
+          { resourceId: RESOURCE.GASOLINE, qty: 3 },
           { resourceId: RESOURCE.THERMITE, qty: 1 }
         ],
-        stoke: [{ resourceId: RESOURCE.MAGNESIUM, qty: 2 }]
-      },
-      needsVerification: true
+        ignite: [{ resourceId: RESOURCE.LIGHTER, qty: 1 }]
+      }
     },
     {
       scenarioName: "Political Firestorm",
@@ -1752,10 +1761,12 @@
     },
     {
       scenarioName: "Smoke Screen",
-      payout: 6e5,
+      payout: 55e4,
       actions: {
         ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
-        place: [{ resourceId: RESOURCE.GASOLINE, qty: 4 }]
+        place: [{ resourceId: RESOURCE.GASOLINE, qty: 3 }],
+        stoke: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1, optional: true }],
+        stokeTime: "late"
       }
     },
     {
@@ -1798,7 +1809,10 @@
       payout: 33e4,
       actions: {
         ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
-        place: [{ resourceId: RESOURCE.GASOLINE, qty: 4 }]
+        place: [
+          { resourceId: RESOURCE.GASOLINE, qty: 2 },
+          { resourceId: RESOURCE.DIESEL, qty: 1 }
+        ]
       }
     },
     {
@@ -1911,11 +1925,11 @@
     },
     {
       scenarioName: "The Fat is in the Fire",
-      payout: 36e4,
+      payout: 34e4,
       actions: {
         ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
-        place: [{ resourceId: RESOURCE.GASOLINE, qty: 5 }],
-        stoke: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
+        place: [{ resourceId: RESOURCE.KEROSENE, qty: 3 }],
+        stoke: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1, optional: true }],
         stokeTime: "late"
       }
     },
@@ -1980,7 +1994,7 @@
       payout: 47e4,
       actions: {
         ignite: [{ resourceId: RESOURCE.LIGHTER, qty: 1 }],
-        place: [{ resourceId: RESOURCE.KEROSENE, qty: 4 }]
+        place: [{ resourceId: RESOURCE.KEROSENE, qty: 5 }]
       }
     },
     {
@@ -2048,8 +2062,8 @@
       actions: {
         ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
         place: [{ resourceId: RESOURCE.GASOLINE, qty: 1 }],
-        stoke: [{ resourceId: RESOURCE.METHANE, qty: 2, optional: true }],
-        stokeTime: "late"
+        stoke: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
+        stokeTime: "24s"
       }
     },
     {
@@ -3407,7 +3421,7 @@
     const runs = `${observed.runs} run${observed.runs === 1 ? "" : "s"}`;
     return `${payout}, ${runs}`;
   }
-  function actionSection(label, items, prices, timing) {
+  function actionSection(label, items, prices, timing, showOptionalBadges2 = true, showResourcePrices2 = true, stackResources2 = true) {
     if (!items || items.length === 0) return null;
     const div = el("div", "pyro-tt-action");
     const labelEl = el("span", "pyro-tt-action-label");
@@ -3418,18 +3432,30 @@
     }
     const valueEl = el("span", "pyro-tt-action-value");
     items.forEach((item, i) => {
-      if (i > 0) valueEl.appendChild(document.createTextNode(", "));
+      const itemEl = el("span", "pyro-tt-item");
       const name = CATALOG[item.resourceId]?.name ?? item.resourceId;
-      const prefix = item.optional ? "~" : "";
-      valueEl.appendChild(
-        document.createTextNode(`${prefix}${item.qty}\xD7 ${name}`)
+      const nameEl = el(
+        "span",
+        item.optional ? "pyro-tt-item-name pyro-tt-item-name--optional" : "pyro-tt-item-name"
       );
-      const cost = itemCost2(item, prices);
+      nameEl.textContent = `${item.qty}\xD7 ${name}`;
+      itemEl.appendChild(nameEl);
+      const cost = showResourcePrices2 ? itemCost2(item, prices) : null;
       if (cost !== null) {
         const costEl = el("span", "pyro-tt-item-cost");
         costEl.textContent = ` (${formatCost(cost)})`;
-        valueEl.appendChild(costEl);
+        itemEl.appendChild(costEl);
       }
+      if (item.optional && showOptionalBadges2) {
+        const badge = el("span", "pyro-tt-optional-badge");
+        badge.textContent = "optional";
+        itemEl.appendChild(badge);
+      }
+      if (i > 0 && !stackResources2) {
+        valueEl.appendChild(document.createTextNode(", "));
+      }
+      valueEl.appendChild(itemEl);
+      if (i < items.length - 1 && stackResources2) valueEl.appendChild(el("br"));
     });
     div.appendChild(labelEl);
     div.appendChild(valueEl);
@@ -3438,6 +3464,11 @@
   function buildPrimaryBlock(ranked, prices, statsOnly = false, options) {
     const frag = document.createDocumentFragment();
     const { Scenario, profitPerNerve, materialCost, baseNerve } = ranked;
+    if (options?.showScenarioName !== false) {
+      const nameEl = el("div", "pyro-tt-name");
+      nameEl.textContent = Scenario.scenarioName;
+      frag.appendChild(nameEl);
+    }
     const header = el("div", "pyro-tt-header");
     const title = el("span", "pyro-tt-title");
     title.textContent = "Per nerve";
@@ -3477,8 +3508,19 @@
       ["Stoke", stoke, stokeTime],
       ["Dampen", dampen, dampenTime]
     ];
+    const showOptionalBadges2 = options?.showOptionalBadges !== false;
+    const showResourcePrices2 = options?.showResourcePrices !== false;
+    const stackResources2 = options?.stackResources !== false;
     for (const [label, items, timing] of actionOrder) {
-      const s = actionSection(label, items, prices, timing);
+      const s = actionSection(
+        label,
+        items,
+        prices,
+        timing,
+        showOptionalBadges2,
+        showResourcePrices2,
+        stackResources2
+      );
       if (s) frag.appendChild(s);
     }
     if (Scenario.notes) {
@@ -3500,7 +3542,13 @@
     font-size: 12px;
     line-height: 1.5;
     min-width: 180px;
-    max-width: 240px;
+    max-width: 335px;
+}
+.pyro-tt-name {
+    font-weight: bold;
+    font-size: 12px;
+    margin-bottom: 2px;
+    color: oklch(76% 0 0);
 }
 .pyro-tt-header {
     display: flex;
@@ -3582,6 +3630,20 @@
     color: oklch(66% 0 0);
     font-size: 10px;
     font-weight: normal;
+}
+.pyro-tt-item-name--optional {
+    text-decoration: underline wavy oklch(66% 0 0);
+    text-underline-offset: 1px;
+    text-decoration-thickness: 1px;
+}
+.pyro-tt-optional-badge {
+    font-size: 9px;
+    margin-left: 4px;
+    background-color: oklch(0.9 0 0);
+    color: oklch(0.23 0 0);
+    font-weight: 700;
+    padding: 0 2px;
+    border-radius: 2px;
 }
 .pyro-tt-notes {
     margin-top: 5px;
@@ -4096,25 +4158,54 @@
       }
     ));
     root.appendChild(thresholdsGroup);
-    const divider = el("hr", "pyro-s-divider");
-    root.appendChild(divider);
-    const tooltipGroup = el("div", "pyro-s-group");
-    const tooltipTitle = el("div", "pyro-s-group-title");
-    tooltipTitle.textContent = "Tooltip";
-    tooltipGroup.appendChild(tooltipTitle);
-    const observedToggle = el("label", "pyro-s-check-row");
-    const observedCheckbox = document.createElement("input");
-    observedCheckbox.type = "checkbox";
-    observedCheckbox.checked = ctx.getShowObservedPayouts();
-    observedCheckbox.addEventListener("change", () => {
-      ctx.setShowObservedPayouts(observedCheckbox.checked);
+    return root;
+  }
+  function checkboxRow(label, getVal, setVal) {
+    const toggle = el("label", "pyro-s-check-row");
+    const checkbox = document.createElement("input");
+    checkbox.type = "checkbox";
+    checkbox.checked = getVal();
+    checkbox.addEventListener("change", () => {
+      setVal(checkbox.checked);
     });
-    const observedLabel = el("span");
-    observedLabel.textContent = "Show observed payout and runs";
-    observedToggle.appendChild(observedCheckbox);
-    observedToggle.appendChild(observedLabel);
-    tooltipGroup.appendChild(observedToggle);
-    root.appendChild(tooltipGroup);
+    const lbl = el("span");
+    lbl.textContent = label;
+    toggle.appendChild(checkbox);
+    toggle.appendChild(lbl);
+    return toggle;
+  }
+  function buildVisualsTab(ctx) {
+    const root = el("div");
+    const group = el("div", "pyro-s-group");
+    const title = el("div", "pyro-s-group-title");
+    title.textContent = "Tooltip elements";
+    group.appendChild(title);
+    group.appendChild(checkboxRow(
+      "Show scenario name",
+      ctx.getShowScenarioName,
+      ctx.setShowScenarioName
+    ));
+    group.appendChild(checkboxRow(
+      'Show "optional" badges',
+      ctx.getShowOptionalBadges,
+      ctx.setShowOptionalBadges
+    ));
+    group.appendChild(checkboxRow(
+      "Stack multiple resources on separate lines",
+      ctx.getStackResources,
+      ctx.setStackResources
+    ));
+    group.appendChild(checkboxRow(
+      "Show resource prices",
+      ctx.getShowResourcePrices,
+      ctx.setShowResourcePrices
+    ));
+    group.appendChild(checkboxRow(
+      "Show observed payout and runs",
+      ctx.getShowObservedPayouts,
+      ctx.setShowObservedPayouts
+    ));
+    root.appendChild(group);
     return root;
   }
   function buildApiTab(ctx) {
@@ -4181,6 +4272,7 @@
     const tabs = [
       { id: "prices", label: "Prices" },
       { id: "thresholds", label: "Thresholds" },
+      { id: "visuals", label: "Visuals" },
       { id: "api", label: "API" }
     ];
     const bar = el("div", "pyro-tab-bar");
@@ -4209,6 +4301,8 @@
         return buildPricesTab(ctx, panel);
       case "thresholds":
         return buildThresholdsTab(ctx);
+      case "visuals":
+        return buildVisualsTab(ctx);
       case "api":
         return buildApiTab(ctx);
       default:
@@ -4270,6 +4364,10 @@
   var KEY_THRESHOLDS = "pyroLedger.v1.thresholds";
   var KEY_ACTIVE_TAB = "pyroLedger.v1.activeTab";
   var KEY_SHOW_OBSERVED_PAYOUTS = "pyroLedger.v1.showObservedPayouts";
+  var KEY_SHOW_OPTIONAL_BADGES = "pyroLedger.v1.showOptionalBadges";
+  var KEY_SHOW_RESOURCE_PRICES = "pyroLedger.v1.showResourcePrices";
+  var KEY_SHOW_SCENARIO_NAME = "pyroLedger.v1.showScenarioName";
+  var KEY_STACK_RESOURCES = "pyroLedger.v1.stackResources";
   function store_get(key, def = "") {
     if (typeof GM_getValue !== "undefined") return GM_getValue(key, def);
     return localStorage.getItem(key) ?? def;
@@ -4294,6 +4392,7 @@
     return null;
   }
   var tooltipWarned = false;
+  var tooltipConfigured = false;
   function tryTooltip(callback) {
     const api = getTooltipAPI();
     if (!api) {
@@ -4305,6 +4404,10 @@
       }
       return;
     }
+    if (!tooltipConfigured) {
+      api.configure({ maxWidth: "335px" });
+      tooltipConfigured = true;
+    }
     callback(api);
   }
   var manualPrices = {};
@@ -4313,7 +4416,11 @@
   var apiLastRefresh = 0;
   var thresholds = { ...DEFAULT_THRESHOLDS };
   var activeTab = "prices";
-  var showObservedPayouts = true;
+  var showObservedPayouts = false;
+  var showOptionalBadges = true;
+  var showResourcePrices = true;
+  var showScenarioName = true;
+  var stackResources = true;
   var visibleMobileSection = null;
   var IOS_USER_AGENT_RE = /iPad|iPhone|iPod/i;
   function isIosDevice() {
@@ -4329,7 +4436,11 @@
     apiKey = store_get(KEY_API_KEY, "");
     activeTab = store_get(KEY_ACTIVE_TAB, "prices");
     apiLastRefresh = parseInt(store_get(KEY_API_REFRESH, "0"), 10) || 0;
-    showObservedPayouts = store_get(KEY_SHOW_OBSERVED_PAYOUTS, "1") !== "0";
+    showObservedPayouts = store_get(KEY_SHOW_OBSERVED_PAYOUTS, "0") !== "0";
+    showOptionalBadges = store_get(KEY_SHOW_OPTIONAL_BADGES, "1") !== "0";
+    showResourcePrices = store_get(KEY_SHOW_RESOURCE_PRICES, "1") !== "0";
+    showScenarioName = store_get(KEY_SHOW_SCENARIO_NAME, "1") !== "0";
+    stackResources = store_get(KEY_STACK_RESOURCES, "1") !== "0";
     try {
       manualPrices = JSON.parse(store_get(KEY_MANUAL_PRICES, "{}"));
     } catch {
@@ -4371,6 +4482,26 @@
   function setShowObservedPayoutsEnabled(show) {
     showObservedPayouts = show;
     store_set(KEY_SHOW_OBSERVED_PAYOUTS, show ? "1" : "0");
+    resetScans();
+  }
+  function setShowOptionalBadgesEnabled(show) {
+    showOptionalBadges = show;
+    store_set(KEY_SHOW_OPTIONAL_BADGES, show ? "1" : "0");
+    resetScans();
+  }
+  function setShowResourcePricesEnabled(show) {
+    showResourcePrices = show;
+    store_set(KEY_SHOW_RESOURCE_PRICES, show ? "1" : "0");
+    resetScans();
+  }
+  function setShowScenarioNameEnabled(show) {
+    showScenarioName = show;
+    store_set(KEY_SHOW_SCENARIO_NAME, show ? "1" : "0");
+    resetScans();
+  }
+  function setStackResourcesEnabled(stack) {
+    stackResources = stack;
+    store_set(KEY_STACK_RESOURCES, stack ? "1" : "0");
     resetScans();
   }
   function setApiPrices(prices, timestamp) {
@@ -4559,7 +4690,11 @@
         ranked,
         effectivePrices(),
         statsOnly,
-        showObservedPayouts
+        showObservedPayouts,
+        showOptionalBadges,
+        showResourcePrices,
+        showScenarioName,
+        stackResources
       );
     });
   }
@@ -4618,9 +4753,13 @@
       { passive: true }
     );
   }
-  function buildTooltipContentWithStyles(ranked, prices, statsOnly = false, showObservedPayout = true) {
+  function buildTooltipContentWithStyles(ranked, prices, statsOnly = false, showObservedPayout = true, showOptionalBadges2 = true, showResourcePrices2 = true, showScenarioName2 = true, stackResources2 = true) {
     const node = buildTooltipContent(ranked, prices, statsOnly, {
-      showObservedPayout
+      showObservedPayout,
+      showOptionalBadges: showOptionalBadges2,
+      showResourcePrices: showResourcePrices2,
+      showScenarioName: showScenarioName2,
+      stackResources: stackResources2
     });
     const style = el("style");
     style.textContent = buildTooltipStyles();
@@ -4661,6 +4800,10 @@
     getApiLastRefresh: () => apiLastRefresh,
     getActiveTab: () => activeTab,
     getShowObservedPayouts: () => showObservedPayouts,
+    getShowOptionalBadges: () => showOptionalBadges,
+    getShowResourcePrices: () => showResourcePrices,
+    getShowScenarioName: () => showScenarioName,
+    getStackResources: () => stackResources,
     setManualPrice,
     clearManualPrices,
     clearManualPrice,
@@ -4669,7 +4812,11 @@
     clearApiPrices,
     setApiKey,
     setActiveTab,
-    setShowObservedPayouts: setShowObservedPayoutsEnabled
+    setShowObservedPayouts: setShowObservedPayoutsEnabled,
+    setShowOptionalBadges: setShowOptionalBadgesEnabled,
+    setShowResourcePrices: setShowResourcePricesEnabled,
+    setShowScenarioName: setShowScenarioNameEnabled,
+    setStackResources: setStackResourcesEnabled
   };
   var reInjectTimer = null;
   function scheduleInjectSettings() {

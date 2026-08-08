@@ -28,6 +28,10 @@ const KEY_CATALOG_UPDATED = "pyroLedger.v1.catalogUpdated";
 const KEY_THRESHOLDS = "pyroLedger.v1.thresholds";
 const KEY_ACTIVE_TAB = "pyroLedger.v1.activeTab";
 const KEY_SHOW_OBSERVED_PAYOUTS = "pyroLedger.v1.showObservedPayouts";
+const KEY_SHOW_OPTIONAL_BADGES = "pyroLedger.v1.showOptionalBadges";
+const KEY_SHOW_RESOURCE_PRICES = "pyroLedger.v1.showResourcePrices";
+const KEY_SHOW_SCENARIO_NAME = "pyroLedger.v1.showScenarioName";
+const KEY_STACK_RESOURCES = "pyroLedger.v1.stackResources";
 
 // ---------------------------------------------------------------------------
 // Minimal GM storage shim (falls back to localStorage in dev/non-GM contexts)
@@ -67,6 +71,7 @@ interface BalaclavaTooltipAPI {
     options?: { position?: string; theme?: string },
   ) => void;
   hide: () => void;
+  configure: (userConfig?: { maxWidth?: string }) => void;
 }
 
 function getTooltipAPI(): BalaclavaTooltipAPI | null {
@@ -83,6 +88,7 @@ function getTooltipAPI(): BalaclavaTooltipAPI | null {
 }
 
 let tooltipWarned = false;
+let tooltipConfigured = false;
 
 function tryTooltip(callback: (api: BalaclavaTooltipAPI) => void): void {
   const api = getTooltipAPI();
@@ -94,6 +100,10 @@ function tryTooltip(callback: (api: BalaclavaTooltipAPI) => void): void {
       tooltipWarned = true;
     }
     return;
+  }
+  if (!tooltipConfigured) {
+    api.configure({ maxWidth: "335px" });
+    tooltipConfigured = true;
   }
   callback(api);
 }
@@ -107,7 +117,11 @@ let apiKey = "";
 let apiLastRefresh = 0;
 let thresholds: ProfitThresholds = { ...DEFAULT_THRESHOLDS };
 let activeTab = "prices";
-let showObservedPayouts = true;
+let showObservedPayouts = false;
+let showOptionalBadges = true;
+let showResourcePrices = true;
+let showScenarioName = true;
+let stackResources = true;
 let visibleMobileSection: HTMLElement | null = null;
 const IOS_USER_AGENT_RE = /iPad|iPhone|iPod/i;
 
@@ -130,7 +144,11 @@ function loadState(): void {
   apiKey = store_get(KEY_API_KEY, "");
   activeTab = store_get(KEY_ACTIVE_TAB, "prices");
   apiLastRefresh = parseInt(store_get(KEY_API_REFRESH, "0"), 10) || 0;
-  showObservedPayouts = store_get(KEY_SHOW_OBSERVED_PAYOUTS, "1") !== "0";
+  showObservedPayouts = store_get(KEY_SHOW_OBSERVED_PAYOUTS, "0") !== "0";
+  showOptionalBadges = store_get(KEY_SHOW_OPTIONAL_BADGES, "1") !== "0";
+  showResourcePrices = store_get(KEY_SHOW_RESOURCE_PRICES, "1") !== "0";
+  showScenarioName = store_get(KEY_SHOW_SCENARIO_NAME, "1") !== "0";
+  stackResources = store_get(KEY_STACK_RESOURCES, "1") !== "0";
 
   try {
     manualPrices = JSON.parse(store_get(KEY_MANUAL_PRICES, "{}")) as PriceMap;
@@ -184,6 +202,30 @@ function setThresholds(t: ProfitThresholds): void {
 function setShowObservedPayoutsEnabled(show: boolean): void {
   showObservedPayouts = show;
   store_set(KEY_SHOW_OBSERVED_PAYOUTS, show ? "1" : "0");
+  resetScans();
+}
+
+function setShowOptionalBadgesEnabled(show: boolean): void {
+  showOptionalBadges = show;
+  store_set(KEY_SHOW_OPTIONAL_BADGES, show ? "1" : "0");
+  resetScans();
+}
+
+function setShowResourcePricesEnabled(show: boolean): void {
+  showResourcePrices = show;
+  store_set(KEY_SHOW_RESOURCE_PRICES, show ? "1" : "0");
+  resetScans();
+}
+
+function setShowScenarioNameEnabled(show: boolean): void {
+  showScenarioName = show;
+  store_set(KEY_SHOW_SCENARIO_NAME, show ? "1" : "0");
+  resetScans();
+}
+
+function setStackResourcesEnabled(stack: boolean): void {
+  stackResources = stack;
+  store_set(KEY_STACK_RESOURCES, stack ? "1" : "0");
   resetScans();
 }
 
@@ -424,6 +466,10 @@ function applyToSection(
       effectivePrices(),
       statsOnly,
       showObservedPayouts,
+      showOptionalBadges,
+      showResourcePrices,
+      showScenarioName,
+      stackResources,
     );
   });
 }
@@ -511,9 +557,17 @@ function buildTooltipContentWithStyles(
   prices: PriceMap,
   statsOnly = false,
   showObservedPayout = true,
+  showOptionalBadges = true,
+  showResourcePrices = true,
+  showScenarioName = true,
+  stackResources = true,
 ): HTMLElement {
   const node = buildTooltipContent(ranked, prices, statsOnly, {
     showObservedPayout,
+    showOptionalBadges,
+    showResourcePrices,
+    showScenarioName,
+    stackResources,
   });
   const style = el("style");
   style.textContent = buildTooltipStyles();
@@ -571,6 +625,10 @@ const settingsCtx: SettingsCtx = {
   getApiLastRefresh: () => apiLastRefresh,
   getActiveTab: () => activeTab,
   getShowObservedPayouts: () => showObservedPayouts,
+  getShowOptionalBadges: () => showOptionalBadges,
+  getShowResourcePrices: () => showResourcePrices,
+  getShowScenarioName: () => showScenarioName,
+  getStackResources: () => stackResources,
 
   setManualPrice,
   clearManualPrices,
@@ -581,6 +639,10 @@ const settingsCtx: SettingsCtx = {
   setApiKey,
   setActiveTab,
   setShowObservedPayouts: setShowObservedPayoutsEnabled,
+  setShowOptionalBadges: setShowOptionalBadgesEnabled,
+  setShowResourcePrices: setShowResourcePricesEnabled,
+  setShowScenarioName: setShowScenarioNameEnabled,
+  setStackResources: setStackResourcesEnabled,
 };
 
 // ---------------------------------------------------------------------------

@@ -1,5 +1,5 @@
 import { CATALOG, RESOURCE } from "../../data/catalog.js";
-import type { ActionItem, Scenario } from "../../data/scenarios.js";
+import type { ActionItem, ActionTime, Scenario } from "../../data/scenarios.js";
 import { type RankedScenario, type PriceMap, formatPpn } from "./engine.js";
 import { BAND_COLOR } from "./colors.js";
 import { el } from "./dom.js";
@@ -54,7 +54,10 @@ function actionSection(
   label: string,
   items: ActionItem[] | undefined,
   prices: PriceMap,
-  timing?: "early" | "late",
+  timing?: ActionTime,
+  showOptionalBadges = true,
+  showResourcePrices = true,
+  stackResources = true,
 ): HTMLElement | null {
   if (!items || items.length === 0) return null;
   const div = el("div", "pyro-tt-action");
@@ -67,18 +70,32 @@ function actionSection(
   const valueEl = el("span", "pyro-tt-action-value");
 
   items.forEach((item, i) => {
-    if (i > 0) valueEl.appendChild(document.createTextNode(", "));
+    const itemEl = el("span", "pyro-tt-item");
     const name = CATALOG[item.resourceId]?.name ?? item.resourceId;
-    const prefix = item.optional ? "~" : "";
-    valueEl.appendChild(
-      document.createTextNode(`${prefix}${item.qty}× ${name}`),
+    const nameEl = el(
+      "span",
+      item.optional
+        ? "pyro-tt-item-name pyro-tt-item-name--optional"
+        : "pyro-tt-item-name",
     );
-    const cost = itemCost(item, prices);
+    nameEl.textContent = `${item.qty}× ${name}`;
+    itemEl.appendChild(nameEl);
+    const cost = showResourcePrices ? itemCost(item, prices) : null;
     if (cost !== null) {
       const costEl = el("span", "pyro-tt-item-cost");
       costEl.textContent = ` (${formatCost(cost)})`;
-      valueEl.appendChild(costEl);
+      itemEl.appendChild(costEl);
     }
+    if (item.optional && showOptionalBadges) {
+      const badge = el("span", "pyro-tt-optional-badge");
+      badge.textContent = "optional";
+      itemEl.appendChild(badge);
+    }
+    if (i > 0 && !stackResources) {
+      valueEl.appendChild(document.createTextNode(", "));
+    }
+    valueEl.appendChild(itemEl);
+    if (i < items.length - 1 && stackResources) valueEl.appendChild(el("br"));
   });
 
   div.appendChild(labelEl);
@@ -90,10 +107,22 @@ function buildPrimaryBlock(
   ranked: RankedScenario,
   prices: PriceMap,
   statsOnly = false,
-  options?: { showObservedPayout?: boolean },
+  options?: {
+    showObservedPayout?: boolean;
+    showOptionalBadges?: boolean;
+    showResourcePrices?: boolean;
+    showScenarioName?: boolean;
+    stackResources?: boolean;
+  },
 ): DocumentFragment {
   const frag = document.createDocumentFragment();
   const { Scenario, profitPerNerve, materialCost, baseNerve } = ranked;
+
+  if (options?.showScenarioName !== false) {
+    const nameEl = el("div", "pyro-tt-name");
+    nameEl.textContent = Scenario.scenarioName;
+    frag.appendChild(nameEl);
+  }
 
   const header = el("div", "pyro-tt-header");
   const title = el("span", "pyro-tt-title");
@@ -133,19 +162,26 @@ function buildPrimaryBlock(
   const ignite = Scenario.actions.ignite ?? [
     { resourceId: RESOURCE.LIGHTER, qty: 1 },
   ];
-  const actionOrder: [
-    string,
-    ActionItem[] | undefined,
-    "early" | "late" | undefined,
-  ][] = [
+  const actionOrder: [string, ActionItem[] | undefined, ActionTime][] = [
     ["Evidence", evidence, undefined],
     ["Place", place, undefined],
     ["Ignite", ignite, undefined],
     ["Stoke", stoke, stokeTime],
     ["Dampen", dampen, dampenTime],
   ];
+  const showOptionalBadges = options?.showOptionalBadges !== false;
+  const showResourcePrices = options?.showResourcePrices !== false;
+  const stackResources = options?.stackResources !== false;
   for (const [label, items, timing] of actionOrder) {
-    const s = actionSection(label, items, prices, timing);
+    const s = actionSection(
+      label,
+      items,
+      prices,
+      timing,
+      showOptionalBadges,
+      showResourcePrices,
+      stackResources,
+    );
     if (s) frag.appendChild(s);
   }
 
@@ -162,7 +198,13 @@ export function buildTooltipContent(
   ranked: RankedScenario | null,
   prices: PriceMap,
   statsOnly = false,
-  options?: { showObservedPayout?: boolean },
+  options?: {
+    showObservedPayout?: boolean;
+    showOptionalBadges?: boolean;
+    showResourcePrices?: boolean;
+    showScenarioName?: boolean;
+    stackResources?: boolean;
+  },
 ): HTMLElement {
   const root = el("div", "pyro-tt");
   if (!ranked) return root;
@@ -176,7 +218,13 @@ export function buildTooltipStyles(): string {
     font-size: 12px;
     line-height: 1.5;
     min-width: 180px;
-    max-width: 240px;
+    max-width: 335px;
+}
+.pyro-tt-name {
+    font-weight: bold;
+    font-size: 12px;
+    margin-bottom: 2px;
+    color: oklch(76% 0 0);
 }
 .pyro-tt-header {
     display: flex;
@@ -258,6 +306,20 @@ export function buildTooltipStyles(): string {
     color: oklch(66% 0 0);
     font-size: 10px;
     font-weight: normal;
+}
+.pyro-tt-item-name--optional {
+    text-decoration: underline wavy oklch(66% 0 0);
+    text-underline-offset: 1px;
+    text-decoration-thickness: 1px;
+}
+.pyro-tt-optional-badge {
+    font-size: 9px;
+    margin-left: 4px;
+    background-color: oklch(0.9 0 0);
+    color: oklch(0.23 0 0);
+    font-weight: 700;
+    padding: 0 2px;
+    border-radius: 2px;
 }
 .pyro-tt-notes {
     margin-top: 5px;
