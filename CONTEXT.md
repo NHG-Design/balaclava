@@ -115,3 +115,8 @@ All Signature endpoints are SvelteKit `+server.ts` route handlers deployed to Cl
 
 - The whitelist is hardcoded — there is no admin UI or database-backed management.
 - Faction Builder UI (`src/routes/faction/`) is not yet built.
+
+## Children
+
+- [`src/userscripts/arsonists-ledger/CONTEXT.md`](src/userscripts/arsonists-ledger/CONTEXT.md) — Arson page scanner/annotator: scenario ranking, tooltips, settings panel
+- [`src/userscripts/balaclava-tooltip/CONTEXT.md`](src/userscripts/balaclava-tooltip/CONTEXT.md) — Shared Shadow-DOM tooltip engine consumed by other userscripts
