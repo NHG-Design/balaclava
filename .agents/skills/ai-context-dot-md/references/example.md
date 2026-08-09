@@ -27,11 +27,13 @@ Multi-tenant order management platform. TypeScript monorepo using npm workspaces
 ## Architecture
 
 ```
-apps/api/          → Express HTTP layer: routes, middleware, context creation
-apps/worker/       → BullMQ job runner: queue consumers, retry logic
-packages/core/     → Shared domain types, service interfaces, DB client
-packages/jobs/     → Job definitions and enqueue helpers (shared by api + worker)
-```
+
+apps/api/ → Express HTTP layer: routes, middleware, context creation
+apps/worker/ → BullMQ job runner: queue consumers, retry logic
+packages/core/ → Shared domain types, service interfaces, DB client
+packages/jobs/ → Job definitions and enqueue helpers (shared by api + worker)
+
+```text
 
 HTTP requests enter `apps/api`, create a Context, call services in `packages/core`, and enqueue Jobs via `packages/jobs`. Workers in `apps/worker` consume those jobs and call the same `packages/core` services — no direct DB access outside `packages/core`.
 
@@ -68,7 +70,7 @@ HTTP requests enter `apps/api`, create a Context, call services in `packages/cor
 
 ## Review Mode Output — Hypothetical Stale File
 
-```
+```text
 ## CONTEXT.md Review: packages/core/CONTEXT.md
 
 **Score:** 14/25 (C)

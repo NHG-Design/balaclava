@@ -1,6 +1,6 @@
 ---
 name: ai-context-dot-md
-description: "Create or review CONTEXT.md files — hierarchical, LLM-optimized repository documentation describing what a codebase IS (architecture, domain model, conventions). Dual mode: creates new CONTEXT.md at user-specified path, or reviews existing file for completeness and anti-patterns. Use when user wants to add CONTEXT.md, document codebase architecture for agents, define domain language, or says 'create context', 'review context', 'document this codebase'. Triggers: CONTEXT.md, context file, document architecture, domain model, codebase context."
+description: "Create or review CONTEXT.md files — hierarchical, LLM-optimized repository documentation describing what a codebase IS (architecture, domain model, conventions). Dual mode: creates new CONTEXT.md at user-specified path, or reviews existing file for completeness and anti-patterns. Use when user wants to add CONTEXT.md, document codebase architecture for agents, define domain language, or says 'create context', 'review context', 'document this codebase'. Triggers are CONTEXT.md, context file, document architecture, domain model, codebase context."
 ---
 
 # AI Context Dot MD
@@ -23,7 +23,7 @@ Create or review CONTEXT.md files that give agents the factual substrate needed 
 
 Ask the user: "Where should the CONTEXT.md live?"
 
-```
+```text
 (r)oot — broad architecture overview
 (p)ath — specific directory (provide path)
 (m)ultiple — hierarchical (start with root, then children)
@@ -38,11 +38,13 @@ If the scope has fewer than 5 files or a single obvious purpose, suggest: `This 
 **MANDATORY READ** [`references/knowledge-base.md`](references/knowledge-base.md) for principles and patterns.
 
 Before investigating, ask yourself:
+
 - What would confuse a new agent about this scope?
 - What terms mean something different HERE than in general usage?
 - What implicit relationships aren't visible from file names alone?
 
 Investigate the target scope:
+
 - Read directory structure, key files, existing docs (README, AGENTS.md)
 - Identify the domain model (entities, relationships, naming conventions in code)
 - Map architecture (boundaries, data flow, abstractions)
@@ -54,6 +56,7 @@ Investigate the target scope:
 **MANDATORY READ** [`references/template.md`](references/template.md) for structure.
 
 Write sections in priority order:
+
 1. **Overview** — one paragraph, what this scope IS
 2. **Language** — domain terms with _Avoid_ alternatives (highest ROI section)
 3. **Architecture** — boundaries and data flow
@@ -67,6 +70,7 @@ Skip sections that add no value for the specific scope. A 3-section file is fine
 ### Step 4 — Validate
 
 Before presenting to user, verify:
+
 - [ ] Every term in Language section appears in actual code (no invented abstractions)
 - [ ] No section duplicates what's already in AGENTS.md or README
 - [ ] Under 200 lines (if over → split into child CONTEXT.md files)
@@ -97,6 +101,7 @@ Evaluate the existing CONTEXT.md on 5 dimensions (1–5 scale):
 ### Anti-Pattern Checklist
 
 Flag if present:
+
 - [ ] README-as-CONTEXT (setup instructions in CONTEXT.md)
 - [ ] Tutorial style ("First do X, then Y...")
 - [ ] Mixing concerns (agent behavior rules here)
@@ -107,7 +112,7 @@ Flag if present:
 
 ### Output Format
 
-```
+```text
 ## CONTEXT.md Review: [path]
 
 **Score:** [X/25] ([grade])
@@ -133,6 +138,7 @@ Grade scale: A (22-25), B (18-21), C (14-17), D (10-13), F (<10)
 ## Hierarchical Guidance
 
 When a project warrants multiple CONTEXT.md files:
+
 - Root = architecture overview + domain model + child links
 - Children = focused scope (one package, one domain, one layer)
 - Never repeat child content in parent — link with one-line summary

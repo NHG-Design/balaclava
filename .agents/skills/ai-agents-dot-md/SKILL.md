@@ -1,6 +1,6 @@
 ---
 name: ai-agents-dot-md
-description: "Create or review AGENTS.md files for repositories. Use when user wants to generate agent documentation, scaffold AGENTS.md, review an existing AGENTS.md for quality, or make their repo agent-friendly. Triggers: AGENTS.md, agent docs, review agents file, create agents file, coding agent context, repository setup for AI."
+description: "Create or review AGENTS.md files for repositories. Use when user wants to generate agent documentation, scaffold AGENTS.md, review an existing AGENTS.md for quality, or make their repo agent-friendly. Triggers are AGENTS.md, agent docs, review agents file, create agents file, coding agent context, repository setup for AI."
 ---
 
 # AI Create / Review AGENTS.md
@@ -19,7 +19,7 @@ Two modes: **create** a new AGENTS.md or **review** an existing one against rese
 
 ### Step 1: Ask placement
 
-```
+```text
 Where should the AGENTS.md be placed?
 (r)oot — repo-wide baseline
 (p)ath — specific directory (provide path)
@@ -106,7 +106,7 @@ Flag any of these (empirically proven to hurt agent performance):
 
 ### Output Format
 
-```
+```text
 ## AGENTS.md Review: <filename or path>
 
 **Score**: X/100

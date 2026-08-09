@@ -1,6 +1,6 @@
 ---
 name: ai-forge-apply
-description: "HITL (Human-In-The-Loop) application of a numbered list one item at a time — status board upfront, per-item approve/skip, approve-all mode, commits after each approved item. Use when stepping through ai-forge-judge findings or any numbered changes. Triggers: apply these, go through each one, apply improvements, commit each change. Not for: bulk refactors, one-shot changes, or changes that don't need per-item review."
+description: "HITL (Human-In-The-Loop) application of a numbered list one item at a time — status board upfront, per-item approve/skip, approve-all mode, commits after each approved item. Use when stepping through ai-forge-judge findings or any numbered changes. Triggers are apply these, go through each one, apply improvements, commit each change. Don't use for bulk refactors, one-shot changes, or changes that don't need per-item review."
 ---
 
 # AI Forge Apply (HITL)
@@ -11,7 +11,7 @@ Throw the lasso, pull it tight, move to the next. One change at a time, one appr
 
 ## Workflow
 
-### 1 — Read the list
+### 1. Read the list
 
 Parse the numbered improvement list from context. If there are multiple lists or it's unclear which to apply, ask once before starting — not mid-loop. If the response does not resolve the ambiguity, stop: "Still unclear which list to apply — please re-invoke with the target list quoted directly."
 
@@ -23,7 +23,7 @@ If items have dependencies (item 3 requires item 1), note the dependency at the 
 
 Check git status before showing the board. If the working directory is not a git repo, note this at the top of the board and skip all commit steps:
 
-```
+```text
 ℹ No git repo — changes will be applied but not committed.
 ```
 
@@ -33,13 +33,15 @@ If the user responds `A`: apply all items in sequence, then show the final board
 
 If the user responds `s`: begin the per-item loop from item #1.
 
-### 2 — Apply each one
+### 2. Apply each one
 
 Repeat for every item in order:
 
-**a. Announce** — show `─── #N of M ───` and the full improvement description.
+#### a. Announce
 
-**b. Apply**
+Show `─── #N of M ───` and the full improvement description.
+
+#### b. Apply
 
 If the smallest change requires touching more than one logical unit (function, section, rule), the improvement is under-scoped — note this in the change summary and apply only the first unit.
 
@@ -47,14 +49,16 @@ Do not touch adjacent code, bundle items, or anticipate the next improvement. If
 
 If an improvement requires non-edit actions (adding a dependency, creating a new file, running a command), describe the action in the change summary and let the user decide whether to perform it.
 
-**c. Show the change**
-```
+#### c. Show the change
+
+```text
 Changed: <file>:<lines> — <one-line description>
 <concise diff summary — not the full file>
 ```
 
-**d. Ask**
-```
+#### d. Ask
+
+```text
 (a)pprove, (r)evise, (s)kip, (o)bsolete, (A)ccept-all, (k)skip-all, (Q)uit?
 ```
 
@@ -72,7 +76,7 @@ Wait. Do not advance until the user responds. Any input not in the table below i
 
 **e. Update the board** — after each decision, show the current state of all items using the status symbols. For accept-all (`A`): skip intermediate board updates — apply each remaining item silently, then show the final board once in step 3.
 
-### 3 — Done
+### 3. Done
 
 When all items are processed, show the final board and a one-liner: `HITL complete. Applied: N  Skipped: M  Revised then applied: P`
 
@@ -84,13 +88,13 @@ When all items are processed, show the final board and a one-liner: `HITL comple
 
 Check git status. If uncommitted changes exist, warn:
 
-```
+```text
 ⚠ Uncommitted changes detected. (s)tash / (c)ontinue / (Q)uit?
 ```
 
 Then check if the user wants git integration:
 
-```
+```text
 Git: (n)o git — just apply changes / (c)ommit when done? [default: n]
 ```
 
@@ -99,14 +103,17 @@ On `n` (or no response): skip all git operations for this session. Apply changes
 On `c`: enable git mode — then determine branch:
 
 - If already on an `ai/*` branch, check **relevance** (does the branch name relate to the skill/agent being modified?):
-  ```
+
+  ```text
   On branch ai/<name>. Relevant to this change? (y)es — commit here / (n)ew branch / (Q)uit?
   ```
+
   On `y`: use current branch.
   On `n`: create `ai/<skill-or-agent-name>-<two-word-description>` from current HEAD.
 
 - If on any other branch:
-  ```
+
+  ```text
   Create ai/<suggested-name> branch? (y)es / (n)o — abort git mode
   ```
 
@@ -116,7 +123,7 @@ On `c`: enable git mode — then determine branch:
 
 If git mode was enabled and at least one item was approved:
 
-```
+```text
 All changes applied. Commit? (y)es / (n)o — leave staged
 ```
 

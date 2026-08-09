@@ -1,6 +1,6 @@
 # AgentSkills.io Specification (bundled reference)
 
-> Source: https://agentskills.io/specification
+> Source: <https://agentskills.io/specification>
 > Last fetched: 2026-05-18
 > If you need the latest version, WebFetch the URL above.
 
@@ -10,7 +10,7 @@
 
 A skill is a directory containing, at minimum, a `SKILL.md` file:
 
-```
+```text
 skill-name/
 ├── SKILL.md          # Required: metadata + instructions
 ├── scripts/          # Optional: executable code
@@ -78,6 +78,7 @@ The agent loads the entire file once it activates a skill. Consider splitting lo
 ### `scripts/`
 
 Contains executable code. Scripts should:
+
 - Be self-contained or clearly document dependencies
 - Include helpful error messages
 - Handle edge cases gracefully
@@ -85,6 +86,7 @@ Contains executable code. Scripts should:
 ### `references/`
 
 Contains additional documentation loaded on demand:
+
 - Detailed technical reference
 - Form templates or structured data formats
 - Domain-specific files

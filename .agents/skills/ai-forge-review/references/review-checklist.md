@@ -86,3 +86,18 @@ Detailed questions for the Review Sequence. Work through in order, one question 
 - Have you tested with adversarial/edge-case inputs?
 
 > **Why this matters:** You cannot improve what you cannot observe.
+
+---
+
+## 8a. Skill Directory Structure (SKILL.md reviews only)
+
+- Are there any non-SKILL.md files at the skill root? If yes, flag each one.
+- Documentation files (.md loaded on demand) → must be in `references/`
+- Executable scripts (.js, .mjs, .cjs, .sh) → must be in `scripts/`
+- Data files, JSON schemas, templates → must be in `assets/`
+- Does `SKILL.md` reference any of these files with a root-relative path (e.g. `[foo.md](foo.md)`)? Update to the correct subdirectory path.
+- Is the description written in third-person imperative? ("Creates…", "Analyzes…" — not "I can…", "Helps you…")
+- Does the description include negative triggers ("Don't use for…")?
+- Are all references exactly 1 level deep from `SKILL.md`? (no chained references: `SKILL.md → a.md → b.md`)
+
+> **Why this matters:** Files at the skill root are ambiguous — the spec defines three purpose-named directories for a reason. Misplaced files signal the author didn't read the spec and may indicate other structural gaps.

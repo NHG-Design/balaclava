@@ -18,7 +18,7 @@ Choose the pattern that matches the agent's role in the workflow.
 
 ## Decision Tree
 
-```
+```text
 Does the agent produce code changes directly?
 │
 ├── YES → Does it follow a specification or plan?
@@ -37,6 +37,7 @@ Does the agent produce code changes directly?
 ## Pattern Signatures
 
 ### Pipeline (~200 lines)
+
 - **Input**: A file artifact (spec, PRD, ticket)
 - **Output**: Code changes committed to a branch, status updated in the input file
 - **Tools**: Full edit access, file read/write, git
@@ -49,6 +50,7 @@ Does the agent produce code changes directly?
 - **Examples**: writer (ticket → spec), implementer (spec → code), reviewer (code → pass/fail report)
 
 ### Worker (~150 lines)
+
 - **Input**: A specific task description (often from a coordinator)
 - **Output**: Focused result (fix, analysis, single-file change)
 - **Tools**: Minimal — only what the task requires
@@ -61,6 +63,7 @@ Does the agent produce code changes directly?
 - **Examples**: bug-fixer, linter, test-writer
 
 ### Coordinator (~100 lines)
+
 - **Input**: Complex request requiring multiple perspectives or parallel work
 - **Output**: Synthesized summary from delegated work
 - **Tools**: `agent` tool (to spawn subagents), read-only for own analysis
@@ -78,6 +81,7 @@ Does the agent produce code changes directly?
   - Each worker should have appropriate tool restrictions (read-only for reviewers, edit for implementers)
 
 ### Expert (~200 lines)
+
 - **Input**: Code diff, file set, or specific question
 - **Output**: Advisory report — findings, recommendations, no code changes
 - **Tools**: Read-only (read, search, glob). No edit/write access.
@@ -91,6 +95,7 @@ Does the agent produce code changes directly?
 - **Examples**: accessibility expert, security auditor, performance reviewer
 
 ### Ops (~150 lines)
+
 - **Input**: Ticket or task (often from Jira or similar)
 - **Output**: Branch created, config changed, PR opened
 - **Tools**: git, gh CLI, file edit, config-specific tools
@@ -105,17 +110,23 @@ Does the agent produce code changes directly?
 
 ---
 
-## Frontmatter Reference (VS Code .agent.md)
+## Frontmatter Reference (Claude Code only)
+
+> For GitHub Copilot, OpenAI Codex, or Google Gemini frontmatter schemas, file locations, and platform-specific constraints, see [`agents-taxonomy.md`](agents-taxonomy.md).
 
 ```yaml
 ---
 name: agent-name                    # Required. Unique identifier.
 description: What it does and when  # Required. Guides agent selection.
 model: Claude Sonnet 4.6            # Optional. Model selection.
-tools: ['edit', 'read', 'search']   # Optional. Tool allowlist.
-user-invocable: true                # Optional. Show in agents dropdown? Default: true.
-disable-model-invocation: false     # Optional. Prevent subagent use? Default: false.
-agents: ['Worker1', 'Worker2']      # Optional. Restrict which subagents can be used.
+tools: Read, Grep, Glob             # Optional. Tool allowlist. Comma-separated.
+disallowedTools: Write, Edit        # Optional. Denylist; applied before allowlist.
+permissionMode: default             # Optional. default|acceptEdits|auto|dontAsk|bypassPermissions|plan
+maxTurns: 20                        # Optional. Max agentic turns.
+isolation: worktree                 # Optional. Isolated git worktree.
+memory: user                        # Optional. user|project|local
+effort: medium                      # Optional. low|medium|high|xhigh|max
+color: blue                         # Optional. red|blue|green|yellow|purple|orange|pink|cyan
 ---
 ```
 

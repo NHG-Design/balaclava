@@ -1,6 +1,6 @@
 ---
 name: arson-changelog
-description: Generate a Torn-forum-ready HTML changelog of scenario balance changes (payout, resource, qty, stoke/stokeTime edits) in src/data/scenarios.ts between two arsonists-ledger versions. Use when the user asks to write/build/post a changelog, release notes, or "what changed" summary for the arsonists-ledger userscript, references a version bump (e.g. "v1.0.4 to v1.0.5"), or wants scenario changes summarized for the Torn forums. Triggers: changelog, release notes, version bump summary, forum post, scenario changes since last version.
+description: Generates a Torn-forum-ready HTML changelog of scenario balance changes (payout, resource, qty, stoke/stokeTime edits) in src/data/scenarios.ts between two arsonists-ledger versions. Use when the user asks to write/build/post a changelog, release notes, or "what changed" summary for the arsonists-ledger userscript, references a version bump (e.g. "v1.0.4 to v1.0.5"), or wants scenario changes summarized for the Torn forums. Triggers: changelog, release notes, version bump summary, forum post, scenario changes since last version. Don't use for the balaclava-tooltip project or non-scenario code changes.
 ---
 
 # Arson Changelog
@@ -11,6 +11,7 @@ Produces an HTML file matching Torn's forum WYSIWYG sanitizer, listing scenario 
 
 1. **Resolve the version range.**
    - If the user gave two versions (e.g. `v1.0.4 v1.0.5`): run `git log -p -- versions.json` and find the commit where the `"arsonists-ledger"` key changed from the old value to the new value. That commit is the range end; the previous version-bump commit (or its parent) is the range start.
+   - If the user gave one version (e.g. "changelog for v1.0.6" — this is the common case): treat it as the range end. Run `git log -p -- versions.json` and find the commit where `"arsonists-ledger"` changed to that value. The range start is the previous commit that changed `"arsonists-ledger"` (i.e. the prior version bump).
    - If no versions given: use `git log -p -- versions.json` to find the most recent commit that changed `"arsonists-ledger"`. Diff from that commit to the working tree (uncommitted + committed changes since).
    - If a named version never appears in `versions.json`'s history, stop and tell the user: "v<X> not found in versions.json history — check the version string." Do not guess a nearby commit.
 

@@ -18,6 +18,7 @@ The core failure mode for agent-style prompts is not redundancy (as in Skills) b
 | 14–15 | Unambiguous, consistent vocabulary, zero contradictions |
 
 **What to check**:
+
 - [ ] Do any two instructions govern the same scenario with different outcomes?
 - [ ] Is MUST/NEVER/SHOULD/MAY used consistently with the same meaning throughout?
 - [ ] Are conditional instructions ("if X, then Y") complete — do they cover the else case when it matters?
@@ -25,13 +26,15 @@ The core failure mode for agent-style prompts is not redundancy (as in Skills) b
 - [ ] Do sections added at different times now conflict with each other?
 
 **Example of ambiguity failure**:
-```
+
+```text
 Section A: "Always ask for clarification before proceeding."
 Section B: "Prefer action over asking — users find questions annoying."
 ```
 
 **Example of clarity**:
-```
+
+```text
 "When the task is ambiguous AND the consequence of guessing wrong is high
 (destructive operations, external sends), ask for clarification.
 For low-consequence ambiguity, make a reasonable assumption and proceed."
@@ -44,6 +47,7 @@ For low-consequence ambiguity, make a reasonable assumption and proceed."
 Does the prompt govern only what actually needs governing — and avoid over-specifying what the model handles well by default?
 
 **The scope failure modes**:
+
 1. **Over-scoped**: So many rules it becomes noise; real constraints get buried
 2. **Under-scoped**: Leaves out genuine edge cases that cause repeated failures
 3. **Wrong domain**: Governs something the model already does well, wasting tokens
@@ -56,17 +60,20 @@ Does the prompt govern only what actually needs governing — and avoid over-spe
 | 14–15 | Governs exactly what needs governing; no redundant defaults |
 
 **What to check**:
+
 - [ ] Does it tell the model to do things it already does by default? (token waste)
 - [ ] Are the rules clearly applicable to a specific context, or trying to govern everything?
 - [ ] Is there a gap — a known failure mode in this domain that isn't covered?
 - [ ] Do rules have enough context to know WHEN they apply vs. when they don't?
 
 **Red flags** (over-scoping):
+
 - "Be helpful and professional" — the model does this by default
 - "Write clear, readable code" — model does this by default
 - Rules for every conceivable edge case, including ones that never occur
 
 **Red flags** (under-scoping):
+
 - Known recurring failure modes not mentioned
 - Vague scope ("sometimes", "usually") where specificity matters
 
@@ -84,6 +91,7 @@ Can an LLM efficiently locate and apply the relevant rules during inference?
 | 9–10 | Optimal: most critical rules prominent, consistent format throughout |
 
 **What to check**:
+
 - [ ] Are related instructions grouped together or scattered?
 - [ ] Are the most important rules prominent (early, in dedicated sections, or marked)?
 - [ ] Is the format consistent — headers, lists, or prose, not all three mixed arbitrarily?
@@ -91,6 +99,7 @@ Can an LLM efficiently locate and apply the relevant rules during inference?
 - [ ] Would a new reader understand the priority ordering of rules?
 
 **Good structural patterns**:
+
 ```markdown
 ## Critical (always applies)
 - Rule with consequence
@@ -103,6 +112,7 @@ Can an LLM efficiently locate and apply the relevant rules during inference?
 ```
 
 **Agent-specific structural checks**:
+
 - [ ] Is the frontmatter correct? (name, description, model, tools)
 - [ ] Are tool restrictions justified by the agent's stated purpose?
 - [ ] Is the model choice appropriate for task complexity?

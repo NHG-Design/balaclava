@@ -18,7 +18,7 @@ Choose the pattern that matches what the skill must do, not what it looks like i
 
 ## Decision Tree
 
-```
+```text
 Does the task have one correct output?
 │
 ├── YES → Is the output a specific file format or system state?
@@ -39,6 +39,7 @@ Does the task have one correct output?
 ## Pattern Signatures
 
 ### Mindset (~50 lines)
+
 - Strong NEVER list (5+ items with WHY)
 - Thinking frameworks ("Before X, ask yourself...")
 - No step-by-step sequences
@@ -46,12 +47,14 @@ Does the task have one correct output?
 - Example body structure: Philosophy → NEVER → One trigger question
 
 ### Navigation (~30 lines)
+
 - SKILL.md is almost entirely routing logic
 - Each route points to a separate reference file
 - No inline content — the sub-files hold everything
 - Body: detect scenario → load file → follow it
 
 ### Philosophy (~150 lines)
+
 - Two explicit phases: absorb → express
 - Phase 1: principles, reference works, aesthetic constraints
 - Phase 2: creation with those principles active
@@ -59,6 +62,7 @@ Does the task have one correct output?
 - Freedom: high, but constrained by internalized principles
 
 ### Process (~200 lines)
+
 - Numbered phases (Discovery → Draft → Review → Ship)
 - Each phase has a clear exit condition
 - Checkpoints at phase boundaries ("do not proceed until...")
@@ -66,6 +70,7 @@ Does the task have one correct output?
 - Freedom: medium — structure is fixed, content within steps is not
 
 ### Tool (~300 lines)
+
 - Decision trees for format-specific choices
 - Exact commands or API calls (no paraphrasing)
 - MANDATORY READ triggers for reference files

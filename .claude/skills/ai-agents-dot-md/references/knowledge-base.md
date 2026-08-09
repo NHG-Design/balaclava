@@ -25,22 +25,28 @@
 ## Core Principles
 
 ### 1. Minimal by Design
+
 If a constraint can be expressed elsewhere (linter, type checker, CI gate), it must NOT live in AGENTS.md. The tool IS the constraint.
 
 ### 2. Toolchain First
+
 Correct: `Lint: \`pnpm lint\` (Biome — see biome.json)`
 Wrong: A list of what Biome enforces.
 
 ### 3. Pink Elephant Problem (Context Anchoring)
+
 Telling an agent what NOT to do keeps the concept active in attention. Saying "do not use tRPC" makes tRPC highly active. Better: fix the underlying ambiguity (delete the legacy code, add a linter rule) and then delete the instruction.
 
 ### 4. Command-First
+
 Instructions without verification commands are suggestions, not rules. Every instruction should answer: "What command proves this was done correctly?"
 
 ### 5. Closure Definitions
+
 Define "done" as specific exit codes, not feelings. Without explicit closure, "done" means "I think I'm done."
 
 ### 6. Task-Organized Sections
+
 "When Writing Code / When Reviewing / When Releasing" > flat categorized lists. The "When…" prefix maps to how agents reason about task context.
 
 ---
@@ -76,7 +82,7 @@ Define "done" as specific exit codes, not feelings. Without explicit closure, "d
 
 ## Three-Tier Boundary System (ASDLC)
 
-```
+```text
 NEVER (Hard judgment limits):
 - Never commit secrets, tokens, or .env files
 - Never add external dependencies without discussion
@@ -134,6 +140,7 @@ Skip style preferences until the first four work.
 ## Auditing Checklist
 
 Periodically remove:
+
 - Style rules that a linter now enforces
 - Library restrictions that tsconfig/ESLint enforces
 - Persona definitions moved to skill files

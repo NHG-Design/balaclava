@@ -1,6 +1,6 @@
 ---
 name: ai-forge-recap
-description: "Read a skill or agent's body and report what it actually does vs. what the description claims: drift, undeclared behaviors, verdict. After the recap, offers context-sensitive actions: fix frontmatter via ai-forge-apply, hand off to ai-forge-update, run ai-forge-judge, or run ai-forge-review (agents only). Use before updating a skill or agent. Triggers: recap [skill], what does [skill] do, audit [skill] description, summarize [skill]."
+description: "Read a skill or agent's body and report what it actually does vs. what the description claims — drift, undeclared behaviors, verdict. After the recap, offers context-sensitive actions (fix frontmatter via ai-forge-apply, hand off to ai-forge-update, run ai-forge-judge, or run ai-forge-review for agents). Use before updating a skill or agent. Triggers are recap [skill], what does [skill] do, audit [skill] description, summarize [skill]. Don't use for rewriting the artifact — that's ai-forge-update."
 ---
 
 # AI Forge Recap
@@ -42,7 +42,7 @@ Also scan for **undeclared behaviors**: things the body does that the descriptio
 
 ## Output Format
 
-```
+```text
 ## Recap: <name>
 
 **Description claims:** [one-line summary of what description promises]
@@ -73,7 +73,7 @@ If neither bucket has findings, output "No drift found." and stop — do not sho
 
 Otherwise, show only the options relevant to what was found:
 
-```
+```text
 (f)ix frontmatter — apply corrected name/description fields via ai-forge-apply  [only if frontmatter drift]
 (u)pdate body     — hand off to ai-forge-update with drift loaded               [only if body drift]
 (j)udge           — run ai-forge-judge for quality scoring                       [always]
@@ -84,7 +84,7 @@ Otherwise, show only the options relevant to what was found:
 
 Produce a numbered findings list covering only the drifted fields. Each item must include the current value and the corrected value:
 
-```
+```text
 1. name: "<current>" → "<corrected>"
 2. description: "<current>" → "<corrected>"
 ```

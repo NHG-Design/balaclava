@@ -30,7 +30,7 @@ Does the Skill follow official format requirements? **Special focus on descripti
 
 **Why description is THE MOST IMPORTANT field**:
 
-```
+```text
 ┌─────────────────────────────────────────────────────────────────────┐
 │  SKILL ACTIVATION FLOW                                              │
 │                                                                     │
@@ -50,10 +50,24 @@ Does the Skill follow official format requirements? **Special focus on descripti
 3. **KEYWORDS**: What terms should trigger this Skill? (searchable terms)
 
 **Description quality checklist**:
+
 - [ ] Lists specific capabilities (not just "helps with X")
 - [ ] Includes explicit trigger scenarios ("Use when...", "When user asks for...")
 - [ ] Contains searchable keywords (file extensions, domain terms, action verbs)
 - [ ] Specific enough that Agent knows EXACTLY when to use it
+- [ ] Single-line value — no YAML multiline (`|` or `>`) present; if multiline, deduct S1 to 0–5 range
+- [ ] Max 1024 chars (count it; over-length is a spec violation regardless of content quality)
+- [ ] No colons in the description value (unescaped colons break frontmatter — auto-fail S1 if present)
+- [ ] **Third-person imperative** — description must not contain "I", "me", "my", "we", "our", "you", "your"; first/second-person degrades discovery. Fail S1 to 6–10 range if present.
+- [ ] **Negative triggers present** — description includes "Don't use for…"; absence is not an auto-fail but deduct 1pt from S1 if missing entirely.
+- [ ] **Reaches for coverage, not only precision** — the common failure is a skill that never fires, not one that fires too often. A description scoped so narrowly that it only matches its own title is under-triggering; deduct 1pt. Descriptions that name adjacent phrasings and unspoken intents ("even when the user doesn't say X") score higher, provided a negative trigger bounds the reach.
+- [ ] **States trigger conditions, not a workflow summary** — a description that narrates the steps gets acted on directly and the agent never opens the body. Deduct 1pt when the description reads as a procedure rather than a set of conditions.
+- [ ] **Combined cap** — `description` + `when_to_use` must total ≤1,536 chars; past that the listing is silently truncated and the tail triggers never load. Over-length is a spec violation regardless of content quality.
+- [ ] **No dated model ID** anywhere in frontmatter (`claude-*-YYYYMMDD`) — deduct 1pt; these are deprecated on a schedule the skill does not control.
+
+**Do not penalize a description** for failing to trigger on a trivial, one-step prompt. The model consults a skill only for tasks it can't comfortably handle alone, so a simple request may not activate any skill regardless of how well the description matches. That is a property of the routing mechanism, not a description defect.
+- [ ] **Trigger validation** (recommended): write one should-trigger prompt and confirm the skill activates in a live session — description quality is untestable by rubric alone. Use `ai-forge-eval` to validate behaviorally if uncertain.
+- [ ] **Directory compliance**: no non-SKILL.md files at skill root — docs in `references/`, executables in `scripts/`, data/templates in `assets/`. Any root-level stray file is a spec violation; deduct S1 to 6–10 range.
 
 ---
 
@@ -62,7 +76,8 @@ Does the Skill follow official format requirements? **Special focus on descripti
 Does the Skill implement proper content layering?
 
 Skill loading has three layers:
-```
+
+```text
 Layer 1: Metadata (always in memory)
          Only name + description
          ~100 tokens per skill
@@ -91,6 +106,12 @@ Layer 3: Resources (loaded on demand)
 | Mediocre | Some triggers but not embedded in workflow |
 | Good | MANDATORY triggers in workflow steps |
 | Excellent | Scenario detection + conditional triggers + "Do NOT Load" guidance |
+
+**Additional S2 checks**:
+
+- **References depth**: all references are 1 level from `SKILL.md` (no `SKILL.md → a.md → b.md` chains). Each chain link → deduct 2pts from S2.
+- **TOC for long references**: reference files > 300 lines must have a table of contents at the top. Absence → deduct 1pt per file.
+- **No `<details>` blocks**: collapsing is a rendering affordance for humans — an agent receives the full expanded text and pays full token cost, so a `<details>` block is not progressive disclosure. Each one → deduct 2pts from S2, and note the content belongs in `references/`.
 
 **For simple Skills** (no references, <100 lines): Score based on conciseness and self-containment.
 

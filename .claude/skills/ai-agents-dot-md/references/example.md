@@ -29,6 +29,7 @@ From the agents.md website — a turborepo with pnpm:
 ```
 
 **Why this works:**
+
 - 30 lines total — well under the 60-line target
 - Every line is non-obvious (turborepo-specific commands, filter patterns)
 - No filler, no explanations of what pnpm is

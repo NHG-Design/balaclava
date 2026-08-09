@@ -7,18 +7,21 @@ A **briefing document** for AI agents and human developers that describes what a
 ## Core Principles
 
 ### Hierarchical Locality
+
 - Place CONTEXT.md files throughout the directory tree, each describing its own scope
 - Agents walk UP from their working file to gather layered context (specific → general)
 - Root CONTEXT.md = broad architecture; nested = focused domain detail
 - Never duplicate content from child CONTEXT.md in a parent — link instead
 
 ### LLM-Optimized
+
 - Write for token efficiency: facts, not prose
 - Frontload the highest-value information (architecture, domain terms)
 - Use structured formats: tables, definition lists, relationship maps
 - Keep each file under 200 lines — if longer, split into children
 
 ### Human-Reviewable
+
 - Must make sense to a developer reading it cold
 - Update in the same PR that changes architecture
 - Can be AI-drafted, then human-reviewed (common bootstrap pattern)
@@ -61,11 +64,13 @@ The most distinctive and high-value pattern for CONTEXT.md files:
 ```
 
 Structure per term:
+
 - **Bold term** — the canonical name
 - Description — what it means in THIS project
 - _Avoid_ — synonyms that cause confusion (agents will avoid these in generated code/docs)
 
 Add a **Relationships** subsection:
+
 ```markdown
 ### Relationships
 - A Tenant owns many Orders; Orders are never shared across Tenants
@@ -75,7 +80,7 @@ Add a **Relationships** subsection:
 
 ## Hierarchical Structure Example
 
-```
+```text
 my-platform/
 ├── CONTEXT.md              # Top-level architecture, domain model, child links
 ├── packages/
