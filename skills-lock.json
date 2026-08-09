@@ -1,0 +1,11 @@
+{
+  "version": 1,
+  "skills": {
+    "meridian": {
+      "source": "robcsaszar/meridian",
+      "sourceType": "github",
+      "skillPath": "skills/meridian/SKILL.md",
+      "computedHash": "2947c3c00d8aba616f87154ec6c6c92cc64e8e95e6621b6330fd064d5de13ac9"
+    }
+  }
+}
