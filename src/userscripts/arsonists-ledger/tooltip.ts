@@ -32,7 +32,7 @@ function formatCost(total: number): string {
 }
 
 function formatPayoutValue(amount: number): string {
-  return `~$${(amount / 1000).toFixed(0)}k`;
+  return `$${(amount / 1000).toFixed(0)}k`;
 }
 
 function formatObservedPayout(amount: number): string {
