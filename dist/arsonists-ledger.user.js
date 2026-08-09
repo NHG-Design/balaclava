@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        Torn Arsonist's Ledger
 // @namespace   https://greasyfork.org/en/users/942572-yukio-mizsima
-// @version     1.0.9
+// @version     1.0.10
 // @description Arson profit-per-nerve calculator and scenario guide for Torn's Crimes page
 // @icon        https://www.google.com/s2/favicons?sz=64&domain=torn.com
 // @author      Yukio [906148]
@@ -18,7 +18,7 @@
 "use strict";
 (() => {
   // src/data/scenarios-version.ts
-  var SCENARIOS_VERSION = "c7e032aedcd6";
+  var SCENARIOS_VERSION = "6622693740d2";
 
   // src/data/catalog.ts
   var CATALOG_UPDATED = "2026-08-08";
@@ -120,6 +120,7 @@
     {
       scenarioName: "A Black Mark",
       payout: 21e4,
+      payoutMax: 22e4,
       actions: {
         ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
         place: [{ resourceId: RESOURCE.DIESEL, qty: 1 }],
@@ -140,6 +141,7 @@
     {
       scenarioName: "Burning Ambition",
       payout: 46e3,
+      payoutMax: 13e4,
       actions: {
         ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
         place: [{ resourceId: RESOURCE.GASOLINE, qty: 3 }]
@@ -156,6 +158,7 @@
     {
       scenarioName: "Child's Play",
       payout: 23e3,
+      payoutMax: 43e3,
       actions: {
         ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
         place: [{ resourceId: RESOURCE.GASOLINE, qty: 2 }]
@@ -164,6 +167,7 @@
     {
       scenarioName: "Cooked and Burned",
       payout: 73e3,
+      payoutMax: 79e3,
       actions: {
         evidence: [{ resourceId: RESOURCE.AMMONIA, qty: 1 }],
         ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
@@ -173,6 +177,7 @@
     {
       scenarioName: "Final Cut",
       payout: 15e4,
+      payoutMax: 18e4,
       actions: {
         ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
         place: [{ resourceId: RESOURCE.GASOLINE, qty: 3 }]
@@ -197,6 +202,7 @@
     {
       scenarioName: "Green With Envy",
       payout: 12e4,
+      payoutMax: 13e4,
       actions: {
         ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
         place: [{ resourceId: RESOURCE.GASOLINE, qty: 3 }]
@@ -221,6 +227,7 @@
     {
       scenarioName: "Needles to Say",
       payout: 39e3,
+      payoutMax: 45e3,
       actions: {
         ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
         place: [{ resourceId: RESOURCE.GASOLINE, qty: 2 }]
@@ -229,6 +236,7 @@
     {
       scenarioName: "Off the Market",
       payout: 155e3,
+      payoutMax: 21e4,
       actions: {
         ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
         place: [
@@ -241,6 +249,7 @@
     {
       scenarioName: "Old School",
       payout: 62500,
+      payoutMax: 77e3,
       actions: {
         ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
         place: [{ resourceId: RESOURCE.GASOLINE, qty: 4 }]
@@ -265,6 +274,7 @@
     {
       scenarioName: "Raze the Steaks",
       payout: 25e4,
+      payoutMax: 26e4,
       actions: {
         ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
         place: [{ resourceId: RESOURCE.GASOLINE, qty: 5 }]
@@ -273,6 +283,7 @@
     {
       scenarioName: "Burn the Deck",
       payout: 96e3,
+      payoutMax: 13e4,
       actions: {
         ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
         place: [{ resourceId: RESOURCE.GASOLINE, qty: 4 }]
@@ -281,6 +292,7 @@
     {
       scenarioName: "Boom Industry",
       payout: 1e5,
+      payoutMax: 13e4,
       actions: {
         ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
         place: [{ resourceId: RESOURCE.GASOLINE, qty: 3 }]
@@ -298,6 +310,7 @@
     {
       scenarioName: "Burn Rubber",
       payout: 67e3,
+      payoutMax: 82e3,
       actions: {
         evidence: [{ resourceId: RESOURCE.MAYAN_STATUE, qty: 1 }],
         ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
@@ -325,6 +338,7 @@
     {
       scenarioName: "Blaze of Glory",
       payout: 18e4,
+      payoutMax: 2e5,
       actions: {
         evidence: [{ resourceId: RESOURCE.TOOTHBRUSH, qty: 1 }],
         ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
@@ -336,6 +350,7 @@
     {
       scenarioName: "A Treat for the Tricked",
       payout: 71e3,
+      payoutMax: 11e4,
       actions: {
         evidence: [{ resourceId: RESOURCE.KABUKI_MASK, qty: 1 }],
         ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
@@ -345,6 +360,7 @@
     {
       scenarioName: "Muscling In",
       payout: 90500,
+      payoutMax: 2e5,
       actions: {
         evidence: [{ resourceId: RESOURCE.SYRINGE, qty: 1 }],
         ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
@@ -366,6 +382,7 @@
     {
       scenarioName: "Planted",
       payout: 12e4,
+      payoutMax: 13e4,
       actions: {
         evidence: [{ resourceId: RESOURCE.PELE_CHARM, qty: 1 }],
         ignite: [{ resourceId: RESOURCE.LIGHTER, qty: 1 }],
@@ -375,6 +392,7 @@
     {
       scenarioName: "Flame and Fortune",
       payout: 68e4,
+      payoutMax: 7e5,
       actions: {
         ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
         place: [{ resourceId: RESOURCE.KEROSENE, qty: 3 }]
@@ -383,6 +401,7 @@
     {
       scenarioName: "Cache and Burn",
       payout: 49e4,
+      payoutMax: 51e4,
       actions: {
         ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
         place: [{ resourceId: RESOURCE.KEROSENE, qty: 4 }]
@@ -401,6 +420,7 @@
     {
       scenarioName: "Letter of the Law",
       payout: 36e4,
+      payoutMax: 41e4,
       actions: {
         ignite: [{ resourceId: RESOURCE.LIGHTER, qty: 1 }],
         place: [{ resourceId: RESOURCE.HYDROGEN, qty: 1 }],
@@ -420,6 +440,7 @@
     {
       scenarioName: "A Burnt Child Dreads the Fire",
       payout: 235e3,
+      payoutMax: 29e4,
       actions: {
         ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
         place: [
@@ -433,6 +454,7 @@
     {
       scenarioName: "A Dirty Job",
       payout: 32e3,
+      payoutMax: 43e3,
       actions: {
         ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
         place: [{ resourceId: RESOURCE.GASOLINE, qty: 2 }]
@@ -441,6 +463,7 @@
     {
       scenarioName: "A Fungus Among Us",
       payout: 34e3,
+      payoutMax: 46e3,
       actions: {
         ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
         place: [{ resourceId: RESOURCE.GASOLINE, qty: 2 }]
@@ -449,6 +472,7 @@
     {
       scenarioName: "A Hot Lead",
       payout: 22e3,
+      payoutMax: 44e3,
       actions: {
         ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
         place: [{ resourceId: RESOURCE.GASOLINE, qty: 6 }]
@@ -474,6 +498,7 @@
     {
       scenarioName: "A Rash Decision",
       payout: 11e3,
+      payoutMax: 17e3,
       actions: {
         ignite: [{ resourceId: RESOURCE.LIGHTER, qty: 1 }],
         place: [{ resourceId: RESOURCE.GASOLINE, qty: 1 }],
@@ -484,6 +509,7 @@
     {
       scenarioName: "All Mouth and Trousers",
       payout: 56e3,
+      payoutMax: 78e3,
       actions: {
         evidence: [{ resourceId: RESOURCE.DIAMOND_RING, qty: 1 }],
         ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
@@ -502,6 +528,7 @@
     {
       scenarioName: "Anon Starter",
       payout: 31e3,
+      payoutMax: 33e3,
       actions: {
         ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
         place: [{ resourceId: RESOURCE.GASOLINE, qty: 1 }]
@@ -510,6 +537,7 @@
     {
       scenarioName: "Apart of the Problem",
       payout: 265e3,
+      payoutMax: 3e5,
       actions: {
         ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
         place: [{ resourceId: RESOURCE.GASOLINE, qty: 4 }],
@@ -546,6 +574,7 @@
     {
       scenarioName: "Baewatch",
       payout: 13e3,
+      payoutMax: 16e3,
       actions: {
         ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
         place: [{ resourceId: RESOURCE.GASOLINE, qty: 1 }]
@@ -554,6 +583,7 @@
     {
       scenarioName: "Bagged and Tagged",
       payout: 1600,
+      payoutMax: 19e3,
       actions: {
         ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
         place: [{ resourceId: RESOURCE.GASOLINE, qty: 1 }]
@@ -562,6 +592,7 @@
     {
       scenarioName: "Bang For Your Buck",
       payout: 44e3,
+      payoutMax: 5e4,
       actions: {
         evidence: [{ resourceId: RESOURCE.GRENADE, qty: 1 }],
         ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
@@ -579,6 +610,7 @@
     {
       scenarioName: "Beat the Odds",
       payout: 33e4,
+      payoutMax: 35e4,
       actions: {
         ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
         place: [{ resourceId: RESOURCE.GASOLINE, qty: 3 }]
@@ -587,6 +619,7 @@
     {
       scenarioName: "Beggars Can't be Choosers",
       payout: 48e4,
+      payoutMax: 51e4,
       actions: {
         ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
         place: [
@@ -627,6 +660,7 @@
     {
       scenarioName: "Boxing Clever",
       payout: 325e3,
+      payoutMax: 36e4,
       actions: {
         ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
         place: [{ resourceId: RESOURCE.GASOLINE, qty: 2 }]
@@ -645,6 +679,7 @@
     {
       scenarioName: "Burn After Screening",
       payout: 1e5,
+      payoutMax: 12e4,
       actions: {
         ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
         place: [{ resourceId: RESOURCE.GASOLINE, qty: 4 }]
@@ -653,6 +688,7 @@
     {
       scenarioName: "Burn Notice",
       payout: 175e3,
+      payoutMax: 18e4,
       actions: {
         ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
         place: [
@@ -672,6 +708,7 @@
     {
       scenarioName: "Burned Cookies",
       payout: 81e3,
+      payoutMax: 31e4,
       actions: {
         place: [{ resourceId: RESOURCE.DIESEL, qty: 8 }],
         ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
@@ -692,6 +729,7 @@
     {
       scenarioName: "Burning Memory",
       payout: 32e3,
+      payoutMax: 4e4,
       actions: {
         ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
         place: [{ resourceId: RESOURCE.GASOLINE, qty: 2 }]
@@ -700,6 +738,7 @@
     {
       scenarioName: "Burning Through Cash",
       payout: 105e3,
+      payoutMax: 12e4,
       actions: {
         ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
         place: [{ resourceId: RESOURCE.HYDROGEN, qty: 1 }]
@@ -708,6 +747,7 @@
     {
       scenarioName: "Burnt Ends",
       payout: 17e4,
+      payoutMax: 19e4,
       actions: {
         ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
         place: [{ resourceId: RESOURCE.GASOLINE, qty: 6 }],
@@ -726,6 +766,7 @@
     {
       scenarioName: "Camera Tricks",
       payout: 115e3,
+      payoutMax: 12e4,
       actions: {
         ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
         place: [{ resourceId: RESOURCE.GASOLINE, qty: 3 }],
@@ -736,6 +777,7 @@
     {
       scenarioName: "Carrying a Torch",
       payout: 44500,
+      payoutMax: 9e4,
       actions: {
         ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
         place: [{ resourceId: RESOURCE.GASOLINE, qty: 4 }]
@@ -744,6 +786,7 @@
     {
       scenarioName: "Chance of Redemption",
       payout: 59e3,
+      payoutMax: 82e3,
       actions: {
         ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
         place: [{ resourceId: RESOURCE.GASOLINE, qty: 2 }]
@@ -752,6 +795,7 @@
     {
       scenarioName: "Charcoal Sketch",
       payout: 39e3,
+      payoutMax: 68e3,
       actions: {
         ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
         place: [{ resourceId: RESOURCE.GASOLINE, qty: 3 }]
@@ -760,6 +804,7 @@
     {
       scenarioName: "Chasing Targets",
       payout: 24e3,
+      payoutMax: 37e3,
       actions: {
         ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
         place: [{ resourceId: RESOURCE.GASOLINE, qty: 1 }]
@@ -768,6 +813,7 @@
     {
       scenarioName: "Checking Out",
       payout: 28e4,
+      payoutMax: 36e4,
       actions: {
         ignite: [{ resourceId: RESOURCE.LIGHTER, qty: 1 }],
         place: [
@@ -781,6 +827,7 @@
     {
       scenarioName: "Claim to Flame",
       payout: 33500,
+      payoutMax: 43e3,
       actions: {
         ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
         place: [{ resourceId: RESOURCE.GASOLINE, qty: 2 }]
@@ -801,6 +848,7 @@
     {
       scenarioName: "Cleansed Through Fire",
       payout: 46e3,
+      payoutMax: 23e4,
       actions: {
         ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
         place: [
@@ -812,6 +860,7 @@
     {
       scenarioName: "Clinical Exposure",
       payout: 165e3,
+      payoutMax: 18e4,
       actions: {
         evidence: [{ resourceId: RESOURCE.OPIUM, qty: 1 }],
         ignite: [{ resourceId: RESOURCE.LIGHTER, qty: 1 }],
@@ -852,6 +901,7 @@
     {
       scenarioName: "Cooking the Books",
       payout: 25e3,
+      payoutMax: 38e3,
       actions: {
         ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
         place: [{ resourceId: RESOURCE.GASOLINE, qty: 2 }]
@@ -860,6 +910,7 @@
     {
       scenarioName: "Cop Some Heat",
       payout: 19e3,
+      payoutMax: 63e3,
       actions: {
         ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
         place: [{ resourceId: RESOURCE.GASOLINE, qty: 2 }]
@@ -868,6 +919,7 @@
     {
       scenarioName: "Crafty Devil",
       payout: 1e5,
+      payoutMax: 106e3,
       actions: {
         ignite: [{ resourceId: RESOURCE.LIGHTER, qty: 1 }],
         place: [{ resourceId: RESOURCE.GASOLINE, qty: 1 }]
@@ -876,6 +928,7 @@
     {
       scenarioName: "Crisp Bills",
       payout: 39e3,
+      payoutMax: 52e3,
       actions: {
         ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
         place: [{ resourceId: RESOURCE.GASOLINE, qty: 2 }]
@@ -884,6 +937,7 @@
     {
       scenarioName: "Curtain Call",
       payout: 57e3,
+      payoutMax: 79e3,
       actions: {
         ignite: [{ resourceId: RESOURCE.LIGHTER, qty: 1 }],
         place: [{ resourceId: RESOURCE.GASOLINE, qty: 1 }]
@@ -892,6 +946,7 @@
     {
       scenarioName: "Cut Corners",
       payout: 2e5,
+      payoutMax: 23e4,
       actions: {
         ignite: [{ resourceId: RESOURCE.LIGHTER, qty: 1 }],
         place: [
@@ -917,6 +972,7 @@
     {
       scenarioName: "Damned If You Don't",
       payout: 74e3,
+      payoutMax: 15e4,
       observedPayout: {
         min: 13e4,
         max: 15e4,
@@ -957,6 +1013,7 @@
     {
       scenarioName: "Dirty Money",
       payout: 36e4,
+      payoutMax: 42e4,
       actions: {
         ignite: [{ resourceId: RESOURCE.LIGHTER, qty: 1 }],
         place: [{ resourceId: RESOURCE.KEROSENE, qty: 3 }]
@@ -965,6 +1022,7 @@
     {
       scenarioName: "Disco Inferno",
       payout: 48e3,
+      payoutMax: 14e4,
       actions: {
         ignite: [{ resourceId: RESOURCE.LIGHTER, qty: 1 }],
         place: [
@@ -977,6 +1035,7 @@
     {
       scenarioName: "Don't Hate the Player",
       payout: 32e3,
+      payoutMax: 37e3,
       actions: {
         ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
         place: [{ resourceId: RESOURCE.GASOLINE, qty: 2 }]
@@ -985,6 +1044,7 @@
     {
       scenarioName: "Eight Lives",
       payout: 6e3,
+      payoutMax: 9e3,
       actions: {
         ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
         place: [{ resourceId: RESOURCE.GASOLINE, qty: 1 }]
@@ -993,6 +1053,7 @@
     {
       scenarioName: "Emotional Wreck",
       payout: 14e4,
+      payoutMax: 16e4,
       actions: {
         ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
         place: [
@@ -1004,6 +1065,7 @@
     {
       scenarioName: "End of the Line",
       payout: 78e3,
+      payoutMax: 15e4,
       actions: {
         ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
         place: [{ resourceId: RESOURCE.GASOLINE, qty: 4 }]
@@ -1012,6 +1074,7 @@
     {
       scenarioName: "Faction Fiction",
       payout: 64500,
+      payoutMax: 84e3,
       actions: {
         ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
         place: [{ resourceId: RESOURCE.GASOLINE, qty: 4 }]
@@ -1020,6 +1083,7 @@
     {
       scenarioName: "Family Feud",
       payout: 2e4,
+      payoutMax: 22e3,
       actions: {
         ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
         place: [{ resourceId: RESOURCE.GASOLINE, qty: 1 }]
@@ -1028,6 +1092,7 @@
     {
       scenarioName: "Fan the Flames",
       payout: 33e3,
+      payoutMax: 96e3,
       actions: {
         ignite: [{ resourceId: RESOURCE.LIGHTER, qty: 1 }],
         place: [
@@ -1049,6 +1114,7 @@
     {
       scenarioName: "Final Markdown",
       payout: 49e3,
+      payoutMax: 1e5,
       actions: {
         ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
         place: [{ resourceId: RESOURCE.GASOLINE, qty: 4 }]
@@ -1057,6 +1123,7 @@
     {
       scenarioName: "Fire and Brimstone",
       payout: 125e3,
+      payoutMax: 14e4,
       actions: {
         ignite: [{ resourceId: RESOURCE.LIGHTER, qty: 1 }],
         place: [{ resourceId: RESOURCE.GASOLINE, qty: 1 }]
@@ -1065,6 +1132,7 @@
     {
       scenarioName: "Fire Burn and Cauldron Bubble",
       payout: 17e4,
+      payoutMax: 18e4,
       actions: {
         ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
         place: [{ resourceId: RESOURCE.GASOLINE, qty: 4 }]
@@ -1073,6 +1141,7 @@
     {
       scenarioName: "Fire in the Belly",
       payout: 17e3,
+      payoutMax: 4e4,
       actions: {
         ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
         place: [{ resourceId: RESOURCE.GASOLINE, qty: 3 }]
@@ -1081,6 +1150,7 @@
     {
       scenarioName: "Fire Kills 99.9% of Bacteria",
       payout: 305e3,
+      payoutMax: 33e4,
       actions: {
         ignite: [{ resourceId: RESOURCE.LIGHTER, qty: 1 }],
         place: [{ resourceId: RESOURCE.HYDROGEN, qty: 1 }]
@@ -1089,6 +1159,7 @@
     {
       scenarioName: "Fire Sale",
       payout: 1e4,
+      payoutMax: 12e3,
       actions: {
         ignite: [{ resourceId: RESOURCE.LIGHTER, qty: 1 }],
         place: [{ resourceId: RESOURCE.HYDROGEN, qty: 1 }]
@@ -1097,6 +1168,7 @@
     {
       scenarioName: "Follow the Leader",
       payout: 69e3,
+      payoutMax: 13e4,
       actions: {
         ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
         place: [{ resourceId: RESOURCE.HYDROGEN, qty: 2 }],
@@ -1107,6 +1179,7 @@
     {
       scenarioName: "For Closure",
       payout: 16e3,
+      payoutMax: 42e3,
       actions: {
         ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
         place: [{ resourceId: RESOURCE.GASOLINE, qty: 2 }]
@@ -1115,6 +1188,7 @@
     {
       scenarioName: "Foul Play",
       payout: 12e4,
+      payoutMax: 14e4,
       actions: {
         ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
         place: [{ resourceId: RESOURCE.GASOLINE, qty: 3 }]
@@ -1157,6 +1231,7 @@
     {
       scenarioName: "Heat the Rich",
       payout: 4e4,
+      payoutMax: 69e3,
       actions: {
         ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
         place: [{ resourceId: RESOURCE.GASOLINE, qty: 3 }]
@@ -1181,6 +1256,7 @@
     {
       scenarioName: "Hire and Fire",
       payout: 57e3,
+      payoutMax: 73e3,
       actions: {
         ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
         place: [{ resourceId: RESOURCE.GASOLINE, qty: 3 }]
@@ -1189,6 +1265,7 @@
     {
       scenarioName: "Hold Fire",
       payout: 11e4,
+      payoutMax: 12e4,
       actions: {
         ignite: [{ resourceId: RESOURCE.LIGHTER, qty: 1 }],
         place: [{ resourceId: RESOURCE.GASOLINE, qty: 1 }]
@@ -1197,6 +1274,7 @@
     {
       scenarioName: "Holy Smokes",
       payout: 56500,
+      payoutMax: 73e3,
       actions: {
         ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
         place: [{ resourceId: RESOURCE.HYDROGEN, qty: 1 }]
@@ -1205,6 +1283,7 @@
     {
       scenarioName: "Home and Dry",
       payout: 49e3,
+      payoutMax: 89e3,
       actions: {
         ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
         place: [{ resourceId: RESOURCE.GASOLINE, qty: 3 }]
@@ -1213,6 +1292,7 @@
     {
       scenarioName: "Hostile Takeover",
       payout: 3e5,
+      payoutMax: 32e4,
       actions: {
         ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
         place: [{ resourceId: RESOURCE.GASOLINE, qty: 3 }]
@@ -1229,6 +1309,7 @@
     {
       scenarioName: "Hot Dog",
       payout: 30500,
+      payoutMax: 34e3,
       actions: {
         ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
         place: [{ resourceId: RESOURCE.GASOLINE, qty: 1 }]
@@ -1237,6 +1318,7 @@
     {
       scenarioName: "Hot Gossip",
       payout: 62e3,
+      payoutMax: 104e3,
       actions: {
         ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
         place: [{ resourceId: RESOURCE.GASOLINE, qty: 3 }]
@@ -1245,6 +1327,7 @@
     {
       scenarioName: "Hot Off the Press",
       payout: 18e3,
+      payoutMax: 3e4,
       actions: {
         ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
         place: [{ resourceId: RESOURCE.GASOLINE, qty: 1 }]
@@ -1253,6 +1336,7 @@
     {
       scenarioName: "Hot on the Trail",
       payout: 39e4,
+      payoutMax: 46e4,
       actions: {
         ignite: [{ resourceId: RESOURCE.LIGHTER, qty: 1 }],
         place: [{ resourceId: RESOURCE.GASOLINE, qty: 2 }]
@@ -1261,6 +1345,7 @@
     {
       scenarioName: "Hot Profit",
       payout: 57500,
+      payoutMax: 1e5,
       actions: {
         ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
         place: [{ resourceId: RESOURCE.GASOLINE, qty: 3 }]
@@ -1269,6 +1354,7 @@
     {
       scenarioName: "Hot Trend",
       payout: 54e3,
+      payoutMax: 66e3,
       actions: {
         ignite: [{ resourceId: RESOURCE.LIGHTER, qty: 1 }],
         place: [{ resourceId: RESOURCE.HYDROGEN, qty: 1 }]
@@ -1277,6 +1363,7 @@
     {
       scenarioName: "House Edge",
       payout: 135e3,
+      payoutMax: 2e5,
       actions: {
         ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
         place: [{ resourceId: RESOURCE.GASOLINE, qty: 5 }]
@@ -1285,6 +1372,7 @@
     {
       scenarioName: "House of Cards",
       payout: 61e4,
+      payoutMax: 63e4,
       actions: {
         ignite: [{ resourceId: RESOURCE.LIGHTER, qty: 1 }],
         place: [{ resourceId: RESOURCE.HYDROGEN, qty: 1 }],
@@ -1295,6 +1383,7 @@
     {
       scenarioName: "In Your Debt",
       payout: 33e3,
+      payoutMax: 46e3,
       actions: {
         ignite: [{ resourceId: RESOURCE.LIGHTER, qty: 1 }],
         place: [{ resourceId: RESOURCE.HYDROGEN, qty: 1 }]
@@ -1313,6 +1402,7 @@
     {
       scenarioName: "It Cuts Both Ways",
       payout: 20500,
+      payoutMax: 29e3,
       actions: {
         ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
         place: [{ resourceId: RESOURCE.GASOLINE, qty: 2 }]
@@ -1321,6 +1411,7 @@
     {
       scenarioName: "It's a Write Off",
       payout: 225e3,
+      payoutMax: 25e4,
       actions: {
         ignite: [{ resourceId: RESOURCE.LIGHTER, qty: 1 }],
         place: [{ resourceId: RESOURCE.GASOLINE, qty: 3 }]
@@ -1329,6 +1420,7 @@
     {
       scenarioName: "It's Not All White",
       payout: 14e4,
+      payoutMax: 18e4,
       actions: {
         ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
         place: [{ resourceId: RESOURCE.HYDROGEN, qty: 1 }],
@@ -1338,6 +1430,7 @@
     {
       scenarioName: "Landmark Decision",
       payout: 28e4,
+      payoutMax: 29e4,
       actions: {
         ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
         place: [{ resourceId: RESOURCE.GASOLINE, qty: 4 }],
@@ -1348,6 +1441,7 @@
     {
       scenarioName: "Last Lyft Home",
       payout: 52e3,
+      payoutMax: 97e3,
       actions: {
         ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
         place: [{ resourceId: RESOURCE.GASOLINE, qty: 3 }]
@@ -1356,6 +1450,7 @@
     {
       scenarioName: "Light Fingered",
       payout: 165e3,
+      payoutMax: 19e4,
       actions: {
         ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
         place: [{ resourceId: RESOURCE.GASOLINE, qty: 3 }]
@@ -1390,6 +1485,7 @@
     {
       scenarioName: "Long Pig",
       payout: 13e4,
+      payoutMax: 15e4,
       actions: {
         ignite: [{ resourceId: RESOURCE.LIGHTER, qty: 1 }],
         place: [{ resourceId: RESOURCE.GASOLINE, qty: 2 }]
@@ -1422,6 +1518,7 @@
     {
       scenarioName: "Make a Killing",
       payout: 39e4,
+      payoutMax: 48e4,
       actions: {
         ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
         place: [
@@ -1442,6 +1539,7 @@
     {
       scenarioName: "Marked for Salvation",
       payout: 8e4,
+      payoutMax: 11e4,
       actions: {
         ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
         place: [
@@ -1483,6 +1581,7 @@
     {
       scenarioName: "Milk Milk, Lemonade",
       payout: 155e3,
+      payoutMax: 18e4,
       actions: {
         ignite: [{ resourceId: RESOURCE.LIGHTER, qty: 1 }],
         place: [{ resourceId: RESOURCE.GASOLINE, qty: 1 }]
@@ -1500,6 +1599,7 @@
     {
       scenarioName: "Not a Leg to Stand on",
       payout: 125e3,
+      payoutMax: 22e4,
       actions: {
         ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
         place: [{ resourceId: RESOURCE.GASOLINE, qty: 4 }]
@@ -1508,6 +1608,7 @@
     {
       scenarioName: "Oh God, Yes",
       payout: 17500,
+      payoutMax: 41e3,
       actions: {
         ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
         place: [{ resourceId: RESOURCE.GASOLINE, qty: 2 }]
@@ -1549,6 +1650,7 @@
     {
       scenarioName: "Pest Control",
       payout: 16e3,
+      payoutMax: 19e3,
       actions: {
         ignite: [{ resourceId: RESOURCE.LIGHTER, qty: 1 }],
         place: [{ resourceId: RESOURCE.HYDROGEN, qty: 1 }]
@@ -1557,6 +1659,7 @@
     {
       scenarioName: "Piggy in the Middle",
       payout: 104e3,
+      payoutMax: 11e4,
       actions: {
         ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
         place: [{ resourceId: RESOURCE.GASOLINE, qty: 3 }]
@@ -1565,6 +1668,7 @@
     {
       scenarioName: "Playing With Fire",
       payout: 21e4,
+      payoutMax: 24e4,
       actions: {
         ignite: [{ resourceId: RESOURCE.LIGHTER, qty: 1 }],
         place: [{ resourceId: RESOURCE.GASOLINE, qty: 2 }]
@@ -1573,6 +1677,7 @@
     {
       scenarioName: "Point of No Return",
       payout: 9e4,
+      payoutMax: 16e4,
       actions: {
         place: [
           { resourceId: RESOURCE.GASOLINE, qty: 3 },
@@ -1592,6 +1697,7 @@
     {
       scenarioName: "Pyro for Pornos",
       payout: 65e3,
+      payoutMax: 102e3,
       actions: {
         ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
         place: [{ resourceId: RESOURCE.GASOLINE, qty: 3 }]
@@ -1618,6 +1724,7 @@
     {
       scenarioName: "Read the Room",
       payout: 125e3,
+      payoutMax: 15e4,
       actions: {
         ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
         place: [{ resourceId: RESOURCE.GASOLINE, qty: 3 }]
@@ -1634,6 +1741,7 @@
     {
       scenarioName: "Rest in Peace",
       payout: 20500,
+      payoutMax: 3e4,
       actions: {
         ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
         place: [{ resourceId: RESOURCE.GASOLINE, qty: 2 }]
@@ -1659,6 +1767,7 @@
     {
       scenarioName: "Rock the Boat",
       payout: 325e3,
+      payoutMax: 35e4,
       actions: {
         ignite: [{ resourceId: RESOURCE.LIGHTER, qty: 1 }],
         place: [{ resourceId: RESOURCE.DIESEL, qty: 1 }]
@@ -1675,6 +1784,7 @@
     {
       scenarioName: "Second Hand Smoke",
       payout: 37e3,
+      payoutMax: 1e5,
       actions: {
         ignite: [{ resourceId: RESOURCE.LIGHTER, qty: 1 }],
         place: [
@@ -1688,6 +1798,7 @@
     {
       scenarioName: "See No Evil",
       payout: 71e3,
+      payoutMax: 8e4,
       actions: {
         ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
         place: [{ resourceId: RESOURCE.GASOLINE, qty: 5 }]
@@ -1706,6 +1817,7 @@
     {
       scenarioName: "Shaky Investment",
       payout: 8e4,
+      payoutMax: 11e4,
       actions: {
         ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
         place: [
@@ -1717,6 +1829,7 @@
     {
       scenarioName: "Shielded from the Truth",
       payout: 16e3,
+      payoutMax: 24e3,
       actions: {
         ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
         place: [{ resourceId: RESOURCE.GASOLINE, qty: 1 }]
@@ -1725,6 +1838,7 @@
     {
       scenarioName: "Short Shelf Life",
       payout: 395e3,
+      payoutMax: 44e4,
       actions: {
         ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
         place: [{ resourceId: RESOURCE.GASOLINE, qty: 2 }]
@@ -1733,6 +1847,7 @@
     {
       scenarioName: "Smoke on the Water",
       payout: 8600,
+      payoutMax: 1e4,
       actions: {
         ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
         place: [{ resourceId: RESOURCE.GASOLINE, qty: 1 }]
@@ -1741,6 +1856,7 @@
     {
       scenarioName: "Smoke Out",
       payout: 21e3,
+      payoutMax: 23e3,
       actions: {
         evidence: [{ resourceId: RESOURCE.CANNABIS, qty: 1 }],
         ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
@@ -1762,6 +1878,7 @@
     {
       scenarioName: "Smoke Screen",
       payout: 535e3,
+      payoutMax: 55e4,
       actions: {
         ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
         place: [{ resourceId: RESOURCE.GASOLINE, qty: 3 }],
@@ -1772,6 +1889,7 @@
     {
       scenarioName: "Smoke Without Fire",
       payout: 2e5,
+      payoutMax: 22e4,
       actions: {
         ignite: [{ resourceId: RESOURCE.LIGHTER, qty: 1 }],
         place: [{ resourceId: RESOURCE.GASOLINE, qty: 2 }]
@@ -1780,6 +1898,7 @@
     {
       scenarioName: "Smoldering Resentment",
       payout: 1e4,
+      payoutMax: 17e3,
       actions: {
         ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
         place: [{ resourceId: RESOURCE.GASOLINE, qty: 1 }]
@@ -1788,6 +1907,7 @@
     {
       scenarioName: "Sofa King Cheap",
       payout: 12e4,
+      payoutMax: 14e4,
       actions: {
         ignite: [{ resourceId: RESOURCE.LIGHTER, qty: 1 }],
         place: [{ resourceId: RESOURCE.HYDROGEN, qty: 1 }],
@@ -1807,6 +1927,7 @@
     {
       scenarioName: "Spirit Level",
       payout: 28e4,
+      payoutMax: 33e4,
       actions: {
         ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
         place: [
@@ -1818,6 +1939,7 @@
     {
       scenarioName: "Stick to the Script",
       payout: 16e4,
+      payoutMax: 17e4,
       actions: {
         ignite: [{ resourceId: RESOURCE.LIGHTER, qty: 1 }],
         place: [{ resourceId: RESOURCE.HYDROGEN, qty: 1 }],
@@ -1827,6 +1949,7 @@
     {
       scenarioName: "Stink to High Heaven",
       payout: 41e3,
+      payoutMax: 74e3,
       actions: {
         ignite: [{ resourceId: RESOURCE.LIGHTER, qty: 1 }],
         place: [
@@ -1838,6 +1961,7 @@
     {
       scenarioName: "Strike While it's Hot",
       payout: 265e3,
+      payoutMax: 3e5,
       actions: {
         ignite: [{ resourceId: RESOURCE.LIGHTER, qty: 1 }],
         place: [{ resourceId: RESOURCE.HYDROGEN, qty: 1 }],
@@ -1865,6 +1989,7 @@
     {
       scenarioName: "Swansong",
       payout: 27e3,
+      payoutMax: 51e3,
       actions: {
         ignite: [{ resourceId: RESOURCE.LIGHTER, qty: 1 }],
         place: [{ resourceId: RESOURCE.HYDROGEN, qty: 1 }]
@@ -1873,6 +1998,7 @@
     {
       scenarioName: "Taking out the Trash",
       payout: 11e4,
+      payoutMax: 15e4,
       actions: {
         evidence: [{ resourceId: RESOURCE.HARD_DRIVE, qty: 1 }],
         ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
@@ -1910,6 +2036,7 @@
     {
       scenarioName: "The Declaration of Inebrience",
       payout: 115e3,
+      payoutMax: 14e4,
       actions: {
         ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
         place: [{ resourceId: RESOURCE.GASOLINE, qty: 2 }]
@@ -1918,6 +2045,7 @@
     {
       scenarioName: "The Empyre Strikes Back",
       payout: 49e3,
+      payoutMax: 5e4,
       actions: {
         ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
         place: [{ resourceId: RESOURCE.GASOLINE, qty: 3 }]
@@ -1926,6 +2054,7 @@
     {
       scenarioName: "The Fat is in the Fire",
       payout: 3e5,
+      payoutMax: 34e4,
       actions: {
         ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
         place: [{ resourceId: RESOURCE.KEROSENE, qty: 3 }],
@@ -1936,6 +2065,7 @@
     {
       scenarioName: "The Fire Chief",
       payout: 14e4,
+      payoutMax: 15e4,
       actions: {
         ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
         place: [{ resourceId: RESOURCE.GASOLINE, qty: 4 }]
@@ -1944,6 +2074,7 @@
     {
       scenarioName: "The Fried Piper",
       payout: 27e4,
+      payoutMax: 32e4,
       actions: {
         ignite: [{ resourceId: RESOURCE.LIGHTER, qty: 1 }],
         place: [{ resourceId: RESOURCE.HYDROGEN, qty: 1 }]
@@ -1960,6 +2091,7 @@
     {
       scenarioName: "The Male Gaze",
       payout: 11e4,
+      payoutMax: 12e4,
       actions: {
         ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
         place: [{ resourceId: RESOURCE.GASOLINE, qty: 3 }]
@@ -1968,6 +2100,7 @@
     {
       scenarioName: "The Midnight Oil",
       payout: 75e3,
+      payoutMax: 104e3,
       actions: {
         ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
         place: [{ resourceId: RESOURCE.GASOLINE, qty: 4 }]
@@ -1976,6 +2109,7 @@
     {
       scenarioName: "The Plane Truth",
       payout: 25e3,
+      payoutMax: 52e3,
       actions: {
         ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
         place: [{ resourceId: RESOURCE.GASOLINE, qty: 2 }]
@@ -1984,6 +2118,7 @@
     {
       scenarioName: "The Savage Beast",
       payout: 17e4,
+      payoutMax: 19e4,
       actions: {
         ignite: [{ resourceId: RESOURCE.LIGHTER, qty: 1 }],
         place: [{ resourceId: RESOURCE.GASOLINE, qty: 3 }]
@@ -2000,6 +2135,7 @@
     {
       scenarioName: "The Waiting Game",
       payout: 12e4,
+      payoutMax: 13e4,
       actions: {
         ignite: [{ resourceId: RESOURCE.LIGHTER, qty: 1 }],
         place: [{ resourceId: RESOURCE.GASOLINE, qty: 1 }]
@@ -2008,6 +2144,7 @@
     {
       scenarioName: "Third-Degree Burn",
       payout: 29e3,
+      payoutMax: 58e3,
       actions: {
         ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
         place: [{ resourceId: RESOURCE.GASOLINE, qty: 2 }]
@@ -2016,6 +2153,7 @@
     {
       scenarioName: "To the Manor Scorned",
       payout: 75500,
+      payoutMax: 1e5,
       actions: {
         ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
         place: [{ resourceId: RESOURCE.GASOLINE, qty: 4 }]
@@ -2024,6 +2162,7 @@
     {
       scenarioName: "Totally Armless",
       payout: 35e3,
+      payoutMax: 86e3,
       actions: {
         ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
         place: [{ resourceId: RESOURCE.KEROSENE, qty: 2 }],
@@ -2043,6 +2182,7 @@
     {
       scenarioName: "Twisted Firestarter",
       payout: 23e3,
+      payoutMax: 33e3,
       actions: {
         ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
         place: [{ resourceId: RESOURCE.GASOLINE, qty: 2 }]
@@ -2059,6 +2199,7 @@
     {
       scenarioName: "Under the Table",
       payout: 4e5,
+      payoutMax: 43e4,
       actions: {
         ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
         place: [{ resourceId: RESOURCE.GASOLINE, qty: 1 }],
@@ -2069,6 +2210,7 @@
     {
       scenarioName: "Unpopular Mechanics",
       payout: 8600,
+      payoutMax: 1e4,
       actions: {
         ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
         place: [{ resourceId: RESOURCE.GASOLINE, qty: 1 }]
@@ -2087,6 +2229,7 @@
     {
       scenarioName: "Visions of the Savory",
       payout: 11e4,
+      payoutMax: 12e4,
       actions: {
         evidence: [{ resourceId: RESOURCE.FAMILY_PHOTO, qty: 1 }],
         ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
@@ -2096,6 +2239,7 @@
     {
       scenarioName: "Waist Not, Want Not",
       payout: 21e4,
+      payoutMax: 26e4,
       actions: {
         ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
         place: [{ resourceId: RESOURCE.GASOLINE, qty: 5 }]
@@ -2104,6 +2248,7 @@
     {
       scenarioName: "Wedded to the Lie",
       payout: 69e3,
+      payoutMax: 102e3,
       actions: {
         ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
         place: [{ resourceId: RESOURCE.GASOLINE, qty: 3 }]
@@ -2112,6 +2257,7 @@
     {
       scenarioName: "Wet Behind the Ears",
       payout: 2e5,
+      payoutMax: 25e4,
       actions: {
         ignite: [{ resourceId: RESOURCE.LIGHTER, qty: 1 }],
         place: [{ resourceId: RESOURCE.KEROSENE, qty: 1 }]
@@ -2120,6 +2266,7 @@
     {
       scenarioName: "Where There's a Will",
       payout: 52e3,
+      payoutMax: 11e4,
       actions: {
         ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
         place: [{ resourceId: RESOURCE.GASOLINE, qty: 5 }]
@@ -2128,6 +2275,7 @@
     {
       scenarioName: "Whiskey Business",
       payout: 9e4,
+      payoutMax: 1e5,
       actions: {
         ignite: [{ resourceId: RESOURCE.LIGHTER, qty: 1 }],
         place: [{ resourceId: RESOURCE.METHANE, qty: 2 }],
@@ -2146,6 +2294,7 @@
     {
       scenarioName: "Womb With a View",
       payout: 78500,
+      payoutMax: 9e4,
       actions: {
         ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
         place: [{ resourceId: RESOURCE.GASOLINE, qty: 3 }]
@@ -2154,6 +2303,7 @@
     {
       scenarioName: "Workplace Burnout",
       payout: 73e3,
+      payoutMax: 82e3,
       actions: {
         ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
         place: [{ resourceId: RESOURCE.GASOLINE, qty: 3 }]
@@ -3300,6 +3450,10 @@
 
   // src/userscripts/arsonists-ledger/engine.ts
   var DEFAULT_THRESHOLDS = { low: 5e3, good: 1e4 };
+  function effectivePayout(scenario, basis) {
+    if (basis === "max" && scenario.payoutMax !== void 0) return scenario.payoutMax;
+    return scenario.payout;
+  }
   function resolvePrice(resourceId, prices) {
     const override = prices[resourceId];
     if (override !== void 0) return override;
@@ -3331,10 +3485,10 @@
     const { evidence, ignite, place, stoke, dampen } = scenario.actions;
     return itemCost(evidence, prices) + itemCost(ignite, prices) + itemCost(place, prices) + itemCost(stoke, prices) + itemCost(dampen, prices);
   }
-  function calcProfitPerNerve(scenario, prices) {
+  function calcProfitPerNerve(scenario, prices, basis = "average") {
     const nerve = calcNerve(scenario);
     const cost = calcMaterialCost(scenario, prices);
-    return (scenario.payout - cost) / nerve;
+    return (effectivePayout(scenario, basis) - cost) / nerve;
   }
   function profitBand(ppn, thresholds2) {
     if (ppn <= 0) return "negative";
@@ -3348,8 +3502,8 @@
     if (rounded >= 1e3) return `~$${sign}${(rounded / 1e3).toFixed(1)}k`;
     return `~$${sign}${rounded}`;
   }
-  function rankForScenario(scenario, prices, thresholds2) {
-    const ppn = calcProfitPerNerve(scenario, prices);
+  function rankForScenario(scenario, prices, thresholds2, basis = "average") {
+    const ppn = calcProfitPerNerve(scenario, prices, basis);
     return {
       Scenario: scenario,
       materialCost: calcMaterialCost(scenario, prices),
@@ -3407,6 +3561,9 @@
   function formatCost(total) {
     if (total >= 1e3) return `$${(total / 1e3).toFixed(1)}k`;
     return `$${total}`;
+  }
+  function formatPayoutValue(amount) {
+    return `~$${(amount / 1e3).toFixed(0)}k`;
   }
   function formatObservedPayout(amount) {
     if (amount >= 1e6)
@@ -3483,7 +3640,8 @@
     }
     frag.appendChild(header);
     const stats = el("div", "pyro-tt-stats");
-    stats.appendChild(row("Payout", `~$${(Scenario.payout / 1e3).toFixed(0)}k`));
+    const payoutLabel = Scenario.payoutMax !== void 0 && Scenario.payoutMax > Scenario.payout ? `${formatPayoutValue(Scenario.payout)}\u2013${formatPayoutValue(Scenario.payoutMax)}` : formatPayoutValue(Scenario.payout);
+    stats.appendChild(row("Payout", payoutLabel));
     stats.appendChild(row("Cost", `~$${(materialCost / 1e3).toFixed(1)}k`));
     stats.appendChild(row("Nerve", String(baseNerve)));
     frag.appendChild(stats);
@@ -3958,6 +4116,31 @@
     user-select: none;
 }
 .pyro-s-check-row input[type=checkbox] { cursor: pointer; }
+.pyro-s-toggle-group {
+    display: inline-flex;
+    align-self: flex-start;
+    border: 1px solid oklch(27% 0.017 285);
+    border-radius: 5px;
+    overflow: hidden;
+}
+.pyro-s-toggle-btn {
+    background: oklch(14.5% 0.011 285);
+    border: none;
+    color: oklch(62% 0.009 285);
+    font: inherit;
+    font-size: 11px;
+    padding: 4px 12px;
+    cursor: pointer;
+    transition: background 120ms ease-out, color 120ms ease-out;
+}
+.pyro-s-toggle-btn + .pyro-s-toggle-btn { border-left: 1px solid oklch(27% 0.017 285); }
+@media (hover: hover) and (pointer: fine) {
+    .pyro-s-toggle-btn:not(.active):hover { color: oklch(82% 0.007 285); }
+}
+.pyro-s-toggle-btn.active {
+    background: color-mix(in oklch, ${BAND_COLOR.excellent} 22%, oklch(14.5% 0.011 285));
+    color: oklch(96% 0.012 95);
+}
 .pyro-s-section-note { display: flex; align-items: flex-start; gap: 5px; font-size: 10px; line-height: 1.4; color: oklch(57% 0.008 285); margin-bottom: 6px; }
 .pyro-s-section-note > svg { width: 10px; height: 10px; flex-shrink: 0; margin-top: 1px; }
 .pyro-s-section-note strong { color: oklch(64% 0.009 285); font-weight: 600; }
@@ -4166,6 +4349,26 @@
     );
     thresholdsGroup.appendChild(thresholdRows);
     root.appendChild(thresholdsGroup);
+    const basisGroup = el("div", "pyro-s-group");
+    const basisTitle = el("div", "pyro-s-group-title");
+    basisTitle.textContent = "Payout basis";
+    basisGroup.appendChild(basisTitle);
+    const basisNote = el("p", "pyro-s-section-note");
+    basisNote.innerHTML = `${ICON_INFO}<span>Which payout figure drives PPN math (and card banding): the realistic <strong>average</strong>, or the optimistic <strong>max</strong> when a scenario has one on record.</span>`;
+    basisGroup.appendChild(basisNote);
+    basisGroup.appendChild(
+      toggleGroupRow(
+        "payout-basis",
+        "PPN calculation basis",
+        [
+          { value: "average", label: "Average" },
+          { value: "max", label: "Max" }
+        ],
+        ctx.getPayoutBasis,
+        ctx.setPayoutBasis
+      )
+    );
+    root.appendChild(basisGroup);
     return root;
   }
   function checkboxRow(label, getVal, setVal) {
@@ -4182,11 +4385,44 @@
     toggle.appendChild(lbl);
     return toggle;
   }
+  function toggleGroupRow(idSlug, label, options, getVal, setVal) {
+    const row2 = el("div", "pyro-s-row");
+    const lbl = el("span", "pyro-s-label");
+    lbl.textContent = label;
+    const labelId = `pyro-s-toggle-label-${idSlug}`;
+    lbl.id = labelId;
+    row2.appendChild(lbl);
+    const wrap = el("div", "pyro-s-toggle-group");
+    wrap.setAttribute("role", "group");
+    wrap.setAttribute("aria-labelledby", labelId);
+    const buttons = options.map(({ value, label: btnLabel }) => {
+      const btn = el("button", "pyro-s-toggle-btn");
+      btn.type = "button";
+      btn.textContent = btnLabel;
+      btn.addEventListener("click", () => {
+        setVal(value);
+        sync();
+      });
+      wrap.appendChild(btn);
+      return { value, btn };
+    });
+    function sync() {
+      const current = getVal();
+      for (const { value, btn } of buttons) {
+        const active = value === current;
+        btn.setAttribute("aria-pressed", String(active));
+        btn.classList.toggle("active", active);
+      }
+    }
+    sync();
+    row2.appendChild(wrap);
+    return row2;
+  }
   function buildVisualsTab(ctx) {
     const root = el("div");
     const group = el("div", "pyro-s-group");
     const title = el("div", "pyro-s-group-title");
-    title.textContent = "Tooltip elements";
+    title.textContent = "Tooltips";
     group.appendChild(title);
     const rows = el("div", "pyro-s-rows");
     rows.appendChild(
@@ -4226,6 +4462,23 @@
     );
     group.appendChild(rows);
     root.appendChild(group);
+    const barGroup = el("div", "pyro-s-group");
+    const barTitle = el("div", "pyro-s-group-title");
+    barTitle.textContent = "Scenarios";
+    barGroup.appendChild(barTitle);
+    barGroup.appendChild(
+      toggleGroupRow(
+        "ppn-bar-position",
+        "PPN bar position",
+        [
+          { value: "left", label: "Left" },
+          { value: "right", label: "Right" }
+        ],
+        ctx.getPpnBarPosition,
+        ctx.setPpnBarPosition
+      )
+    );
+    root.appendChild(barGroup);
     return root;
   }
   function buildApiTab(ctx) {
@@ -4397,6 +4650,8 @@
   var KEY_SHOW_RESOURCE_PRICES = "pyroLedger.v1.showResourcePrices";
   var KEY_SHOW_SCENARIO_NAME = "pyroLedger.v1.showScenarioName";
   var KEY_STACK_RESOURCES = "pyroLedger.v1.stackResources";
+  var KEY_PPN_BAR_POSITION = "pyroLedger.v1.ppnBarPosition";
+  var KEY_PAYOUT_BASIS = "pyroLedger.v1.payoutBasis";
   function store_get(key, def = "") {
     if (typeof GM_getValue !== "undefined") return GM_getValue(key, def);
     return localStorage.getItem(key) ?? def;
@@ -4450,6 +4705,8 @@
   var showResourcePrices = true;
   var showScenarioName = true;
   var stackResources = true;
+  var ppnBarPosition = "right";
+  var payoutBasis = "average";
   var visibleMobileSection = null;
   var IOS_USER_AGENT_RE = /iPad|iPhone|iPod/i;
   function isIosDevice() {
@@ -4470,6 +4727,8 @@
     showResourcePrices = store_get(KEY_SHOW_RESOURCE_PRICES, "1") !== "0";
     showScenarioName = store_get(KEY_SHOW_SCENARIO_NAME, "1") !== "0";
     stackResources = store_get(KEY_STACK_RESOURCES, "1") !== "0";
+    ppnBarPosition = store_get(KEY_PPN_BAR_POSITION, "right") === "left" ? "left" : "right";
+    payoutBasis = store_get(KEY_PAYOUT_BASIS, "average") === "max" ? "max" : "average";
     try {
       manualPrices = JSON.parse(store_get(KEY_MANUAL_PRICES, "{}"));
     } catch {
@@ -4531,6 +4790,22 @@
   function setStackResourcesEnabled(stack) {
     stackResources = stack;
     store_set(KEY_STACK_RESOURCES, stack ? "1" : "0");
+    resetScans();
+  }
+  function applyPpnBarPosition() {
+    document.documentElement.setAttribute(
+      "data-pyro-bar-position",
+      ppnBarPosition
+    );
+  }
+  function setPpnBarPosition(position) {
+    ppnBarPosition = position;
+    store_set(KEY_PPN_BAR_POSITION, position);
+    applyPpnBarPosition();
+  }
+  function setPayoutBasis(basis) {
+    payoutBasis = basis;
+    store_set(KEY_PAYOUT_BASIS, basis);
     resetScans();
   }
   function setApiPrices(prices, timestamp) {
@@ -4631,11 +4906,21 @@
     style.textContent = `
         .pyro-label { display: none; }
 
-        .arson-root .pyro-band--negative { box-shadow: inset -5px 0 0 ${BAND_COLOR.negative} !important; }
-        .arson-root .pyro-band--low      { box-shadow: inset -5px 0 0 ${BAND_COLOR.low}      !important; }
-        .arson-root .pyro-band--good     { box-shadow: inset -5px 0 0 ${BAND_COLOR.good}     !important; }
-        .arson-root .pyro-band--excellent { box-shadow: inset -5px 0 0 ${BAND_COLOR.excellent} !important; }
-        .arson-root .pyro-band--unknown  { box-shadow: inset -5px 0 0 ${BAND_COLOR.unknown}  !important; }
+        :root { --pyro-bar-x: -5px; }
+        :root[data-pyro-bar-position="left"] { --pyro-bar-x: 5px; }
+
+        .arson-root ${SEL.CARD} { position: relative; }
+        .arson-root ${SEL.CARD}::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+        }
+        .arson-root .pyro-band--negative::after { box-shadow: inset var(--pyro-bar-x) 0 0 ${BAND_COLOR.negative} !important; }
+        .arson-root .pyro-band--low::after      { box-shadow: inset var(--pyro-bar-x) 0 0 ${BAND_COLOR.low}      !important; }
+        .arson-root .pyro-band--good::after     { box-shadow: inset var(--pyro-bar-x) 0 0 ${BAND_COLOR.good}     !important; }
+        .arson-root .pyro-band--excellent::after { box-shadow: inset var(--pyro-bar-x) 0 0 ${BAND_COLOR.excellent} !important; }
+        .arson-root .pyro-band--unknown::after  { box-shadow: inset var(--pyro-bar-x) 0 0 ${BAND_COLOR.unknown}  !important; }
 
         ${SEL.FIRE_METER},
         .crime-image { position: relative !important; }
@@ -4811,7 +5096,7 @@
       const rawName = scenarioEl?.textContent?.trim() ?? "";
       if (!rawName) return;
       const scenario = scenarioIndex.get(rawName.toLowerCase()) ?? null;
-      const ranked = scenario ? rankForScenario(scenario, prices, thresholds) : null;
+      const ranked = scenario ? rankForScenario(scenario, prices, thresholds, payoutBasis) : null;
       applyToSection(section, ranked);
     });
   }
@@ -4833,6 +5118,8 @@
     getShowResourcePrices: () => showResourcePrices,
     getShowScenarioName: () => showScenarioName,
     getStackResources: () => stackResources,
+    getPpnBarPosition: () => ppnBarPosition,
+    getPayoutBasis: () => payoutBasis,
     setManualPrice,
     clearManualPrices,
     clearManualPrice,
@@ -4845,7 +5132,9 @@
     setShowOptionalBadges: setShowOptionalBadgesEnabled,
     setShowResourcePrices: setShowResourcePricesEnabled,
     setShowScenarioName: setShowScenarioNameEnabled,
-    setStackResources: setStackResourcesEnabled
+    setStackResources: setStackResourcesEnabled,
+    setPpnBarPosition,
+    setPayoutBasis
   };
   var reInjectTimer = null;
   function scheduleInjectSettings() {
@@ -4868,6 +5157,7 @@
     loadState();
     populateScenarioIndex(SCENARIOS);
     injectHighlightStyles();
+    applyPpnBarPosition();
     observer.observe(document.body, { childList: true, subtree: true });
     scheduleScenarioRefresh();
     if (isArsonPage()) {

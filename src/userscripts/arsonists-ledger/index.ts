@@ -9,6 +9,7 @@ import {
   type PriceMap,
   type ProfitThresholds,
   type RankedScenario,
+  type PayoutBasis,
 } from "./engine.js";
 import { buildTooltipContent, buildTooltipStyles } from "./tooltip.js";
 import { SEL } from "./selectors.js";
@@ -32,6 +33,8 @@ const KEY_SHOW_OPTIONAL_BADGES = "pyroLedger.v1.showOptionalBadges";
 const KEY_SHOW_RESOURCE_PRICES = "pyroLedger.v1.showResourcePrices";
 const KEY_SHOW_SCENARIO_NAME = "pyroLedger.v1.showScenarioName";
 const KEY_STACK_RESOURCES = "pyroLedger.v1.stackResources";
+const KEY_PPN_BAR_POSITION = "pyroLedger.v1.ppnBarPosition";
+const KEY_PAYOUT_BASIS = "pyroLedger.v1.payoutBasis";
 
 // ---------------------------------------------------------------------------
 // Minimal GM storage shim (falls back to localStorage in dev/non-GM contexts)
@@ -122,6 +125,8 @@ let showOptionalBadges = true;
 let showResourcePrices = true;
 let showScenarioName = true;
 let stackResources = true;
+let ppnBarPosition: "left" | "right" = "right";
+let payoutBasis: PayoutBasis = "average";
 let visibleMobileSection: HTMLElement | null = null;
 const IOS_USER_AGENT_RE = /iPad|iPhone|iPod/i;
 
@@ -149,6 +154,10 @@ function loadState(): void {
   showResourcePrices = store_get(KEY_SHOW_RESOURCE_PRICES, "1") !== "0";
   showScenarioName = store_get(KEY_SHOW_SCENARIO_NAME, "1") !== "0";
   stackResources = store_get(KEY_STACK_RESOURCES, "1") !== "0";
+  ppnBarPosition =
+    store_get(KEY_PPN_BAR_POSITION, "right") === "left" ? "left" : "right";
+  payoutBasis =
+    store_get(KEY_PAYOUT_BASIS, "average") === "max" ? "max" : "average";
 
   try {
     manualPrices = JSON.parse(store_get(KEY_MANUAL_PRICES, "{}")) as PriceMap;
@@ -226,6 +235,25 @@ function setShowScenarioNameEnabled(show: boolean): void {
 function setStackResourcesEnabled(stack: boolean): void {
   stackResources = stack;
   store_set(KEY_STACK_RESOURCES, stack ? "1" : "0");
+  resetScans();
+}
+
+function applyPpnBarPosition(): void {
+  document.documentElement.setAttribute(
+    "data-pyro-bar-position",
+    ppnBarPosition,
+  );
+}
+
+function setPpnBarPosition(position: "left" | "right"): void {
+  ppnBarPosition = position;
+  store_set(KEY_PPN_BAR_POSITION, position);
+  applyPpnBarPosition();
+}
+
+function setPayoutBasis(basis: PayoutBasis): void {
+  payoutBasis = basis;
+  store_set(KEY_PAYOUT_BASIS, basis);
   resetScans();
 }
 
@@ -357,11 +385,21 @@ function injectHighlightStyles(): void {
   style.textContent = `
         .pyro-label { display: none; }
 
-        .arson-root .pyro-band--negative { box-shadow: inset -5px 0 0 ${BAND_COLOR.negative} !important; }
-        .arson-root .pyro-band--low      { box-shadow: inset -5px 0 0 ${BAND_COLOR.low}      !important; }
-        .arson-root .pyro-band--good     { box-shadow: inset -5px 0 0 ${BAND_COLOR.good}     !important; }
-        .arson-root .pyro-band--excellent { box-shadow: inset -5px 0 0 ${BAND_COLOR.excellent} !important; }
-        .arson-root .pyro-band--unknown  { box-shadow: inset -5px 0 0 ${BAND_COLOR.unknown}  !important; }
+        :root { --pyro-bar-x: -5px; }
+        :root[data-pyro-bar-position="left"] { --pyro-bar-x: 5px; }
+
+        .arson-root ${SEL.CARD} { position: relative; }
+        .arson-root ${SEL.CARD}::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+        }
+        .arson-root .pyro-band--negative::after { box-shadow: inset var(--pyro-bar-x) 0 0 ${BAND_COLOR.negative} !important; }
+        .arson-root .pyro-band--low::after      { box-shadow: inset var(--pyro-bar-x) 0 0 ${BAND_COLOR.low}      !important; }
+        .arson-root .pyro-band--good::after     { box-shadow: inset var(--pyro-bar-x) 0 0 ${BAND_COLOR.good}     !important; }
+        .arson-root .pyro-band--excellent::after { box-shadow: inset var(--pyro-bar-x) 0 0 ${BAND_COLOR.excellent} !important; }
+        .arson-root .pyro-band--unknown::after  { box-shadow: inset var(--pyro-bar-x) 0 0 ${BAND_COLOR.unknown}  !important; }
 
         ${SEL.FIRE_METER},
         .crime-image { position: relative !important; }
@@ -599,7 +637,7 @@ function scanPage(): void {
 
       const scenario = scenarioIndex.get(rawName.toLowerCase()) ?? null;
       const ranked = scenario
-        ? rankForScenario(scenario, prices, thresholds)
+        ? rankForScenario(scenario, prices, thresholds, payoutBasis)
         : null;
       applyToSection(section, ranked);
     });
@@ -629,6 +667,8 @@ const settingsCtx: SettingsCtx = {
   getShowResourcePrices: () => showResourcePrices,
   getShowScenarioName: () => showScenarioName,
   getStackResources: () => stackResources,
+  getPpnBarPosition: () => ppnBarPosition,
+  getPayoutBasis: () => payoutBasis,
 
   setManualPrice,
   clearManualPrices,
@@ -643,6 +683,8 @@ const settingsCtx: SettingsCtx = {
   setShowResourcePrices: setShowResourcePricesEnabled,
   setShowScenarioName: setShowScenarioNameEnabled,
   setStackResources: setStackResourcesEnabled,
+  setPpnBarPosition,
+  setPayoutBasis,
 };
 
 // ---------------------------------------------------------------------------
@@ -672,6 +714,7 @@ function start(): void {
   loadState();
   populateScenarioIndex(SCENARIOS);
   injectHighlightStyles();
+  applyPpnBarPosition();
   observer.observe(document.body, { childList: true, subtree: true });
   scheduleScenarioRefresh();
   if (isArsonPage()) {

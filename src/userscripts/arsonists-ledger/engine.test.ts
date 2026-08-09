@@ -10,6 +10,7 @@ import {
     profitBand,
     formatPpn,
     rankForScenario,
+    effectivePayout,
     DEFAULT_THRESHOLDS,
     type PriceMap,
 } from './engine.js';
@@ -225,6 +226,55 @@ describe('calcProfitPerNerve', () => {
             actions: { place: [{ resourceId: RESOURCE.GASOLINE, qty: 1 }] },
         });
         assert.ok(calcProfitPerNerve(s, {}) < 0);
+    });
+
+    it('defaults to the average payout when basis is omitted', () => {
+        const s = Scenario({
+            payout: 100_000,
+            payoutMax: 150_000,
+            actions: { place: [{ resourceId: RESOURCE.GASOLINE, qty: 2 }] },
+        });
+        assert.equal(calcProfitPerNerve(s, {}), calcProfitPerNerve(s, {}, 'average'));
+    });
+
+    it('uses payoutMax when basis is "max" and payoutMax is set', () => {
+        const cost = CATALOG[RESOURCE.GASOLINE].defaultPrice * 2;
+        const nerve = 10 + 2 * 5;
+        const s = Scenario({
+            payout: 100_000,
+            payoutMax: 150_000,
+            actions: { place: [{ resourceId: RESOURCE.GASOLINE, qty: 2 }] },
+        });
+        assert.equal(calcProfitPerNerve(s, {}, 'max'), (150_000 - cost) / nerve);
+    });
+
+    it('falls back to payout when basis is "max" but payoutMax is unset', () => {
+        const s = Scenario({
+            payout: 100_000,
+            actions: { place: [{ resourceId: RESOURCE.GASOLINE, qty: 2 }] },
+        });
+        assert.equal(calcProfitPerNerve(s, {}, 'max'), calcProfitPerNerve(s, {}, 'average'));
+    });
+});
+
+// ---------------------------------------------------------------------------
+// effectivePayout
+// ---------------------------------------------------------------------------
+
+describe('effectivePayout', () => {
+    it('returns payout for basis "average"', () => {
+        const s = Scenario({ payout: 100_000, payoutMax: 150_000, actions: { place: [] } });
+        assert.equal(effectivePayout(s, 'average'), 100_000);
+    });
+
+    it('returns payoutMax for basis "max" when set', () => {
+        const s = Scenario({ payout: 100_000, payoutMax: 150_000, actions: { place: [] } });
+        assert.equal(effectivePayout(s, 'max'), 150_000);
+    });
+
+    it('returns payout for basis "max" when payoutMax is unset', () => {
+        const s = Scenario({ payout: 100_000, actions: { place: [] } });
+        assert.equal(effectivePayout(s, 'max'), 100_000);
     });
 });
 

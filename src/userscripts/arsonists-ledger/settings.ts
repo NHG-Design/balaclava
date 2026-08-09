@@ -3,7 +3,11 @@ import {
   CATALOG_UPDATED,
   type ResourceId,
 } from "../../data/catalog.js";
-import { type PriceMap, type ProfitThresholds } from "./engine.js";
+import {
+  type PriceMap,
+  type ProfitThresholds,
+  type PayoutBasis,
+} from "./engine.js";
 import { fetchApiPrices } from "./api.js";
 import { SEL } from "./selectors.js";
 import { BAND_COLOR } from "./colors.js";
@@ -21,6 +25,8 @@ import {
 // Context
 // ---------------------------------------------------------------------------
 
+export type PpnBarPosition = "left" | "right";
+
 export interface SettingsCtx {
   getManualPrices(): PriceMap;
   getApiPrices(): PriceMap;
@@ -33,6 +39,8 @@ export interface SettingsCtx {
   getShowResourcePrices(): boolean;
   getShowScenarioName(): boolean;
   getStackResources(): boolean;
+  getPpnBarPosition(): PpnBarPosition;
+  getPayoutBasis(): PayoutBasis;
 
   setManualPrice(id: ResourceId, price: number): void;
   clearManualPrices(): void;
@@ -47,6 +55,8 @@ export interface SettingsCtx {
   setShowResourcePrices(show: boolean): void;
   setShowScenarioName(show: boolean): void;
   setStackResources(stack: boolean): void;
+  setPpnBarPosition(position: PpnBarPosition): void;
+  setPayoutBasis(basis: PayoutBasis): void;
 }
 
 // ---------------------------------------------------------------------------
@@ -268,6 +278,31 @@ export function injectSettingsStyles(): void {
     user-select: none;
 }
 .pyro-s-check-row input[type=checkbox] { cursor: pointer; }
+.pyro-s-toggle-group {
+    display: inline-flex;
+    align-self: flex-start;
+    border: 1px solid oklch(27% 0.017 285);
+    border-radius: 5px;
+    overflow: hidden;
+}
+.pyro-s-toggle-btn {
+    background: oklch(14.5% 0.011 285);
+    border: none;
+    color: oklch(62% 0.009 285);
+    font: inherit;
+    font-size: 11px;
+    padding: 4px 12px;
+    cursor: pointer;
+    transition: background 120ms ease-out, color 120ms ease-out;
+}
+.pyro-s-toggle-btn + .pyro-s-toggle-btn { border-left: 1px solid oklch(27% 0.017 285); }
+@media (hover: hover) and (pointer: fine) {
+    .pyro-s-toggle-btn:not(.active):hover { color: oklch(82% 0.007 285); }
+}
+.pyro-s-toggle-btn.active {
+    background: color-mix(in oklch, ${BAND_COLOR.excellent} 22%, oklch(14.5% 0.011 285));
+    color: oklch(96% 0.012 95);
+}
 .pyro-s-section-note { display: flex; align-items: flex-start; gap: 5px; font-size: 10px; line-height: 1.4; color: oklch(57% 0.008 285); margin-bottom: 6px; }
 .pyro-s-section-note > svg { width: 10px; height: 10px; flex-shrink: 0; margin-top: 1px; }
 .pyro-s-section-note strong { color: oklch(64% 0.009 285); font-weight: 600; }
@@ -527,6 +562,30 @@ function buildThresholdsTab(ctx: SettingsCtx): HTMLElement {
   );
   thresholdsGroup.appendChild(thresholdRows);
   root.appendChild(thresholdsGroup);
+
+  const basisGroup = el("div", "pyro-s-group");
+  const basisTitle = el("div", "pyro-s-group-title");
+  basisTitle.textContent = "Payout basis";
+  basisGroup.appendChild(basisTitle);
+
+  const basisNote = el("p", "pyro-s-section-note");
+  basisNote.innerHTML = `${ICON_INFO}<span>Which payout figure drives PPN math (and card banding): the realistic <strong>average</strong>, or the optimistic <strong>max</strong> when a scenario has one on record.</span>`;
+  basisGroup.appendChild(basisNote);
+
+  basisGroup.appendChild(
+    toggleGroupRow(
+      "payout-basis",
+      "PPN calculation basis",
+      [
+        { value: "average", label: "Average" },
+        { value: "max", label: "Max" },
+      ],
+      ctx.getPayoutBasis,
+      ctx.setPayoutBasis,
+    ),
+  );
+  root.appendChild(basisGroup);
+
   return root;
 }
 
@@ -553,11 +612,56 @@ function checkboxRow(
   return toggle;
 }
 
+function toggleGroupRow<T extends string>(
+  idSlug: string,
+  label: string,
+  options: { value: T; label: string }[],
+  getVal: () => T,
+  setVal: (v: T) => void,
+): HTMLElement {
+  const row = el("div", "pyro-s-row");
+
+  const lbl = el("span", "pyro-s-label");
+  lbl.textContent = label;
+  const labelId = `pyro-s-toggle-label-${idSlug}`;
+  lbl.id = labelId;
+  row.appendChild(lbl);
+
+  const wrap = el("div", "pyro-s-toggle-group");
+  wrap.setAttribute("role", "group");
+  wrap.setAttribute("aria-labelledby", labelId);
+
+  const buttons = options.map(({ value, label: btnLabel }) => {
+    const btn = el("button", "pyro-s-toggle-btn") as HTMLButtonElement;
+    btn.type = "button";
+    btn.textContent = btnLabel;
+    btn.addEventListener("click", () => {
+      setVal(value);
+      sync();
+    });
+    wrap.appendChild(btn);
+    return { value, btn };
+  });
+
+  function sync(): void {
+    const current = getVal();
+    for (const { value, btn } of buttons) {
+      const active = value === current;
+      btn.setAttribute("aria-pressed", String(active));
+      btn.classList.toggle("active", active);
+    }
+  }
+
+  sync();
+  row.appendChild(wrap);
+  return row;
+}
+
 function buildVisualsTab(ctx: SettingsCtx): HTMLElement {
   const root = el("div");
   const group = el("div", "pyro-s-group");
   const title = el("div", "pyro-s-group-title");
-  title.textContent = "Tooltip elements";
+  title.textContent = "Tooltips";
   group.appendChild(title);
 
   const rows = el("div", "pyro-s-rows");
@@ -597,8 +701,26 @@ function buildVisualsTab(ctx: SettingsCtx): HTMLElement {
     ),
   );
   group.appendChild(rows);
-
   root.appendChild(group);
+
+  const barGroup = el("div", "pyro-s-group");
+  const barTitle = el("div", "pyro-s-group-title");
+  barTitle.textContent = "Scenarios";
+  barGroup.appendChild(barTitle);
+  barGroup.appendChild(
+    toggleGroupRow(
+      "ppn-bar-position",
+      "PPN bar position",
+      [
+        { value: "left", label: "Left" },
+        { value: "right", label: "Right" },
+      ],
+      ctx.getPpnBarPosition,
+      ctx.setPpnBarPosition,
+    ),
+  );
+  root.appendChild(barGroup);
+
   return root;
 }
 
