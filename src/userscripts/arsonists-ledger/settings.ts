@@ -1,48 +1,52 @@
-import { CATALOG, CATALOG_UPDATED, type ResourceId } from '../../data/catalog.js';
-import { type PriceMap, type ProfitThresholds } from './engine.js';
-import { fetchApiPrices } from './api.js';
-import { SEL } from './selectors.js';
-import { BAND_COLOR } from './colors.js';
-import { el, txt, svgEl } from './dom.js';
 import {
-    ICON_INFO,
-    ICON_CHECK,
-    ICON_X,
-    ICON_ARROW_RIGHT,
-    ICON_FLAME,
-    ICON_EXTERNAL_LINK,
-} from './icons.js';
+  CATALOG,
+  CATALOG_UPDATED,
+  type ResourceId,
+} from "../../data/catalog.js";
+import { type PriceMap, type ProfitThresholds } from "./engine.js";
+import { fetchApiPrices } from "./api.js";
+import { SEL } from "./selectors.js";
+import { BAND_COLOR } from "./colors.js";
+import { el, txt, svgEl } from "./dom.js";
+import {
+  ICON_INFO,
+  ICON_CHECK,
+  ICON_X,
+  ICON_ARROW_RIGHT,
+  ICON_FLAME,
+  ICON_EXTERNAL_LINK,
+} from "./icons.js";
 
 // ---------------------------------------------------------------------------
 // Context
 // ---------------------------------------------------------------------------
 
 export interface SettingsCtx {
-    getManualPrices(): PriceMap;
-    getApiPrices(): PriceMap;
-    getThresholds(): ProfitThresholds;
-    getApiKey(): string;
-    getApiLastRefresh(): number;
-    getActiveTab(): string;
-    getShowObservedPayouts(): boolean;
-    getShowOptionalBadges(): boolean;
-    getShowResourcePrices(): boolean;
-    getShowScenarioName(): boolean;
-    getStackResources(): boolean;
+  getManualPrices(): PriceMap;
+  getApiPrices(): PriceMap;
+  getThresholds(): ProfitThresholds;
+  getApiKey(): string;
+  getApiLastRefresh(): number;
+  getActiveTab(): string;
+  getShowObservedPayouts(): boolean;
+  getShowOptionalBadges(): boolean;
+  getShowResourcePrices(): boolean;
+  getShowScenarioName(): boolean;
+  getStackResources(): boolean;
 
-    setManualPrice(id: ResourceId, price: number): void;
-    clearManualPrices(): void;
-    clearManualPrice(id: ResourceId): void;
-    setThresholds(t: ProfitThresholds): void;
-    setApiPrices(prices: PriceMap, timestamp: number): void;
-    clearApiPrices(): void;
-    setApiKey(key: string): void;
-    setActiveTab(tab: string): void;
-    setShowObservedPayouts(show: boolean): void;
-    setShowOptionalBadges(show: boolean): void;
-    setShowResourcePrices(show: boolean): void;
-    setShowScenarioName(show: boolean): void;
-    setStackResources(stack: boolean): void;
+  setManualPrice(id: ResourceId, price: number): void;
+  clearManualPrices(): void;
+  clearManualPrice(id: ResourceId): void;
+  setThresholds(t: ProfitThresholds): void;
+  setApiPrices(prices: PriceMap, timestamp: number): void;
+  clearApiPrices(): void;
+  setApiKey(key: string): void;
+  setActiveTab(tab: string): void;
+  setShowObservedPayouts(show: boolean): void;
+  setShowOptionalBadges(show: boolean): void;
+  setShowResourcePrices(show: boolean): void;
+  setShowScenarioName(show: boolean): void;
+  setStackResources(stack: boolean): void;
 }
 
 // ---------------------------------------------------------------------------
@@ -50,13 +54,13 @@ export interface SettingsCtx {
 // ---------------------------------------------------------------------------
 
 function setOkStatus(statusEl: HTMLElement, message: string): void {
-    statusEl.innerHTML = ICON_CHECK;
-    statusEl.appendChild(txt(message));
+  statusEl.innerHTML = ICON_CHECK;
+  statusEl.appendChild(txt(message));
 }
 
 function setErrStatus(statusEl: HTMLElement, message: string): void {
-    statusEl.innerHTML = ICON_X;
-    statusEl.appendChild(txt(message));
+  statusEl.innerHTML = ICON_X;
+  statusEl.appendChild(txt(message));
 }
 
 // ---------------------------------------------------------------------------
@@ -64,10 +68,10 @@ function setErrStatus(statusEl: HTMLElement, message: string): void {
 // ---------------------------------------------------------------------------
 
 export function injectSettingsStyles(): void {
-    if (document.getElementById('pyro-settings-styles')) return;
-    const style = el('style');
-    style.id = 'pyro-settings-styles';
-    style.textContent = `
+  if (document.getElementById("pyro-settings-styles")) return;
+  const style = el("style");
+  style.id = "pyro-settings-styles";
+  style.textContent = `
 .pyro-settings-wrap {
     --pyro-tooltip-bg: oklch(24% 0 0);
     --pyro-tooltip-border: oklch(30% 0 0);
@@ -176,16 +180,17 @@ export function injectSettingsStyles(): void {
 .pyro-tab-content::-webkit-scrollbar { width: 3px; }
 .pyro-tab-content::-webkit-scrollbar-track { background: transparent; }
 .pyro-tab-content::-webkit-scrollbar-thumb { background: oklch(57% 0.008 285); border-radius: 2px; }
-.pyro-s-group { display: flex; flex-direction: column; gap: 4px; }
+.pyro-s-group { display: flex; flex-direction: column; gap: 8px; }
 .pyro-s-group-title {
     font-size: 14px;
     text-transform: uppercase;
     color: oklch(58% 0.012 285);
 }
+.pyro-s-rows { display: flex; flex-direction: column; gap: 4px; }
 .pyro-s-row { display: flex; align-items: center; gap: 6px; }
 .pyro-s-label {
     flex: 1;
-    font-size: 11px;
+    font-size: 12px;
     color: oklch(62% 0.009 285);
     overflow: hidden;
     text-overflow: ellipsis;
@@ -257,7 +262,6 @@ export function injectSettingsStyles(): void {
     display: flex;
     align-items: center;
     gap: 7px;
-    margin-bottom: 7px;
     font-size: 12px;
     color: oklch(62% 0.009 285);
     cursor: pointer;
@@ -273,73 +277,75 @@ export function injectSettingsStyles(): void {
 .pyro-s-missing-header { font-size: 10px; color: oklch(40% 0.007 285); margin: 8px 0 4px; }
 .pyro-s-missing-list { font-size: 10px; color: oklch(46% 0.008 285); padding-left: 14px; margin: 0; }
 `;
-    document.head.appendChild(style);
+  document.head.appendChild(style);
 }
 
 // ---------------------------------------------------------------------------
 // Price input helper
 // ---------------------------------------------------------------------------
 
-type PriceSource = 'manual' | 'api' | 'db';
+type PriceSource = "manual" | "api" | "db";
 
 function applyPriceStyle(input: HTMLInputElement, source: PriceSource): void {
-    input.classList.remove('overridden', 'from-api');
-    if (source === 'manual') input.classList.add('overridden');
-    else if (source === 'api') input.classList.add('from-api');
+  input.classList.remove("overridden", "from-api");
+  if (source === "manual") input.classList.add("overridden");
+  else if (source === "api") input.classList.add("from-api");
 }
 
 function priceInput(id: ResourceId, ctx: SettingsCtx): HTMLInputElement {
-    const input = el('input', 'pyro-s-input');
-    input.type = 'number';
-    input.min = '0';
-    let initialValue = '';
-    let isDirty = false;
+  const input = el("input", "pyro-s-input");
+  input.type = "number";
+  input.min = "0";
+  let initialValue = "";
+  let isDirty = false;
 
-    const refresh = () => {
-        const manual = ctx.getManualPrices()[id];
-        const api    = ctx.getApiPrices()[id];
-        const db     = CATALOG[id]?.defaultPrice ?? 0;
-        if (manual !== undefined) {
-            input.value = String(manual);
-            applyPriceStyle(input, 'manual');
-        } else if (api !== undefined) {
-            input.value = String(api);
-            applyPriceStyle(input, 'api');
-        } else {
-            input.value = '';
-            input.placeholder = String(db);
-            applyPriceStyle(input, 'db');
-        }
-        initialValue = input.value;
-        isDirty = false;
-    };
+  const refresh = () => {
+    const manual = ctx.getManualPrices()[id];
+    const api = ctx.getApiPrices()[id];
+    const db = CATALOG[id]?.defaultPrice ?? 0;
+    if (manual !== undefined) {
+      input.value = String(manual);
+      applyPriceStyle(input, "manual");
+    } else if (api !== undefined) {
+      input.value = String(api);
+      applyPriceStyle(input, "api");
+    } else {
+      input.value = "";
+      input.placeholder = String(db);
+      applyPriceStyle(input, "db");
+    }
+    initialValue = input.value;
+    isDirty = false;
+  };
+  refresh();
+
+  const commit = () => {
+    if (!isDirty) {
+      refresh();
+      return;
+    }
+
+    const raw = input.value.trim();
+    if (raw === "") {
+      ctx.clearManualPrice(id);
+    } else {
+      const val = Math.round(parseFloat(raw));
+      if (!isNaN(val) && val >= 0) ctx.setManualPrice(id, val);
+    }
     refresh();
-
-    const commit = () => {
-        if (!isDirty) {
-            refresh();
-            return;
-        }
-
-        const raw = input.value.trim();
-        if (raw === '') {
-            ctx.clearManualPrice(id);
-        } else {
-            const val = Math.round(parseFloat(raw));
-            if (!isNaN(val) && val >= 0) ctx.setManualPrice(id, val);
-        }
-        refresh();
-    };
-    input.addEventListener('focus', () => {
-        initialValue = input.value;
-        isDirty = false;
-    });
-    input.addEventListener('input', () => {
-        isDirty = input.value !== initialValue;
-    });
-    input.addEventListener('blur', commit);
-    input.addEventListener('keydown', e => { if (e.key === 'Enter') input.blur(); });
-    return input;
+  };
+  input.addEventListener("focus", () => {
+    initialValue = input.value;
+    isDirty = false;
+  });
+  input.addEventListener("input", () => {
+    isDirty = input.value !== initialValue;
+  });
+  input.addEventListener("blur", commit);
+  input.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") input.blur();
+  });
+  return input;
 }
 
 // ---------------------------------------------------------------------------
@@ -347,106 +353,111 @@ function priceInput(id: ResourceId, ctx: SettingsCtx): HTMLInputElement {
 // ---------------------------------------------------------------------------
 
 const PRICE_GROUPS: Array<{ title: string; ids: ResourceId[] }> = [
-    { title: 'Liquids',  ids: ['gasoline', 'diesel', 'kerosene'] },
-    { title: 'Solids',   ids: ['magnesium', 'thermite', 'potassium_nitrate'] },
-    { title: 'Gases', ids: ['oxygen', 'methane', 'hydrogen'] },
-    {
-        title: 'Evidence',
-        ids: Object.values(CATALOG)
-            .filter(r => r.kind === 'evidence')
-            .sort((a, b) => a.name.localeCompare(b.name))
-            .map(r => r.id as ResourceId),
-    },
+  { title: "Liquids", ids: ["gasoline", "diesel", "kerosene"] },
+  { title: "Solids", ids: ["magnesium", "thermite", "potassium_nitrate"] },
+  { title: "Gases", ids: ["oxygen", "methane", "hydrogen"] },
+  {
+    title: "Evidence",
+    ids: Object.values(CATALOG)
+      .filter((r) => r.kind === "evidence")
+      .sort((a, b) => a.name.localeCompare(b.name))
+      .map((r) => r.id as ResourceId),
+  },
 ];
 
 function buildPricesTab(ctx: SettingsCtx, panel: HTMLElement): HTMLElement {
-    const root = el('div');
-    const hasManualOverrides = Object.keys(ctx.getManualPrices()).length > 0;
-    const hasApiPrices = ctx.getApiLastRefresh() > 0 || Object.keys(ctx.getApiPrices()).length > 0;
+  const root = el("div");
+  const hasManualOverrides = Object.keys(ctx.getManualPrices()).length > 0;
+  const hasApiPrices =
+    ctx.getApiLastRefresh() > 0 || Object.keys(ctx.getApiPrices()).length > 0;
 
-    const actionGroup = el('div', 'pyro-s-group');
-    const actionRow = el('div', 'pyro-s-refresh-row');
+  const actionGroup = el("div", "pyro-s-group");
+  const actionRow = el("div", "pyro-s-refresh-row");
 
-    const refreshBtn = el('button', 'pyro-s-btn');
-    refreshBtn.textContent = 'Refresh';
-    if (!ctx.getApiKey()) refreshBtn.disabled = true;
+  const refreshBtn = el("button", "pyro-s-btn");
+  refreshBtn.textContent = "Refresh";
+  if (!ctx.getApiKey()) refreshBtn.disabled = true;
 
-    const resetBtn = el('button', 'pyro-s-btn');
-    resetBtn.textContent = 'Reset';
-    if (!hasManualOverrides && !hasApiPrices) resetBtn.disabled = true;
+  const resetBtn = el("button", "pyro-s-btn");
+  resetBtn.textContent = "Reset";
+  if (!hasManualOverrides && !hasApiPrices) resetBtn.disabled = true;
 
-    const tsEl = el('span', 'pyro-s-timestamp');
-    const ts = ctx.getApiLastRefresh();
-    tsEl.textContent = ts ? `Fetched: ${formatTimestamp(ts)}` : `DB: ${CATALOG_UPDATED}`;
+  const tsEl = el("span", "pyro-s-timestamp");
+  const ts = ctx.getApiLastRefresh();
+  tsEl.textContent = ts
+    ? `Fetched: ${formatTimestamp(ts)}`
+    : `DB: ${CATALOG_UPDATED}`;
 
-    actionRow.appendChild(refreshBtn);
-    actionRow.appendChild(resetBtn);
-    actionRow.appendChild(tsEl);
-    actionGroup.appendChild(actionRow);
+  actionRow.appendChild(refreshBtn);
+  actionRow.appendChild(resetBtn);
+  actionRow.appendChild(tsEl);
+  actionGroup.appendChild(actionRow);
 
-    const actionStatus = el('div', 'pyro-s-status');
-    actionGroup.appendChild(actionStatus);
-    root.appendChild(actionGroup);
+  const actionStatus = el("div", "pyro-s-status");
+  actionGroup.appendChild(actionStatus);
+  root.appendChild(actionGroup);
 
-    refreshBtn.addEventListener('click', async () => {
-        refreshBtn.disabled = true;
-        actionStatus.textContent = 'Refreshing…';
-        actionStatus.className = 'pyro-s-status';
+  refreshBtn.addEventListener("click", async () => {
+    refreshBtn.disabled = true;
+    actionStatus.textContent = "Refreshing…";
+    actionStatus.className = "pyro-s-status";
 
-        const result = await fetchApiPrices(ctx.getApiKey());
-        refreshBtn.disabled = !ctx.getApiKey();
+    const result = await fetchApiPrices(ctx.getApiKey());
+    refreshBtn.disabled = !ctx.getApiKey();
 
-        if (result.success && result.prices) {
-            ctx.setApiPrices(result.prices, Date.now());
-            setOkStatus(actionStatus, `${result.updatedCount} prices updated`);
-            actionStatus.className = 'pyro-s-status ok';
-            rerenderTab(panel, 'prices', ctx);
-        } else {
-            setErrStatus(actionStatus, result.error ?? 'Unknown error');
-            actionStatus.className = 'pyro-s-status err';
-        }
-    });
+    if (result.success && result.prices) {
+      ctx.setApiPrices(result.prices, Date.now());
+      setOkStatus(actionStatus, `${result.updatedCount} prices updated`);
+      actionStatus.className = "pyro-s-status ok";
+      rerenderTab(panel, "prices", ctx);
+    } else {
+      setErrStatus(actionStatus, result.error ?? "Unknown error");
+      actionStatus.className = "pyro-s-status err";
+    }
+  });
 
-    resetBtn.addEventListener('click', event => {
-        event.stopPropagation();
-        ctx.clearManualPrices();
-        ctx.clearApiPrices();
-        actionStatus.textContent = 'Reset to bundled prices';
-        actionStatus.className = 'pyro-s-status';
-        rerenderTab(panel, 'prices', ctx);
-    });
+  resetBtn.addEventListener("click", (event) => {
+    event.stopPropagation();
+    ctx.clearManualPrices();
+    ctx.clearApiPrices();
+    actionStatus.textContent = "Reset to bundled prices";
+    actionStatus.className = "pyro-s-status";
+    rerenderTab(panel, "prices", ctx);
+  });
 
-    for (const group of PRICE_GROUPS) {
-        const g = el('div', 'pyro-s-group');
-        const title = el('div', 'pyro-s-group-title');
-        title.textContent = group.title;
-        g.appendChild(title);
+  for (const group of PRICE_GROUPS) {
+    const g = el("div", "pyro-s-group");
+    const title = el("div", "pyro-s-group-title");
+    title.textContent = group.title;
+    g.appendChild(title);
 
-        for (const id of group.ids) {
-            const resource = CATALOG[id];
-            if (!resource) continue;
-            const row = el('div', 'pyro-s-row');
-            const label = el('span', 'pyro-s-label');
-            label.textContent = resource.name;
-            label.title = resource.name;
-            row.appendChild(label);
-            row.appendChild(priceInput(id, ctx));
-            g.appendChild(row);
-        }
+    const rows = el("div", "pyro-s-rows");
+    for (const id of group.ids) {
+      const resource = CATALOG[id];
+      if (!resource) continue;
+      const row = el("div", "pyro-s-row");
+      const label = el("span", "pyro-s-label");
+      label.textContent = resource.name;
+      label.title = resource.name;
+      row.appendChild(label);
+      row.appendChild(priceInput(id, ctx));
+      rows.appendChild(row);
+    }
+    g.appendChild(rows);
 
-        if (group !== PRICE_GROUPS[0]) {
-            const divider = el('hr', 'pyro-s-divider');
-            root.appendChild(divider);
-        }
-
-        root.appendChild(g);
+    if (group !== PRICE_GROUPS[0]) {
+      const divider = el("hr", "pyro-s-divider");
+      root.appendChild(divider);
     }
 
-    const note = el('p', 'pyro-s-section-note');
-    note.innerHTML = `${ICON_INFO}<span>Saved prices as of ${CATALOG_UPDATED}. API price active in <span style="color: var(--pyro-api-color);">green</span>. Manual override in <span style="color: var(--pyro-manual-color);">blue</span>. Clear manual price to revert to API or database <span style="color: var(--pyro-db-color);">default</span>.</span>`;
-    root.appendChild(note);
+    root.appendChild(g);
+  }
 
-    return root;
+  const note = el("p", "pyro-s-section-note");
+  note.innerHTML = `${ICON_INFO}<span>Saved prices as of ${CATALOG_UPDATED}. API price active in <span style="color: var(--pyro-api-color);">green</span>. Manual override in <span style="color: var(--pyro-manual-color);">blue</span>. Clear manual price to revert to API or database <span style="color: var(--pyro-db-color);">default</span>.</span>`;
+  root.appendChild(note);
+
+  return root;
 }
 
 // ---------------------------------------------------------------------------
@@ -454,61 +465,69 @@ function buildPricesTab(ctx: SettingsCtx, panel: HTMLElement): HTMLElement {
 // ---------------------------------------------------------------------------
 
 function thresholdInput(
-    label: string,
-    getVal: () => number,
-    setVal: (n: number) => void,
+  label: string,
+  getVal: () => number,
+  setVal: (n: number) => void,
 ): HTMLElement {
-    const row = el('div', 'pyro-s-row');
-    const lbl = el('span', 'pyro-s-label');
-    const [before, after] = label.split('→');
-    lbl.appendChild(txt(before.trim()));
-    lbl.appendChild(svgEl(ICON_ARROW_RIGHT));
-    lbl.appendChild(txt((after ?? '').trim()));
-    const input = el('input', 'pyro-s-input');
-    input.type = 'number';
-    input.min = '0';
-    input.value = String(getVal());
-    input.addEventListener('blur', () => {
-        const val = Math.round(parseFloat(input.value));
-        if (!isNaN(val) && val >= 0) {
-            setVal(val);
-            input.value = String(val);
-        } else {
-            input.value = String(getVal());
-        }
-    });
-    input.addEventListener('keydown', e => { if (e.key === 'Enter') input.blur(); });
-    row.appendChild(lbl);
-    row.appendChild(input);
-    return row;
+  const row = el("div", "pyro-s-row");
+  const lbl = el("span", "pyro-s-label");
+  const [before, after] = label.split("→");
+  lbl.appendChild(txt(before.trim()));
+  lbl.appendChild(svgEl(ICON_ARROW_RIGHT));
+  lbl.appendChild(txt((after ?? "").trim()));
+  const input = el("input", "pyro-s-input");
+  input.type = "number";
+  input.min = "0";
+  input.value = String(getVal());
+  input.addEventListener("blur", () => {
+    const val = Math.round(parseFloat(input.value));
+    if (!isNaN(val) && val >= 0) {
+      setVal(val);
+      input.value = String(val);
+    } else {
+      input.value = String(getVal());
+    }
+  });
+  input.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") input.blur();
+  });
+  row.appendChild(lbl);
+  row.appendChild(input);
+  return row;
 }
 
 function buildThresholdsTab(ctx: SettingsCtx): HTMLElement {
-    const root = el('div');
-    const thresholdsGroup = el('div', 'pyro-s-group');
+  const root = el("div");
+  const thresholdsGroup = el("div", "pyro-s-group");
 
-    const bandNote = el('p', 'pyro-s-section-note');
-    bandNote.innerHTML = `${ICON_INFO}<span>Cards are color-coded by profit/nerve: <span style="color:${BAND_COLOR.negative}">negative</span> (≤ 0), <span style="color:${BAND_COLOR.low}">low</span>, <span style="color:${BAND_COLOR.good}">good</span>, <span style="color:${BAND_COLOR.excellent}">excellent</span>.</span>`;
-    thresholdsGroup.appendChild(bandNote);
+  const bandNote = el("p", "pyro-s-section-note");
+  bandNote.innerHTML = `${ICON_INFO}<span>Cards are color-coded by profit/nerve: <span style="color:${BAND_COLOR.negative}">negative</span> (≤ 0), <span style="color:${BAND_COLOR.low}">low</span>, <span style="color:${BAND_COLOR.good}">good</span>, <span style="color:${BAND_COLOR.excellent}">excellent</span>.</span>`;
+  thresholdsGroup.appendChild(bandNote);
 
-    thresholdsGroup.appendChild(thresholdInput(
-        'Low → Good ($/N)',
-        () => ctx.getThresholds().low,
-        val => {
-            const t = ctx.getThresholds();
-            ctx.setThresholds({ low: val, good: Math.max(val, t.good) });
-        },
-    ));
-    thresholdsGroup.appendChild(thresholdInput(
-        'Good → Excellent ($/N)',
-        () => ctx.getThresholds().good,
-        val => {
-            const t = ctx.getThresholds();
-            ctx.setThresholds({ low: Math.min(t.low, val), good: val });
-        },
-    ));
-    root.appendChild(thresholdsGroup);
-    return root;
+  const thresholdRows = el("div", "pyro-s-rows");
+  thresholdRows.appendChild(
+    thresholdInput(
+      "Low → Good ($/N)",
+      () => ctx.getThresholds().low,
+      (val) => {
+        const t = ctx.getThresholds();
+        ctx.setThresholds({ low: val, good: Math.max(val, t.good) });
+      },
+    ),
+  );
+  thresholdRows.appendChild(
+    thresholdInput(
+      "Good → Excellent ($/N)",
+      () => ctx.getThresholds().good,
+      (val) => {
+        const t = ctx.getThresholds();
+        ctx.setThresholds({ low: Math.min(t.low, val), good: val });
+      },
+    ),
+  );
+  thresholdsGroup.appendChild(thresholdRows);
+  root.appendChild(thresholdsGroup);
+  return root;
 }
 
 // ---------------------------------------------------------------------------
@@ -516,59 +535,71 @@ function buildThresholdsTab(ctx: SettingsCtx): HTMLElement {
 // ---------------------------------------------------------------------------
 
 function checkboxRow(
-    label: string,
-    getVal: () => boolean,
-    setVal: (v: boolean) => void,
+  label: string,
+  getVal: () => boolean,
+  setVal: (v: boolean) => void,
 ): HTMLElement {
-    const toggle = el('label', 'pyro-s-check-row');
-    const checkbox = document.createElement('input');
-    checkbox.type = 'checkbox';
-    checkbox.checked = getVal();
-    checkbox.addEventListener('change', () => {
-        setVal(checkbox.checked);
-    });
-    const lbl = el('span');
-    lbl.textContent = label;
-    toggle.appendChild(checkbox);
-    toggle.appendChild(lbl);
-    return toggle;
+  const toggle = el("label", "pyro-s-check-row");
+  const checkbox = document.createElement("input");
+  checkbox.type = "checkbox";
+  checkbox.checked = getVal();
+  checkbox.addEventListener("change", () => {
+    setVal(checkbox.checked);
+  });
+  const lbl = el("span");
+  lbl.textContent = label;
+  toggle.appendChild(checkbox);
+  toggle.appendChild(lbl);
+  return toggle;
 }
 
 function buildVisualsTab(ctx: SettingsCtx): HTMLElement {
-    const root = el('div');
-    const group = el('div', 'pyro-s-group');
-    const title = el('div', 'pyro-s-group-title');
-    title.textContent = 'Tooltip elements';
-    group.appendChild(title);
+  const root = el("div");
+  const group = el("div", "pyro-s-group");
+  const title = el("div", "pyro-s-group-title");
+  title.textContent = "Tooltip elements";
+  group.appendChild(title);
 
-    group.appendChild(checkboxRow(
-        'Show scenario name',
-        ctx.getShowScenarioName,
-        ctx.setShowScenarioName,
-    ));
-    group.appendChild(checkboxRow(
-        'Show "optional" badges',
-        ctx.getShowOptionalBadges,
-        ctx.setShowOptionalBadges,
-    ));
-    group.appendChild(checkboxRow(
-        'Stack multiple resources on separate lines',
-        ctx.getStackResources,
-        ctx.setStackResources,
-    ));
-    group.appendChild(checkboxRow(
-        'Show resource prices',
-        ctx.getShowResourcePrices,
-        ctx.setShowResourcePrices,
-    ));
-    group.appendChild(checkboxRow(
-        'Show observed payout and runs',
-        ctx.getShowObservedPayouts,
-        ctx.setShowObservedPayouts,
-    ));
+  const rows = el("div", "pyro-s-rows");
+  rows.appendChild(
+    checkboxRow(
+      "Show scenario name",
+      ctx.getShowScenarioName,
+      ctx.setShowScenarioName,
+    ),
+  );
+  rows.appendChild(
+    checkboxRow(
+      'Show "optional" badges',
+      ctx.getShowOptionalBadges,
+      ctx.setShowOptionalBadges,
+    ),
+  );
+  rows.appendChild(
+    checkboxRow(
+      "Stack multiple resources on separate lines",
+      ctx.getStackResources,
+      ctx.setStackResources,
+    ),
+  );
+  rows.appendChild(
+    checkboxRow(
+      "Show resource prices",
+      ctx.getShowResourcePrices,
+      ctx.setShowResourcePrices,
+    ),
+  );
+  rows.appendChild(
+    checkboxRow(
+      "Show observed payout and runs",
+      ctx.getShowObservedPayouts,
+      ctx.setShowObservedPayouts,
+    ),
+  );
+  group.appendChild(rows);
 
-    root.appendChild(group);
-    return root;
+  root.appendChild(group);
+  return root;
 }
 
 // ---------------------------------------------------------------------------
@@ -576,118 +607,141 @@ function buildVisualsTab(ctx: SettingsCtx): HTMLElement {
 // ---------------------------------------------------------------------------
 
 function buildApiTab(ctx: SettingsCtx): HTMLElement {
-    const root = el('div');
-    const keyGroup = el('div', 'pyro-s-group');
+  const root = el("div");
+  const keyGroup = el("div", "pyro-s-group");
 
-    const keyNote = el('p', 'pyro-s-section-note');
-    keyNote.innerHTML = `${ICON_INFO}<span><strong>Public access</strong> only, used solely to fetch item market prices. <a href="https://www.torn.com/preferences.php#tab=api?step=addNewKey&title=Arsonist%27s+Ledger&torn=items" target="_blank" rel="noopener noreferrer">Create one ${ICON_EXTERNAL_LINK}</a></span>`;
-    keyGroup.appendChild(keyNote);
+  const keyNote = el("p", "pyro-s-section-note");
+  keyNote.innerHTML = `${ICON_INFO}<span><strong>Public access</strong> only, used solely to fetch item market prices. <a href="https://www.torn.com/preferences.php#tab=api?step=addNewKey&title=Arsonist%27s+Ledger&torn=items" target="_blank" rel="noopener noreferrer">Create one ${ICON_EXTERNAL_LINK}</a></span>`;
+  keyGroup.appendChild(keyNote);
 
-    const storageNote = el('p', 'pyro-s-section-note');
-    storageNote.innerHTML = `${ICON_INFO}<span>Stored by your userscript manager only, <strong>never</strong> sent to any server other than Torn's API.</span>`;
-    keyGroup.appendChild(storageNote);
+  const storageNote = el("p", "pyro-s-section-note");
+  storageNote.innerHTML = `${ICON_INFO}<span>Stored by your userscript manager only, <strong>never</strong> sent to any server other than Torn's API.</span>`;
+  keyGroup.appendChild(storageNote);
 
-    const keyRow = el('div', 'pyro-s-key-row');
-    const keyInput = el('input', 'pyro-s-key-input');
-    keyInput.type = 'password';
-    keyInput.placeholder = 'Your Torn API key';
-    keyInput.value = ctx.getApiKey();
-    keyInput.autocomplete = 'off';
-    keyInput.spellcheck = false;
+  const keyRow = el("div", "pyro-s-key-row");
+  const keyInput = el("input", "pyro-s-key-input");
+  keyInput.type = "password";
+  keyInput.placeholder = "Your Torn API key";
+  keyInput.value = ctx.getApiKey();
+  keyInput.autocomplete = "off";
+  keyInput.spellcheck = false;
 
-    const saveBtn = el('button', 'pyro-s-btn');
-    saveBtn.textContent = 'Validate & save';
-    keyRow.appendChild(keyInput);
-    keyRow.appendChild(saveBtn);
-    keyGroup.appendChild(keyRow);
+  const saveBtn = el("button", "pyro-s-btn");
+  saveBtn.textContent = "Validate & save";
+  keyRow.appendChild(keyInput);
+  keyRow.appendChild(saveBtn);
+  keyGroup.appendChild(keyRow);
 
-    const keyStatus = el('div', 'pyro-s-status');
-    if (ctx.getApiKey()) {
-        setOkStatus(keyStatus, 'Key saved');
-        keyStatus.className = 'pyro-s-status ok';
+  const keyStatus = el("div", "pyro-s-status");
+  if (ctx.getApiKey()) {
+    setOkStatus(keyStatus, "Key saved");
+    keyStatus.className = "pyro-s-status ok";
+  }
+  keyGroup.appendChild(keyStatus);
+  root.appendChild(keyGroup);
+
+  saveBtn.addEventListener("click", async () => {
+    const key = keyInput.value.trim();
+    if (!key) {
+      setErrStatus(keyStatus, "Enter a key first.");
+      keyStatus.className = "pyro-s-status err";
+      return;
     }
-    keyGroup.appendChild(keyStatus);
-    root.appendChild(keyGroup);
 
-    saveBtn.addEventListener('click', async () => {
-        const key = keyInput.value.trim();
-        if (!key) {
-            setErrStatus(keyStatus, 'Enter a key first.');
-            keyStatus.className = 'pyro-s-status err';
-            return;
-        }
+    saveBtn.disabled = true;
+    keyStatus.textContent = "Validating…";
+    keyStatus.className = "pyro-s-status";
 
-        saveBtn.disabled = true;
-        keyStatus.textContent = 'Validating…';
-        keyStatus.className = 'pyro-s-status';
+    const result = await fetchApiPrices(key);
+    saveBtn.disabled = false;
 
-        const result = await fetchApiPrices(key);
-        saveBtn.disabled = false;
+    if (result.success && result.prices) {
+      ctx.setApiKey(key);
+      ctx.setApiPrices(result.prices, Date.now());
+      setOkStatus(keyStatus, `Valid, ${result.updatedCount} prices updated`);
+      keyStatus.className = "pyro-s-status ok";
+    } else {
+      setErrStatus(keyStatus, result.error ?? "Unknown error");
+      keyStatus.className = "pyro-s-status err";
+    }
+  });
 
-        if (result.success && result.prices) {
-            ctx.setApiKey(key);
-            ctx.setApiPrices(result.prices, Date.now());
-            setOkStatus(keyStatus, `Valid, ${result.updatedCount} prices updated`);
-            keyStatus.className = 'pyro-s-status ok';
-        } else {
-            setErrStatus(keyStatus, result.error ?? 'Unknown error');
-            keyStatus.className = 'pyro-s-status err';
-        }
-    });
-
-    return root;
+  return root;
 }
 
 function formatTimestamp(ts: number): string {
-    return new Date(ts).toLocaleString(undefined, {
-        month: 'short', day: 'numeric',
-        hour: '2-digit', minute: '2-digit',
-    });
+  return new Date(ts).toLocaleString(undefined, {
+    month: "short",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
 }
 
 // ---------------------------------------------------------------------------
 // Tab switching
 // ---------------------------------------------------------------------------
 
-type TabId = 'prices' | 'thresholds' | 'visuals' | 'api';
+type TabId = "prices" | "thresholds" | "visuals" | "api";
 
-function buildTabBar(activeId: string, onSwitch: (id: TabId) => void): HTMLElement {
-    const tabs: Array<{ id: TabId; label: string }> = [
-        { id: 'prices',     label: 'Prices'     },
-        { id: 'thresholds', label: 'Thresholds' },
-        { id: 'visuals',    label: 'Visuals'    },
-        { id: 'api',        label: 'API'        },
-    ];
-    const bar = el('div', 'pyro-tab-bar');
-    for (const tab of tabs) {
-        const btn = el('button', tab.id === activeId ? 'pyro-tab active' : 'pyro-tab');
-        btn.textContent = tab.label;
-        btn.dataset.tab = tab.id;
-        btn.addEventListener('click', () => {
-            bar.querySelectorAll('.pyro-tab').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-            onSwitch(tab.id);
-        });
-        bar.appendChild(btn);
-    }
-    return bar;
+function buildTabBar(
+  activeId: string,
+  onSwitch: (id: TabId) => void,
+): HTMLElement {
+  const tabs: Array<{ id: TabId; label: string }> = [
+    { id: "prices", label: "Prices" },
+    { id: "thresholds", label: "Thresholds" },
+    { id: "visuals", label: "Visuals" },
+    { id: "api", label: "API" },
+  ];
+  const bar = el("div", "pyro-tab-bar");
+  for (const tab of tabs) {
+    const btn = el(
+      "button",
+      tab.id === activeId ? "pyro-tab active" : "pyro-tab",
+    );
+    btn.textContent = tab.label;
+    btn.dataset.tab = tab.id;
+    btn.addEventListener("click", () => {
+      bar
+        .querySelectorAll(".pyro-tab")
+        .forEach((b) => b.classList.remove("active"));
+      btn.classList.add("active");
+      onSwitch(tab.id);
+    });
+    bar.appendChild(btn);
+  }
+  return bar;
 }
 
-function rerenderTab(panel: HTMLElement, tabId: string, ctx: SettingsCtx): void {
-    const content = panel.querySelector<HTMLElement>('.pyro-tab-content');
-    if (!content) return;
-    content.innerHTML = '';
-    content.appendChild(buildTabContent(tabId, ctx, panel));
+function rerenderTab(
+  panel: HTMLElement,
+  tabId: string,
+  ctx: SettingsCtx,
+): void {
+  const content = panel.querySelector<HTMLElement>(".pyro-tab-content");
+  if (!content) return;
+  content.innerHTML = "";
+  content.appendChild(buildTabContent(tabId, ctx, panel));
 }
 
-function buildTabContent(tabId: string, ctx: SettingsCtx, panel: HTMLElement): HTMLElement {
-    switch (tabId) {
-        case 'prices':     return buildPricesTab(ctx, panel);
-        case 'thresholds': return buildThresholdsTab(ctx);
-        case 'visuals':    return buildVisualsTab(ctx);
-        case 'api':        return buildApiTab(ctx);
-        default:           return buildPricesTab(ctx, panel);
-    }
+function buildTabContent(
+  tabId: string,
+  ctx: SettingsCtx,
+  panel: HTMLElement,
+): HTMLElement {
+  switch (tabId) {
+    case "prices":
+      return buildPricesTab(ctx, panel);
+    case "thresholds":
+      return buildThresholdsTab(ctx);
+    case "visuals":
+      return buildVisualsTab(ctx);
+    case "api":
+      return buildApiTab(ctx);
+    default:
+      return buildPricesTab(ctx, panel);
+  }
 }
 
 // ---------------------------------------------------------------------------
@@ -695,58 +749,68 @@ function buildTabContent(tabId: string, ctx: SettingsCtx, panel: HTMLElement): H
 // ---------------------------------------------------------------------------
 
 export function injectSettings(root: Element, ctx: SettingsCtx): void {
-    const existing = document.getElementById('pyro-settings-btn');
-    if (existing) {
-        if (root.contains(existing)) return;
-        existing.closest('.pyro-settings-wrap')?.remove();
-    }
+  const existing = document.getElementById("pyro-settings-btn");
+  if (existing) {
+    if (root.contains(existing)) return;
+    existing.closest(".pyro-settings-wrap")?.remove();
+  }
 
-    injectSettingsStyles();
+  injectSettingsStyles();
 
-    const anchor = root.querySelector(SEL.RESULT_COUNTS) ?? root.querySelector(SEL.TITLE_BAR) ?? root;
+  const anchor =
+    root.querySelector(SEL.RESULT_COUNTS) ??
+    root.querySelector(SEL.TITLE_BAR) ??
+    root;
 
-    const wrap = el('div', 'pyro-settings-wrap');
+  const wrap = el("div", "pyro-settings-wrap");
 
-    const btn = el('button');
-    btn.id = 'pyro-settings-btn';
-    btn.setAttribute('aria-label', "Arsonist's Ledger settings");
-    btn.setAttribute('aria-expanded', 'false');
-    btn.innerHTML = ICON_FLAME;
+  const btn = el("button");
+  btn.id = "pyro-settings-btn";
+  btn.setAttribute("aria-label", "Arsonist's Ledger settings");
+  btn.setAttribute("aria-expanded", "false");
+  btn.innerHTML = ICON_FLAME;
 
-    const panel = el('div');
-    panel.id = 'pyro-settings-panel';
+  const panel = el("div");
+  panel.id = "pyro-settings-panel";
 
-    const activeTabId = ctx.getActiveTab() || 'prices';
-    panel.appendChild(buildTabBar(activeTabId, tabId => {
-        ctx.setActiveTab(tabId);
-        rerenderTab(panel, tabId, ctx);
-    }));
+  const activeTabId = ctx.getActiveTab() || "prices";
+  panel.appendChild(
+    buildTabBar(activeTabId, (tabId) => {
+      ctx.setActiveTab(tabId);
+      rerenderTab(panel, tabId, ctx);
+    }),
+  );
 
-    const content = el('div', 'pyro-tab-content');
-    content.appendChild(buildTabContent(activeTabId, ctx, panel));
-    panel.appendChild(content);
+  const content = el("div", "pyro-tab-content");
+  content.appendChild(buildTabContent(activeTabId, ctx, panel));
+  panel.appendChild(content);
 
-    wrap.appendChild(btn);
-    wrap.appendChild(panel);
-    anchor.appendChild(wrap);
+  wrap.appendChild(btn);
+  wrap.appendChild(panel);
+  anchor.appendChild(wrap);
 
-    btn.addEventListener('click', e => {
-        e.stopPropagation();
-        const isOpen = panel.classList.contains('is-open');
-        panel.classList.toggle('is-open', !isOpen);
-        btn.setAttribute('aria-expanded', String(!isOpen));
-    });
+  btn.addEventListener("click", (e) => {
+    e.stopPropagation();
+    const isOpen = panel.classList.contains("is-open");
+    panel.classList.toggle("is-open", !isOpen);
+    btn.setAttribute("aria-expanded", String(!isOpen));
+  });
 
-    panel.addEventListener('click', e => {
-        e.stopPropagation();
-    });
+  panel.addEventListener("click", (e) => {
+    e.stopPropagation();
+  });
 
-    document.addEventListener('click', e => {
-        const path = typeof e.composedPath === 'function' ? e.composedPath() : [];
-        const clickedInside = path.length > 0 ? path.includes(wrap) : wrap.contains(e.target as Node);
-        if (!clickedInside) {
-            panel.classList.remove('is-open');
-            btn.setAttribute('aria-expanded', 'false');
-        }
-    }, { passive: true });
+  document.addEventListener(
+    "click",
+    (e) => {
+      const path = typeof e.composedPath === "function" ? e.composedPath() : [];
+      const clickedInside =
+        path.length > 0 ? path.includes(wrap) : wrap.contains(e.target as Node);
+      if (!clickedInside) {
+        panel.classList.remove("is-open");
+        btn.setAttribute("aria-expanded", "false");
+      }
+    },
+    { passive: true },
+  );
 }

@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        Torn Arsonist's Ledger
 // @namespace   https://greasyfork.org/en/users/942572-yukio-mizsima
-// @version     1.0.8
+// @version     1.0.9
 // @description Arson profit-per-nerve calculator and scenario guide for Torn's Crimes page
 // @icon        https://www.google.com/s2/favicons?sz=64&domain=torn.com
 // @author      Yukio [906148]
@@ -3870,16 +3870,17 @@
 .pyro-tab-content::-webkit-scrollbar { width: 3px; }
 .pyro-tab-content::-webkit-scrollbar-track { background: transparent; }
 .pyro-tab-content::-webkit-scrollbar-thumb { background: oklch(57% 0.008 285); border-radius: 2px; }
-.pyro-s-group { display: flex; flex-direction: column; gap: 4px; }
+.pyro-s-group { display: flex; flex-direction: column; gap: 8px; }
 .pyro-s-group-title {
     font-size: 14px;
     text-transform: uppercase;
     color: oklch(58% 0.012 285);
 }
+.pyro-s-rows { display: flex; flex-direction: column; gap: 4px; }
 .pyro-s-row { display: flex; align-items: center; gap: 6px; }
 .pyro-s-label {
     flex: 1;
-    font-size: 11px;
+    font-size: 12px;
     color: oklch(62% 0.009 285);
     overflow: hidden;
     text-overflow: ellipsis;
@@ -3951,7 +3952,6 @@
     display: flex;
     align-items: center;
     gap: 7px;
-    margin-bottom: 7px;
     font-size: 12px;
     color: oklch(62% 0.009 285);
     cursor: pointer;
@@ -4086,6 +4086,7 @@
       const title = el("div", "pyro-s-group-title");
       title.textContent = group.title;
       g.appendChild(title);
+      const rows = el("div", "pyro-s-rows");
       for (const id of group.ids) {
         const resource = CATALOG[id];
         if (!resource) continue;
@@ -4095,8 +4096,9 @@
         label.title = resource.name;
         row2.appendChild(label);
         row2.appendChild(priceInput(id, ctx));
-        g.appendChild(row2);
+        rows.appendChild(row2);
       }
+      g.appendChild(rows);
       if (group !== PRICE_GROUPS[0]) {
         const divider = el("hr", "pyro-s-divider");
         root.appendChild(divider);
@@ -4141,22 +4143,28 @@
     const bandNote = el("p", "pyro-s-section-note");
     bandNote.innerHTML = `${ICON_INFO}<span>Cards are color-coded by profit/nerve: <span style="color:${BAND_COLOR.negative}">negative</span> (\u2264 0), <span style="color:${BAND_COLOR.low}">low</span>, <span style="color:${BAND_COLOR.good}">good</span>, <span style="color:${BAND_COLOR.excellent}">excellent</span>.</span>`;
     thresholdsGroup.appendChild(bandNote);
-    thresholdsGroup.appendChild(thresholdInput(
-      "Low \u2192 Good ($/N)",
-      () => ctx.getThresholds().low,
-      (val) => {
-        const t = ctx.getThresholds();
-        ctx.setThresholds({ low: val, good: Math.max(val, t.good) });
-      }
-    ));
-    thresholdsGroup.appendChild(thresholdInput(
-      "Good \u2192 Excellent ($/N)",
-      () => ctx.getThresholds().good,
-      (val) => {
-        const t = ctx.getThresholds();
-        ctx.setThresholds({ low: Math.min(t.low, val), good: val });
-      }
-    ));
+    const thresholdRows = el("div", "pyro-s-rows");
+    thresholdRows.appendChild(
+      thresholdInput(
+        "Low \u2192 Good ($/N)",
+        () => ctx.getThresholds().low,
+        (val) => {
+          const t = ctx.getThresholds();
+          ctx.setThresholds({ low: val, good: Math.max(val, t.good) });
+        }
+      )
+    );
+    thresholdRows.appendChild(
+      thresholdInput(
+        "Good \u2192 Excellent ($/N)",
+        () => ctx.getThresholds().good,
+        (val) => {
+          const t = ctx.getThresholds();
+          ctx.setThresholds({ low: Math.min(t.low, val), good: val });
+        }
+      )
+    );
+    thresholdsGroup.appendChild(thresholdRows);
     root.appendChild(thresholdsGroup);
     return root;
   }
@@ -4180,31 +4188,43 @@
     const title = el("div", "pyro-s-group-title");
     title.textContent = "Tooltip elements";
     group.appendChild(title);
-    group.appendChild(checkboxRow(
-      "Show scenario name",
-      ctx.getShowScenarioName,
-      ctx.setShowScenarioName
-    ));
-    group.appendChild(checkboxRow(
-      'Show "optional" badges',
-      ctx.getShowOptionalBadges,
-      ctx.setShowOptionalBadges
-    ));
-    group.appendChild(checkboxRow(
-      "Stack multiple resources on separate lines",
-      ctx.getStackResources,
-      ctx.setStackResources
-    ));
-    group.appendChild(checkboxRow(
-      "Show resource prices",
-      ctx.getShowResourcePrices,
-      ctx.setShowResourcePrices
-    ));
-    group.appendChild(checkboxRow(
-      "Show observed payout and runs",
-      ctx.getShowObservedPayouts,
-      ctx.setShowObservedPayouts
-    ));
+    const rows = el("div", "pyro-s-rows");
+    rows.appendChild(
+      checkboxRow(
+        "Show scenario name",
+        ctx.getShowScenarioName,
+        ctx.setShowScenarioName
+      )
+    );
+    rows.appendChild(
+      checkboxRow(
+        'Show "optional" badges',
+        ctx.getShowOptionalBadges,
+        ctx.setShowOptionalBadges
+      )
+    );
+    rows.appendChild(
+      checkboxRow(
+        "Stack multiple resources on separate lines",
+        ctx.getStackResources,
+        ctx.setStackResources
+      )
+    );
+    rows.appendChild(
+      checkboxRow(
+        "Show resource prices",
+        ctx.getShowResourcePrices,
+        ctx.setShowResourcePrices
+      )
+    );
+    rows.appendChild(
+      checkboxRow(
+        "Show observed payout and runs",
+        ctx.getShowObservedPayouts,
+        ctx.setShowObservedPayouts
+      )
+    );
+    group.appendChild(rows);
     root.appendChild(group);
     return root;
   }
@@ -4277,7 +4297,10 @@
     ];
     const bar = el("div", "pyro-tab-bar");
     for (const tab of tabs) {
-      const btn = el("button", tab.id === activeId ? "pyro-tab active" : "pyro-tab");
+      const btn = el(
+        "button",
+        tab.id === activeId ? "pyro-tab active" : "pyro-tab"
+      );
       btn.textContent = tab.label;
       btn.dataset.tab = tab.id;
       btn.addEventListener("click", () => {
@@ -4326,10 +4349,12 @@
     const panel = el("div");
     panel.id = "pyro-settings-panel";
     const activeTabId = ctx.getActiveTab() || "prices";
-    panel.appendChild(buildTabBar(activeTabId, (tabId) => {
-      ctx.setActiveTab(tabId);
-      rerenderTab(panel, tabId, ctx);
-    }));
+    panel.appendChild(
+      buildTabBar(activeTabId, (tabId) => {
+        ctx.setActiveTab(tabId);
+        rerenderTab(panel, tabId, ctx);
+      })
+    );
     const content = el("div", "pyro-tab-content");
     content.appendChild(buildTabContent(activeTabId, ctx, panel));
     panel.appendChild(content);
@@ -4345,14 +4370,18 @@
     panel.addEventListener("click", (e) => {
       e.stopPropagation();
     });
-    document.addEventListener("click", (e) => {
-      const path = typeof e.composedPath === "function" ? e.composedPath() : [];
-      const clickedInside = path.length > 0 ? path.includes(wrap) : wrap.contains(e.target);
-      if (!clickedInside) {
-        panel.classList.remove("is-open");
-        btn.setAttribute("aria-expanded", "false");
-      }
-    }, { passive: true });
+    document.addEventListener(
+      "click",
+      (e) => {
+        const path = typeof e.composedPath === "function" ? e.composedPath() : [];
+        const clickedInside = path.length > 0 ? path.includes(wrap) : wrap.contains(e.target);
+        if (!clickedInside) {
+          panel.classList.remove("is-open");
+          btn.setAttribute("aria-expanded", "false");
+        }
+      },
+      { passive: true }
+    );
   }
 
   // src/userscripts/arsonists-ledger/index.ts
