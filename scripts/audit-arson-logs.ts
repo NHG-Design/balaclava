@@ -64,7 +64,7 @@ interface SuccessfulRun {
     steps: RunStep[];
 }
 
-interface ObservedRecipe {
+interface LoggedRecipe {
     actions: Partial<Record<Exclude<ActionType, 'collect' | 'ignite'>, ItemUsage[]>>;
     completeForUpdate: boolean;
     cost: number;
@@ -80,14 +80,14 @@ interface ScenarioSummary {
     currentPayout: number;
     currentConsumables: string[];
     currentProfitPerNerve: number;
-    observedRunCount: number;
+    loggedRunCount: number;
     payoutRange: {
         min: number;
         max: number;
     } | null;
-    bestObservedPayout: number | null;
-    bestObservedConsumables: string[] | null;
-    bestObservedProfitPerNerve: number | null;
+    bestLoggedPayout: number | null;
+    bestLoggedConsumables: string[] | null;
+    bestLoggedProfitPerNerve: number | null;
     evidenceSummary: {
         collectOnlyRuns: number;
         completeRuns: number;
@@ -114,7 +114,7 @@ interface ReportPayload {
     windowStartUtc: string;
     summary: {
         apiRequests: number;
-        scenariosObserved: number;
+        scenariosLogged: number;
         successfulRuns: number;
         totalArsonLogs: number;
         totalItemLogs: number;
@@ -376,19 +376,19 @@ function groupConsumablesByAction(steps: RunStep[]): Partial<Record<Exclude<Acti
 
 function isRecipeCompleteForUpdate(steps: RunStep[]): boolean {
     const requiredCounts = { evidence: 0, place: 0, stoke: 0 };
-    const observedCounts = { evidence: 0, place: 0, stoke: 0 };
+    const loggedCounts = { evidence: 0, place: 0, stoke: 0 };
 
     for (const step of steps) {
         if (step.actionType === 'evidence' || step.actionType === 'place' || step.actionType === 'stoke') {
             requiredCounts[step.actionType] += 1;
-            if (step.items.some((item) => !CATALOG[item.resourceId].isTool)) observedCounts[step.actionType] += 1;
+            if (step.items.some((item) => !CATALOG[item.resourceId].isTool)) loggedCounts[step.actionType] += 1;
         }
     }
 
     return (
-        requiredCounts.evidence === observedCounts.evidence &&
-        requiredCounts.place === observedCounts.place &&
-        requiredCounts.stoke === observedCounts.stoke
+        requiredCounts.evidence === loggedCounts.evidence &&
+        requiredCounts.place === loggedCounts.place &&
+        requiredCounts.stoke === loggedCounts.stoke
     );
 }
 
@@ -398,12 +398,12 @@ function pricesFromCatalog(): PriceMap {
     return prices;
 }
 
-function observedRecipeForRun(run: SuccessfulRun): ObservedRecipe | null {
+function loggedRecipeForRun(run: SuccessfulRun): LoggedRecipe | null {
     const actions = groupConsumablesByAction(run.steps);
     const hasConsumables = Object.values(actions).some((items) => Array.isArray(items) && items.length > 0);
     if (!hasConsumables) return null;
 
-    const observedScenario: Scenario = {
+    const loggedScenario: Scenario = {
         scenarioName: run.scenarioName,
         payout: run.payout,
         actions: {
@@ -417,9 +417,9 @@ function observedRecipeForRun(run: SuccessfulRun): ObservedRecipe | null {
     return {
         actions,
         completeForUpdate: isRecipeCompleteForUpdate(run.steps),
-        cost: calcMaterialCost(observedScenario, pricesFromCatalog()),
-        nerve: calcNerve(observedScenario),
-        profitPerNerve: calcProfitPerNerve(observedScenario, pricesFromCatalog()),
+        cost: calcMaterialCost(loggedScenario, pricesFromCatalog()),
+        nerve: calcNerve(loggedScenario),
+        profitPerNerve: calcProfitPerNerve(loggedScenario, pricesFromCatalog()),
     };
 }
 
@@ -437,7 +437,7 @@ function consumableLines(actions: ScenarioActions): string[] {
     return entries.sort();
 }
 
-function observedConsumableLines(actions: Partial<Record<Exclude<ActionType, 'collect' | 'ignite'>, ItemUsage[]>>): string[] {
+function loggedConsumableLines(actions: Partial<Record<Exclude<ActionType, 'collect' | 'ignite'>, ItemUsage[]>>): string[] {
     const entries: string[] = [];
     for (const actionType of ['evidence', 'place', 'stoke', 'dampen'] as const) {
         const items = actions[actionType];
@@ -452,7 +452,7 @@ function observedConsumableLines(actions: Partial<Record<Exclude<ActionType, 'co
 }
 
 function classifyEvidenceStatus(run: SuccessfulRun): ItemEvidenceStatus {
-    const recipe = observedRecipeForRun(run);
+    const recipe = loggedRecipeForRun(run);
     if (!recipe) return 'collect_only';
     return recipe.completeForUpdate ? 'complete' : 'partial';
 }
@@ -488,7 +488,7 @@ function summarizeScenarioRuns(runs: SuccessfulRun[]): Map<string, ScenarioSumma
         const current = scenarioMap.get(scenarioName);
         if (!current) continue;
 
-        let bestObservedRecipe: ObservedRecipe | null = null;
+        let bestLoggedRecipe: LoggedRecipe | null = null;
         let payoutMin = Number.POSITIVE_INFINITY;
         let payoutMax = Number.NEGATIVE_INFINITY;
         let collectOnlyRuns = 0;
@@ -502,38 +502,38 @@ function summarizeScenarioRuns(runs: SuccessfulRun[]): Map<string, ScenarioSumma
             payoutMin = Math.min(payoutMin, run.payout);
             payoutMax = Math.max(payoutMax, run.payout);
 
-            const recipe = observedRecipeForRun(run);
+            const recipe = loggedRecipeForRun(run);
             const evidenceStatus = classifyEvidenceStatus(run);
             if (evidenceStatus === 'collect_only') collectOnlyRuns += 1;
             if (evidenceStatus === 'partial') partialRuns += 1;
             if (evidenceStatus === 'complete') completeRuns += 1;
 
             if (recipe?.completeForUpdate) {
-                const observedLines = observedConsumableLines(recipe.actions);
-                if (arraysEqual(observedLines, currentConsumables)) matchedCurrentRecipe = true;
+                const loggedLines = loggedConsumableLines(recipe.actions);
+                if (arraysEqual(loggedLines, currentConsumables)) matchedCurrentRecipe = true;
                 else if (matchedCurrentRecipe === null) matchedCurrentRecipe = false;
             }
 
             if (!recipe || !recipe.completeForUpdate) continue;
-            if (!bestObservedRecipe || recipe.profitPerNerve > bestObservedRecipe.profitPerNerve) {
-                bestObservedRecipe = recipe;
+            if (!bestLoggedRecipe || recipe.profitPerNerve > bestLoggedRecipe.profitPerNerve) {
+                bestLoggedRecipe = recipe;
             }
         }
 
         const recommendations: Array<'items' | 'none' | 'payout'> = [];
         if (payoutMax > current.payout) recommendations.push('payout');
-        if (bestObservedRecipe && bestObservedRecipe.profitPerNerve > currentPpn) recommendations.push('items');
+        if (bestLoggedRecipe && bestLoggedRecipe.profitPerNerve > currentPpn) recommendations.push('items');
         if (!recommendations.length) recommendations.push('none');
 
         summaries.set(scenarioName, {
-            bestObservedConsumables: bestObservedRecipe ? consumableLines({
-                place: bestObservedRecipe.actions.place ?? [],
-                evidence: bestObservedRecipe.actions.evidence,
-                stoke: bestObservedRecipe.actions.stoke,
-                dampen: bestObservedRecipe.actions.dampen,
+            bestLoggedConsumables: bestLoggedRecipe ? consumableLines({
+                place: bestLoggedRecipe.actions.place ?? [],
+                evidence: bestLoggedRecipe.actions.evidence,
+                stoke: bestLoggedRecipe.actions.stoke,
+                dampen: bestLoggedRecipe.actions.dampen,
             }) : null,
-            bestObservedPayout: payoutMax,
-            bestObservedProfitPerNerve: bestObservedRecipe?.profitPerNerve ?? null,
+            bestLoggedPayout: payoutMax,
+            bestLoggedProfitPerNerve: bestLoggedRecipe?.profitPerNerve ?? null,
             currentConsumables,
             currentPayout: current.payout,
             currentProfitPerNerve: currentPpn,
@@ -544,7 +544,7 @@ function summarizeScenarioRuns(runs: SuccessfulRun[]): Map<string, ScenarioSumma
             },
             locations: [...new Set(scenarioRuns.map((run) => run.location))].sort(),
             matchedCurrentRecipe,
-            observedRunCount: scenarioRuns.length,
+            loggedRunCount: scenarioRuns.length,
             payoutRange: Number.isFinite(payoutMin) && Number.isFinite(payoutMax) ? { max: payoutMax, min: payoutMin } : null,
             recommendedUpdates: recommendations.sort(),
             scenarioName,
@@ -552,10 +552,10 @@ function summarizeScenarioRuns(runs: SuccessfulRun[]): Map<string, ScenarioSumma
                 .slice()
                 .sort((a, b) => b.collectedAt - a.collectedAt)
                 .map((run) => {
-                    const recipe = observedRecipeForRun(run);
+                    const recipe = loggedRecipeForRun(run);
                     const evidenceStatus = classifyEvidenceStatus(run);
-                    const observedLines = recipe ? observedConsumableLines(recipe.actions) : [];
-                    const runMatchesCurrent = recipe?.completeForUpdate ? arraysEqual(observedLines, currentConsumables) : null;
+                    const loggedLines = recipe ? loggedConsumableLines(recipe.actions) : [];
+                    const runMatchesCurrent = recipe?.completeForUpdate ? arraysEqual(loggedLines, currentConsumables) : null;
                     const itemUpdateReason =
                         evidenceStatus === 'collect_only' || evidenceStatus === 'partial'
                             ? 'insufficient_evidence'
@@ -566,7 +566,7 @@ function summarizeScenarioRuns(runs: SuccessfulRun[]): Map<string, ScenarioSumma
                                     : 'not_better_than_current';
                     return {
                         collectedAtUtc: new Date(run.collectedAt * 1000).toISOString(),
-                        consumables: observedLines,
+                        consumables: loggedLines,
                         evidenceStatus,
                         itemUpdateReason,
                         location: run.location,
@@ -582,7 +582,7 @@ function summarizeScenarioRuns(runs: SuccessfulRun[]): Map<string, ScenarioSumma
     return summaries;
 }
 
-function highestObservedPayoutByScenario(runs: SuccessfulRun[]): Map<string, number> {
+function highestLoggedPayoutByScenario(runs: SuccessfulRun[]): Map<string, number> {
     const result = new Map<string, number>();
     for (const run of runs) {
         result.set(run.scenarioName, Math.max(result.get(run.scenarioName) ?? 0, run.payout));
@@ -590,14 +590,14 @@ function highestObservedPayoutByScenario(runs: SuccessfulRun[]): Map<string, num
     return result;
 }
 
-function bestObservedRecipeByScenario(runs: SuccessfulRun[]): Map<string, ObservedRecipe> {
+function bestLoggedRecipeByScenario(runs: SuccessfulRun[]): Map<string, LoggedRecipe> {
     const currentByScenario = indexScenariosByName(SCENARIOS);
-    const result = new Map<string, ObservedRecipe>();
+    const result = new Map<string, LoggedRecipe>();
 
     for (const run of runs) {
         const current = currentByScenario.get(run.scenarioName);
         if (!current) continue;
-        const recipe = observedRecipeForRun(run);
+        const recipe = loggedRecipeForRun(run);
         if (!recipe || !recipe.completeForUpdate) continue;
         const currentPpn = calcProfitPerNerve(current, pricesFromCatalog());
         if (recipe.profitPerNerve <= currentPpn) continue;
@@ -651,7 +651,7 @@ function formatActions(actions: ScenarioActions): string {
     return lines.join('\n');
 }
 
-function mergedActions(current: ScenarioActions, observed: ObservedRecipe): ScenarioActions {
+function mergedActions(current: ScenarioActions, logged: LoggedRecipe): ScenarioActions {
     const next: ScenarioActions = {
         ...current,
         place: [...current.place],
@@ -660,8 +660,8 @@ function mergedActions(current: ScenarioActions, observed: ObservedRecipe): Scen
     for (const actionType of ['evidence', 'place', 'stoke', 'dampen'] as const) {
         const existing = [...(current[actionType] ?? [])];
         const preserved = existing.filter((item) => CATALOG[item.resourceId].isTool);
-        const observedItems = observed.actions[actionType]?.map((item) => ({ ...item })) ?? [];
-        const replacement = [...preserved, ...observedItems];
+        const loggedItems = logged.actions[actionType]?.map((item) => ({ ...item })) ?? [];
+        const replacement = [...preserved, ...loggedItems];
 
         if (replacement.length > 0 || actionType === 'place') {
             next[actionType] = replacement;
@@ -736,28 +736,28 @@ function applyScenarioUpdates(runs: SuccessfulRun[], options: CliOptions): { cha
     const sourcePath = path.join(process.cwd(), 'src', 'data', 'scenarios.ts');
     const sourceText = readFileSync(sourcePath, 'utf8');
     const entries = collectScenarioEntryMeta(sourceText);
-    const payoutMap = highestObservedPayoutByScenario(runs);
-    const recipeMap = bestObservedRecipeByScenario(runs);
+    const payoutMap = highestLoggedPayoutByScenario(runs);
+    const recipeMap = bestLoggedRecipeByScenario(runs);
     const replacements: Replacement[] = [];
     const updatedScenarios = new Set<string>();
 
     for (const [scenarioName, entry] of entries.entries()) {
         if (options.updatePayouts) {
-            const observedPayout = payoutMap.get(scenarioName);
-            if (observedPayout && observedPayout > entry.scenario.payout) {
+            const loggedPayout = payoutMap.get(scenarioName);
+            if (loggedPayout && loggedPayout > entry.scenario.payout) {
                 replacements.push({
                     end: entry.payoutNode.end,
                     start: entry.payoutNode.getStart(),
-                    text: formatNumberLiteral(observedPayout),
+                    text: formatNumberLiteral(loggedPayout),
                 });
                 updatedScenarios.add(scenarioName);
             }
         }
 
         if (options.updateItems) {
-            const observedRecipe = recipeMap.get(scenarioName);
-            if (!observedRecipe) continue;
-            const nextActions = mergedActions(entry.scenario.actions, observedRecipe);
+            const loggedRecipe = recipeMap.get(scenarioName);
+            if (!loggedRecipe) continue;
+            const nextActions = mergedActions(entry.scenario.actions, loggedRecipe);
             replacements.push({
                 end: entry.actionsNode.end,
                 start: entry.actionsNode.getStart(),
@@ -803,7 +803,7 @@ async function main(): Promise<void> {
         scenarios: [...summaries.values()].sort((a, b) => a.scenarioName.localeCompare(b.scenarioName)),
         summary: {
             apiRequests: requestCount,
-            scenariosObserved: summaries.size,
+            scenariosLogged: summaries.size,
             successfulRuns: runs.length,
             totalArsonLogs: actionEvents.length,
             totalItemLogs: itemLogs.length,
@@ -817,7 +817,7 @@ async function main(): Promise<void> {
     console.log(JSON.stringify({
         reportPath,
         apiRequests: report.summary.apiRequests,
-        scenariosObserved: report.summary.scenariosObserved,
+        scenariosLogged: report.summary.scenariosLogged,
         successfulRuns: report.summary.successfulRuns,
         totalArsonLogs: report.summary.totalArsonLogs,
         totalItemLogs: report.summary.totalItemLogs,

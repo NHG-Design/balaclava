@@ -26,12 +26,6 @@ export interface ScenarioActions {
   dampenTime?: ActionTime;
 }
 
-export interface ObservedPayout {
-  min: number;
-  max: number;
-  runs: number;
-}
-
 export interface Scenario {
   /** Exact scenario name as it appears on the Torn Arson crimes page. */
   scenarioName: string;
@@ -43,8 +37,6 @@ export interface Scenario {
    * Drives the tooltip's payout range and the "optimist" PPN calculation basis.
    */
   payoutMax?: number;
-  /** Optional observed payout stats from the latest committed audit report. */
-  observedPayout?: ObservedPayout;
   actions: ScenarioActions;
   notes?: string;
   /**
@@ -117,11 +109,13 @@ export const SCENARIOS: Scenario[] = [
 
   {
     scenarioName: "Final Cut",
-    payout: 150_000,
+    payout: 140_000,
     payoutMax: 180_000,
     actions: {
       ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
       place: [{ resourceId: RESOURCE.GASOLINE, qty: 3 }],
+      stoke: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1, optional: true }],
+      stokeTime: "98%",
     },
   },
 
@@ -514,7 +508,7 @@ export const SCENARIOS: Scenario[] = [
 
   {
     scenarioName: "Apart of the Problem",
-    payout: 265_000,
+    payout: 240_000,
     payoutMax: 300_000,
     actions: {
       ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
@@ -995,11 +989,6 @@ export const SCENARIOS: Scenario[] = [
     scenarioName: "Damned If You Don't",
     payout: 74_000,
     payoutMax: 150_000,
-    observedPayout: {
-      min: 130_000,
-      max: 150_000,
-      runs: 2,
-    },
     actions: {
       ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
       place: [{ resourceId: RESOURCE.GASOLINE, qty: 4 }],
@@ -1416,7 +1405,7 @@ export const SCENARIOS: Scenario[] = [
   {
     scenarioName: "House Edge",
     payout: 135_000,
-    payoutMax: 200_000,
+    payoutMax: 220_000,
     actions: {
       ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
       place: [{ resourceId: RESOURCE.GASOLINE, qty: 5 }],
@@ -1468,11 +1457,13 @@ export const SCENARIOS: Scenario[] = [
 
   {
     scenarioName: "It's a Write Off",
-    payout: 225_000,
+    payout: 210_000,
     payoutMax: 250_000,
     actions: {
-      ignite: [{ resourceId: RESOURCE.LIGHTER, qty: 1 }],
-      place: [{ resourceId: RESOURCE.GASOLINE, qty: 3 }],
+      ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
+      place: [{ resourceId: RESOURCE.GASOLINE, qty: 1 }],
+      stoke: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1, optional: true }],
+      stokeTime: "late",
     },
   },
 
@@ -1882,16 +1873,13 @@ export const SCENARIOS: Scenario[] = [
 
   {
     scenarioName: "Second Hand Smoke",
-    payout: 37_000,
-    payoutMax: 100_000,
+    payout: 180_000,
+    payoutMax: 210_000,
     actions: {
-      ignite: [{ resourceId: RESOURCE.LIGHTER, qty: 1 }],
-      place: [
-        { resourceId: RESOURCE.GASOLINE, qty: 1 },
-        { resourceId: RESOURCE.HYDROGEN, qty: 1 },
-      ],
-      stoke: [{ resourceId: RESOURCE.METHANE, qty: 1 }],
-      stokeTime: "late",
+      ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
+      place: [{ resourceId: RESOURCE.GASOLINE, qty: 2 }],
+      stoke: [{ resourceId: RESOURCE.METHANE, qty: 2 }],
+      stokeTime: "early",
     },
   },
 
@@ -2269,7 +2257,7 @@ export const SCENARIOS: Scenario[] = [
 
   {
     scenarioName: "The Waiting Game",
-    payout: 120_000,
+    payout: 100_000,
     payoutMax: 130_000,
     actions: {
       ignite: [{ resourceId: RESOURCE.LIGHTER, qty: 1 }],

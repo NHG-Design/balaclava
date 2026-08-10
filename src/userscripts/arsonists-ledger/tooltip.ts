@@ -1,5 +1,5 @@
 import { CATALOG, RESOURCE } from "../../data/catalog.js";
-import type { ActionItem, ActionTime, Scenario } from "../../data/scenarios.js";
+import type { ActionItem, ActionTime } from "../../data/scenarios.js";
 import { type RankedScenario, type PriceMap, formatPpn } from "./engine.js";
 import { BAND_COLOR } from "./colors.js";
 import { el } from "./dom.js";
@@ -33,25 +33,6 @@ function formatCost(total: number): string {
 
 function formatPayoutValue(amount: number): string {
   return `$${(amount / 1000).toFixed(0)}k`;
-}
-
-function formatObservedPayout(amount: number): string {
-  if (amount >= 1_000_000)
-    return `$${(amount / 1_000_000).toFixed(2).replace(/\.00$/, "")}m`;
-  if (amount >= 1_000) return `$${(amount / 1_000).toFixed(0)}k`;
-  return `$${amount}`;
-}
-
-function observedPayoutLabel(scenario: Scenario): string | null {
-  const observed = scenario.observedPayout;
-  if (!observed || observed.runs <= 0) return null;
-
-  const payout =
-    observed.min === observed.max
-      ? formatObservedPayout(observed.max)
-      : `${formatObservedPayout(observed.min)}–${formatObservedPayout(observed.max)}`;
-  const runs = `${observed.runs} run${observed.runs === 1 ? "" : "s"}`;
-  return `${payout}, ${runs}`;
 }
 
 function actionSection(
@@ -112,7 +93,6 @@ function buildPrimaryBlock(
   prices: PriceMap,
   statsOnly = false,
   options?: {
-    showObservedPayout?: boolean;
     showOptionalBadges?: boolean;
     showResourcePrices?: boolean;
     showScenarioName?: boolean;
@@ -151,15 +131,6 @@ function buildPrimaryBlock(
   stats.appendChild(row("Cost", `~$${(materialCost / 1000).toFixed(1)}k`));
   stats.appendChild(row("Nerve", String(baseNerve)));
   frag.appendChild(stats);
-
-  if (options?.showObservedPayout !== false) {
-    const observed = observedPayoutLabel(Scenario);
-    if (observed) {
-      const observedRow = el("div", "pyro-tt-observed");
-      observedRow.textContent = `Observed ${observed}`;
-      frag.appendChild(observedRow);
-    }
-  }
 
   if (statsOnly) return frag;
 
@@ -207,7 +178,6 @@ export function buildTooltipContent(
   prices: PriceMap,
   statsOnly = false,
   options?: {
-    showObservedPayout?: boolean;
     showOptionalBadges?: boolean;
     showResourcePrices?: boolean;
     showScenarioName?: boolean;
@@ -269,11 +239,6 @@ export function buildTooltipStyles(): string {
     display: flex;
     flex-direction: column;
     font-size: 11px;
-}
-.pyro-tt-observed {
-    margin: -2px 0 6px;
-    font-size: 10px;
-    color: oklch(66% 0 0);
 }
 .pyro-tt-label {
     color: oklch(66% 0 0);

@@ -34,7 +34,6 @@ export interface SettingsCtx {
   getApiKey(): string;
   getApiLastRefresh(): number;
   getActiveTab(): string;
-  getShowObservedPayouts(): boolean;
   getShowOptionalBadges(): boolean;
   getShowResourcePrices(): boolean;
   getShowScenarioName(): boolean;
@@ -50,7 +49,6 @@ export interface SettingsCtx {
   clearApiPrices(): void;
   setApiKey(key: string): void;
   setActiveTab(tab: string): void;
-  setShowObservedPayouts(show: boolean): void;
   setShowOptionalBadges(show: boolean): void;
   setShowResourcePrices(show: boolean): void;
   setShowScenarioName(show: boolean): void;
@@ -691,13 +689,6 @@ function buildVisualsTab(ctx: SettingsCtx): HTMLElement {
       "Show resource prices",
       ctx.getShowResourcePrices,
       ctx.setShowResourcePrices,
-    ),
-  );
-  rows.appendChild(
-    checkboxRow(
-      "Show observed payout and runs",
-      ctx.getShowObservedPayouts,
-      ctx.setShowObservedPayouts,
     ),
   );
   group.appendChild(rows);

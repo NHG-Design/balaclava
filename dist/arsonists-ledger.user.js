@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        Torn Arsonist's Ledger
 // @namespace   https://greasyfork.org/en/users/942572-yukio-mizsima
-// @version     1.0.11
+// @version     1.0.12
 // @description Arson profit-per-nerve calculator and scenario guide for Torn's Crimes page
 // @icon        https://www.google.com/s2/favicons?sz=64&domain=torn.com
 // @author      Yukio [906148]
@@ -18,7 +18,7 @@
 "use strict";
 (() => {
   // src/data/scenarios-version.ts
-  var SCENARIOS_VERSION = "6622693740d2";
+  var SCENARIOS_VERSION = "4cd5041028d0";
 
   // src/data/catalog.ts
   var CATALOG_UPDATED = "2026-08-08";
@@ -176,11 +176,13 @@
     },
     {
       scenarioName: "Final Cut",
-      payout: 15e4,
+      payout: 14e4,
       payoutMax: 18e4,
       actions: {
         ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
-        place: [{ resourceId: RESOURCE.GASOLINE, qty: 3 }]
+        place: [{ resourceId: RESOURCE.GASOLINE, qty: 3 }],
+        stoke: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1, optional: true }],
+        stokeTime: "98%"
       }
     },
     {
@@ -536,7 +538,7 @@
     },
     {
       scenarioName: "Apart of the Problem",
-      payout: 265e3,
+      payout: 24e4,
       payoutMax: 3e5,
       actions: {
         ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
@@ -973,11 +975,6 @@
       scenarioName: "Damned If You Don't",
       payout: 74e3,
       payoutMax: 15e4,
-      observedPayout: {
-        min: 13e4,
-        max: 15e4,
-        runs: 2
-      },
       actions: {
         ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
         place: [{ resourceId: RESOURCE.GASOLINE, qty: 4 }]
@@ -1363,7 +1360,7 @@
     {
       scenarioName: "House Edge",
       payout: 135e3,
-      payoutMax: 2e5,
+      payoutMax: 22e4,
       actions: {
         ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
         place: [{ resourceId: RESOURCE.GASOLINE, qty: 5 }]
@@ -1410,11 +1407,13 @@
     },
     {
       scenarioName: "It's a Write Off",
-      payout: 225e3,
+      payout: 21e4,
       payoutMax: 25e4,
       actions: {
-        ignite: [{ resourceId: RESOURCE.LIGHTER, qty: 1 }],
-        place: [{ resourceId: RESOURCE.GASOLINE, qty: 3 }]
+        ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
+        place: [{ resourceId: RESOURCE.GASOLINE, qty: 1 }],
+        stoke: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1, optional: true }],
+        stokeTime: "late"
       }
     },
     {
@@ -1783,16 +1782,13 @@
     },
     {
       scenarioName: "Second Hand Smoke",
-      payout: 37e3,
-      payoutMax: 1e5,
+      payout: 18e4,
+      payoutMax: 21e4,
       actions: {
-        ignite: [{ resourceId: RESOURCE.LIGHTER, qty: 1 }],
-        place: [
-          { resourceId: RESOURCE.GASOLINE, qty: 1 },
-          { resourceId: RESOURCE.HYDROGEN, qty: 1 }
-        ],
-        stoke: [{ resourceId: RESOURCE.METHANE, qty: 1 }],
-        stokeTime: "late"
+        ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
+        place: [{ resourceId: RESOURCE.GASOLINE, qty: 2 }],
+        stoke: [{ resourceId: RESOURCE.METHANE, qty: 2 }],
+        stokeTime: "early"
       }
     },
     {
@@ -2134,7 +2130,7 @@
     },
     {
       scenarioName: "The Waiting Game",
-      payout: 12e4,
+      payout: 1e5,
       payoutMax: 13e4,
       actions: {
         ignite: [{ resourceId: RESOURCE.LIGHTER, qty: 1 }],
@@ -2466,205 +2462,6 @@
       }
     }
   ];
-
-  // src/data/scenario-observations.ts
-  var OBSERVED_PAYOUTS = {
-    "A Burnt Child Dreads the Fire": {
-      "min": 21e4,
-      "max": 21e4,
-      "runs": 1
-    },
-    "Back, Sack, and Crack": {
-      "min": 3e5,
-      "max": 3e5,
-      "runs": 1
-    },
-    "Blaze of Glory": {
-      "min": 2e5,
-      "max": 2e5,
-      "runs": 1
-    },
-    "Boxing Clever": {
-      "min": 3e5,
-      "max": 3e5,
-      "runs": 1
-    },
-    "Bright Spark": {
-      "min": 25e4,
-      "max": 25e4,
-      "runs": 1
-    },
-    "Burn After Screening": {
-      "min": 1e5,
-      "max": 1e5,
-      "runs": 1
-    },
-    "Cache and Burn": {
-      "min": 56e4,
-      "max": 56e4,
-      "runs": 1
-    },
-    "Cook it Rare": {
-      "min": 32e4,
-      "max": 32e4,
-      "runs": 1
-    },
-    "Crafty Devil": {
-      "min": 106e3,
-      "max": 106e3,
-      "runs": 1
-    },
-    "Daddy's Girl": {
-      "min": 21e4,
-      "max": 21e4,
-      "runs": 1
-    },
-    "Final Cut": {
-      "min": 14e4,
-      "max": 14e4,
-      "runs": 1
-    },
-    "Fire and Brimstone": {
-      "min": 14e4,
-      "max": 14e4,
-      "runs": 1
-    },
-    "Fire Burn and Cauldron Bubble": {
-      "min": 16e4,
-      "max": 16e4,
-      "runs": 1
-    },
-    "Fire Kills 99.9% of Bacteria": {
-      "min": 31e4,
-      "max": 31e4,
-      "runs": 1
-    },
-    "Hold Fire": {
-      "min": 1e5,
-      "max": 1e5,
-      "runs": 1
-    },
-    "Hot on the Trail": {
-      "min": 43e4,
-      "max": 43e4,
-      "runs": 1
-    },
-    "House Edge": {
-      "min": 16e4,
-      "max": 16e4,
-      "runs": 1
-    },
-    "Igniting Curiosity": {
-      "min": 21e4,
-      "max": 21e4,
-      "runs": 1
-    },
-    "Insert Coin to Continue": {
-      "min": 11e4,
-      "max": 11e4,
-      "runs": 1
-    },
-    "It's a Write Off": {
-      "min": 23e4,
-      "max": 23e4,
-      "runs": 1
-    },
-    "It's Not All White": {
-      "min": 18e4,
-      "max": 18e4,
-      "runs": 1
-    },
-    "Landmark Decision": {
-      "min": 3e5,
-      "max": 3e5,
-      "runs": 1
-    },
-    "Letter of the Law": {
-      "min": 41e4,
-      "max": 41e4,
-      "runs": 1
-    },
-    "Light Fingered": {
-      "min": 15e4,
-      "max": 15e4,
-      "runs": 1
-    },
-    "Lock, Stock, and Barrel": {
-      "min": 2e5,
-      "max": 2e5,
-      "runs": 1
-    },
-    "Mental Block": {
-      "min": 54e4,
-      "max": 54e4,
-      "runs": 1
-    },
-    "Milk Milk, Lemonade": {
-      "min": 14e4,
-      "max": 14e4,
-      "runs": 1
-    },
-    "Planted": {
-      "min": 12e4,
-      "max": 12e4,
-      "runs": 1
-    },
-    "Raze the Steaks": {
-      "min": 23e4,
-      "max": 23e4,
-      "runs": 1
-    },
-    "Ring of Fire": {
-      "min": 1e5,
-      "max": 1e5,
-      "runs": 1
-    },
-    "Set 'Em Straight": {
-      "min": 24e4,
-      "max": 24e4,
-      "runs": 1
-    },
-    "Short Shelf Life": {
-      "min": 4e5,
-      "max": 4e5,
-      "runs": 1
-    },
-    "Stick to the Script": {
-      "min": 17e4,
-      "max": 17e4,
-      "runs": 1
-    },
-    "Supermarket Sweep": {
-      "min": 26e4,
-      "max": 26e4,
-      "runs": 1
-    },
-    "The Fat is in the Fire": {
-      "min": 36e4,
-      "max": 36e4,
-      "runs": 1
-    },
-    "The Savage Beast": {
-      "min": 19e4,
-      "max": 19e4,
-      "runs": 1
-    },
-    "Unspilled Beans": {
-      "min": 14e4,
-      "max": 14e4,
-      "runs": 1
-    },
-    "Waist Not, Want Not": {
-      "min": 24e4,
-      "max": 24e4,
-      "runs": 1
-    },
-    "Wired for War": {
-      "min": 41e4,
-      "max": 41e4,
-      "runs": 1
-    }
-  };
 
   // src/userscripts/balaclava-tooltip/index.ts
   var API_NAME = "BalaclavaTooltip";
@@ -3565,19 +3362,6 @@
   function formatPayoutValue(amount) {
     return `$${(amount / 1e3).toFixed(0)}k`;
   }
-  function formatObservedPayout(amount) {
-    if (amount >= 1e6)
-      return `$${(amount / 1e6).toFixed(2).replace(/\.00$/, "")}m`;
-    if (amount >= 1e3) return `$${(amount / 1e3).toFixed(0)}k`;
-    return `$${amount}`;
-  }
-  function observedPayoutLabel(scenario) {
-    const observed = scenario.observedPayout;
-    if (!observed || observed.runs <= 0) return null;
-    const payout = observed.min === observed.max ? formatObservedPayout(observed.max) : `${formatObservedPayout(observed.min)}\u2013${formatObservedPayout(observed.max)}`;
-    const runs = `${observed.runs} run${observed.runs === 1 ? "" : "s"}`;
-    return `${payout}, ${runs}`;
-  }
   function actionSection(label, items, prices, timing, showOptionalBadges2 = true, showResourcePrices2 = true, stackResources2 = true) {
     if (!items || items.length === 0) return null;
     const div = el("div", "pyro-tt-action");
@@ -3645,14 +3429,6 @@
     stats.appendChild(row("Cost", `~$${(materialCost / 1e3).toFixed(1)}k`));
     stats.appendChild(row("Nerve", String(baseNerve)));
     frag.appendChild(stats);
-    if (options?.showObservedPayout !== false) {
-      const observed = observedPayoutLabel(Scenario);
-      if (observed) {
-        const observedRow = el("div", "pyro-tt-observed");
-        observedRow.textContent = `Observed ${observed}`;
-        frag.appendChild(observedRow);
-      }
-    }
     if (statsOnly) return frag;
     frag.appendChild(el("hr", "pyro-tt-divider"));
     const { evidence, place, stoke, stokeTime, dampen, dampenTime } = Scenario.actions;
@@ -3743,11 +3519,6 @@
     display: flex;
     flex-direction: column;
     font-size: 11px;
-}
-.pyro-tt-observed {
-    margin: -2px 0 6px;
-    font-size: 10px;
-    color: oklch(66% 0 0);
 }
 .pyro-tt-label {
     color: oklch(66% 0 0);
@@ -4453,13 +4224,6 @@
         ctx.setShowResourcePrices
       )
     );
-    rows.appendChild(
-      checkboxRow(
-        "Show observed payout and runs",
-        ctx.getShowObservedPayouts,
-        ctx.setShowObservedPayouts
-      )
-    );
     group.appendChild(rows);
     root.appendChild(group);
     const barGroup = el("div", "pyro-s-group");
@@ -4645,7 +4409,6 @@
   var KEY_CATALOG_UPDATED = "pyroLedger.v1.catalogUpdated";
   var KEY_THRESHOLDS = "pyroLedger.v1.thresholds";
   var KEY_ACTIVE_TAB = "pyroLedger.v1.activeTab";
-  var KEY_SHOW_OBSERVED_PAYOUTS = "pyroLedger.v1.showObservedPayouts";
   var KEY_SHOW_OPTIONAL_BADGES = "pyroLedger.v1.showOptionalBadges";
   var KEY_SHOW_RESOURCE_PRICES = "pyroLedger.v1.showResourcePrices";
   var KEY_SHOW_SCENARIO_NAME = "pyroLedger.v1.showScenarioName";
@@ -4700,7 +4463,6 @@
   var apiLastRefresh = 0;
   var thresholds = { ...DEFAULT_THRESHOLDS };
   var activeTab = "prices";
-  var showObservedPayouts = false;
   var showOptionalBadges = true;
   var showResourcePrices = true;
   var showScenarioName = true;
@@ -4722,7 +4484,6 @@
     apiKey = store_get(KEY_API_KEY, "");
     activeTab = store_get(KEY_ACTIVE_TAB, "prices");
     apiLastRefresh = parseInt(store_get(KEY_API_REFRESH, "0"), 10) || 0;
-    showObservedPayouts = store_get(KEY_SHOW_OBSERVED_PAYOUTS, "0") !== "0";
     showOptionalBadges = store_get(KEY_SHOW_OPTIONAL_BADGES, "1") !== "0";
     showResourcePrices = store_get(KEY_SHOW_RESOURCE_PRICES, "1") !== "0";
     showScenarioName = store_get(KEY_SHOW_SCENARIO_NAME, "1") !== "0";
@@ -4765,11 +4526,6 @@
   function setThresholds(t) {
     thresholds = t;
     store_set(KEY_THRESHOLDS, JSON.stringify(thresholds));
-    resetScans();
-  }
-  function setShowObservedPayoutsEnabled(show) {
-    showObservedPayouts = show;
-    store_set(KEY_SHOW_OBSERVED_PAYOUTS, show ? "1" : "0");
     resetScans();
   }
   function setShowOptionalBadgesEnabled(show) {
@@ -4851,16 +4607,11 @@
   var SCENARIOS_URL = "https://balaclava.app/arsonists-ledger/scenarios.json";
   var SCENARIOS_TTL_MS = 24 * 60 * 60 * 1e3;
   var scenarioIndex = /* @__PURE__ */ new Map();
-  function withObservedPayout(scenario) {
-    const observedPayout = scenario.observedPayout ?? OBSERVED_PAYOUTS[scenario.scenarioName];
-    return observedPayout ? { ...scenario, observedPayout } : scenario;
-  }
   function populateScenarioIndex(scenarios) {
     scenarioIndex.clear();
     for (const s of scenarios) {
-      const scenario = withObservedPayout(s);
       const key = s.scenarioName.toLowerCase();
-      if (!scenarioIndex.has(key)) scenarioIndex.set(key, scenario);
+      if (!scenarioIndex.has(key)) scenarioIndex.set(key, s);
     }
   }
   function scheduleScenarioRefresh() {
@@ -5004,7 +4755,6 @@
         ranked,
         effectivePrices(),
         statsOnly,
-        showObservedPayouts,
         showOptionalBadges,
         showResourcePrices,
         showScenarioName,
@@ -5067,9 +4817,8 @@
       { passive: true }
     );
   }
-  function buildTooltipContentWithStyles(ranked, prices, statsOnly = false, showObservedPayout = true, showOptionalBadges2 = true, showResourcePrices2 = true, showScenarioName2 = true, stackResources2 = true) {
+  function buildTooltipContentWithStyles(ranked, prices, statsOnly = false, showOptionalBadges2 = true, showResourcePrices2 = true, showScenarioName2 = true, stackResources2 = true) {
     const node = buildTooltipContent(ranked, prices, statsOnly, {
-      showObservedPayout,
       showOptionalBadges: showOptionalBadges2,
       showResourcePrices: showResourcePrices2,
       showScenarioName: showScenarioName2,
@@ -5113,7 +4862,6 @@
     getApiKey: () => apiKey,
     getApiLastRefresh: () => apiLastRefresh,
     getActiveTab: () => activeTab,
-    getShowObservedPayouts: () => showObservedPayouts,
     getShowOptionalBadges: () => showOptionalBadges,
     getShowResourcePrices: () => showResourcePrices,
     getShowScenarioName: () => showScenarioName,
@@ -5128,7 +4876,6 @@
     clearApiPrices,
     setApiKey,
     setActiveTab,
-    setShowObservedPayouts: setShowObservedPayoutsEnabled,
     setShowOptionalBadges: setShowOptionalBadgesEnabled,
     setShowResourcePrices: setShowResourcePricesEnabled,
     setShowScenarioName: setShowScenarioNameEnabled,

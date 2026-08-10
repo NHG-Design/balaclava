@@ -1,6 +1,5 @@
 import { SCENARIOS_VERSION } from "../../data/scenarios-version.js";
 import { SCENARIOS, type Scenario } from "../../data/scenarios.js";
-import { OBSERVED_PAYOUTS } from "../../data/scenario-observations.js";
 import "../balaclava-tooltip/index.js";
 import {
   rankForScenario,
@@ -28,7 +27,6 @@ const KEY_API_REFRESH = "pyroLedger.v1.apiRefresh";
 const KEY_CATALOG_UPDATED = "pyroLedger.v1.catalogUpdated";
 const KEY_THRESHOLDS = "pyroLedger.v1.thresholds";
 const KEY_ACTIVE_TAB = "pyroLedger.v1.activeTab";
-const KEY_SHOW_OBSERVED_PAYOUTS = "pyroLedger.v1.showObservedPayouts";
 const KEY_SHOW_OPTIONAL_BADGES = "pyroLedger.v1.showOptionalBadges";
 const KEY_SHOW_RESOURCE_PRICES = "pyroLedger.v1.showResourcePrices";
 const KEY_SHOW_SCENARIO_NAME = "pyroLedger.v1.showScenarioName";
@@ -120,7 +118,6 @@ let apiKey = "";
 let apiLastRefresh = 0;
 let thresholds: ProfitThresholds = { ...DEFAULT_THRESHOLDS };
 let activeTab = "prices";
-let showObservedPayouts = false;
 let showOptionalBadges = true;
 let showResourcePrices = true;
 let showScenarioName = true;
@@ -149,7 +146,6 @@ function loadState(): void {
   apiKey = store_get(KEY_API_KEY, "");
   activeTab = store_get(KEY_ACTIVE_TAB, "prices");
   apiLastRefresh = parseInt(store_get(KEY_API_REFRESH, "0"), 10) || 0;
-  showObservedPayouts = store_get(KEY_SHOW_OBSERVED_PAYOUTS, "0") !== "0";
   showOptionalBadges = store_get(KEY_SHOW_OPTIONAL_BADGES, "1") !== "0";
   showResourcePrices = store_get(KEY_SHOW_RESOURCE_PRICES, "1") !== "0";
   showScenarioName = store_get(KEY_SHOW_SCENARIO_NAME, "1") !== "0";
@@ -205,12 +201,6 @@ function clearManualPrice(id: ResourceId): void {
 function setThresholds(t: ProfitThresholds): void {
   thresholds = t;
   store_set(KEY_THRESHOLDS, JSON.stringify(thresholds));
-  resetScans();
-}
-
-function setShowObservedPayoutsEnabled(show: boolean): void {
-  showObservedPayouts = show;
-  store_set(KEY_SHOW_OBSERVED_PAYOUTS, show ? "1" : "0");
   resetScans();
 }
 
@@ -317,18 +307,11 @@ const SCENARIOS_TTL_MS = 24 * 60 * 60 * 1000;
 
 const scenarioIndex = new Map<string, Scenario>();
 
-function withObservedPayout(scenario: Scenario): Scenario {
-  const observedPayout =
-    scenario.observedPayout ?? OBSERVED_PAYOUTS[scenario.scenarioName];
-  return observedPayout ? { ...scenario, observedPayout } : scenario;
-}
-
 function populateScenarioIndex(scenarios: Scenario[]): void {
   scenarioIndex.clear();
   for (const s of scenarios) {
-    const scenario = withObservedPayout(s);
     const key = s.scenarioName.toLowerCase();
-    if (!scenarioIndex.has(key)) scenarioIndex.set(key, scenario);
+    if (!scenarioIndex.has(key)) scenarioIndex.set(key, s);
   }
 }
 
@@ -503,7 +486,6 @@ function applyToSection(
       ranked,
       effectivePrices(),
       statsOnly,
-      showObservedPayouts,
       showOptionalBadges,
       showResourcePrices,
       showScenarioName,
@@ -594,14 +576,12 @@ function buildTooltipContentWithStyles(
   ranked: RankedScenario | null,
   prices: PriceMap,
   statsOnly = false,
-  showObservedPayout = true,
   showOptionalBadges = true,
   showResourcePrices = true,
   showScenarioName = true,
   stackResources = true,
 ): HTMLElement {
   const node = buildTooltipContent(ranked, prices, statsOnly, {
-    showObservedPayout,
     showOptionalBadges,
     showResourcePrices,
     showScenarioName,
@@ -662,7 +642,6 @@ const settingsCtx: SettingsCtx = {
   getApiKey: () => apiKey,
   getApiLastRefresh: () => apiLastRefresh,
   getActiveTab: () => activeTab,
-  getShowObservedPayouts: () => showObservedPayouts,
   getShowOptionalBadges: () => showOptionalBadges,
   getShowResourcePrices: () => showResourcePrices,
   getShowScenarioName: () => showScenarioName,
@@ -678,7 +657,6 @@ const settingsCtx: SettingsCtx = {
   clearApiPrices,
   setApiKey,
   setActiveTab,
-  setShowObservedPayouts: setShowObservedPayoutsEnabled,
   setShowOptionalBadges: setShowOptionalBadgesEnabled,
   setShowResourcePrices: setShowResourcePricesEnabled,
   setShowScenarioName: setShowScenarioNameEnabled,

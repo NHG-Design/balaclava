@@ -156,11 +156,13 @@
     },
     {
       scenarioName: "Final Cut",
-      payout: 15e4,
+      payout: 14e4,
       payoutMax: 18e4,
       actions: {
         ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
-        place: [{ resourceId: RESOURCE.GASOLINE, qty: 3 }]
+        place: [{ resourceId: RESOURCE.GASOLINE, qty: 3 }],
+        stoke: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1, optional: true }],
+        stokeTime: "98%"
       }
     },
     {
@@ -516,7 +518,7 @@
     },
     {
       scenarioName: "Apart of the Problem",
-      payout: 265e3,
+      payout: 24e4,
       payoutMax: 3e5,
       actions: {
         ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
@@ -953,11 +955,6 @@
       scenarioName: "Damned If You Don't",
       payout: 74e3,
       payoutMax: 15e4,
-      observedPayout: {
-        min: 13e4,
-        max: 15e4,
-        runs: 2
-      },
       actions: {
         ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
         place: [{ resourceId: RESOURCE.GASOLINE, qty: 4 }]
@@ -1343,7 +1340,7 @@
     {
       scenarioName: "House Edge",
       payout: 135e3,
-      payoutMax: 2e5,
+      payoutMax: 22e4,
       actions: {
         ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
         place: [{ resourceId: RESOURCE.GASOLINE, qty: 5 }]
@@ -1390,11 +1387,13 @@
     },
     {
       scenarioName: "It's a Write Off",
-      payout: 225e3,
+      payout: 21e4,
       payoutMax: 25e4,
       actions: {
-        ignite: [{ resourceId: RESOURCE.LIGHTER, qty: 1 }],
-        place: [{ resourceId: RESOURCE.GASOLINE, qty: 3 }]
+        ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
+        place: [{ resourceId: RESOURCE.GASOLINE, qty: 1 }],
+        stoke: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1, optional: true }],
+        stokeTime: "late"
       }
     },
     {
@@ -1763,16 +1762,13 @@
     },
     {
       scenarioName: "Second Hand Smoke",
-      payout: 37e3,
-      payoutMax: 1e5,
+      payout: 18e4,
+      payoutMax: 21e4,
       actions: {
-        ignite: [{ resourceId: RESOURCE.LIGHTER, qty: 1 }],
-        place: [
-          { resourceId: RESOURCE.GASOLINE, qty: 1 },
-          { resourceId: RESOURCE.HYDROGEN, qty: 1 }
-        ],
-        stoke: [{ resourceId: RESOURCE.METHANE, qty: 1 }],
-        stokeTime: "late"
+        ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
+        place: [{ resourceId: RESOURCE.GASOLINE, qty: 2 }],
+        stoke: [{ resourceId: RESOURCE.METHANE, qty: 2 }],
+        stokeTime: "early"
       }
     },
     {
@@ -2114,7 +2110,7 @@
     },
     {
       scenarioName: "The Waiting Game",
-      payout: 12e4,
+      payout: 1e5,
       payoutMax: 13e4,
       actions: {
         ignite: [{ resourceId: RESOURCE.LIGHTER, qty: 1 }],
