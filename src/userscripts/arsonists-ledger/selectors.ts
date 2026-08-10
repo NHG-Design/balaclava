@@ -59,4 +59,15 @@ export const SEL = {
 
     /** Crime image thumbnail — retained as a fallback tooltip anchor. */
     CRIME_IMAGE: '.crime-image',
+
+    /**
+     * Mobile/tablet-only row holding the building-damage icon and the
+     * responder (alarm) status icon. Absent on desktop, where those icons
+     * live in DESKTOP_STATUS_SECTION instead — used as the mobile building-
+     * stats badge anchor since the overlay badges don't fit on-image there.
+     */
+    BUILDING_RESPONDER_ICONS: '[class*="buildingAndResponderIcons___"]',
+
+    /** Round alarm/responder status icon within BUILDING_RESPONDER_ICONS. */
+    RESPONDER_STATUS: '[class*="responderStatus___"]',
 } as const;

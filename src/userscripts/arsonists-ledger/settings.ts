@@ -40,6 +40,11 @@ export interface SettingsCtx {
   getStackResources(): boolean;
   getPpnBarPosition(): PpnBarPosition;
   getPayoutBasis(): PayoutBasis;
+  getShowBuildingStats(): boolean;
+  getShowResponseTime(): boolean;
+  getShowFlammability(): boolean;
+  getShowRurality(): boolean;
+  getShowUrgency(): boolean;
 
   setManualPrice(id: ResourceId, price: number): void;
   clearManualPrices(): void;
@@ -55,6 +60,11 @@ export interface SettingsCtx {
   setStackResources(stack: boolean): void;
   setPpnBarPosition(position: PpnBarPosition): void;
   setPayoutBasis(basis: PayoutBasis): void;
+  setShowBuildingStats(show: boolean): void;
+  setShowResponseTime(show: boolean): void;
+  setShowFlammability(show: boolean): void;
+  setShowRurality(show: boolean): void;
+  setShowUrgency(show: boolean): void;
 }
 
 // ---------------------------------------------------------------------------
@@ -708,6 +718,41 @@ function buildVisualsTab(ctx: SettingsCtx): HTMLElement {
       ],
       ctx.getPpnBarPosition,
       ctx.setPpnBarPosition,
+    ),
+  );
+  barGroup.appendChild(
+    checkboxRow(
+      "Show building info",
+      ctx.getShowBuildingStats,
+      ctx.setShowBuildingStats,
+    ),
+  );
+  barGroup.appendChild(
+    checkboxRow(
+      "Show response time badge",
+      ctx.getShowResponseTime,
+      ctx.setShowResponseTime,
+    ),
+  );
+  barGroup.appendChild(
+    checkboxRow(
+      "Show flammability badge",
+      ctx.getShowFlammability,
+      ctx.setShowFlammability,
+    ),
+  );
+  barGroup.appendChild(
+    checkboxRow(
+      "Show rurality badge",
+      ctx.getShowRurality,
+      ctx.setShowRurality,
+    ),
+  );
+  barGroup.appendChild(
+    checkboxRow(
+      "Show urgency badge",
+      ctx.getShowUrgency,
+      ctx.setShowUrgency,
     ),
   );
   root.appendChild(barGroup);

@@ -20,14 +20,29 @@
   var ARROW_OFFSET_MAX = 90;
   var ARROW_OFFSET_DEFAULT = 50;
   var VERSION = "1.0.2";
-  var VALID_POSITIONS = /* @__PURE__ */ new Set(["top", "bottom", "left", "right"]);
-  var VALID_THEMES = /* @__PURE__ */ new Set(["system", "dark", "light", "custom"]);
-  var CUSTOM_THEME_KEYS = /* @__PURE__ */ new Set(["bgColor", "textColor", "borderColor", "shadowColor"]);
+  var VALID_POSITIONS = /* @__PURE__ */ new Set([
+    "top",
+    "bottom",
+    "left",
+    "right"
+  ]);
+  var VALID_THEMES = /* @__PURE__ */ new Set([
+    "system",
+    "dark",
+    "light",
+    "custom"
+  ]);
+  var CUSTOM_THEME_KEYS = /* @__PURE__ */ new Set([
+    "bgColor",
+    "textColor",
+    "borderColor",
+    "shadowColor"
+  ]);
   var THEME_TOKENS = Object.freeze({
     dark: Object.freeze({
-      bgColor: "oklch(18% 0.012 260)",
+      bgColor: "oklch(24% 0 0)",
       textColor: "oklch(96% 0.012 95)",
-      borderColor: "oklch(96% 0.012 95 / 0.16)",
+      borderColor: "oklch(30% 0 0)",
       shadowColor: "oklch(12% 0.01 260 / 0.55)"
     }),
     light: Object.freeze({
@@ -85,9 +100,9 @@
         max-width: ${visualConfig.maxWidth};
         color: var(--balaclava-tooltip-text);
         color-scheme: dark;
-        font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        font-family: "Fjalla One", sans-serif;
         font-size: ${visualConfig.fontSize};
-        line-height: 1.4;
+        line-height: 1.5;
         letter-spacing: 0;
         overflow-wrap: anywhere;
         pointer-events: none;
@@ -239,9 +254,19 @@
       if (globalListenersController) return;
       globalListenersController = new AbortController();
       const { signal } = globalListenersController;
-      window.addEventListener("resize", updateVisibleTooltip, { passive: true, signal });
-      window.addEventListener("scroll", scheduleScrollUpdate, { capture: true, passive: true, signal });
-      window.addEventListener("keydown", handleKeydown, { passive: true, signal });
+      window.addEventListener("resize", updateVisibleTooltip, {
+        passive: true,
+        signal
+      });
+      window.addEventListener("scroll", scheduleScrollUpdate, {
+        capture: true,
+        passive: true,
+        signal
+      });
+      window.addEventListener("keydown", handleKeydown, {
+        passive: true,
+        signal
+      });
     }, handleKeydown = function(event) {
       if (event.key === "Escape" && isVisible) {
         hideTooltip();
@@ -259,7 +284,9 @@
       updateTooltipPosition();
     }, showTooltip = function(target, content, options = {}) {
       if (!isElement(target)) {
-        throw new TypeError("BalaclavaTooltip.show target must be an HTMLElement.");
+        throw new TypeError(
+          "BalaclavaTooltip.show target must be an HTMLElement."
+        );
       }
       ensureHost();
       cleanupTooltip();
@@ -313,7 +340,9 @@
       updateVisibleTooltip();
     }, attachTooltip = function(element, content, options = {}) {
       if (!isElement(element)) {
-        throw new TypeError("BalaclavaTooltip.attach element must be an HTMLElement.");
+        throw new TypeError(
+          "BalaclavaTooltip.attach element must be an HTMLElement."
+        );
       }
       const controller = new AbortController();
       const { signal } = controller;
@@ -342,9 +371,13 @@
       element.addEventListener("mouseenter", onMouseEnter, { signal });
       element.addEventListener("mouseleave", onMouseLeave, { signal });
       element.addEventListener("focus", doShow, { signal });
-      element.addEventListener("blur", () => {
-        if (targetElement === element) hideTooltip();
-      }, { signal });
+      element.addEventListener(
+        "blur",
+        () => {
+          if (targetElement === element) hideTooltip();
+        },
+        { signal }
+      );
       const detach = function detach2() {
         if (detached) return;
         detached = true;
@@ -368,9 +401,13 @@
       if (!isElement(element) || attachedElements.has(element)) return;
       const text = element.getAttribute("data-balaclava-tooltip");
       if (!text) return;
-      const position = normalizePosition(element.getAttribute("data-balaclava-tooltip-position"));
+      const position = normalizePosition(
+        element.getAttribute("data-balaclava-tooltip-position")
+      );
       const arrow = element.getAttribute("data-balaclava-tooltip-arrow") !== "false";
-      const theme = normalizeOptionalTheme(element.getAttribute("data-balaclava-tooltip-theme"));
+      const theme = normalizeOptionalTheme(
+        element.getAttribute("data-balaclava-tooltip-theme")
+      );
       const options = { position, showArrow: arrow };
       if (theme) {
         options.theme = theme;
@@ -445,7 +482,10 @@
       if (isNode(content)) {
         const clone = content.cloneNode(true);
         contentEl.appendChild(clone);
-        tooltipEl.setAttribute("aria-label", clone.textContent?.trim() || "Tooltip");
+        tooltipEl.setAttribute(
+          "aria-label",
+          clone.textContent?.trim() || "Tooltip"
+        );
       } else {
         const text = content == null ? "" : String(content);
         contentEl.textContent = text;
@@ -638,8 +678,14 @@
       }
     }, clampToViewport = function(position, tooltipWidth, tooltipHeight) {
       const original = { top: position.top, left: position.left };
-      const maxTop = Math.max(SAFEZONE, window.innerHeight - tooltipHeight - SAFEZONE);
-      const maxLeft = Math.max(SAFEZONE, window.innerWidth - tooltipWidth - SAFEZONE);
+      const maxTop = Math.max(
+        SAFEZONE,
+        window.innerHeight - tooltipHeight - SAFEZONE
+      );
+      const maxLeft = Math.max(
+        SAFEZONE,
+        window.innerWidth - tooltipWidth - SAFEZONE
+      );
       position.top = Math.max(SAFEZONE, Math.min(position.top, maxTop));
       position.left = Math.max(SAFEZONE, Math.min(position.left, maxLeft));
       if (showArrow) {
@@ -694,22 +740,22 @@
     };
     init2 = init, ensureHost2 = ensureHost, buildStylesheet2 = buildStylesheet, getVisualConfig2 = getVisualConfig, exposeApi2 = exposeApi, setupGlobalListeners2 = setupGlobalListeners, handleKeydown2 = handleKeydown, scheduleScrollUpdate2 = scheduleScrollUpdate, updateVisibleTooltip2 = updateVisibleTooltip, showTooltip2 = showTooltip, hideTooltip2 = hideTooltip, configure2 = configure, attachTooltip2 = attachTooltip, resolveContent2 = resolveContent, scanAll2 = scanAll, scanElement2 = scanElement, setupMutationObserver2 = setupMutationObserver, scanAddedNode2 = scanAddedNode, cleanupRemovedNode2 = cleanupRemovedNode, cleanupAttachedElement2 = cleanupAttachedElement, refreshElement2 = refreshElement, renderTooltip2 = renderTooltip, setupIntersectionObserver2 = setupIntersectionObserver, cleanupIntersectionObserver2 = cleanupIntersectionObserver, cleanupTooltip2 = cleanupTooltip, destroy2 = destroy, trackTargetPosition2 = trackTargetPosition, updateTooltipPosition2 = updateTooltipPosition, getInitialPosition2 = getInitialPosition, applyFallback2 = applyFallback, clampToViewport2 = clampToViewport, updateArrowOffset2 = updateArrowOffset, calculatePercentageOffset2 = calculatePercentageOffset, sameRect2 = sameRect, normalizePosition2 = normalizePosition, normalizeTheme2 = normalizeTheme, normalizeOptionalTheme2 = normalizeOptionalTheme, getTooltipClassName2 = getTooltipClassName, refreshTooltipClassName2 = refreshTooltipClassName, isConfigKey2 = isConfigKey, isElement2 = isElement, isNode2 = isNode;
     const DEFAULT_CONFIG = Object.freeze({
-      theme: "system",
+      theme: "dark",
       bgColor: THEME_TOKENS.dark.bgColor,
       textColor: THEME_TOKENS.dark.textColor,
       borderColor: THEME_TOKENS.dark.borderColor,
       shadowColor: THEME_TOKENS.dark.shadowColor,
-      borderSize: "0",
+      borderSize: "1px",
       borderRadius: "8px",
       padding: "8px 12px",
-      maxWidth: "250px",
+      maxWidth: "335px",
       arrowSize: "12px",
       arrowBorderSize: null,
       arrowBorderColor: null,
       arrowBorderRadius: null,
       zIndex: 2147483647,
       animationDuration: "150ms",
-      fontSize: "13px",
+      fontSize: "12px",
       offset: 8
     });
     let config = { ...DEFAULT_CONFIG };

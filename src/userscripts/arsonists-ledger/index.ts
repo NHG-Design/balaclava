@@ -10,12 +10,30 @@ import {
   type RankedScenario,
   type PayoutBasis,
 } from "./engine.js";
-import { buildTooltipContent, buildTooltipStyles } from "./tooltip.js";
+import {
+  buildTooltipContent,
+  buildTooltipStyles,
+  buildStatTooltip,
+  buildStatTooltipGroup,
+  type StatEntry,
+} from "./tooltip.js";
 import { SEL } from "./selectors.js";
 import { BAND_COLOR } from "./colors.js";
 import { injectSettings, type SettingsCtx } from "./settings.js";
-import { el } from "./dom.js";
+import { el, txt } from "./dom.js";
 import { CATALOG_UPDATED, type ResourceId } from "../../data/catalog.js";
+import {
+  BUILDINGS,
+  formatResponseTime,
+  type Building,
+} from "../../data/buildings.js";
+import {
+  ICON_TIMER,
+  ICON_PIN,
+  ICON_SIREN,
+  ICON_FLAMABILITY,
+  ICON_EMBER,
+} from "./icons.js";
 
 // ---------------------------------------------------------------------------
 // Storage keys
@@ -33,6 +51,11 @@ const KEY_SHOW_SCENARIO_NAME = "pyroLedger.v1.showScenarioName";
 const KEY_STACK_RESOURCES = "pyroLedger.v1.stackResources";
 const KEY_PPN_BAR_POSITION = "pyroLedger.v1.ppnBarPosition";
 const KEY_PAYOUT_BASIS = "pyroLedger.v1.payoutBasis";
+const KEY_SHOW_BUILDING_STATS = "pyroLedger.v1.showBuildingStats";
+const KEY_SHOW_RESPONSE_TIME = "pyroLedger.v1.showResponseTime";
+const KEY_SHOW_FLAMMABILITY = "pyroLedger.v1.showFlammability";
+const KEY_SHOW_RURALITY = "pyroLedger.v1.showRurality";
+const KEY_SHOW_URGENCY = "pyroLedger.v1.showUrgency";
 
 // ---------------------------------------------------------------------------
 // Minimal GM storage shim (falls back to localStorage in dev/non-GM contexts)
@@ -69,10 +92,9 @@ interface BalaclavaTooltipAPI {
   show: (
     target: HTMLElement,
     content: string | Node,
-    options?: { position?: string; theme?: string },
+    options?: { position?: string },
   ) => void;
   hide: () => void;
-  configure: (userConfig?: { maxWidth?: string }) => void;
 }
 
 function getTooltipAPI(): BalaclavaTooltipAPI | null {
@@ -89,7 +111,6 @@ function getTooltipAPI(): BalaclavaTooltipAPI | null {
 }
 
 let tooltipWarned = false;
-let tooltipConfigured = false;
 
 function tryTooltip(callback: (api: BalaclavaTooltipAPI) => void): void {
   const api = getTooltipAPI();
@@ -101,10 +122,6 @@ function tryTooltip(callback: (api: BalaclavaTooltipAPI) => void): void {
       tooltipWarned = true;
     }
     return;
-  }
-  if (!tooltipConfigured) {
-    api.configure({ maxWidth: "335px" });
-    tooltipConfigured = true;
   }
   callback(api);
 }
@@ -124,6 +141,11 @@ let showScenarioName = true;
 let stackResources = true;
 let ppnBarPosition: "left" | "right" = "right";
 let payoutBasis: PayoutBasis = "average";
+let showBuildingStats = true;
+let showResponseTime = true;
+let showFlammability = true;
+let showRurality = true;
+let showUrgency = true;
 let visibleMobileSection: HTMLElement | null = null;
 const IOS_USER_AGENT_RE = /iPad|iPhone|iPod/i;
 
@@ -154,6 +176,11 @@ function loadState(): void {
     store_get(KEY_PPN_BAR_POSITION, "right") === "left" ? "left" : "right";
   payoutBasis =
     store_get(KEY_PAYOUT_BASIS, "average") === "max" ? "max" : "average";
+  showBuildingStats = store_get(KEY_SHOW_BUILDING_STATS, "1") !== "0";
+  showResponseTime = store_get(KEY_SHOW_RESPONSE_TIME, "1") !== "0";
+  showFlammability = store_get(KEY_SHOW_FLAMMABILITY, "1") !== "0";
+  showRurality = store_get(KEY_SHOW_RURALITY, "1") !== "0";
+  showUrgency = store_get(KEY_SHOW_URGENCY, "1") !== "0";
 
   try {
     manualPrices = JSON.parse(store_get(KEY_MANUAL_PRICES, "{}")) as PriceMap;
@@ -244,6 +271,36 @@ function setPpnBarPosition(position: "left" | "right"): void {
 function setPayoutBasis(basis: PayoutBasis): void {
   payoutBasis = basis;
   store_set(KEY_PAYOUT_BASIS, basis);
+  resetScans();
+}
+
+function setShowBuildingStatsEnabled(show: boolean): void {
+  showBuildingStats = show;
+  store_set(KEY_SHOW_BUILDING_STATS, show ? "1" : "0");
+  resetScans();
+}
+
+function setShowResponseTimeEnabled(show: boolean): void {
+  showResponseTime = show;
+  store_set(KEY_SHOW_RESPONSE_TIME, show ? "1" : "0");
+  resetScans();
+}
+
+function setShowFlammabilityEnabled(show: boolean): void {
+  showFlammability = show;
+  store_set(KEY_SHOW_FLAMMABILITY, show ? "1" : "0");
+  resetScans();
+}
+
+function setShowRuralityEnabled(show: boolean): void {
+  showRurality = show;
+  store_set(KEY_SHOW_RURALITY, show ? "1" : "0");
+  resetScans();
+}
+
+function setShowUrgencyEnabled(show: boolean): void {
+  showUrgency = show;
+  store_set(KEY_SHOW_URGENCY, show ? "1" : "0");
   resetScans();
 }
 
@@ -406,6 +463,70 @@ function injectHighlightStyles(): void {
             white-space: nowrap;
             z-index: 10;
         }
+        .pyro-building-badges {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: flex-start;
+            align-content: flex-start;
+            gap: 2px;
+            pointer-events: none;
+            user-select: none;
+            z-index: 10;
+            padding: 2px;
+        }
+        .pyro-building-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 2px;
+            padding: 1px 3px;
+            background: var(--crimes-crimeOption-bgColor, #222);
+            border: 1px solid var(--crimes-outcomeDivider-color, #444);
+            border-radius: 3px;
+            color: var(--crimes-subText-color, #eee);
+            font-size: 10px;
+            letter-spacing: 0.02em;
+            line-height: 1;
+            white-space: nowrap;
+            pointer-events: auto;
+        }
+        .pyro-building-badge svg {
+            width: 12px;
+            height: 12px;
+            flex-shrink: 0;
+        }
+        .pyro-mobile-stat-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 16px;
+            height: 16px;
+            padding: 2px;
+            margin: 0;
+            border: 1px solid #444;
+            border-radius: 50%;
+            background: #333;
+            cursor: pointer;
+            position: absolute;
+            right: -3px;
+            top: -5px;
+        }
+        @media screen and (max-width: 386px) {
+          .pyro-mobile-stat-badge {
+            right: 1px;
+          }
+        }
+        .pyro-mobile-stat-badge svg {
+            width: 14px;
+            height: 14px;
+            padding: 0;
+            box-sizing: border-box;
+            border-radius: 50%;
+            background: #333;
+            color: #ff8a3d;
+            filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.5));
+        }
     `;
   document.head.appendChild(style);
 }
@@ -443,6 +564,203 @@ function ensureValuePill(
   pill.textContent = getPillText(ranked);
 }
 
+function buildingBadgeRow(
+  icon: string,
+  value: string,
+  tooltipContent: HTMLElement,
+): HTMLElement {
+  const row = el("span", "pyro-building-badge");
+  row.innerHTML = icon;
+  row.appendChild(txt(value));
+  row.addEventListener("mouseenter", () => {
+    tryTooltip((api) => api.show(row, tooltipContent, { position: "top" }));
+  });
+  row.addEventListener("mouseleave", () => {
+    tryTooltip((api) => api.hide());
+  });
+  return row;
+}
+
+interface BuildingStat {
+  icon: string;
+  value: string;
+  entry: StatEntry;
+}
+
+function collectBuildingStats(building: Building): BuildingStat[] {
+  const stats: BuildingStat[] = [];
+  if (!showBuildingStats) return stats;
+
+  if (showResponseTime && building.responseTime > 0) {
+    const value = formatResponseTime(building.responseTime);
+    stats.push({
+      icon: ICON_TIMER,
+      value,
+      entry: {
+        title: "Response Time",
+        description: "How long firefighters take to arrive once dispatched.",
+        value,
+      },
+    });
+  }
+  if (showFlammability && building.flammability >= 0) {
+    const value = String(building.flammability);
+    stats.push({
+      icon: ICON_FLAMABILITY,
+      value,
+      entry: {
+        title: "Flammability",
+        description:
+          "How fast the fire's intensity scales, and its max destruction speed.",
+        value,
+        bar: {
+          value: building.flammability,
+          min: 1,
+          max: 5,
+          lowLabel: "Fire-resistant",
+          highLabel: "Highly flammable",
+        },
+      },
+    });
+  }
+  if (showRurality && building.rurality >= 0) {
+    const value = String(building.rurality);
+    stats.push({
+      icon: ICON_PIN,
+      value,
+      entry: {
+        title: "Rurality",
+        description:
+          "How isolated the location is — drives dispatch delay and response time.",
+        value,
+        bar: {
+          value: building.rurality,
+          min: 1,
+          max: 5,
+          lowLabel: "Urban",
+          highLabel: "Remote",
+        },
+      },
+    });
+  }
+  if (showUrgency && building.urgency !== null) {
+    const value = String(building.urgency);
+    stats.push({
+      icon: ICON_SIREN,
+      value,
+      entry: {
+        title: "Urgency",
+        description:
+          "How fast the danger alert escalates through response tiers.",
+        value,
+        bar: {
+          value: building.urgency,
+          min: 1,
+          max: 6,
+          lowLabel: "Gradual",
+          highLabel: "Rapid",
+        },
+      },
+    });
+  }
+
+  return stats;
+}
+
+function ensureBuildingBadges(
+  target: HTMLElement,
+  building: Building | null,
+): void {
+  let wrap = target.querySelector<HTMLElement>(".pyro-building-badges");
+  const stats = building ? collectBuildingStats(building) : [];
+  if (stats.length === 0) {
+    wrap?.remove();
+    return;
+  }
+  if (!wrap) {
+    wrap = el("div", "pyro-building-badges");
+    wrap.setAttribute("aria-hidden", "true");
+    target.appendChild(wrap);
+  }
+  wrap.innerHTML = "";
+
+  for (const stat of stats) {
+    wrap.appendChild(
+      buildingBadgeRow(
+        stat.icon,
+        stat.value,
+        buildStatTooltip(
+          stat.entry.title,
+          stat.entry.description,
+          stat.entry.bar,
+        ),
+      ),
+    );
+  }
+}
+
+let visibleMobileStatsBadge: HTMLElement | null = null;
+const mobileStatsState = new WeakMap<HTMLElement, { entries: StatEntry[] }>();
+
+function ensureMobileStatsBadge(
+  section: HTMLElement,
+  building: Building | null,
+): void {
+  const iconsRow = section.querySelector<HTMLElement>(
+    SEL.BUILDING_RESPONDER_ICONS,
+  );
+  let badge = iconsRow?.querySelector<HTMLElement>(".pyro-mobile-stat-badge");
+  const stats = building ? collectBuildingStats(building) : [];
+
+  if (!iconsRow || stats.length === 0) {
+    badge?.remove();
+    return;
+  }
+
+  const entries = stats.map((s) => s.entry);
+  const existing = badge ? mobileStatsState.get(badge) : undefined;
+  if (existing) {
+    existing.entries = entries;
+  } else {
+    const state = { entries };
+    badge = el("button", "pyro-mobile-stat-badge");
+    badge.setAttribute("type", "button");
+    badge.setAttribute("aria-label", "Building stats");
+    badge.innerHTML = ICON_EMBER;
+    mobileStatsState.set(badge, state);
+    iconsRow.appendChild(badge);
+
+    const badgeEl = badge;
+    badgeEl.addEventListener("click", (e) => {
+      e.stopPropagation();
+      tryTooltip((api) => {
+        if (visibleMobileStatsBadge === badgeEl) {
+          api.hide();
+          visibleMobileStatsBadge = null;
+        } else {
+          api.show(badgeEl, buildStatTooltipGroup(state.entries), {
+            position: "top",
+          });
+          visibleMobileStatsBadge = badgeEl;
+        }
+      });
+    });
+    document.addEventListener(
+      "click",
+      (e) => {
+        if (
+          visibleMobileStatsBadge === badgeEl &&
+          !badgeEl.contains(e.target as Node)
+        ) {
+          tryTooltip((api) => api.hide());
+          visibleMobileStatsBadge = null;
+        }
+      },
+      { passive: true },
+    );
+  }
+}
+
 function buildUnknownTooltip(): HTMLElement {
   const wrap = el("div");
   const style = el("style");
@@ -460,6 +778,7 @@ function buildUnknownTooltip(): HTMLElement {
 function applyToSection(
   section: HTMLElement,
   ranked: RankedScenario | null,
+  building: Building | null,
 ): void {
   section.querySelector(".pyro-label")?.remove();
   section.classList.forEach((c) => {
@@ -469,6 +788,12 @@ function applyToSection(
   const fireMeter = section.querySelector<HTMLElement>(SEL.FIRE_METER);
   const crimeImage = section.querySelector<HTMLElement>(SEL.CRIME_IMAGE);
   const hoverTarget = fireMeter ?? crimeImage ?? section;
+
+  const isMobileLayout = !!section.querySelector(SEL.BUILDING_RESPONDER_ICONS);
+  if (crimeImage) {
+    ensureBuildingBadges(crimeImage, isMobileLayout ? null : building);
+  }
+  ensureMobileStatsBadge(section, building);
 
   if (!ranked) {
     section.classList.add("pyro-band--unknown");
@@ -526,10 +851,7 @@ function wireTooltip(
   if (!useTapOnlyTooltip) {
     hoverTarget.addEventListener("mouseenter", () => {
       tryTooltip((api) =>
-        api.show(hoverTarget, state.getContent(), {
-          position: "top",
-          theme: "dark",
-        }),
+        api.show(hoverTarget, state.getContent(), { position: "top" }),
       );
     });
     hoverTarget.addEventListener("mouseleave", () => {
@@ -549,10 +871,7 @@ function wireTooltip(
         api.hide();
         visibleMobileSection = null;
       } else {
-        api.show(hoverTarget, state.getContent(), {
-          position: "top",
-          theme: "dark",
-        });
+        api.show(hoverTarget, state.getContent(), { position: "top" });
         visibleMobileSection = section;
       }
     });
@@ -619,7 +938,12 @@ function scanPage(): void {
       const ranked = scenario
         ? rankForScenario(scenario, prices, thresholds, payoutBasis)
         : null;
-      applyToSection(section, ranked);
+
+      const buildingName =
+        scenarioEl?.previousElementSibling?.textContent?.trim() ?? "";
+      const building = BUILDINGS[buildingName] ?? null;
+
+      applyToSection(section, ranked, building);
     });
 }
 
@@ -648,6 +972,11 @@ const settingsCtx: SettingsCtx = {
   getStackResources: () => stackResources,
   getPpnBarPosition: () => ppnBarPosition,
   getPayoutBasis: () => payoutBasis,
+  getShowBuildingStats: () => showBuildingStats,
+  getShowResponseTime: () => showResponseTime,
+  getShowFlammability: () => showFlammability,
+  getShowRurality: () => showRurality,
+  getShowUrgency: () => showUrgency,
 
   setManualPrice,
   clearManualPrices,
@@ -663,6 +992,11 @@ const settingsCtx: SettingsCtx = {
   setStackResources: setStackResourcesEnabled,
   setPpnBarPosition,
   setPayoutBasis,
+  setShowBuildingStats: setShowBuildingStatsEnabled,
+  setShowResponseTime: setShowResponseTimeEnabled,
+  setShowFlammability: setShowFlammabilityEnabled,
+  setShowRurality: setShowRuralityEnabled,
+  setShowUrgency: setShowUrgencyEnabled,
 };
 
 // ---------------------------------------------------------------------------

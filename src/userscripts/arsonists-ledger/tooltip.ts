@@ -190,16 +190,164 @@ export function buildTooltipContent(
   return root;
 }
 
+export interface StatBar {
+  value: number;
+  min: number;
+  max: number;
+  lowLabel: string;
+  highLabel: string;
+}
+
+function barColor(ratio: number): string {
+  if (ratio <= 1 / 3) return BAND_COLOR.good;
+  if (ratio <= 2 / 3) return BAND_COLOR.low;
+  return BAND_COLOR.negative;
+}
+
+function buildStatBar(bar: StatBar): HTMLElement {
+  const wrap = el("div", "pyro-stat-bar");
+  const segCount = bar.max - bar.min + 1;
+  const filled = bar.value - bar.min + 1;
+  const ratio = (bar.value - bar.min) / (bar.max - bar.min);
+  const color = barColor(ratio);
+
+  const track = el("div", "pyro-stat-bar-track");
+  for (let i = 0; i < segCount; i++) {
+    const seg = el("span", "pyro-stat-bar-seg");
+    if (i < filled) {
+      seg.classList.add("pyro-stat-bar-seg--filled");
+      seg.style.background = color;
+    }
+    track.appendChild(seg);
+  }
+  wrap.appendChild(track);
+
+  const labels = el("div", "pyro-stat-bar-labels");
+  const low = el("span", "pyro-stat-bar-label");
+  low.textContent = bar.lowLabel;
+  const high = el("span", "pyro-stat-bar-label");
+  high.textContent = bar.highLabel;
+  labels.appendChild(low);
+  labels.appendChild(high);
+  wrap.appendChild(labels);
+
+  return wrap;
+}
+
+export interface StatEntry {
+  title: string;
+  description: string;
+  value?: string;
+  bar?: StatBar;
+}
+
+function buildStatBlock(entry: StatEntry): HTMLElement {
+  const block = el("div", "pyro-stat-block");
+
+  const header = el("div", "pyro-stat-tt-header");
+  const titleEl = el("span", "pyro-stat-tt-title");
+  titleEl.textContent = entry.title;
+  header.appendChild(titleEl);
+  if (entry.value !== undefined) {
+    const valueEl = el("span", "pyro-stat-tt-value");
+    valueEl.textContent = entry.value;
+    header.appendChild(valueEl);
+  }
+  block.appendChild(header);
+
+  const descEl = el("div", "pyro-stat-tt-desc");
+  descEl.textContent = entry.description;
+  block.appendChild(descEl);
+
+  if (entry.bar) block.appendChild(buildStatBar(entry.bar));
+
+  return block;
+}
+
+export function buildStatTooltip(
+  title: string,
+  description: string,
+  bar?: StatBar,
+): HTMLElement {
+  return buildStatTooltipGroup([{ title, description, bar }]);
+}
+
+export function buildStatTooltipGroup(entries: StatEntry[]): HTMLElement {
+  const root = el("div", "pyro-stat-tt");
+  const style = el("style");
+  style.textContent = buildStatTooltipStyles();
+  root.appendChild(style);
+
+  entries.forEach((entry, i) => {
+    if (i > 0) root.appendChild(el("hr", "pyro-stat-divider"));
+    root.appendChild(buildStatBlock(entry));
+  });
+
+  return root;
+}
+
+function buildStatTooltipStyles(): string {
+  return `
+.pyro-stat-tt {
+    min-width: 140px;
+    max-width: 200px;
+}
+.pyro-stat-tt-header {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 8px;
+}
+.pyro-stat-tt-title {
+    font-size: 13px;
+}
+.pyro-stat-tt-value {
+    font-size: 14px;
+    color: oklch(76% 0.14 55);
+    white-space: nowrap;
+}
+.pyro-stat-tt-desc {
+    margin-top: 2px;
+    font-size: 10px;
+    opacity: 0.7;
+}
+.pyro-stat-bar {
+    margin-top: 6px;
+}
+.pyro-stat-bar-track {
+    display: flex;
+    gap: 2px;
+}
+.pyro-stat-bar-seg {
+    flex: 1;
+    height: 5px;
+    border-radius: 2px;
+    background: oklch(40% 0 0);
+}
+.pyro-stat-bar-labels {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 3px;
+    font-size: 9px;
+    opacity: 0.55;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+}
+.pyro-stat-divider {
+    border: none;
+    border-top: 1px solid currentColor;
+    opacity: 0.15;
+    margin: 6px 0;
+}
+`;
+}
+
 export function buildTooltipStyles(): string {
   return `
 .pyro-tt {
-    font-size: 12px;
-    line-height: 1.5;
     min-width: 180px;
-    max-width: 335px;
 }
 .pyro-tt-name {
-    font-weight: bold;
     font-size: 12px;
     margin-bottom: 2px;
     color: oklch(76% 0 0);
@@ -212,11 +360,9 @@ export function buildTooltipStyles(): string {
 }
 .pyro-tt-title {
     font: inherit;
-    font-weight: bold;
     font-size: 14px;
 }
 .pyro-tt-ppn {
-    font-weight: bold;
     font-size: 14px;
 }
 .pyro-tt-band--negative { color: ${BAND_COLOR.negative}; }
@@ -267,13 +413,11 @@ export function buildTooltipStyles(): string {
     margin-left: 4px;
     background-color: oklch(0.9 0 0);
     color: oklch(0.23 0 0);
-    font-weight: 700;
     padding: 0 2px;
     border-radius: 2px;
 }
 .pyro-tt-action-value {
     font-size: 11px;
-    font-weight: bold;
 }
 .pyro-tt-item-cost {
     color: oklch(66% 0 0);
@@ -290,7 +434,6 @@ export function buildTooltipStyles(): string {
     margin-left: 4px;
     background-color: oklch(0.9 0 0);
     color: oklch(0.23 0 0);
-    font-weight: 700;
     padding: 0 2px;
     border-radius: 2px;
 }
@@ -304,12 +447,6 @@ export function buildTooltipStyles(): string {
     margin-top: 5px;
     opacity: 0.55;
     font-size: 10px;
-}
-
-.balaclava-tooltip.is-theme-dark {
-    --balaclava-tooltip-bg: oklch(24% 0 0);
-    --balaclava-tooltip-border-size: 1px;
-    --balaclava-tooltip-border: oklch(30% 0 0);
 }
 `;
 }

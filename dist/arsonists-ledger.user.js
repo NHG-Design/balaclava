@@ -2471,14 +2471,29 @@
   var ARROW_OFFSET_MAX = 90;
   var ARROW_OFFSET_DEFAULT = 50;
   var VERSION = "1.0.2";
-  var VALID_POSITIONS = /* @__PURE__ */ new Set(["top", "bottom", "left", "right"]);
-  var VALID_THEMES = /* @__PURE__ */ new Set(["system", "dark", "light", "custom"]);
-  var CUSTOM_THEME_KEYS = /* @__PURE__ */ new Set(["bgColor", "textColor", "borderColor", "shadowColor"]);
+  var VALID_POSITIONS = /* @__PURE__ */ new Set([
+    "top",
+    "bottom",
+    "left",
+    "right"
+  ]);
+  var VALID_THEMES = /* @__PURE__ */ new Set([
+    "system",
+    "dark",
+    "light",
+    "custom"
+  ]);
+  var CUSTOM_THEME_KEYS = /* @__PURE__ */ new Set([
+    "bgColor",
+    "textColor",
+    "borderColor",
+    "shadowColor"
+  ]);
   var THEME_TOKENS = Object.freeze({
     dark: Object.freeze({
-      bgColor: "oklch(18% 0.012 260)",
+      bgColor: "oklch(24% 0 0)",
       textColor: "oklch(96% 0.012 95)",
-      borderColor: "oklch(96% 0.012 95 / 0.16)",
+      borderColor: "oklch(30% 0 0)",
       shadowColor: "oklch(12% 0.01 260 / 0.55)"
     }),
     light: Object.freeze({
@@ -2536,9 +2551,9 @@
         max-width: ${visualConfig.maxWidth};
         color: var(--balaclava-tooltip-text);
         color-scheme: dark;
-        font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        font-family: "Fjalla One", sans-serif;
         font-size: ${visualConfig.fontSize};
-        line-height: 1.4;
+        line-height: 1.5;
         letter-spacing: 0;
         overflow-wrap: anywhere;
         pointer-events: none;
@@ -2690,9 +2705,19 @@
       if (globalListenersController) return;
       globalListenersController = new AbortController();
       const { signal } = globalListenersController;
-      window.addEventListener("resize", updateVisibleTooltip, { passive: true, signal });
-      window.addEventListener("scroll", scheduleScrollUpdate, { capture: true, passive: true, signal });
-      window.addEventListener("keydown", handleKeydown, { passive: true, signal });
+      window.addEventListener("resize", updateVisibleTooltip, {
+        passive: true,
+        signal
+      });
+      window.addEventListener("scroll", scheduleScrollUpdate, {
+        capture: true,
+        passive: true,
+        signal
+      });
+      window.addEventListener("keydown", handleKeydown, {
+        passive: true,
+        signal
+      });
     }, handleKeydown = function(event) {
       if (event.key === "Escape" && isVisible) {
         hideTooltip();
@@ -2710,7 +2735,9 @@
       updateTooltipPosition();
     }, showTooltip = function(target, content, options = {}) {
       if (!isElement(target)) {
-        throw new TypeError("BalaclavaTooltip.show target must be an HTMLElement.");
+        throw new TypeError(
+          "BalaclavaTooltip.show target must be an HTMLElement."
+        );
       }
       ensureHost();
       cleanupTooltip();
@@ -2764,7 +2791,9 @@
       updateVisibleTooltip();
     }, attachTooltip = function(element, content, options = {}) {
       if (!isElement(element)) {
-        throw new TypeError("BalaclavaTooltip.attach element must be an HTMLElement.");
+        throw new TypeError(
+          "BalaclavaTooltip.attach element must be an HTMLElement."
+        );
       }
       const controller = new AbortController();
       const { signal } = controller;
@@ -2793,9 +2822,13 @@
       element.addEventListener("mouseenter", onMouseEnter, { signal });
       element.addEventListener("mouseleave", onMouseLeave, { signal });
       element.addEventListener("focus", doShow, { signal });
-      element.addEventListener("blur", () => {
-        if (targetElement === element) hideTooltip();
-      }, { signal });
+      element.addEventListener(
+        "blur",
+        () => {
+          if (targetElement === element) hideTooltip();
+        },
+        { signal }
+      );
       const detach = function detach2() {
         if (detached) return;
         detached = true;
@@ -2819,9 +2852,13 @@
       if (!isElement(element) || attachedElements.has(element)) return;
       const text = element.getAttribute("data-balaclava-tooltip");
       if (!text) return;
-      const position = normalizePosition(element.getAttribute("data-balaclava-tooltip-position"));
+      const position = normalizePosition(
+        element.getAttribute("data-balaclava-tooltip-position")
+      );
       const arrow = element.getAttribute("data-balaclava-tooltip-arrow") !== "false";
-      const theme = normalizeOptionalTheme(element.getAttribute("data-balaclava-tooltip-theme"));
+      const theme = normalizeOptionalTheme(
+        element.getAttribute("data-balaclava-tooltip-theme")
+      );
       const options = { position, showArrow: arrow };
       if (theme) {
         options.theme = theme;
@@ -2896,7 +2933,10 @@
       if (isNode(content)) {
         const clone = content.cloneNode(true);
         contentEl.appendChild(clone);
-        tooltipEl.setAttribute("aria-label", clone.textContent?.trim() || "Tooltip");
+        tooltipEl.setAttribute(
+          "aria-label",
+          clone.textContent?.trim() || "Tooltip"
+        );
       } else {
         const text = content == null ? "" : String(content);
         contentEl.textContent = text;
@@ -3089,8 +3129,14 @@
       }
     }, clampToViewport = function(position, tooltipWidth, tooltipHeight) {
       const original = { top: position.top, left: position.left };
-      const maxTop = Math.max(SAFEZONE, window.innerHeight - tooltipHeight - SAFEZONE);
-      const maxLeft = Math.max(SAFEZONE, window.innerWidth - tooltipWidth - SAFEZONE);
+      const maxTop = Math.max(
+        SAFEZONE,
+        window.innerHeight - tooltipHeight - SAFEZONE
+      );
+      const maxLeft = Math.max(
+        SAFEZONE,
+        window.innerWidth - tooltipWidth - SAFEZONE
+      );
       position.top = Math.max(SAFEZONE, Math.min(position.top, maxTop));
       position.left = Math.max(SAFEZONE, Math.min(position.left, maxLeft));
       if (showArrow) {
@@ -3145,22 +3191,22 @@
     };
     init2 = init, ensureHost2 = ensureHost, buildStylesheet2 = buildStylesheet, getVisualConfig2 = getVisualConfig, exposeApi2 = exposeApi, setupGlobalListeners2 = setupGlobalListeners, handleKeydown2 = handleKeydown, scheduleScrollUpdate2 = scheduleScrollUpdate, updateVisibleTooltip2 = updateVisibleTooltip, showTooltip2 = showTooltip, hideTooltip2 = hideTooltip, configure2 = configure, attachTooltip2 = attachTooltip, resolveContent2 = resolveContent, scanAll2 = scanAll, scanElement2 = scanElement, setupMutationObserver2 = setupMutationObserver, scanAddedNode2 = scanAddedNode, cleanupRemovedNode2 = cleanupRemovedNode, cleanupAttachedElement2 = cleanupAttachedElement, refreshElement2 = refreshElement, renderTooltip2 = renderTooltip, setupIntersectionObserver2 = setupIntersectionObserver, cleanupIntersectionObserver2 = cleanupIntersectionObserver, cleanupTooltip2 = cleanupTooltip, destroy2 = destroy, trackTargetPosition2 = trackTargetPosition, updateTooltipPosition2 = updateTooltipPosition, getInitialPosition2 = getInitialPosition, applyFallback2 = applyFallback, clampToViewport2 = clampToViewport, updateArrowOffset2 = updateArrowOffset, calculatePercentageOffset2 = calculatePercentageOffset, sameRect2 = sameRect, normalizePosition2 = normalizePosition, normalizeTheme2 = normalizeTheme, normalizeOptionalTheme2 = normalizeOptionalTheme, getTooltipClassName2 = getTooltipClassName, refreshTooltipClassName2 = refreshTooltipClassName, isConfigKey2 = isConfigKey, isElement2 = isElement, isNode2 = isNode;
     const DEFAULT_CONFIG = Object.freeze({
-      theme: "system",
+      theme: "dark",
       bgColor: THEME_TOKENS.dark.bgColor,
       textColor: THEME_TOKENS.dark.textColor,
       borderColor: THEME_TOKENS.dark.borderColor,
       shadowColor: THEME_TOKENS.dark.shadowColor,
-      borderSize: "0",
+      borderSize: "1px",
       borderRadius: "8px",
       padding: "8px 12px",
-      maxWidth: "250px",
+      maxWidth: "335px",
       arrowSize: "12px",
       arrowBorderSize: null,
       arrowBorderColor: null,
       arrowBorderRadius: null,
       zIndex: 2147483647,
       animationDuration: "150ms",
-      fontSize: "13px",
+      fontSize: "12px",
       offset: 8
     });
     let config = { ...DEFAULT_CONFIG };
@@ -3470,16 +3516,130 @@
     root.appendChild(buildPrimaryBlock(ranked, prices, statsOnly, options));
     return root;
   }
+  function barColor(ratio) {
+    if (ratio <= 1 / 3) return BAND_COLOR.good;
+    if (ratio <= 2 / 3) return BAND_COLOR.low;
+    return BAND_COLOR.negative;
+  }
+  function buildStatBar(bar) {
+    const wrap = el("div", "pyro-stat-bar");
+    const segCount = bar.max - bar.min + 1;
+    const filled = bar.value - bar.min + 1;
+    const ratio = (bar.value - bar.min) / (bar.max - bar.min);
+    const color = barColor(ratio);
+    const track = el("div", "pyro-stat-bar-track");
+    for (let i = 0; i < segCount; i++) {
+      const seg = el("span", "pyro-stat-bar-seg");
+      if (i < filled) {
+        seg.classList.add("pyro-stat-bar-seg--filled");
+        seg.style.background = color;
+      }
+      track.appendChild(seg);
+    }
+    wrap.appendChild(track);
+    const labels = el("div", "pyro-stat-bar-labels");
+    const low = el("span", "pyro-stat-bar-label");
+    low.textContent = bar.lowLabel;
+    const high = el("span", "pyro-stat-bar-label");
+    high.textContent = bar.highLabel;
+    labels.appendChild(low);
+    labels.appendChild(high);
+    wrap.appendChild(labels);
+    return wrap;
+  }
+  function buildStatBlock(entry) {
+    const block = el("div", "pyro-stat-block");
+    const header = el("div", "pyro-stat-tt-header");
+    const titleEl = el("span", "pyro-stat-tt-title");
+    titleEl.textContent = entry.title;
+    header.appendChild(titleEl);
+    if (entry.value !== void 0) {
+      const valueEl = el("span", "pyro-stat-tt-value");
+      valueEl.textContent = entry.value;
+      header.appendChild(valueEl);
+    }
+    block.appendChild(header);
+    const descEl = el("div", "pyro-stat-tt-desc");
+    descEl.textContent = entry.description;
+    block.appendChild(descEl);
+    if (entry.bar) block.appendChild(buildStatBar(entry.bar));
+    return block;
+  }
+  function buildStatTooltip(title, description, bar) {
+    return buildStatTooltipGroup([{ title, description, bar }]);
+  }
+  function buildStatTooltipGroup(entries) {
+    const root = el("div", "pyro-stat-tt");
+    const style = el("style");
+    style.textContent = buildStatTooltipStyles();
+    root.appendChild(style);
+    entries.forEach((entry, i) => {
+      if (i > 0) root.appendChild(el("hr", "pyro-stat-divider"));
+      root.appendChild(buildStatBlock(entry));
+    });
+    return root;
+  }
+  function buildStatTooltipStyles() {
+    return `
+.pyro-stat-tt {
+    min-width: 140px;
+    max-width: 200px;
+}
+.pyro-stat-tt-header {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 8px;
+}
+.pyro-stat-tt-title {
+    font-size: 13px;
+}
+.pyro-stat-tt-value {
+    font-size: 14px;
+    color: oklch(76% 0.14 55);
+    white-space: nowrap;
+}
+.pyro-stat-tt-desc {
+    margin-top: 2px;
+    font-size: 10px;
+    opacity: 0.7;
+}
+.pyro-stat-bar {
+    margin-top: 6px;
+}
+.pyro-stat-bar-track {
+    display: flex;
+    gap: 2px;
+}
+.pyro-stat-bar-seg {
+    flex: 1;
+    height: 5px;
+    border-radius: 2px;
+    background: oklch(40% 0 0);
+}
+.pyro-stat-bar-labels {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 3px;
+    font-size: 9px;
+    opacity: 0.55;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+}
+.pyro-stat-divider {
+    border: none;
+    border-top: 1px solid currentColor;
+    opacity: 0.15;
+    margin: 6px 0;
+}
+`;
+  }
   function buildTooltipStyles() {
     return `
 .pyro-tt {
-    font-size: 12px;
-    line-height: 1.5;
     min-width: 180px;
-    max-width: 335px;
 }
 .pyro-tt-name {
-    font-weight: bold;
     font-size: 12px;
     margin-bottom: 2px;
     color: oklch(76% 0 0);
@@ -3492,11 +3652,9 @@
 }
 .pyro-tt-title {
     font: inherit;
-    font-weight: bold;
     font-size: 14px;
 }
 .pyro-tt-ppn {
-    font-weight: bold;
     font-size: 14px;
 }
 .pyro-tt-band--negative { color: ${BAND_COLOR.negative}; }
@@ -3547,13 +3705,11 @@
     margin-left: 4px;
     background-color: oklch(0.9 0 0);
     color: oklch(0.23 0 0);
-    font-weight: 700;
     padding: 0 2px;
     border-radius: 2px;
 }
 .pyro-tt-action-value {
     font-size: 11px;
-    font-weight: bold;
 }
 .pyro-tt-item-cost {
     color: oklch(66% 0 0);
@@ -3570,7 +3726,6 @@
     margin-left: 4px;
     background-color: oklch(0.9 0 0);
     color: oklch(0.23 0 0);
-    font-weight: 700;
     padding: 0 2px;
     border-radius: 2px;
 }
@@ -3584,12 +3739,6 @@
     margin-top: 5px;
     opacity: 0.55;
     font-size: 10px;
-}
-
-.balaclava-tooltip.is-theme-dark {
-    --balaclava-tooltip-bg: oklch(24% 0 0);
-    --balaclava-tooltip-border-size: 1px;
-    --balaclava-tooltip-border: oklch(30% 0 0);
 }
 `;
   }
@@ -3638,7 +3787,16 @@
      */
     FIRE_METER: '[class*="fireMeter"]',
     /** Crime image thumbnail — retained as a fallback tooltip anchor. */
-    CRIME_IMAGE: ".crime-image"
+    CRIME_IMAGE: ".crime-image",
+    /**
+     * Mobile/tablet-only row holding the building-damage icon and the
+     * responder (alarm) status icon. Absent on desktop, where those icons
+     * live in DESKTOP_STATUS_SECTION instead — used as the mobile building-
+     * stats badge anchor since the overlay badges don't fit on-image there.
+     */
+    BUILDING_RESPONDER_ICONS: '[class*="buildingAndResponderIcons___"]',
+    /** Round alarm/responder status icon within BUILDING_RESPONDER_ICONS. */
+    RESPONDER_STATUS: '[class*="responderStatus___"]'
   };
 
   // src/userscripts/arsonists-ledger/api.ts
@@ -3676,6 +3834,11 @@
   var ICON_ARROW_RIGHT = `<svg ${S} width="12" height="12" style="vertical-align:middle;margin:0 2px">${BLANK}<path d="M5 12l14 0"/><path d="M15 16l4 -4"/><path d="M15 8l4 4"/></svg>`;
   var ICON_FLAME = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M12 10.941c2.333 -3.308 .167 -7.823 -1 -8.941c0 3.395 -2.235 5.299 -3.667 6.706c-1.43 1.408 -2.333 3.294 -2.333 5.588c0 3.704 3.134 6.706 7 6.706c3.866 0 7 -3.002 7 -6.706c0 -1.712 -1.232 -4.403 -2.333 -5.588c-2.084 3.353 -3.257 3.353 -4.667 2.235"/></svg>`;
   var ICON_EXTERNAL_LINK = `<svg ${S}>${BLANK}<path d="M12 6h-6a2 2 0 0 0 -2 2v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-6"/><path d="M11 13l9 -9"/><path d="M15 4h5v5"/></svg>`;
+  var ICON_FLAMABILITY = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640" fill="currentColor"><path d="M500.5 320.5L499.8 318.6C465.8 224.8 410 140.5 337.1 72.5L333.8 69.5C330.1 66 325.1 64 320 64C314.9 64 309.9 66 306.2 69.5L302.9 72.5C230 140.5 174.2 224.8 140.2 318.6L139.5 320.5C131.9 341.3 128 363.4 128 385.6C128 490.7 214.8 576 320 576C425.2 576 512 490.7 512 385.6C512 363.4 508.1 341.4 500.5 320.5zM409.7 370C413.8 379.3 415.9 389.4 415.9 399.5C415.9 452.5 372.9 496 319.9 496C266.9 496 223.9 452.5 223.9 399.5C223.9 389.4 226 379.2 230.1 370L232 365.7C247.8 330.3 269.9 298 297.3 270.6L306.2 261.7C309.8 258.1 314.7 256.1 319.8 256.1C324.9 256.1 329.8 258.1 333.4 261.7L342.3 270.6C369.7 298 391.9 330.3 407.6 365.7L409.5 370z"/></svg>`;
+  var ICON_TIMER = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640" fill="currentColor"><path d="M320 64C302.3 64 288 78.3 288 96L288 160C288 177.7 302.3 192 320 192C337.7 192 352 177.7 352 160L352 130.7C442.8 145.9 512 224.9 512 320C512 426 426 512 320 512C214 512 128 426 128 320C128 266.3 150 217.7 185.6 182.9C198.2 170.5 198.4 150.3 186.1 137.6C173.8 124.9 153.5 124.8 140.8 137.1C93.5 183.6 64 248.4 64 320C64 461.4 178.6 576 320 576C461.4 576 576 461.4 576 320C576 178.6 461.4 64 320 64zM257 223C247.6 213.6 232.4 213.6 223.1 223C213.8 232.4 213.7 247.6 223.1 256.9L303.1 336.9C312.5 346.3 327.7 346.3 337 336.9C346.3 327.5 346.4 312.3 337 303L257 223z"/></svg>`;
+  var ICON_PIN = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640" fill="currentColor"><path d="M128 252.6C128 148.4 214 64 320 64C426 64 512 148.4 512 252.6C512 371.9 391.8 514.9 341.6 569.4C329.8 582.2 310.1 582.2 298.3 569.4C248.1 514.9 127.9 371.9 127.9 252.6zM320 320C355.3 320 384 291.3 384 256C384 220.7 355.3 192 320 192C284.7 192 256 220.7 256 256C256 291.3 284.7 320 320 320z"/></svg>`;
+  var ICON_SIREN = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640" fill="currentColor"><path d="M69.3 100L117.3 132C128.3 139.4 131.3 154.3 124 165.3C116.7 176.3 101.7 179.3 90.7 172L42.7 140C31.7 132.6 28.7 117.7 36 106.7C43.3 95.7 58.3 92.7 69.3 100zM597.3 140L549.3 172C538.3 179.4 523.4 176.4 516 165.3C508.6 154.2 511.6 139.4 522.7 132L570.7 100C581.7 92.6 596.6 95.6 604 106.7C611.4 117.8 608.4 132.6 597.3 140zM24 256L88 256C101.3 256 112 266.7 112 280C112 293.3 101.3 304 88 304L24 304C10.7 304 0 293.3 0 280C0 266.7 10.7 256 24 256zM552 256L616 256C629.3 256 640 266.7 640 280C640 293.3 629.3 304 616 304L552 304C538.7 304 528 293.3 528 280C528 266.7 538.7 256 552 256zM144 368L169.4 152.5C173.1 120.3 200.5 96 232.9 96L407.1 96C439.6 96 466.9 120.3 470.7 152.5L496 368L258.3 368L271.9 218.2C273.1 205 263.4 193.3 250.2 192.1C237 190.9 225.3 200.6 224.1 213.8L210.1 368L144 368zM96 448C96 430.3 110.3 416 128 416L512 416C529.7 416 544 430.3 544 448L544 512C544 529.7 529.7 544 512 544L128 544C110.3 544 96 529.7 96 512L96 448z"/></svg>`;
+  var ICON_EMBER = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640" fill="currentColor"><path d="M281.6 93.9L297.6 72.6C301.6 67.2 308 64 314.7 64C326.4 64 336 73.6 336 85.3L336 107.4C336 120.5 341.4 133.1 350.9 142.1L435.6 223C484.4 269.6 512 334.2 512 401.7C512 498 434 576 337.7 576L320 576C214 576 128 490 128 384L128 380.2C128 331.4 147.4 284.6 181.9 250.1L185.4 246.6C189.6 242.4 195.4 240 201.4 240C213.9 240 224 250.1 224 262.6L224 352C224 387.3 252.7 416 288 416C323.3 416 352 387.3 352 352L352 348.1C352 330.1 344.8 312.8 332.1 300.1L293.5 261.5C269.5 237.5 256 204.8 256 170.8C256 143.1 265 116 281.6 93.9z"/></svg>`;
 
   // src/userscripts/arsonists-ledger/settings.ts
   function setOkStatus(statusEl, message) {
@@ -4242,6 +4405,41 @@
         ctx.setPpnBarPosition
       )
     );
+    barGroup.appendChild(
+      checkboxRow(
+        "Show building info",
+        ctx.getShowBuildingStats,
+        ctx.setShowBuildingStats
+      )
+    );
+    barGroup.appendChild(
+      checkboxRow(
+        "Show response time badge",
+        ctx.getShowResponseTime,
+        ctx.setShowResponseTime
+      )
+    );
+    barGroup.appendChild(
+      checkboxRow(
+        "Show flammability badge",
+        ctx.getShowFlammability,
+        ctx.setShowFlammability
+      )
+    );
+    barGroup.appendChild(
+      checkboxRow(
+        "Show rurality badge",
+        ctx.getShowRurality,
+        ctx.setShowRurality
+      )
+    );
+    barGroup.appendChild(
+      checkboxRow(
+        "Show urgency badge",
+        ctx.getShowUrgency,
+        ctx.setShowUrgency
+      )
+    );
     root.appendChild(barGroup);
     return root;
   }
@@ -4401,6 +4599,134 @@
     );
   }
 
+  // src/data/buildings.ts
+  var BUILDINGS = {
+    "Bazaar": { areas: 1, responseTime: 60, rurality: 2, dps: "1.6/s", flammability: 4, urgency: 4 },
+    "Beach Hut": { areas: 1, responseTime: 120, rurality: 3, dps: "2/s", flammability: 5, urgency: 1 },
+    "Firework Store": { areas: 1, responseTime: 60, rurality: 2, dps: null, flammability: -1, urgency: null },
+    "Fishing Hut": { areas: 1, responseTime: 480, rurality: 5, dps: "2/s", flammability: 5, urgency: 1 },
+    "Forgery Workshop": { areas: 1, responseTime: 480, rurality: 5, dps: "1.2/s", flammability: 3, urgency: 1 },
+    "Hunting Lodge": { areas: 1, responseTime: 480, rurality: 5, dps: "1.6/s", flammability: 4, urgency: 1 },
+    "Lifeguard Hut": { areas: 1, responseTime: 120, rurality: 3, dps: "1.6/s", flammability: 4, urgency: 2 },
+    "Mobile Home": { areas: 1, responseTime: 120, rurality: 3, dps: "1.6/s", flammability: 4, urgency: 2 },
+    "Restroom": { areas: 1, responseTime: 120, rurality: 3, dps: "0.4/s", flammability: 1, urgency: 6 },
+    "Self Storage Container": { areas: 1, responseTime: 240, rurality: 4, dps: "1.2/s", flammability: 3, urgency: 1 },
+    "Shack": { areas: 1, responseTime: 240, rurality: 4, dps: "2/s", flammability: 5, urgency: 1 },
+    "Tool Shed": { areas: 1, responseTime: 120, rurality: 3, dps: "2/s", flammability: 5, urgency: 1 },
+    "Yurt": { areas: 1, responseTime: 120, rurality: 3, dps: "2/s", flammability: 5, urgency: 1 },
+    "Adult Store": { areas: 2, responseTime: 60, rurality: 2, dps: "1.2/s", flammability: 3, urgency: 5 },
+    "Apartment": { areas: 2, responseTime: 30, rurality: 1, dps: "1.2/s", flammability: 3, urgency: 5 },
+    "Arcade": { areas: 2, responseTime: 60, rurality: 2, dps: "1.6/s", flammability: 4, urgency: 4 },
+    "Barbershop": { areas: 2, responseTime: 60, rurality: 2, dps: "0.8/s", flammability: 2, urgency: 6 },
+    "Bookies": { areas: 2, responseTime: 30, rurality: 1, dps: "1.6/s", flammability: 4, urgency: 5 },
+    "Bordello": { areas: 2, responseTime: 120, rurality: 3, dps: "1.6/s", flammability: 4, urgency: 2 },
+    "Bungalow": { areas: 2, responseTime: 120, rurality: 3, dps: "1.2/s", flammability: 3, urgency: 2 },
+    "Cafe": { areas: 2, responseTime: 120, rurality: 3, dps: "1.6/s", flammability: 4, urgency: 2 },
+    "Candle Shop": { areas: 2, responseTime: 60, rurality: 2, dps: "2/s", flammability: 5, urgency: 3 },
+    "Chiropractors Office": { areas: 2, responseTime: 60, rurality: 2, dps: "0.8/s", flammability: 2, urgency: 6 },
+    "Cleaning Agency": { areas: 2, responseTime: 120, rurality: 3, dps: "1.2/s", flammability: 3, urgency: 2 },
+    "Clock Tower": { areas: 2, responseTime: 30, rurality: 1, dps: "1.6/s", flammability: 4, urgency: 5 },
+    "Clothing Store": { areas: 2, responseTime: 30, rurality: 1, dps: "1.6/s", flammability: 4, urgency: 5 },
+    "Community Center": { areas: 2, responseTime: 30, rurality: 1, dps: "1.6/s", flammability: 4, urgency: 5 },
+    "Cottage": { areas: 2, responseTime: 240, rurality: 4, dps: "1.6/s", flammability: 4, urgency: 1 },
+    "Cyber Cafe": { areas: 2, responseTime: 30, rurality: 1, dps: "0.8/s", flammability: 2, urgency: 6 },
+    "Dental Surgery": { areas: 2, responseTime: 60, rurality: 2, dps: null, flammability: -1, urgency: null },
+    "Detective Agency": { areas: 2, responseTime: 60, rurality: 2, dps: "1.2/s", flammability: 3, urgency: 5 },
+    "Diner": { areas: 2, responseTime: 240, rurality: 4, dps: "1.2/s", flammability: 3, urgency: 1 },
+    "Drugs Lab": { areas: 2, responseTime: 120, rurality: 3, dps: "1.6/s", flammability: 4, urgency: 2 },
+    "Flower Shop": { areas: 2, responseTime: 60, rurality: 2, dps: "1.2/s", flammability: 3, urgency: 5 },
+    "Funeral Parlor": { areas: 2, responseTime: 120, rurality: 3, dps: "1.6/s", flammability: 4, urgency: 2 },
+    "Game Shop": { areas: 2, responseTime: 60, rurality: 2, dps: "0.8/s", flammability: 2, urgency: 6 },
+    "Gas Station": { areas: 2, responseTime: 60, rurality: 2, dps: "2/s", flammability: 5, urgency: 3 },
+    "Hair Salon": { areas: 2, responseTime: 60, rurality: 2, dps: "0.8/s", flammability: 2, urgency: 6 },
+    "Hardware Store": { areas: 2, responseTime: 120, rurality: 3, dps: "1.6/s", flammability: 4, urgency: 2 },
+    "Homeless Camp": { areas: 2, responseTime: 60, rurality: 2, dps: "1.6/s", flammability: 4, urgency: 4 },
+    "Jewelry Store": { areas: 2, responseTime: 60, rurality: 2, dps: "1.2/s", flammability: 3, urgency: 5 },
+    "Lingerie Store": { areas: 2, responseTime: 60, rurality: 2, dps: "1.2/s", flammability: 3, urgency: 5 },
+    "Liquor Store": { areas: 2, responseTime: 60, rurality: 2, dps: "1.6/s", flammability: 4, urgency: 4 },
+    "Loanshark Office": { areas: 2, responseTime: 60, rurality: 2, dps: "1.2/s", flammability: 3, urgency: 5 },
+    "Mechanic Shop": { areas: 2, responseTime: 120, rurality: 3, dps: "1.6/s", flammability: 4, urgency: 2 },
+    "Music Store": { areas: 2, responseTime: 60, rurality: 2, dps: "1.2/s", flammability: 3, urgency: 5 },
+    "Pharmacy": { areas: 2, responseTime: 60, rurality: 2, dps: "1.2/s", flammability: 3, urgency: 5 },
+    "Police Safehouse": { areas: 2, responseTime: 60, rurality: 2, dps: "1.2/s", flammability: 3, urgency: 5 },
+    "Printing Store": { areas: 2, responseTime: 60, rurality: 2, dps: "2/s", flammability: 5, urgency: 3 },
+    "Suburban Home": { areas: 2, responseTime: 120, rurality: 3, dps: "1.2/s", flammability: 3, urgency: 2 },
+    "Tattoo Parlor": { areas: 2, responseTime: 60, rurality: 2, dps: "1.6/s", flammability: 4, urgency: 4 },
+    "Toy Shop": { areas: 2, responseTime: 60, rurality: 2, dps: "1.6/s", flammability: 4, urgency: 4 },
+    "Travel Agent": { areas: 2, responseTime: 30, rurality: 1, dps: "1.2/s", flammability: 3, urgency: 5 },
+    "Art Gallery": { areas: 3, responseTime: 60, rurality: 2, dps: "1.6/s", flammability: 4, urgency: 4 },
+    "Bank": { areas: 3, responseTime: 30, rurality: 1, dps: "0.8/s", flammability: 2, urgency: 6 },
+    "Barn": { areas: 3, responseTime: 0, rurality: -1, dps: null, flammability: -1, urgency: null },
+    "Bowling Alley": { areas: 3, responseTime: 30, rurality: 1, dps: "1.6/s", flammability: 4, urgency: 5 },
+    "Car Showroom": { areas: 3, responseTime: 60, rurality: 2, dps: "1.6/s", flammability: 4, urgency: 4 },
+    "Car Wash": { areas: 3, responseTime: 120, rurality: 3, dps: "0.8/s", flammability: 2, urgency: 4 },
+    "Cinema": { areas: 3, responseTime: 30, rurality: 1, dps: "2/s", flammability: 5, urgency: 5 },
+    "Distillery": { areas: 3, responseTime: 240, rurality: 4, dps: "2/s", flammability: 5, urgency: 1 },
+    "Farmhouse": { areas: 3, responseTime: 480, rurality: 5, dps: "1.6/s", flammability: 4, urgency: 1 },
+    "Fire Station": { areas: 3, responseTime: 60, rurality: 2, dps: "0.4/s", flammability: 1, urgency: 6 },
+    "Furniture Store": { areas: 3, responseTime: 120, rurality: 3, dps: "2/s", flammability: 5, urgency: 1 },
+    "Grocery Store": { areas: 3, responseTime: 60, rurality: 2, dps: "1.2/s", flammability: 3, urgency: 5 },
+    "Gym": { areas: 3, responseTime: 30, rurality: 1, dps: "0.8/s", flammability: 2, urgency: 6 },
+    "Laboratory": { areas: 3, responseTime: 480, rurality: 5, dps: "1.2/s", flammability: 3, urgency: 1 },
+    "Lakehouse": { areas: 3, responseTime: 240, rurality: 4, dps: "1.2/s", flammability: 3, urgency: 1 },
+    "Law Firm": { areas: 3, responseTime: 60, rurality: 2, dps: "1.2/s", flammability: 3, urgency: 5 },
+    "Library": { areas: 3, responseTime: 120, rurality: 3, dps: "2/s", flammability: 5, urgency: 1 },
+    "Medical Center": { areas: 3, responseTime: 60, rurality: 2, dps: "1.2/s", flammability: 3, urgency: 5 },
+    "Motorcycle Club": { areas: 3, responseTime: 240, rurality: 4, dps: "1.6/s", flammability: 4, urgency: 1 },
+    "Newspaper Office": { areas: 3, responseTime: 30, rurality: 1, dps: "1.6/s", flammability: 4, urgency: 5 },
+    "Nightclub": { areas: 3, responseTime: 30, rurality: 1, dps: "1.6/s", flammability: 4, urgency: 5 },
+    "Office Block": { areas: 3, responseTime: 30, rurality: 1, dps: "1.2/s", flammability: 3, urgency: 5 },
+    "Penthouse": { areas: 3, responseTime: 30, rurality: 1, dps: "1.2/s", flammability: 3, urgency: 5 },
+    "Pest Control Hub": { areas: 3, responseTime: 60, rurality: 2, dps: "1.6/s", flammability: 4, urgency: 4 },
+    "Police Station": { areas: 3, responseTime: 30, rurality: 1, dps: "1.2/s", flammability: 3, urgency: 5 },
+    "Private Security": { areas: 3, responseTime: 60, rurality: 2, dps: "0.8/s", flammability: 2, urgency: 6 },
+    "Pub": { areas: 3, responseTime: 60, rurality: 2, dps: "1.6/s", flammability: 4, urgency: 4 },
+    "Recording Studio": { areas: 3, responseTime: 240, rurality: 4, dps: "1.6/s", flammability: 4, urgency: 1 },
+    "Restaurant": { areas: 3, responseTime: 30, rurality: 1, dps: "1.6/s", flammability: 4, urgency: 5 },
+    "Strip Club": { areas: 3, responseTime: 30, rurality: 1, dps: "1.2/s", flammability: 3, urgency: 5 },
+    "Subway": { areas: 3, responseTime: 60, rurality: 2, dps: "1.2/s", flammability: 3, urgency: 5 },
+    "Townhouse": { areas: 3, responseTime: 60, rurality: 2, dps: "1.2/s", flammability: 3, urgency: 5 },
+    "Ad Agency": { areas: 4, responseTime: 30, rurality: 1, dps: "1.2/s", flammability: 3, urgency: 5 },
+    "Arms Warehouse": { areas: 4, responseTime: 240, rurality: 4, dps: "2/s", flammability: 5, urgency: 1 },
+    "Bus Terminal": { areas: 4, responseTime: 30, rurality: 1, dps: "0.8/s", flammability: 2, urgency: 6 },
+    "Chemical Plant": { areas: 4, responseTime: 480, rurality: 5, dps: "2/s", flammability: 5, urgency: 1 },
+    "Church": { areas: 4, responseTime: 120, rurality: 3, dps: "1.6/s", flammability: 4, urgency: 2 },
+    "College": { areas: 4, responseTime: 60, rurality: 2, dps: "1.2/s", flammability: 3, urgency: 5 },
+    "Fertilizer Plant": { areas: 4, responseTime: 480, rurality: 5, dps: "2/s", flammability: 5, urgency: 1 },
+    "Hotel": { areas: 4, responseTime: 60, rurality: 2, dps: "1.6/s", flammability: 4, urgency: 4 },
+    "Luxury Villa": { areas: 4, responseTime: 240, rurality: 4, dps: "1.2/s", flammability: 3, urgency: 1 },
+    "Manor House": { areas: 4, responseTime: 240, rurality: 4, dps: "1.2/s", flammability: 3, urgency: 1 },
+    "Paper Mill": { areas: 4, responseTime: 240, rurality: 4, dps: "2/s", flammability: 5, urgency: 1 },
+    "Post Office": { areas: 4, responseTime: 60, rurality: 2, dps: "1.6/s", flammability: 4, urgency: 4 },
+    "Raceway": { areas: 4, responseTime: 60, rurality: 2, dps: "2/s", flammability: 5, urgency: 3 },
+    "Ranch": { areas: 4, responseTime: 480, rurality: 5, dps: "1.6/s", flammability: 4, urgency: 1 },
+    "Recycling Facility": { areas: 4, responseTime: 240, rurality: 4, dps: "2/s", flammability: 5, urgency: 1 },
+    "Slaughterhouse": { areas: 4, responseTime: 240, rurality: 4, dps: "0.8/s", flammability: 2, urgency: 1 },
+    "Supermarket": { areas: 4, responseTime: 60, rurality: 2, dps: "1.6/s", flammability: 4, urgency: 4 },
+    "Theater": { areas: 4, responseTime: 60, rurality: 2, dps: "2/s", flammability: 5, urgency: 3 },
+    "Warehouse": { areas: 4, responseTime: 240, rurality: 4, dps: "1.6/s", flammability: 4, urgency: 1 },
+    "Aircraft Hangar": { areas: 5, responseTime: 480, rurality: 5, dps: "2/s", flammability: 5, urgency: 1 },
+    "Casino": { areas: 5, responseTime: 30, rurality: 1, dps: "1.6/s", flammability: 4, urgency: 5 },
+    "Castle": { areas: 5, responseTime: 480, rurality: 5, dps: "0.8/s", flammability: 2, urgency: 1 },
+    "Cruise Line": { areas: 5, responseTime: 30, rurality: 1, dps: "1.6/s", flammability: 4, urgency: 5 },
+    "Data Center": { areas: 5, responseTime: 480, rurality: 5, dps: "0.4/s", flammability: 1, urgency: 1 },
+    "Electrical Substation": { areas: 5, responseTime: 240, rurality: 4, dps: "0.4/s", flammability: 1, urgency: 4 },
+    "Factory": { areas: 5, responseTime: 240, rurality: 4, dps: "1.6/s", flammability: 4, urgency: 1 },
+    "Foundry": { areas: 5, responseTime: 240, rurality: 4, dps: "0.8/s", flammability: 2, urgency: 1 },
+    "Hospital": { areas: 5, responseTime: 30, rurality: 1, dps: "1.2/s", flammability: 3, urgency: 5 },
+    "Palace": { areas: 5, responseTime: 480, rurality: 5, dps: "1.2/s", flammability: 3, urgency: 1 },
+    "Shopping Mall": { areas: 5, responseTime: 30, rurality: 1, dps: "1.6/s", flammability: 4, urgency: 5 },
+    "Sports Arena": { areas: 5, responseTime: 30, rurality: 1, dps: "1.6/s", flammability: 4, urgency: 5 },
+    "TV Studio": { areas: 5, responseTime: 60, rurality: 2, dps: "1.2/s", flammability: 3, urgency: 5 },
+    "Waste Facility": { areas: 5, responseTime: 480, rurality: 5, dps: "2/s", flammability: 5, urgency: 1 }
+  };
+  function formatResponseTime(seconds) {
+    if (seconds <= 0) return "n/a";
+    if (seconds < 60) return `${seconds}s`;
+    const minutes = seconds / 60;
+    return `${minutes % 1 === 0 ? minutes : minutes.toFixed(1)}m`;
+  }
+
   // src/userscripts/arsonists-ledger/index.ts
   var KEY_MANUAL_PRICES = "pyroLedger.v1.manualPrices";
   var KEY_API_PRICES = "pyroLedger.v1.apiPrices";
@@ -4415,6 +4741,11 @@
   var KEY_STACK_RESOURCES = "pyroLedger.v1.stackResources";
   var KEY_PPN_BAR_POSITION = "pyroLedger.v1.ppnBarPosition";
   var KEY_PAYOUT_BASIS = "pyroLedger.v1.payoutBasis";
+  var KEY_SHOW_BUILDING_STATS = "pyroLedger.v1.showBuildingStats";
+  var KEY_SHOW_RESPONSE_TIME = "pyroLedger.v1.showResponseTime";
+  var KEY_SHOW_FLAMMABILITY = "pyroLedger.v1.showFlammability";
+  var KEY_SHOW_RURALITY = "pyroLedger.v1.showRurality";
+  var KEY_SHOW_URGENCY = "pyroLedger.v1.showUrgency";
   function store_get(key, def = "") {
     if (typeof GM_getValue !== "undefined") return GM_getValue(key, def);
     return localStorage.getItem(key) ?? def;
@@ -4439,7 +4770,6 @@
     return null;
   }
   var tooltipWarned = false;
-  var tooltipConfigured = false;
   function tryTooltip(callback) {
     const api = getTooltipAPI();
     if (!api) {
@@ -4450,10 +4780,6 @@
         tooltipWarned = true;
       }
       return;
-    }
-    if (!tooltipConfigured) {
-      api.configure({ maxWidth: "335px" });
-      tooltipConfigured = true;
     }
     callback(api);
   }
@@ -4469,6 +4795,11 @@
   var stackResources = true;
   var ppnBarPosition = "right";
   var payoutBasis = "average";
+  var showBuildingStats = true;
+  var showResponseTime = true;
+  var showFlammability = true;
+  var showRurality = true;
+  var showUrgency = true;
   var visibleMobileSection = null;
   var IOS_USER_AGENT_RE = /iPad|iPhone|iPod/i;
   function isIosDevice() {
@@ -4490,6 +4821,11 @@
     stackResources = store_get(KEY_STACK_RESOURCES, "1") !== "0";
     ppnBarPosition = store_get(KEY_PPN_BAR_POSITION, "right") === "left" ? "left" : "right";
     payoutBasis = store_get(KEY_PAYOUT_BASIS, "average") === "max" ? "max" : "average";
+    showBuildingStats = store_get(KEY_SHOW_BUILDING_STATS, "1") !== "0";
+    showResponseTime = store_get(KEY_SHOW_RESPONSE_TIME, "1") !== "0";
+    showFlammability = store_get(KEY_SHOW_FLAMMABILITY, "1") !== "0";
+    showRurality = store_get(KEY_SHOW_RURALITY, "1") !== "0";
+    showUrgency = store_get(KEY_SHOW_URGENCY, "1") !== "0";
     try {
       manualPrices = JSON.parse(store_get(KEY_MANUAL_PRICES, "{}"));
     } catch {
@@ -4562,6 +4898,31 @@
   function setPayoutBasis(basis) {
     payoutBasis = basis;
     store_set(KEY_PAYOUT_BASIS, basis);
+    resetScans();
+  }
+  function setShowBuildingStatsEnabled(show) {
+    showBuildingStats = show;
+    store_set(KEY_SHOW_BUILDING_STATS, show ? "1" : "0");
+    resetScans();
+  }
+  function setShowResponseTimeEnabled(show) {
+    showResponseTime = show;
+    store_set(KEY_SHOW_RESPONSE_TIME, show ? "1" : "0");
+    resetScans();
+  }
+  function setShowFlammabilityEnabled(show) {
+    showFlammability = show;
+    store_set(KEY_SHOW_FLAMMABILITY, show ? "1" : "0");
+    resetScans();
+  }
+  function setShowRuralityEnabled(show) {
+    showRurality = show;
+    store_set(KEY_SHOW_RURALITY, show ? "1" : "0");
+    resetScans();
+  }
+  function setShowUrgencyEnabled(show) {
+    showUrgency = show;
+    store_set(KEY_SHOW_URGENCY, show ? "1" : "0");
     resetScans();
   }
   function setApiPrices(prices, timestamp) {
@@ -4695,6 +5056,70 @@
             white-space: nowrap;
             z-index: 10;
         }
+        .pyro-building-badges {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: flex-start;
+            align-content: flex-start;
+            gap: 2px;
+            pointer-events: none;
+            user-select: none;
+            z-index: 10;
+            padding: 2px;
+        }
+        .pyro-building-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 2px;
+            padding: 1px 3px;
+            background: var(--crimes-crimeOption-bgColor, #222);
+            border: 1px solid var(--crimes-outcomeDivider-color, #444);
+            border-radius: 3px;
+            color: var(--crimes-subText-color, #eee);
+            font-size: 10px;
+            letter-spacing: 0.02em;
+            line-height: 1;
+            white-space: nowrap;
+            pointer-events: auto;
+        }
+        .pyro-building-badge svg {
+            width: 12px;
+            height: 12px;
+            flex-shrink: 0;
+        }
+        .pyro-mobile-stat-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 16px;
+            height: 16px;
+            padding: 2px;
+            margin: 0;
+            border: 1px solid #444;
+            border-radius: 50%;
+            background: #333;
+            cursor: pointer;
+            position: absolute;
+            right: -3px;
+            top: -5px;
+        }
+        @media screen and (max-width: 386px) {
+          .pyro-mobile-stat-badge {
+            right: 1px;
+          }
+        }
+        .pyro-mobile-stat-badge svg {
+            width: 14px;
+            height: 14px;
+            padding: 0;
+            box-sizing: border-box;
+            border-radius: 50%;
+            background: #333;
+            color: #ff8a3d;
+            filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.5));
+        }
     `;
     document.head.appendChild(style);
   }
@@ -4722,6 +5147,170 @@
     }
     pill.textContent = getPillText(ranked);
   }
+  function buildingBadgeRow(icon, value, tooltipContent) {
+    const row2 = el("span", "pyro-building-badge");
+    row2.innerHTML = icon;
+    row2.appendChild(txt(value));
+    row2.addEventListener("mouseenter", () => {
+      tryTooltip((api) => api.show(row2, tooltipContent, { position: "top" }));
+    });
+    row2.addEventListener("mouseleave", () => {
+      tryTooltip((api) => api.hide());
+    });
+    return row2;
+  }
+  function collectBuildingStats(building) {
+    const stats = [];
+    if (!showBuildingStats) return stats;
+    if (showResponseTime && building.responseTime > 0) {
+      const value = formatResponseTime(building.responseTime);
+      stats.push({
+        icon: ICON_TIMER,
+        value,
+        entry: {
+          title: "Response Time",
+          description: "How long firefighters take to arrive once dispatched.",
+          value
+        }
+      });
+    }
+    if (showFlammability && building.flammability >= 0) {
+      const value = String(building.flammability);
+      stats.push({
+        icon: ICON_FLAMABILITY,
+        value,
+        entry: {
+          title: "Flammability",
+          description: "How fast the fire's intensity scales, and its max destruction speed.",
+          value,
+          bar: {
+            value: building.flammability,
+            min: 1,
+            max: 5,
+            lowLabel: "Fire-resistant",
+            highLabel: "Highly flammable"
+          }
+        }
+      });
+    }
+    if (showRurality && building.rurality >= 0) {
+      const value = String(building.rurality);
+      stats.push({
+        icon: ICON_PIN,
+        value,
+        entry: {
+          title: "Rurality",
+          description: "How isolated the location is \u2014 drives dispatch delay and response time.",
+          value,
+          bar: {
+            value: building.rurality,
+            min: 1,
+            max: 5,
+            lowLabel: "Urban",
+            highLabel: "Remote"
+          }
+        }
+      });
+    }
+    if (showUrgency && building.urgency !== null) {
+      const value = String(building.urgency);
+      stats.push({
+        icon: ICON_SIREN,
+        value,
+        entry: {
+          title: "Urgency",
+          description: "How fast the danger alert escalates through response tiers.",
+          value,
+          bar: {
+            value: building.urgency,
+            min: 1,
+            max: 6,
+            lowLabel: "Gradual",
+            highLabel: "Rapid"
+          }
+        }
+      });
+    }
+    return stats;
+  }
+  function ensureBuildingBadges(target, building) {
+    let wrap = target.querySelector(".pyro-building-badges");
+    const stats = building ? collectBuildingStats(building) : [];
+    if (stats.length === 0) {
+      wrap?.remove();
+      return;
+    }
+    if (!wrap) {
+      wrap = el("div", "pyro-building-badges");
+      wrap.setAttribute("aria-hidden", "true");
+      target.appendChild(wrap);
+    }
+    wrap.innerHTML = "";
+    for (const stat of stats) {
+      wrap.appendChild(
+        buildingBadgeRow(
+          stat.icon,
+          stat.value,
+          buildStatTooltip(
+            stat.entry.title,
+            stat.entry.description,
+            stat.entry.bar
+          )
+        )
+      );
+    }
+  }
+  var visibleMobileStatsBadge = null;
+  var mobileStatsState = /* @__PURE__ */ new WeakMap();
+  function ensureMobileStatsBadge(section, building) {
+    const iconsRow = section.querySelector(
+      SEL.BUILDING_RESPONDER_ICONS
+    );
+    let badge = iconsRow?.querySelector(".pyro-mobile-stat-badge");
+    const stats = building ? collectBuildingStats(building) : [];
+    if (!iconsRow || stats.length === 0) {
+      badge?.remove();
+      return;
+    }
+    const entries = stats.map((s) => s.entry);
+    const existing = badge ? mobileStatsState.get(badge) : void 0;
+    if (existing) {
+      existing.entries = entries;
+    } else {
+      const state = { entries };
+      badge = el("button", "pyro-mobile-stat-badge");
+      badge.setAttribute("type", "button");
+      badge.setAttribute("aria-label", "Building stats");
+      badge.innerHTML = ICON_EMBER;
+      mobileStatsState.set(badge, state);
+      iconsRow.appendChild(badge);
+      const badgeEl = badge;
+      badgeEl.addEventListener("click", (e) => {
+        e.stopPropagation();
+        tryTooltip((api) => {
+          if (visibleMobileStatsBadge === badgeEl) {
+            api.hide();
+            visibleMobileStatsBadge = null;
+          } else {
+            api.show(badgeEl, buildStatTooltipGroup(state.entries), {
+              position: "top"
+            });
+            visibleMobileStatsBadge = badgeEl;
+          }
+        });
+      });
+      document.addEventListener(
+        "click",
+        (e) => {
+          if (visibleMobileStatsBadge === badgeEl && !badgeEl.contains(e.target)) {
+            tryTooltip((api) => api.hide());
+            visibleMobileStatsBadge = null;
+          }
+        },
+        { passive: true }
+      );
+    }
+  }
   function buildUnknownTooltip() {
     const wrap = el("div");
     const style = el("style");
@@ -4733,7 +5322,7 @@
     wrap.appendChild(msg);
     return wrap;
   }
-  function applyToSection(section, ranked) {
+  function applyToSection(section, ranked, building) {
     section.querySelector(".pyro-label")?.remove();
     section.classList.forEach((c) => {
       if (c.startsWith("pyro-band--")) section.classList.remove(c);
@@ -4741,6 +5330,11 @@
     const fireMeter = section.querySelector(SEL.FIRE_METER);
     const crimeImage = section.querySelector(SEL.CRIME_IMAGE);
     const hoverTarget = fireMeter ?? crimeImage ?? section;
+    const isMobileLayout = !!section.querySelector(SEL.BUILDING_RESPONDER_ICONS);
+    if (crimeImage) {
+      ensureBuildingBadges(crimeImage, isMobileLayout ? null : building);
+    }
+    ensureMobileStatsBadge(section, building);
     if (!ranked) {
       section.classList.add("pyro-band--unknown");
       if (hoverTarget !== section) ensureValuePill(hoverTarget, ranked);
@@ -4778,10 +5372,7 @@
     if (!useTapOnlyTooltip) {
       hoverTarget.addEventListener("mouseenter", () => {
         tryTooltip(
-          (api) => api.show(hoverTarget, state.getContent(), {
-            position: "top",
-            theme: "dark"
-          })
+          (api) => api.show(hoverTarget, state.getContent(), { position: "top" })
         );
       });
       hoverTarget.addEventListener("mouseleave", () => {
@@ -4798,10 +5389,7 @@
           api.hide();
           visibleMobileSection = null;
         } else {
-          api.show(hoverTarget, state.getContent(), {
-            position: "top",
-            theme: "dark"
-          });
+          api.show(hoverTarget, state.getContent(), { position: "top" });
           visibleMobileSection = section;
         }
       });
@@ -4846,7 +5434,9 @@
       if (!rawName) return;
       const scenario = scenarioIndex.get(rawName.toLowerCase()) ?? null;
       const ranked = scenario ? rankForScenario(scenario, prices, thresholds, payoutBasis) : null;
-      applyToSection(section, ranked);
+      const buildingName = scenarioEl?.previousElementSibling?.textContent?.trim() ?? "";
+      const building = BUILDINGS[buildingName] ?? null;
+      applyToSection(section, ranked, building);
     });
   }
   function resetScans() {
@@ -4868,6 +5458,11 @@
     getStackResources: () => stackResources,
     getPpnBarPosition: () => ppnBarPosition,
     getPayoutBasis: () => payoutBasis,
+    getShowBuildingStats: () => showBuildingStats,
+    getShowResponseTime: () => showResponseTime,
+    getShowFlammability: () => showFlammability,
+    getShowRurality: () => showRurality,
+    getShowUrgency: () => showUrgency,
     setManualPrice,
     clearManualPrices,
     clearManualPrice,
@@ -4881,7 +5476,12 @@
     setShowScenarioName: setShowScenarioNameEnabled,
     setStackResources: setStackResourcesEnabled,
     setPpnBarPosition,
-    setPayoutBasis
+    setPayoutBasis,
+    setShowBuildingStats: setShowBuildingStatsEnabled,
+    setShowResponseTime: setShowResponseTimeEnabled,
+    setShowFlammability: setShowFlammabilityEnabled,
+    setShowRurality: setShowRuralityEnabled,
+    setShowUrgency: setShowUrgencyEnabled
   };
   var reInjectTimer = null;
   function scheduleInjectSettings() {
