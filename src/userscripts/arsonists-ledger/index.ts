@@ -141,7 +141,7 @@ let showScenarioName = true;
 let stackResources = true;
 let ppnBarPosition: "left" | "right" = "right";
 let payoutBasis: PayoutBasis = "average";
-let showBuildingStats = true;
+let showBuildingStats = false;
 let showResponseTime = true;
 let showFlammability = true;
 let showRurality = true;
@@ -176,7 +176,7 @@ function loadState(): void {
     store_get(KEY_PPN_BAR_POSITION, "right") === "left" ? "left" : "right";
   payoutBasis =
     store_get(KEY_PAYOUT_BASIS, "average") === "max" ? "max" : "average";
-  showBuildingStats = store_get(KEY_SHOW_BUILDING_STATS, "1") !== "0";
+  showBuildingStats = store_get(KEY_SHOW_BUILDING_STATS, "0") !== "0";
   showResponseTime = store_get(KEY_SHOW_RESPONSE_TIME, "1") !== "0";
   showFlammability = store_get(KEY_SHOW_FLAMMABILITY, "1") !== "0";
   showRurality = store_get(KEY_SHOW_RURALITY, "1") !== "0";

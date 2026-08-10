@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        Torn Arsonist's Ledger
 // @namespace   https://greasyfork.org/en/users/942572-yukio-mizsima
-// @version     1.0.13
+// @version     1.0.14
 // @description Arson profit-per-nerve calculator and scenario guide for Torn's Crimes page
 // @icon        https://www.google.com/s2/favicons?sz=64&domain=torn.com
 // @author      Yukio [906148]
@@ -4050,6 +4050,11 @@
     user-select: none;
 }
 .pyro-s-check-row input[type=checkbox] { cursor: pointer; }
+.pyro-s-check-row--disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+.pyro-s-check-row--disabled input[type=checkbox] { cursor: not-allowed; }
 .pyro-s-toggle-group {
     display: inline-flex;
     align-self: flex-start;
@@ -4405,41 +4410,43 @@
         ctx.setPpnBarPosition
       )
     );
-    barGroup.appendChild(
-      checkboxRow(
-        "Show building info",
-        ctx.getShowBuildingStats,
-        ctx.setShowBuildingStats
-      )
+    const buildingInfoRow = checkboxRow(
+      "Show building info",
+      ctx.getShowBuildingStats,
+      ctx.setShowBuildingStats
     );
-    barGroup.appendChild(
+    barGroup.appendChild(buildingInfoRow);
+    const buildingStatRows = [
       checkboxRow(
         "Show response time badge",
         ctx.getShowResponseTime,
         ctx.setShowResponseTime
-      )
-    );
-    barGroup.appendChild(
+      ),
       checkboxRow(
         "Show flammability badge",
         ctx.getShowFlammability,
         ctx.setShowFlammability
-      )
-    );
-    barGroup.appendChild(
+      ),
       checkboxRow(
         "Show rurality badge",
         ctx.getShowRurality,
         ctx.setShowRurality
-      )
+      ),
+      checkboxRow("Show urgency badge", ctx.getShowUrgency, ctx.setShowUrgency)
+    ];
+    const buildingStatCheckboxes = buildingStatRows.map(
+      (row2) => row2.querySelector("input")
     );
-    barGroup.appendChild(
-      checkboxRow(
-        "Show urgency badge",
-        ctx.getShowUrgency,
-        ctx.setShowUrgency
-      )
-    );
+    function syncBuildingStatRows() {
+      const enabled = ctx.getShowBuildingStats();
+      buildingStatRows.forEach((row2, i) => {
+        buildingStatCheckboxes[i].disabled = !enabled;
+        row2.classList.toggle("pyro-s-check-row--disabled", !enabled);
+      });
+    }
+    buildingInfoRow.querySelector("input").addEventListener("change", syncBuildingStatRows);
+    syncBuildingStatRows();
+    buildingStatRows.forEach((row2) => barGroup.appendChild(row2));
     root.appendChild(barGroup);
     return root;
   }
@@ -4795,7 +4802,7 @@
   var stackResources = true;
   var ppnBarPosition = "right";
   var payoutBasis = "average";
-  var showBuildingStats = true;
+  var showBuildingStats = false;
   var showResponseTime = true;
   var showFlammability = true;
   var showRurality = true;
@@ -4821,7 +4828,7 @@
     stackResources = store_get(KEY_STACK_RESOURCES, "1") !== "0";
     ppnBarPosition = store_get(KEY_PPN_BAR_POSITION, "right") === "left" ? "left" : "right";
     payoutBasis = store_get(KEY_PAYOUT_BASIS, "average") === "max" ? "max" : "average";
-    showBuildingStats = store_get(KEY_SHOW_BUILDING_STATS, "1") !== "0";
+    showBuildingStats = store_get(KEY_SHOW_BUILDING_STATS, "0") !== "0";
     showResponseTime = store_get(KEY_SHOW_RESPONSE_TIME, "1") !== "0";
     showFlammability = store_get(KEY_SHOW_FLAMMABILITY, "1") !== "0";
     showRurality = store_get(KEY_SHOW_RURALITY, "1") !== "0";

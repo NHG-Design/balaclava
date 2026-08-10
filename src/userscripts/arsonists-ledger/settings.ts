@@ -286,6 +286,11 @@ export function injectSettingsStyles(): void {
     user-select: none;
 }
 .pyro-s-check-row input[type=checkbox] { cursor: pointer; }
+.pyro-s-check-row--disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+.pyro-s-check-row--disabled input[type=checkbox] { cursor: not-allowed; }
 .pyro-s-toggle-group {
     display: inline-flex;
     align-self: flex-start;
@@ -720,41 +725,49 @@ function buildVisualsTab(ctx: SettingsCtx): HTMLElement {
       ctx.setPpnBarPosition,
     ),
   );
-  barGroup.appendChild(
-    checkboxRow(
-      "Show building info",
-      ctx.getShowBuildingStats,
-      ctx.setShowBuildingStats,
-    ),
+  const buildingInfoRow = checkboxRow(
+    "Show building info",
+    ctx.getShowBuildingStats,
+    ctx.setShowBuildingStats,
   );
-  barGroup.appendChild(
+  barGroup.appendChild(buildingInfoRow);
+
+  const buildingStatRows = [
     checkboxRow(
       "Show response time badge",
       ctx.getShowResponseTime,
       ctx.setShowResponseTime,
     ),
-  );
-  barGroup.appendChild(
     checkboxRow(
       "Show flammability badge",
       ctx.getShowFlammability,
       ctx.setShowFlammability,
     ),
-  );
-  barGroup.appendChild(
     checkboxRow(
       "Show rurality badge",
       ctx.getShowRurality,
       ctx.setShowRurality,
     ),
+    checkboxRow("Show urgency badge", ctx.getShowUrgency, ctx.setShowUrgency),
+  ];
+  const buildingStatCheckboxes = buildingStatRows.map(
+    (row) => row.querySelector("input") as HTMLInputElement,
   );
-  barGroup.appendChild(
-    checkboxRow(
-      "Show urgency badge",
-      ctx.getShowUrgency,
-      ctx.setShowUrgency,
-    ),
-  );
+
+  function syncBuildingStatRows(): void {
+    const enabled = ctx.getShowBuildingStats();
+    buildingStatRows.forEach((row, i) => {
+      buildingStatCheckboxes[i].disabled = !enabled;
+      row.classList.toggle("pyro-s-check-row--disabled", !enabled);
+    });
+  }
+
+  buildingInfoRow
+    .querySelector("input")!
+    .addEventListener("change", syncBuildingStatRows);
+  syncBuildingStatRows();
+
+  buildingStatRows.forEach((row) => barGroup.appendChild(row));
   root.appendChild(barGroup);
 
   return root;
