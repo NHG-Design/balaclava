@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        Torn Arsonist's Ledger
 // @namespace   https://greasyfork.org/en/users/942572-yukio-mizsima
-// @version     1.0.16
+// @version     1.0.17
 // @description Arson profit-per-nerve calculator and scenario guide for Torn's Crimes page
 // @icon        https://www.google.com/s2/favicons?sz=64&domain=torn.com
 // @author      Yukio [906148]
@@ -3382,7 +3382,7 @@
   // src/userscripts/arsonists-ledger/engine.ts
   var DEFAULT_THRESHOLDS = { low: 5e3, good: 1e4 };
   function effectivePayout(scenario, basis) {
-    return basis === "max" ? scenario.payoutMax : scenario.payoutMin;
+    return basis === "max" ? scenario.payoutMax : (scenario.payoutMin + scenario.payoutMax) / 2;
   }
   function resolvePrice(resourceId, prices) {
     const override = prices[resourceId];
@@ -3415,7 +3415,7 @@
     const { evidence, ignite, place, stoke, dampen } = scenario.actions;
     return itemCost(evidence, prices) + itemCost(ignite, prices) + itemCost(place, prices) + itemCost(stoke, prices) + itemCost(dampen, prices);
   }
-  function calcProfitPerNerve(scenario, prices, basis = "min") {
+  function calcProfitPerNerve(scenario, prices, basis = "average") {
     const nerve = calcNerve(scenario);
     const cost = calcMaterialCost(scenario, prices);
     return (effectivePayout(scenario, basis) - cost) / nerve;
@@ -3432,7 +3432,7 @@
     if (rounded >= 1e3) return `~$${sign}${(rounded / 1e3).toFixed(1)}k`;
     return `~$${sign}${rounded}`;
   }
-  function rankForScenario(scenario, prices, thresholds2, basis = "min") {
+  function rankForScenario(scenario, prices, thresholds2, basis = "average") {
     const ppn = calcProfitPerNerve(scenario, prices, basis);
     return {
       Scenario: scenario,
@@ -4380,14 +4380,14 @@
     basisTitle.textContent = "Payout basis";
     basisGroup.appendChild(basisTitle);
     const basisNote = el("p", "pyro-s-section-note");
-    basisNote.innerHTML = `${ICON_INFO}<span>Which payout figure drives PPN math (and card banding): the conservative <strong>min</strong>, or the optimistic <strong>max</strong>.</span>`;
+    basisNote.innerHTML = `${ICON_INFO}<span>Which payout figure drives PPN math (and card banding): the realistic <strong>average</strong> of the observed range, or the optimistic <strong>max</strong>.</span>`;
     basisGroup.appendChild(basisNote);
     basisGroup.appendChild(
       toggleGroupRow(
         "payout-basis",
         "PPN calculation basis",
         [
-          { value: "min", label: "Min" },
+          { value: "average", label: "Average" },
           { value: "max", label: "Max" }
         ],
         ctx.getPayoutBasis,
@@ -4888,7 +4888,7 @@
   var showScenarioName = true;
   var stackResources = true;
   var ppnBarPosition = "right";
-  var payoutBasis = "min";
+  var payoutBasis = "average";
   var showBuildingStats = false;
   var showResponseTime = true;
   var showFlammability = true;
@@ -4914,7 +4914,7 @@
     showScenarioName = store_get(KEY_SHOW_SCENARIO_NAME, "1") !== "0";
     stackResources = store_get(KEY_STACK_RESOURCES, "1") !== "0";
     ppnBarPosition = store_get(KEY_PPN_BAR_POSITION, "right") === "left" ? "left" : "right";
-    payoutBasis = store_get(KEY_PAYOUT_BASIS, "min") === "max" ? "max" : "min";
+    payoutBasis = store_get(KEY_PAYOUT_BASIS, "average") === "max" ? "max" : "average";
     showBuildingStats = store_get(KEY_SHOW_BUILDING_STATS, "0") !== "0";
     showResponseTime = store_get(KEY_SHOW_RESPONSE_TIME, "1") !== "0";
     showFlammability = store_get(KEY_SHOW_FLAMMABILITY, "1") !== "0";

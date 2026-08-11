@@ -582,7 +582,7 @@ function buildThresholdsTab(ctx: SettingsCtx): HTMLElement {
   basisGroup.appendChild(basisTitle);
 
   const basisNote = el("p", "pyro-s-section-note");
-  basisNote.innerHTML = `${ICON_INFO}<span>Which payout figure drives PPN math (and card banding): the conservative <strong>min</strong>, or the optimistic <strong>max</strong>.</span>`;
+  basisNote.innerHTML = `${ICON_INFO}<span>Which payout figure drives PPN math (and card banding): the realistic <strong>average</strong> of the observed range, or the optimistic <strong>max</strong>.</span>`;
   basisGroup.appendChild(basisNote);
 
   basisGroup.appendChild(
@@ -590,7 +590,7 @@ function buildThresholdsTab(ctx: SettingsCtx): HTMLElement {
       "payout-basis",
       "PPN calculation basis",
       [
-        { value: "min", label: "Min" },
+        { value: "average", label: "Average" },
         { value: "max", label: "Max" },
       ],
       ctx.getPayoutBasis,

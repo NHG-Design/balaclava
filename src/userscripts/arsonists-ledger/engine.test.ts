@@ -211,7 +211,7 @@ describe('calcMaterialCost', () => {
 // ---------------------------------------------------------------------------
 
 describe('calcProfitPerNerve', () => {
-    it('equals (payoutMin - cost) / nerve', () => {
+    it('equals (payoutMin - cost) / nerve when min === max', () => {
         const s = Scenario({
             payoutMin: 100_000,
             payoutMax: 100_000,
@@ -231,13 +231,13 @@ describe('calcProfitPerNerve', () => {
         assert.ok(calcProfitPerNerve(s, {}) < 0);
     });
 
-    it('defaults to the min payout when basis is omitted', () => {
+    it('defaults to the average payout when basis is omitted', () => {
         const s = Scenario({
             payoutMin: 100_000,
             payoutMax: 150_000,
             actions: { place: [{ resourceId: RESOURCE.GASOLINE, qty: 2 }] },
         });
-        assert.equal(calcProfitPerNerve(s, {}), calcProfitPerNerve(s, {}, 'min'));
+        assert.equal(calcProfitPerNerve(s, {}), calcProfitPerNerve(s, {}, 'average'));
     });
 
     it('uses payoutMax when basis is "max"', () => {
@@ -257,9 +257,9 @@ describe('calcProfitPerNerve', () => {
 // ---------------------------------------------------------------------------
 
 describe('effectivePayout', () => {
-    it('returns payoutMin for basis "min"', () => {
+    it('returns the midpoint of payoutMin/payoutMax for basis "average"', () => {
         const s = Scenario({ payoutMin: 100_000, payoutMax: 150_000, actions: { place: [] } });
-        assert.equal(effectivePayout(s, 'min'), 100_000);
+        assert.equal(effectivePayout(s, 'average'), 125_000);
     });
 
     it('returns payoutMax for basis "max"', () => {
