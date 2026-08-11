@@ -34,6 +34,13 @@ import {
   ICON_FLAMABILITY,
   ICON_EMBER,
 } from "./icons.js";
+import {
+  scanMaterialPopover,
+  resetMaterialBadges,
+  injectMaterialBadgeStyles,
+  type TooltipCtx,
+  type MaterialBadgeConfig,
+} from "./material-badges.js";
 
 // ---------------------------------------------------------------------------
 // Storage keys
@@ -56,6 +63,14 @@ const KEY_SHOW_RESPONSE_TIME = "pyroLedger.v1.showResponseTime";
 const KEY_SHOW_FLAMMABILITY = "pyroLedger.v1.showFlammability";
 const KEY_SHOW_RURALITY = "pyroLedger.v1.showRurality";
 const KEY_SHOW_URGENCY = "pyroLedger.v1.showUrgency";
+const KEY_SHOW_MATERIAL_DATA = "pyroLedger.v1.showMaterialData";
+const KEY_SHOW_MATERIAL_INTENSITY = "pyroLedger.v1.showMaterialIntensity";
+const KEY_SHOW_MATERIAL_MOMENTUM = "pyroLedger.v1.showMaterialMomentum";
+const KEY_SHOW_MATERIAL_SUSPICION = "pyroLedger.v1.showMaterialSuspicion";
+const KEY_SHOW_MATERIAL_IGNITION_RISK =
+  "pyroLedger.v1.showMaterialIgnitionRisk";
+const KEY_SHOW_MATERIAL_STOKING_RISK =
+  "pyroLedger.v1.showMaterialStokingRisk";
 
 // ---------------------------------------------------------------------------
 // Minimal GM storage shim (falls back to localStorage in dev/non-GM contexts)
@@ -146,6 +161,12 @@ let showResponseTime = true;
 let showFlammability = true;
 let showRurality = true;
 let showUrgency = true;
+let showMaterialData = false;
+let showMaterialIntensity = true;
+let showMaterialMomentum = true;
+let showMaterialSuspicion = true;
+let showMaterialIgnitionRisk = true;
+let showMaterialStokingRisk = true;
 let visibleMobileSection: HTMLElement | null = null;
 const IOS_USER_AGENT_RE = /iPad|iPhone|iPod/i;
 
@@ -181,6 +202,16 @@ function loadState(): void {
   showFlammability = store_get(KEY_SHOW_FLAMMABILITY, "1") !== "0";
   showRurality = store_get(KEY_SHOW_RURALITY, "1") !== "0";
   showUrgency = store_get(KEY_SHOW_URGENCY, "1") !== "0";
+  showMaterialData = store_get(KEY_SHOW_MATERIAL_DATA, "0") !== "0";
+  showMaterialIntensity =
+    store_get(KEY_SHOW_MATERIAL_INTENSITY, "1") !== "0";
+  showMaterialMomentum = store_get(KEY_SHOW_MATERIAL_MOMENTUM, "1") !== "0";
+  showMaterialSuspicion =
+    store_get(KEY_SHOW_MATERIAL_SUSPICION, "1") !== "0";
+  showMaterialIgnitionRisk =
+    store_get(KEY_SHOW_MATERIAL_IGNITION_RISK, "1") !== "0";
+  showMaterialStokingRisk =
+    store_get(KEY_SHOW_MATERIAL_STOKING_RISK, "1") !== "0";
 
   try {
     manualPrices = JSON.parse(store_get(KEY_MANUAL_PRICES, "{}")) as PriceMap;
@@ -302,6 +333,58 @@ function setShowUrgencyEnabled(show: boolean): void {
   showUrgency = show;
   store_set(KEY_SHOW_URGENCY, show ? "1" : "0");
   resetScans();
+}
+
+function materialBadgeConfig(): MaterialBadgeConfig {
+  return {
+    enabled: showMaterialData,
+    intensity: showMaterialIntensity,
+    momentum: showMaterialMomentum,
+    suspicion: showMaterialSuspicion,
+    ignitionRisk: showMaterialIgnitionRisk,
+    stokingRisk: showMaterialStokingRisk,
+  };
+}
+
+function resetMaterialScans(): void {
+  resetMaterialBadges();
+  scanMaterialPopover(materialBadgeTooltipCtx, materialBadgeConfig());
+}
+
+function setShowMaterialDataEnabled(show: boolean): void {
+  showMaterialData = show;
+  store_set(KEY_SHOW_MATERIAL_DATA, show ? "1" : "0");
+  resetMaterialScans();
+}
+
+function setShowMaterialIntensityEnabled(show: boolean): void {
+  showMaterialIntensity = show;
+  store_set(KEY_SHOW_MATERIAL_INTENSITY, show ? "1" : "0");
+  resetMaterialScans();
+}
+
+function setShowMaterialMomentumEnabled(show: boolean): void {
+  showMaterialMomentum = show;
+  store_set(KEY_SHOW_MATERIAL_MOMENTUM, show ? "1" : "0");
+  resetMaterialScans();
+}
+
+function setShowMaterialSuspicionEnabled(show: boolean): void {
+  showMaterialSuspicion = show;
+  store_set(KEY_SHOW_MATERIAL_SUSPICION, show ? "1" : "0");
+  resetMaterialScans();
+}
+
+function setShowMaterialIgnitionRiskEnabled(show: boolean): void {
+  showMaterialIgnitionRisk = show;
+  store_set(KEY_SHOW_MATERIAL_IGNITION_RISK, show ? "1" : "0");
+  resetMaterialScans();
+}
+
+function setShowMaterialStokingRiskEnabled(show: boolean): void {
+  showMaterialStokingRisk = show;
+  store_set(KEY_SHOW_MATERIAL_STOKING_RISK, show ? "1" : "0");
+  resetMaterialScans();
 }
 
 function setApiPrices(prices: PriceMap, timestamp: number): void {
@@ -442,7 +525,8 @@ function injectHighlightStyles(): void {
         .arson-root .pyro-band--unknown::after  { box-shadow: inset var(--pyro-bar-x) 0 0 ${BAND_COLOR.unknown}  !important; }
 
         ${SEL.FIRE_METER},
-        .crime-image { position: relative !important; }
+        .crime-image,
+        ${SEL.BUILDING_RESPONDER_ICONS} { position: relative !important; }
         .pyro-value-pill {
             position: absolute;
             top: 3px;
@@ -497,27 +581,41 @@ function injectHighlightStyles(): void {
             flex-shrink: 0;
         }
         .pyro-mobile-stat-badge {
+            display: block;
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            padding: 0;
+            margin: 0;
+            border: 0;
+            border-radius: 0;
+            background: transparent;
+            box-shadow: none;
+            appearance: none;
+            -webkit-appearance: none;
+            cursor: pointer;
+        }
+        .pyro-mobile-stat-badge-icon {
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            width: 16px;
-            height: 16px;
-            padding: 2px;
-            margin: 0;
+            width: 14px;
+            height: 14px;
             border: 1px solid #444;
             border-radius: 50%;
             background: #333;
-            cursor: pointer;
             position: absolute;
             right: -3px;
             top: -5px;
+            pointer-events: none;
         }
         @media screen and (max-width: 386px) {
-          .pyro-mobile-stat-badge {
+          .pyro-mobile-stat-badge-icon {
             right: 1px;
           }
         }
-        .pyro-mobile-stat-badge svg {
+        .pyro-mobile-stat-badge-icon svg {
             width: 14px;
             height: 14px;
             padding: 0;
@@ -619,6 +717,7 @@ function collectBuildingStats(building: Building): BuildingStat[] {
           max: 5,
           lowLabel: "Fire-resistant",
           highLabel: "Highly flammable",
+          invert: true,
         },
       },
     });
@@ -639,6 +738,7 @@ function collectBuildingStats(building: Building): BuildingStat[] {
           max: 5,
           lowLabel: "Urban",
           highLabel: "Remote",
+          invert: true,
         },
       },
     });
@@ -726,7 +826,9 @@ function ensureMobileStatsBadge(
     badge = el("button", "pyro-mobile-stat-badge");
     badge.setAttribute("type", "button");
     badge.setAttribute("aria-label", "Building stats");
-    badge.innerHTML = ICON_EMBER;
+    const badgeIcon = el("span", "pyro-mobile-stat-badge-icon");
+    badgeIcon.innerHTML = ICON_EMBER;
+    badge.appendChild(badgeIcon);
     mobileStatsState.set(badge, state);
     iconsRow.appendChild(badge);
 
@@ -977,6 +1079,12 @@ const settingsCtx: SettingsCtx = {
   getShowFlammability: () => showFlammability,
   getShowRurality: () => showRurality,
   getShowUrgency: () => showUrgency,
+  getShowMaterialData: () => showMaterialData,
+  getShowMaterialIntensity: () => showMaterialIntensity,
+  getShowMaterialMomentum: () => showMaterialMomentum,
+  getShowMaterialSuspicion: () => showMaterialSuspicion,
+  getShowMaterialIgnitionRisk: () => showMaterialIgnitionRisk,
+  getShowMaterialStokingRisk: () => showMaterialStokingRisk,
 
   setManualPrice,
   clearManualPrices,
@@ -997,6 +1105,12 @@ const settingsCtx: SettingsCtx = {
   setShowFlammability: setShowFlammabilityEnabled,
   setShowRurality: setShowRuralityEnabled,
   setShowUrgency: setShowUrgencyEnabled,
+  setShowMaterialData: setShowMaterialDataEnabled,
+  setShowMaterialIntensity: setShowMaterialIntensityEnabled,
+  setShowMaterialMomentum: setShowMaterialMomentumEnabled,
+  setShowMaterialSuspicion: setShowMaterialSuspicionEnabled,
+  setShowMaterialIgnitionRisk: setShowMaterialIgnitionRiskEnabled,
+  setShowMaterialStokingRisk: setShowMaterialStokingRiskEnabled,
 };
 
 // ---------------------------------------------------------------------------
@@ -1017,8 +1131,15 @@ function scheduleInjectSettings(): void {
   }, 200);
 }
 
+const materialBadgeTooltipCtx: TooltipCtx = {
+  show: (target, content, options) =>
+    tryTooltip((api) => api.show(target, content, options)),
+  hide: () => tryTooltip((api) => api.hide()),
+};
+
 const observer = new MutationObserver(() => {
   scanPage();
+  scanMaterialPopover(materialBadgeTooltipCtx, materialBadgeConfig());
   scheduleInjectSettings();
 });
 
@@ -1026,6 +1147,7 @@ function start(): void {
   loadState();
   populateScenarioIndex(SCENARIOS);
   injectHighlightStyles();
+  injectMaterialBadgeStyles();
   applyPpnBarPosition();
   observer.observe(document.body, { childList: true, subtree: true });
   scheduleScenarioRefresh();

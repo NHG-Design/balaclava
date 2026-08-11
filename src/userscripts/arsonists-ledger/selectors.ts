@@ -70,4 +70,20 @@ export const SEL = {
 
     /** Round alarm/responder status icon within BUILDING_RESPONDER_ICONS. */
     RESPONDER_STATUS: '[class*="responderStatus___"]',
+
+    /**
+     * Materials item-selector popover, opened by clicking an itemSection
+     * during place/ignite/dampen. Obfuscated class — Torn native, not part
+     * of `.arson-root`, so it's queried from `document` directly.
+     */
+    ITEM_SELECTOR: '[class*="itemSelector___"]',
+
+    /** One material group column (igniters/liquids/solids/gases/dampeners) within ITEM_SELECTOR. */
+    ITEM_GROUP: '[class*="group___"]',
+
+    /** Wrapper for a single material's button+image within an ITEM_GROUP. */
+    ITEM_CELL_WRAP: '[class*="itemCellWrap___"]',
+
+    /** The material's item image — its `src`/`srcset` numeric id maps to a Torn item id. */
+    ITEM_IMAGE: '[class*="image___"]',
 } as const;

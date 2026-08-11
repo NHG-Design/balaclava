@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        Torn Arsonist's Ledger
 // @namespace   https://greasyfork.org/en/users/942572-yukio-mizsima
-// @version     1.0.17
+// @version     1.1.0
 // @description Arson profit-per-nerve calculator and scenario guide for Torn's Crimes page
 // @icon        https://www.google.com/s2/favicons?sz=64&domain=torn.com
 // @author      Yukio [906148]
@@ -84,7 +84,7 @@
     // Igniters
     [RESOURCE.LIGHTER]: { id: RESOURCE.LIGHTER, name: "Windproof Lighter", kind: "tool", category: "igniter", isTool: true, defaultPrice: 0, tornId: 544 },
     [RESOURCE.MOLOTOV]: { id: RESOURCE.MOLOTOV, name: "Molotov Cocktail", kind: "tool", category: "igniter", isTool: false, defaultPrice: 76922, tornId: 742 },
-    [RESOURCE.FLAMETHROWER]: { id: RESOURCE.FLAMETHROWER, name: "Flamethrower", kind: "tool", category: "igniter", isTool: true, defaultPrice: 0 },
+    [RESOURCE.FLAMETHROWER]: { id: RESOURCE.FLAMETHROWER, name: "Flamethrower", kind: "tool", category: "igniter", isTool: true, defaultPrice: 0, tornId: 255 },
     // Dampeners
     [RESOURCE.BLANKET]: { id: RESOURCE.BLANKET, name: "Blanket", kind: "tool", category: "dampener", isTool: true, defaultPrice: 0 },
     [RESOURCE.SAND]: { id: RESOURCE.SAND, name: "Sand", kind: "tool", category: "dampener", isTool: false, defaultPrice: 27302, tornId: 833 },
@@ -3603,9 +3603,10 @@
     root.appendChild(buildPrimaryBlock(ranked, prices, statsOnly, options));
     return root;
   }
-  function barColor(ratio) {
-    if (ratio <= 1 / 3) return BAND_COLOR.good;
-    if (ratio <= 2 / 3) return BAND_COLOR.low;
+  function barColor(ratio, invert) {
+    const r = invert ? 1 - ratio : ratio;
+    if (r <= 1 / 3) return BAND_COLOR.good;
+    if (r <= 2 / 3) return BAND_COLOR.low;
     return BAND_COLOR.negative;
   }
   function buildStatBar(bar) {
@@ -3613,7 +3614,7 @@
     const segCount = bar.max - bar.min + 1;
     const filled = bar.value - bar.min + 1;
     const ratio = (bar.value - bar.min) / (bar.max - bar.min);
-    const color = barColor(ratio);
+    const color = barColor(ratio, bar.invert);
     const track = el("div", "pyro-stat-bar-track");
     for (let i = 0; i < segCount; i++) {
       const seg = el("span", "pyro-stat-bar-seg");
@@ -3683,8 +3684,11 @@
 }
 .pyro-stat-tt-value {
     font-size: 14px;
-    color: oklch(76% 0.14 55);
+    color: var(--balaclava-tooltip-bg);
     white-space: nowrap;
+    background-color: var(--balaclava-tooltip-text);
+    padding-inline: 6px;
+    border-radius: 4px;
 }
 .pyro-stat-tt-desc {
     margin-top: 2px;
@@ -3883,7 +3887,19 @@
      */
     BUILDING_RESPONDER_ICONS: '[class*="buildingAndResponderIcons___"]',
     /** Round alarm/responder status icon within BUILDING_RESPONDER_ICONS. */
-    RESPONDER_STATUS: '[class*="responderStatus___"]'
+    RESPONDER_STATUS: '[class*="responderStatus___"]',
+    /**
+     * Materials item-selector popover, opened by clicking an itemSection
+     * during place/ignite/dampen. Obfuscated class — Torn native, not part
+     * of `.arson-root`, so it's queried from `document` directly.
+     */
+    ITEM_SELECTOR: '[class*="itemSelector___"]',
+    /** One material group column (igniters/liquids/solids/gases/dampeners) within ITEM_SELECTOR. */
+    ITEM_GROUP: '[class*="group___"]',
+    /** Wrapper for a single material's button+image within an ITEM_GROUP. */
+    ITEM_CELL_WRAP: '[class*="itemCellWrap___"]',
+    /** The material's item image — its `src`/`srcset` numeric id maps to a Torn item id. */
+    ITEM_IMAGE: '[class*="image___"]'
   };
 
   // src/userscripts/arsonists-ledger/api.ts
@@ -4125,6 +4141,7 @@
 }
 .pyro-s-status.ok  { color: ${BAND_COLOR.good}; }
 .pyro-s-status.err { color: #c66; }
+.pyro-s-status:empty { display: none; }
 .pyro-s-refresh-row { display: flex; align-items: center; gap: 8px; }
 .pyro-s-timestamp { font-size: 10px; color: oklch(57% 0.008 285); }
 .pyro-s-check-row {
@@ -4498,28 +4515,24 @@
       )
     );
     const buildingInfoRow = checkboxRow(
-      "Show building info",
+      "Show building data",
       ctx.getShowBuildingStats,
       ctx.setShowBuildingStats
     );
     barGroup.appendChild(buildingInfoRow);
     const buildingStatRows = [
       checkboxRow(
-        "Show response time badge",
+        "Show response time",
         ctx.getShowResponseTime,
         ctx.setShowResponseTime
       ),
       checkboxRow(
-        "Show flammability badge",
+        "Show flammability",
         ctx.getShowFlammability,
         ctx.setShowFlammability
       ),
-      checkboxRow(
-        "Show rurality badge",
-        ctx.getShowRurality,
-        ctx.setShowRurality
-      ),
-      checkboxRow("Show urgency badge", ctx.getShowUrgency, ctx.setShowUrgency)
+      checkboxRow("Show rurality", ctx.getShowRurality, ctx.setShowRurality),
+      checkboxRow("Show urgency", ctx.getShowUrgency, ctx.setShowUrgency)
     ];
     const buildingStatCheckboxes = buildingStatRows.map(
       (row2) => row2.querySelector("input")
@@ -4535,6 +4548,57 @@
     syncBuildingStatRows();
     buildingStatRows.forEach((row2) => barGroup.appendChild(row2));
     root.appendChild(barGroup);
+    const materialsGroup = el("div", "pyro-s-group");
+    const materialsTitle = el("div", "pyro-s-group-title");
+    materialsTitle.textContent = "Materials";
+    materialsGroup.appendChild(materialsTitle);
+    const materialDataRow = checkboxRow(
+      "Show material data",
+      ctx.getShowMaterialData,
+      ctx.setShowMaterialData
+    );
+    materialsGroup.appendChild(materialDataRow);
+    const materialStatRows = [
+      checkboxRow(
+        "Show intensity",
+        ctx.getShowMaterialIntensity,
+        ctx.setShowMaterialIntensity
+      ),
+      checkboxRow(
+        "Show momentum",
+        ctx.getShowMaterialMomentum,
+        ctx.setShowMaterialMomentum
+      ),
+      checkboxRow(
+        "Show suspicion",
+        ctx.getShowMaterialSuspicion,
+        ctx.setShowMaterialSuspicion
+      ),
+      checkboxRow(
+        "Show ignition risk",
+        ctx.getShowMaterialIgnitionRisk,
+        ctx.setShowMaterialIgnitionRisk
+      ),
+      checkboxRow(
+        "Show stoking risk",
+        ctx.getShowMaterialStokingRisk,
+        ctx.setShowMaterialStokingRisk
+      )
+    ];
+    const materialStatCheckboxes = materialStatRows.map(
+      (row2) => row2.querySelector("input")
+    );
+    function syncMaterialStatRows() {
+      const enabled = ctx.getShowMaterialData();
+      materialStatRows.forEach((row2, i) => {
+        materialStatCheckboxes[i].disabled = !enabled;
+        row2.classList.toggle("pyro-s-check-row--disabled", !enabled);
+      });
+    }
+    materialDataRow.querySelector("input").addEventListener("change", syncMaterialStatRows);
+    syncMaterialStatRows();
+    materialStatRows.forEach((row2) => materialsGroup.appendChild(row2));
+    root.appendChild(materialsGroup);
     return root;
   }
   function buildApiTab(ctx) {
@@ -4821,6 +4885,356 @@
     return `${minutes % 1 === 0 ? minutes : minutes.toFixed(1)}m`;
   }
 
+  // src/data/arson-information.ts
+  var ACCELERANT_INFO = {
+    [RESOURCE.GASOLINE]: {
+      intensity: 1.5,
+      momentum: 6,
+      suspicion: 9,
+      ignitionRisk: 1,
+      stokingRisk: 7,
+      advice: "Cheap but risky when stoking. High suspicion and high stoking risk."
+    },
+    [RESOURCE.DIESEL]: {
+      intensity: 2,
+      momentum: 5,
+      suspicion: 7,
+      ignitionRisk: 0,
+      stokingRisk: 1,
+      advice: "Lowers crit-rate on ignition, increases visibility. Best combined with solids."
+    },
+    [RESOURCE.KEROSENE]: {
+      intensity: 2,
+      momentum: 10,
+      suspicion: 3,
+      ignitionRisk: 1,
+      stokingRisk: 3,
+      advice: "Great as starter, insurance jobs, and small fires. Increases momentum in single area."
+    },
+    [RESOURCE.POTASSIUM_NITRATE]: {
+      intensity: 10,
+      momentum: 6,
+      suspicion: 3,
+      ignitionRisk: 3,
+      stokingRisk: 1,
+      advice: "Increases intensity by 25% of current intensity in single area."
+    },
+    [RESOURCE.MAGNESIUM]: {
+      intensity: 8,
+      momentum: 6,
+      suspicion: 10,
+      ignitionRisk: 3,
+      stokingRisk: 4,
+      advice: "Halves dampening effectiveness and intensity decay from firefighters. Increases visibility."
+    },
+    [RESOURCE.THERMITE]: {
+      intensity: 7,
+      momentum: 4,
+      suspicion: 7,
+      ignitionRisk: 3,
+      stokingRisk: 7,
+      advice: "Best as starter for total destruction. Multiplies damage rate for each use."
+    },
+    [RESOURCE.OXYGEN]: {
+      intensity: 6,
+      momentum: 2,
+      suspicion: 1,
+      ignitionRisk: 2,
+      stokingRisk: 1,
+      advice: "Terrible starter, excellent for stoking size 4-5. Increases intensity by 25% of current in all areas."
+    },
+    [RESOURCE.METHANE]: {
+      intensity: 4,
+      momentum: 1,
+      suspicion: -3,
+      ignitionRisk: 2,
+      stokingRisk: 3,
+      advice: "Excellent spread for large targets. Lowers accumulated suspicion."
+    },
+    [RESOURCE.HYDROGEN]: {
+      intensity: 4,
+      momentum: 1,
+      suspicion: 1,
+      ignitionRisk: 2,
+      stokingRisk: 3,
+      advice: "Averages intensity and momentum across all areas. Best for size 3-5 targets."
+    }
+  };
+  var IGNITER_INFO = {
+    [RESOURCE.LIGHTER]: {
+      suspicion: 1,
+      advice: "Baseline utility tool. Critical failure rates scale strictly with the quantity of fuels pre-placed."
+    },
+    [RESOURCE.MOLOTOV]: {
+      suspicion: 6,
+      advice: "Moderately high intensity/momentum to area with lowest intensity. Fixed crit rate."
+    },
+    [RESOURCE.FLAMETHROWER]: {
+      suspicion: 8,
+      advice: "High intensity/momentum randomly across areas with high visibility."
+    }
+  };
+
+  // src/userscripts/arsonists-ledger/material-badges.ts
+  var SCALE_MAX = 10;
+  var SEGMENT_COUNT = 10;
+  var STAT_DESCRIPTIONS = {
+    Intensity: "How fiercely the fire burns in the main area. Drives the destruction rate, but pushes dispatch speed and crit-failure risk up when stoking or dampening a hot fire.",
+    Momentum: "Unburned fuel pooling on the property. Feeds future intensity gain, but stoking while momentum is already high risks a severe accident.",
+    Suspicion: "How obvious this arson material is. Most accelerants raise it, only Methane actively lowers it. Matters most for Insurance Claim and Accidental Cause jobs.",
+    "Ignition Risk": "Likelihood of a critical failure when this material is used to start the fire.",
+    "Stoking Risk": "Likelihood of a critical failure or accident when this material is used to stoke an already-burning fire."
+  };
+  var ACCELERANT_BARS = (info) => [
+    {
+      key: "intensity",
+      label: "INT",
+      fullLabel: "Intensity",
+      value: info.intensity,
+      direction: "good"
+    },
+    {
+      key: "momentum",
+      label: "MOM",
+      fullLabel: "Momentum",
+      value: info.momentum,
+      direction: "good"
+    },
+    {
+      key: "suspicion",
+      label: "SUS",
+      fullLabel: "Suspicion",
+      value: info.suspicion,
+      direction: "bad"
+    },
+    {
+      key: "ignitionRisk",
+      label: "IGN",
+      fullLabel: "Ignition Risk",
+      value: info.ignitionRisk,
+      direction: "bad"
+    },
+    {
+      key: "stokingRisk",
+      label: "STK",
+      fullLabel: "Stoking Risk",
+      value: info.stokingRisk,
+      direction: "bad"
+    }
+  ];
+  var IGNITER_BARS = (info) => [
+    {
+      key: "suspicion",
+      label: "SUS",
+      fullLabel: "Suspicion",
+      value: info.suspicion,
+      direction: "bad"
+    }
+  ];
+  var tornIdIndex = null;
+  function getTornIdIndex() {
+    if (tornIdIndex) return tornIdIndex;
+    tornIdIndex = /* @__PURE__ */ new Map();
+    for (const resource of Object.values(CATALOG)) {
+      if (resource.tornId !== void 0) {
+        tornIdIndex.set(resource.tornId, resource.id);
+      }
+    }
+    return tornIdIndex;
+  }
+  function resourceIdFromImage(img) {
+    const match = /\/images\/items\/(\d+)\//.exec(img.src || img.srcset || "");
+    if (!match) return null;
+    const tornId = Number(match[1]);
+    return getTornIdIndex().get(tornId) ?? null;
+  }
+  function blendSeverity(hex, t) {
+    const clamped = Math.min(1, Math.max(0, t));
+    const full = hex.length === 4 ? hex.slice(1).split("").map((c) => c + c).join("") : hex.slice(1);
+    const r = parseInt(full.slice(0, 2), 16);
+    const g = parseInt(full.slice(2, 4), 16);
+    const b = parseInt(full.slice(4, 6), 16);
+    const neutral = 170;
+    const mix = (channel) => Math.round(neutral + (channel - neutral) * clamped);
+    return `rgb(${mix(r)}, ${mix(g)}, ${mix(b)})`;
+  }
+  var openTooltipTarget = null;
+  var documentTapCloseBound = false;
+  function bindTapToggle(target, buildContent, tooltip) {
+    if (!documentTapCloseBound) {
+      documentTapCloseBound = true;
+      document.addEventListener(
+        "click",
+        (e) => {
+          if (openTooltipTarget && !openTooltipTarget.contains(e.target)) {
+            tooltip.hide();
+            openTooltipTarget = null;
+          }
+        },
+        { passive: true }
+      );
+    }
+    target.addEventListener("click", (e) => {
+      e.stopPropagation();
+      if (openTooltipTarget === target) {
+        tooltip.hide();
+        openTooltipTarget = null;
+        return;
+      }
+      tooltip.show(target, buildContent(), { position: "top" });
+      openTooltipTarget = target;
+    });
+  }
+  function buildBarRow(bar, tooltip) {
+    const fraction = Math.min(1, Math.max(0, bar.value) / SCALE_MAX);
+    const filledCount = Math.round(fraction * SEGMENT_COUNT);
+    const color = bar.direction === "good" ? BAND_COLOR.good : BAND_COLOR.negative;
+    const row2 = el("div", "pyro-mat-bar");
+    const label = el("span", "pyro-mat-bar-label");
+    label.textContent = bar.label;
+    row2.appendChild(label);
+    const track = el("div", "pyro-mat-bar-track");
+    for (let i = 0; i < SEGMENT_COUNT; i++) {
+      const seg = el("span", "pyro-mat-bar-seg");
+      if (i < filledCount) seg.style.background = color;
+      track.appendChild(seg);
+    }
+    row2.appendChild(track);
+    const value = el("span", "pyro-mat-bar-value");
+    value.textContent = String(bar.value);
+    value.style.color = blendSeverity(color, fraction);
+    row2.appendChild(value);
+    const buildContent = () => buildStatTooltipGroup([
+      {
+        title: bar.fullLabel,
+        description: STAT_DESCRIPTIONS[bar.fullLabel] ?? "",
+        value: String(bar.value)
+      }
+    ]);
+    row2.addEventListener("mouseenter", () => {
+      tooltip.show(row2, buildContent(), { position: "top" });
+    });
+    row2.addEventListener("mouseleave", () => {
+      tooltip.hide();
+    });
+    bindTapToggle(row2, buildContent, tooltip);
+    return row2;
+  }
+  function bindMaterialTooltip(wrap, name, advice, tooltip) {
+    wrap.addEventListener("mouseenter", () => {
+      const content = buildStatTooltipGroup([
+        { title: name, description: advice }
+      ]);
+      tooltip.show(wrap, content, { position: "top" });
+    });
+    wrap.addEventListener("mouseleave", () => {
+      tooltip.hide();
+    });
+  }
+  function buildBarStrip(bars, tooltip) {
+    const strip = el("div", "pyro-mat-badges");
+    for (const bar of bars) {
+      strip.appendChild(buildBarRow(bar, tooltip));
+    }
+    return strip;
+  }
+  function scanMaterialPopover(tooltip, config) {
+    document.querySelectorAll(SEL.ITEM_SELECTOR).forEach((popover) => {
+      popover.querySelectorAll(SEL.ITEM_CELL_WRAP).forEach((wrap) => {
+        if (wrap.dataset.pyroBadged) return;
+        const img = wrap.querySelector(SEL.ITEM_IMAGE);
+        if (!img) return;
+        const resourceId = resourceIdFromImage(img);
+        if (!resourceId) return;
+        const accelerant = ACCELERANT_INFO[resourceId];
+        const igniter = IGNITER_INFO[resourceId];
+        if (!accelerant && !igniter) {
+          wrap.dataset.pyroBadged = "true";
+          return;
+        }
+        if (!config.enabled) {
+          wrap.dataset.pyroBadged = "true";
+          return;
+        }
+        const info = accelerant ?? igniter;
+        const name = CATALOG[resourceId]?.name ?? resourceId;
+        bindMaterialTooltip(wrap, name, info.advice, tooltip);
+        const bars = (accelerant ? ACCELERANT_BARS(accelerant) : IGNITER_BARS(igniter)).filter((bar) => config[bar.key]);
+        if (bars.length > 0) {
+          wrap.after(buildBarStrip(bars, tooltip));
+        }
+        wrap.dataset.pyroBadged = "true";
+      });
+    });
+  }
+  function resetMaterialBadges() {
+    document.querySelectorAll(SEL.ITEM_SELECTOR).forEach((popover) => {
+      popover.querySelectorAll(SEL.ITEM_CELL_WRAP).forEach((wrap) => {
+        delete wrap.dataset.pyroBadged;
+        const strip = wrap.nextElementSibling;
+        if (strip?.classList.contains("pyro-mat-badges")) strip.remove();
+      });
+    });
+  }
+  function injectMaterialBadgeStyles() {
+    if (document.getElementById("pyro-mat-badge-styles")) return;
+    const style = document.createElement("style");
+    style.id = "pyro-mat-badge-styles";
+    style.textContent = `
+        .pyro-mat-badges {
+            display: flex;
+            flex-direction: column;
+            gap: 1px;
+            padding: 0 10px;
+            align-self: stretch;
+        }
+        .pyro-mat-bar {
+            display: grid;
+            align-items: center;
+            grid-template-columns: 1fr auto;
+        }
+        .pyro-mat-bar-label {
+            font-size: 9px;
+            letter-spacing: 0.05em;
+            line-height: 1;
+            color: var(--crimes-baseText-color, #666);
+            font-family: monospace;
+        }
+        .pyro-mat-bar-track {
+            display: flex;
+            gap: 1px;
+            height: 3px;
+            flex: 1;
+        }
+        .pyro-mat-bar-seg {
+            flex: 1;
+            height: 100%;
+            background: var(--crimes-subtleSubText-color, #999);
+            border-radius: 1px;
+            aspect-ratio: 1;
+        }
+        .pyro-mat-bar-value {
+            display: none;
+            font-size: 9px;
+            letter-spacing: 0.05em;
+            line-height: 1;
+            font-family: monospace;
+            font-weight: bold;
+            text-align: right;
+        }
+
+        @media (max-width: 780px) {
+            .pyro-mat-bar-track {
+                display: none;
+            }
+            .pyro-mat-bar-value {
+                display: block;
+            }
+        }
+    `;
+    document.head.appendChild(style);
+  }
+
   // src/userscripts/arsonists-ledger/index.ts
   var KEY_MANUAL_PRICES = "pyroLedger.v1.manualPrices";
   var KEY_API_PRICES = "pyroLedger.v1.apiPrices";
@@ -4840,6 +5254,12 @@
   var KEY_SHOW_FLAMMABILITY = "pyroLedger.v1.showFlammability";
   var KEY_SHOW_RURALITY = "pyroLedger.v1.showRurality";
   var KEY_SHOW_URGENCY = "pyroLedger.v1.showUrgency";
+  var KEY_SHOW_MATERIAL_DATA = "pyroLedger.v1.showMaterialData";
+  var KEY_SHOW_MATERIAL_INTENSITY = "pyroLedger.v1.showMaterialIntensity";
+  var KEY_SHOW_MATERIAL_MOMENTUM = "pyroLedger.v1.showMaterialMomentum";
+  var KEY_SHOW_MATERIAL_SUSPICION = "pyroLedger.v1.showMaterialSuspicion";
+  var KEY_SHOW_MATERIAL_IGNITION_RISK = "pyroLedger.v1.showMaterialIgnitionRisk";
+  var KEY_SHOW_MATERIAL_STOKING_RISK = "pyroLedger.v1.showMaterialStokingRisk";
   function store_get(key, def = "") {
     if (typeof GM_getValue !== "undefined") return GM_getValue(key, def);
     return localStorage.getItem(key) ?? def;
@@ -4894,6 +5314,12 @@
   var showFlammability = true;
   var showRurality = true;
   var showUrgency = true;
+  var showMaterialData = false;
+  var showMaterialIntensity = true;
+  var showMaterialMomentum = true;
+  var showMaterialSuspicion = true;
+  var showMaterialIgnitionRisk = true;
+  var showMaterialStokingRisk = true;
   var visibleMobileSection = null;
   var IOS_USER_AGENT_RE = /iPad|iPhone|iPod/i;
   function isIosDevice() {
@@ -4920,6 +5346,12 @@
     showFlammability = store_get(KEY_SHOW_FLAMMABILITY, "1") !== "0";
     showRurality = store_get(KEY_SHOW_RURALITY, "1") !== "0";
     showUrgency = store_get(KEY_SHOW_URGENCY, "1") !== "0";
+    showMaterialData = store_get(KEY_SHOW_MATERIAL_DATA, "0") !== "0";
+    showMaterialIntensity = store_get(KEY_SHOW_MATERIAL_INTENSITY, "1") !== "0";
+    showMaterialMomentum = store_get(KEY_SHOW_MATERIAL_MOMENTUM, "1") !== "0";
+    showMaterialSuspicion = store_get(KEY_SHOW_MATERIAL_SUSPICION, "1") !== "0";
+    showMaterialIgnitionRisk = store_get(KEY_SHOW_MATERIAL_IGNITION_RISK, "1") !== "0";
+    showMaterialStokingRisk = store_get(KEY_SHOW_MATERIAL_STOKING_RISK, "1") !== "0";
     try {
       manualPrices = JSON.parse(store_get(KEY_MANUAL_PRICES, "{}"));
     } catch {
@@ -5018,6 +5450,50 @@
     showUrgency = show;
     store_set(KEY_SHOW_URGENCY, show ? "1" : "0");
     resetScans();
+  }
+  function materialBadgeConfig() {
+    return {
+      enabled: showMaterialData,
+      intensity: showMaterialIntensity,
+      momentum: showMaterialMomentum,
+      suspicion: showMaterialSuspicion,
+      ignitionRisk: showMaterialIgnitionRisk,
+      stokingRisk: showMaterialStokingRisk
+    };
+  }
+  function resetMaterialScans() {
+    resetMaterialBadges();
+    scanMaterialPopover(materialBadgeTooltipCtx, materialBadgeConfig());
+  }
+  function setShowMaterialDataEnabled(show) {
+    showMaterialData = show;
+    store_set(KEY_SHOW_MATERIAL_DATA, show ? "1" : "0");
+    resetMaterialScans();
+  }
+  function setShowMaterialIntensityEnabled(show) {
+    showMaterialIntensity = show;
+    store_set(KEY_SHOW_MATERIAL_INTENSITY, show ? "1" : "0");
+    resetMaterialScans();
+  }
+  function setShowMaterialMomentumEnabled(show) {
+    showMaterialMomentum = show;
+    store_set(KEY_SHOW_MATERIAL_MOMENTUM, show ? "1" : "0");
+    resetMaterialScans();
+  }
+  function setShowMaterialSuspicionEnabled(show) {
+    showMaterialSuspicion = show;
+    store_set(KEY_SHOW_MATERIAL_SUSPICION, show ? "1" : "0");
+    resetMaterialScans();
+  }
+  function setShowMaterialIgnitionRiskEnabled(show) {
+    showMaterialIgnitionRisk = show;
+    store_set(KEY_SHOW_MATERIAL_IGNITION_RISK, show ? "1" : "0");
+    resetMaterialScans();
+  }
+  function setShowMaterialStokingRiskEnabled(show) {
+    showMaterialStokingRisk = show;
+    store_set(KEY_SHOW_MATERIAL_STOKING_RISK, show ? "1" : "0");
+    resetMaterialScans();
   }
   function setApiPrices(prices, timestamp) {
     apiPrices = prices;
@@ -5129,7 +5605,8 @@
         .arson-root .pyro-band--unknown::after  { box-shadow: inset var(--pyro-bar-x) 0 0 ${BAND_COLOR.unknown}  !important; }
 
         ${SEL.FIRE_METER},
-        .crime-image { position: relative !important; }
+        .crime-image,
+        ${SEL.BUILDING_RESPONDER_ICONS} { position: relative !important; }
         .pyro-value-pill {
             position: absolute;
             top: 3px;
@@ -5184,27 +5661,41 @@
             flex-shrink: 0;
         }
         .pyro-mobile-stat-badge {
+            display: block;
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            padding: 0;
+            margin: 0;
+            border: 0;
+            border-radius: 0;
+            background: transparent;
+            box-shadow: none;
+            appearance: none;
+            -webkit-appearance: none;
+            cursor: pointer;
+        }
+        .pyro-mobile-stat-badge-icon {
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            width: 16px;
-            height: 16px;
-            padding: 2px;
-            margin: 0;
+            width: 14px;
+            height: 14px;
             border: 1px solid #444;
             border-radius: 50%;
             background: #333;
-            cursor: pointer;
             position: absolute;
             right: -3px;
             top: -5px;
+            pointer-events: none;
         }
         @media screen and (max-width: 386px) {
-          .pyro-mobile-stat-badge {
+          .pyro-mobile-stat-badge-icon {
             right: 1px;
           }
         }
-        .pyro-mobile-stat-badge svg {
+        .pyro-mobile-stat-badge-icon svg {
             width: 14px;
             height: 14px;
             padding: 0;
@@ -5282,7 +5773,8 @@
             min: 1,
             max: 5,
             lowLabel: "Fire-resistant",
-            highLabel: "Highly flammable"
+            highLabel: "Highly flammable",
+            invert: true
           }
         }
       });
@@ -5301,7 +5793,8 @@
             min: 1,
             max: 5,
             lowLabel: "Urban",
-            highLabel: "Remote"
+            highLabel: "Remote",
+            invert: true
           }
         }
       });
@@ -5375,7 +5868,9 @@
       badge = el("button", "pyro-mobile-stat-badge");
       badge.setAttribute("type", "button");
       badge.setAttribute("aria-label", "Building stats");
-      badge.innerHTML = ICON_EMBER;
+      const badgeIcon = el("span", "pyro-mobile-stat-badge-icon");
+      badgeIcon.innerHTML = ICON_EMBER;
+      badge.appendChild(badgeIcon);
       mobileStatsState.set(badge, state);
       iconsRow.appendChild(badge);
       const badgeEl = badge;
@@ -5557,6 +6052,12 @@
     getShowFlammability: () => showFlammability,
     getShowRurality: () => showRurality,
     getShowUrgency: () => showUrgency,
+    getShowMaterialData: () => showMaterialData,
+    getShowMaterialIntensity: () => showMaterialIntensity,
+    getShowMaterialMomentum: () => showMaterialMomentum,
+    getShowMaterialSuspicion: () => showMaterialSuspicion,
+    getShowMaterialIgnitionRisk: () => showMaterialIgnitionRisk,
+    getShowMaterialStokingRisk: () => showMaterialStokingRisk,
     setManualPrice,
     clearManualPrices,
     clearManualPrice,
@@ -5575,7 +6076,13 @@
     setShowResponseTime: setShowResponseTimeEnabled,
     setShowFlammability: setShowFlammabilityEnabled,
     setShowRurality: setShowRuralityEnabled,
-    setShowUrgency: setShowUrgencyEnabled
+    setShowUrgency: setShowUrgencyEnabled,
+    setShowMaterialData: setShowMaterialDataEnabled,
+    setShowMaterialIntensity: setShowMaterialIntensityEnabled,
+    setShowMaterialMomentum: setShowMaterialMomentumEnabled,
+    setShowMaterialSuspicion: setShowMaterialSuspicionEnabled,
+    setShowMaterialIgnitionRisk: setShowMaterialIgnitionRiskEnabled,
+    setShowMaterialStokingRisk: setShowMaterialStokingRiskEnabled
   };
   var reInjectTimer = null;
   function scheduleInjectSettings() {
@@ -5590,14 +6097,20 @@
       }
     }, 200);
   }
+  var materialBadgeTooltipCtx = {
+    show: (target, content, options) => tryTooltip((api) => api.show(target, content, options)),
+    hide: () => tryTooltip((api) => api.hide())
+  };
   var observer = new MutationObserver(() => {
     scanPage();
+    scanMaterialPopover(materialBadgeTooltipCtx, materialBadgeConfig());
     scheduleInjectSettings();
   });
   function start() {
     loadState();
     populateScenarioIndex(SCENARIOS);
     injectHighlightStyles();
+    injectMaterialBadgeStyles();
     applyPpnBarPosition();
     observer.observe(document.body, { childList: true, subtree: true });
     scheduleScenarioRefresh();

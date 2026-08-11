@@ -196,11 +196,14 @@ export interface StatBar {
   max: number;
   lowLabel: string;
   highLabel: string;
+  /** When true, a higher value is "good" (green) instead of the default "higher is worse". */
+  invert?: boolean;
 }
 
-function barColor(ratio: number): string {
-  if (ratio <= 1 / 3) return BAND_COLOR.good;
-  if (ratio <= 2 / 3) return BAND_COLOR.low;
+function barColor(ratio: number, invert?: boolean): string {
+  const r = invert ? 1 - ratio : ratio;
+  if (r <= 1 / 3) return BAND_COLOR.good;
+  if (r <= 2 / 3) return BAND_COLOR.low;
   return BAND_COLOR.negative;
 }
 
@@ -209,7 +212,7 @@ function buildStatBar(bar: StatBar): HTMLElement {
   const segCount = bar.max - bar.min + 1;
   const filled = bar.value - bar.min + 1;
   const ratio = (bar.value - bar.min) / (bar.max - bar.min);
-  const color = barColor(ratio);
+  const color = barColor(ratio, bar.invert);
 
   const track = el("div", "pyro-stat-bar-track");
   for (let i = 0; i < segCount; i++) {
@@ -303,8 +306,11 @@ function buildStatTooltipStyles(): string {
 }
 .pyro-stat-tt-value {
     font-size: 14px;
-    color: oklch(76% 0.14 55);
+    color: var(--balaclava-tooltip-bg);
     white-space: nowrap;
+    background-color: var(--balaclava-tooltip-text);
+    padding-inline: 6px;
+    border-radius: 4px;
 }
 .pyro-stat-tt-desc {
     margin-top: 2px;

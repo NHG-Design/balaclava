@@ -35,7 +35,7 @@ const ACCELERANTS = {
     "suspicion": 3,
     "advice": "Great as starter, insurance jobs, and small fires. Increases momentum in single area."
   },
-  "Saltpetre": {
+  "Magnesium Shavings": {
     "type": "Solid",
     "intensity": "31.25%",
     "intensity_abs": 10,
@@ -110,17 +110,13 @@ const ACCELERANTS = {
 };
 
 const IGNITERS = {
-  "Lighter": {
+  "Windproof Lighter": {
     "suspicion": 1,
-    "advice": "Standard igniter. Provides 2.5% intensity when stoking."
+    "advice": "Enhanced lighter. Same base stats as Lighter but works in adverse conditions."
   },
   "Molotov": {
     "suspicion": 6,
     "advice": "Moderately high intensity/momentum to area with lowest intensity. Fixed crit rate."
-  },
-  "Windproof Lighter": {
-    "suspicion": 1,
-    "advice": "Enhanced lighter. Same base stats as Lighter but works in adverse conditions."
   },
   "Flamethrower": {
     "suspicion": 8,

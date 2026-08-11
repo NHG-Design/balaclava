@@ -45,6 +45,12 @@ export interface SettingsCtx {
   getShowFlammability(): boolean;
   getShowRurality(): boolean;
   getShowUrgency(): boolean;
+  getShowMaterialData(): boolean;
+  getShowMaterialIntensity(): boolean;
+  getShowMaterialMomentum(): boolean;
+  getShowMaterialSuspicion(): boolean;
+  getShowMaterialIgnitionRisk(): boolean;
+  getShowMaterialStokingRisk(): boolean;
 
   setManualPrice(id: ResourceId, price: number): void;
   clearManualPrices(): void;
@@ -65,6 +71,12 @@ export interface SettingsCtx {
   setShowFlammability(show: boolean): void;
   setShowRurality(show: boolean): void;
   setShowUrgency(show: boolean): void;
+  setShowMaterialData(show: boolean): void;
+  setShowMaterialIntensity(show: boolean): void;
+  setShowMaterialMomentum(show: boolean): void;
+  setShowMaterialSuspicion(show: boolean): void;
+  setShowMaterialIgnitionRisk(show: boolean): void;
+  setShowMaterialStokingRisk(show: boolean): void;
 }
 
 // ---------------------------------------------------------------------------
@@ -274,6 +286,7 @@ export function injectSettingsStyles(): void {
 }
 .pyro-s-status.ok  { color: ${BAND_COLOR.good}; }
 .pyro-s-status.err { color: #c66; }
+.pyro-s-status:empty { display: none; }
 .pyro-s-refresh-row { display: flex; align-items: center; gap: 8px; }
 .pyro-s-timestamp { font-size: 10px; color: oklch(57% 0.008 285); }
 .pyro-s-check-row {
@@ -726,7 +739,7 @@ function buildVisualsTab(ctx: SettingsCtx): HTMLElement {
     ),
   );
   const buildingInfoRow = checkboxRow(
-    "Show building info",
+    "Show building data",
     ctx.getShowBuildingStats,
     ctx.setShowBuildingStats,
   );
@@ -734,21 +747,17 @@ function buildVisualsTab(ctx: SettingsCtx): HTMLElement {
 
   const buildingStatRows = [
     checkboxRow(
-      "Show response time badge",
+      "Show response time",
       ctx.getShowResponseTime,
       ctx.setShowResponseTime,
     ),
     checkboxRow(
-      "Show flammability badge",
+      "Show flammability",
       ctx.getShowFlammability,
       ctx.setShowFlammability,
     ),
-    checkboxRow(
-      "Show rurality badge",
-      ctx.getShowRurality,
-      ctx.setShowRurality,
-    ),
-    checkboxRow("Show urgency badge", ctx.getShowUrgency, ctx.setShowUrgency),
+    checkboxRow("Show rurality", ctx.getShowRurality, ctx.setShowRurality),
+    checkboxRow("Show urgency", ctx.getShowUrgency, ctx.setShowUrgency),
   ];
   const buildingStatCheckboxes = buildingStatRows.map(
     (row) => row.querySelector("input") as HTMLInputElement,
@@ -769,6 +778,65 @@ function buildVisualsTab(ctx: SettingsCtx): HTMLElement {
 
   buildingStatRows.forEach((row) => barGroup.appendChild(row));
   root.appendChild(barGroup);
+
+  const materialsGroup = el("div", "pyro-s-group");
+  const materialsTitle = el("div", "pyro-s-group-title");
+  materialsTitle.textContent = "Materials";
+  materialsGroup.appendChild(materialsTitle);
+
+  const materialDataRow = checkboxRow(
+    "Show material data",
+    ctx.getShowMaterialData,
+    ctx.setShowMaterialData,
+  );
+  materialsGroup.appendChild(materialDataRow);
+
+  const materialStatRows = [
+    checkboxRow(
+      "Show intensity",
+      ctx.getShowMaterialIntensity,
+      ctx.setShowMaterialIntensity,
+    ),
+    checkboxRow(
+      "Show momentum",
+      ctx.getShowMaterialMomentum,
+      ctx.setShowMaterialMomentum,
+    ),
+    checkboxRow(
+      "Show suspicion",
+      ctx.getShowMaterialSuspicion,
+      ctx.setShowMaterialSuspicion,
+    ),
+    checkboxRow(
+      "Show ignition risk",
+      ctx.getShowMaterialIgnitionRisk,
+      ctx.setShowMaterialIgnitionRisk,
+    ),
+    checkboxRow(
+      "Show stoking risk",
+      ctx.getShowMaterialStokingRisk,
+      ctx.setShowMaterialStokingRisk,
+    ),
+  ];
+  const materialStatCheckboxes = materialStatRows.map(
+    (row) => row.querySelector("input") as HTMLInputElement,
+  );
+
+  function syncMaterialStatRows(): void {
+    const enabled = ctx.getShowMaterialData();
+    materialStatRows.forEach((row, i) => {
+      materialStatCheckboxes[i].disabled = !enabled;
+      row.classList.toggle("pyro-s-check-row--disabled", !enabled);
+    });
+  }
+
+  materialDataRow
+    .querySelector("input")!
+    .addEventListener("change", syncMaterialStatRows);
+  syncMaterialStatRows();
+
+  materialStatRows.forEach((row) => materialsGroup.appendChild(row));
+  root.appendChild(materialsGroup);
 
   return root;
 }
