@@ -124,9 +124,9 @@ function buildPrimaryBlock(
 
   const stats = el("div", "pyro-tt-stats");
   const payoutLabel =
-    Scenario.payoutMax !== undefined && Scenario.payoutMax > Scenario.payout
-      ? `${formatPayoutValue(Scenario.payout)}–${formatPayoutValue(Scenario.payoutMax)}`
-      : formatPayoutValue(Scenario.payout);
+    Scenario.payoutMax > Scenario.payoutMin
+      ? `${formatPayoutValue(Scenario.payoutMin)}–${formatPayoutValue(Scenario.payoutMax)}`
+      : formatPayoutValue(Scenario.payoutMin);
   stats.appendChild(row("Payout", payoutLabel));
   stats.appendChild(row("Cost", `~$${(materialCost / 1000).toFixed(1)}k`));
   stats.appendChild(row("Nerve", String(baseNerve)));

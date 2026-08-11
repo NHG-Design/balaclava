@@ -10,12 +10,11 @@ export interface ProfitThresholds {
 
 export const DEFAULT_THRESHOLDS: ProfitThresholds = { low: 5_000, good: 10_000 };
 
-/** Which payout figure PPN math uses: the average (`payout`) or the optimistic upper end (`payoutMax`, falls back to `payout` if unset). */
-export type PayoutBasis = 'average' | 'max';
+/** Which payout figure PPN math uses: the conservative low end (`payoutMin`) or the optimistic high end (`payoutMax`). */
+export type PayoutBasis = 'min' | 'max';
 
 export function effectivePayout(scenario: Scenario, basis: PayoutBasis): number {
-    if (basis === 'max' && scenario.payoutMax !== undefined) return scenario.payoutMax;
-    return scenario.payout;
+    return basis === 'max' ? scenario.payoutMax : scenario.payoutMin;
 }
 
 export interface RankedScenario {
@@ -81,7 +80,7 @@ export function calcMaterialCost(scenario: Scenario, prices: PriceMap): number {
     );
 }
 
-export function calcProfitPerNerve(scenario: Scenario, prices: PriceMap, basis: PayoutBasis = 'average'): number {
+export function calcProfitPerNerve(scenario: Scenario, prices: PriceMap, basis: PayoutBasis = 'min'): number {
     const nerve = calcNerve(scenario);
     const cost = calcMaterialCost(scenario, prices);
     return (effectivePayout(scenario, basis) - cost) / nerve;
@@ -105,7 +104,7 @@ export function rankForScenario(
     scenario: Scenario,
     prices: PriceMap,
     thresholds: ProfitThresholds,
-    basis: PayoutBasis = 'average',
+    basis: PayoutBasis = 'min',
 ): RankedScenario {
     const ppn = calcProfitPerNerve(scenario, prices, basis);
     return {

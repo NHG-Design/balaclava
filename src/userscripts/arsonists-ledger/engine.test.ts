@@ -23,7 +23,8 @@ import type { Scenario } from '../../data/scenarios.js';
 function Scenario(overrides: Partial<Scenario> & Pick<Scenario, 'actions'>): Scenario {
     return {
         scenarioName: 'Test Scenario',
-        payout: 100_000,
+        payoutMin: 100_000,
+        payoutMax: 100_000,
         ...overrides,
     };
 }
@@ -210,9 +211,10 @@ describe('calcMaterialCost', () => {
 // ---------------------------------------------------------------------------
 
 describe('calcProfitPerNerve', () => {
-    it('equals (payout - cost) / nerve', () => {
+    it('equals (payoutMin - cost) / nerve', () => {
         const s = Scenario({
-            payout: 100_000,
+            payoutMin: 100_000,
+            payoutMax: 100_000,
             actions: { place: [{ resourceId: RESOURCE.GASOLINE, qty: 2 }] },
         });
         const cost  = CATALOG[RESOURCE.GASOLINE].defaultPrice * 2;
@@ -222,38 +224,31 @@ describe('calcProfitPerNerve', () => {
 
     it('returns negative when cost exceeds payout', () => {
         const s = Scenario({
-            payout: 1,
+            payoutMin: 1,
+            payoutMax: 1,
             actions: { place: [{ resourceId: RESOURCE.GASOLINE, qty: 1 }] },
         });
         assert.ok(calcProfitPerNerve(s, {}) < 0);
     });
 
-    it('defaults to the average payout when basis is omitted', () => {
+    it('defaults to the min payout when basis is omitted', () => {
         const s = Scenario({
-            payout: 100_000,
+            payoutMin: 100_000,
             payoutMax: 150_000,
             actions: { place: [{ resourceId: RESOURCE.GASOLINE, qty: 2 }] },
         });
-        assert.equal(calcProfitPerNerve(s, {}), calcProfitPerNerve(s, {}, 'average'));
+        assert.equal(calcProfitPerNerve(s, {}), calcProfitPerNerve(s, {}, 'min'));
     });
 
-    it('uses payoutMax when basis is "max" and payoutMax is set', () => {
+    it('uses payoutMax when basis is "max"', () => {
         const cost = CATALOG[RESOURCE.GASOLINE].defaultPrice * 2;
         const nerve = 10 + 2 * 5;
         const s = Scenario({
-            payout: 100_000,
+            payoutMin: 100_000,
             payoutMax: 150_000,
             actions: { place: [{ resourceId: RESOURCE.GASOLINE, qty: 2 }] },
         });
         assert.equal(calcProfitPerNerve(s, {}, 'max'), (150_000 - cost) / nerve);
-    });
-
-    it('falls back to payout when basis is "max" but payoutMax is unset', () => {
-        const s = Scenario({
-            payout: 100_000,
-            actions: { place: [{ resourceId: RESOURCE.GASOLINE, qty: 2 }] },
-        });
-        assert.equal(calcProfitPerNerve(s, {}, 'max'), calcProfitPerNerve(s, {}, 'average'));
     });
 });
 
@@ -262,19 +257,14 @@ describe('calcProfitPerNerve', () => {
 // ---------------------------------------------------------------------------
 
 describe('effectivePayout', () => {
-    it('returns payout for basis "average"', () => {
-        const s = Scenario({ payout: 100_000, payoutMax: 150_000, actions: { place: [] } });
-        assert.equal(effectivePayout(s, 'average'), 100_000);
+    it('returns payoutMin for basis "min"', () => {
+        const s = Scenario({ payoutMin: 100_000, payoutMax: 150_000, actions: { place: [] } });
+        assert.equal(effectivePayout(s, 'min'), 100_000);
     });
 
-    it('returns payoutMax for basis "max" when set', () => {
-        const s = Scenario({ payout: 100_000, payoutMax: 150_000, actions: { place: [] } });
+    it('returns payoutMax for basis "max"', () => {
+        const s = Scenario({ payoutMin: 100_000, payoutMax: 150_000, actions: { place: [] } });
         assert.equal(effectivePayout(s, 'max'), 150_000);
-    });
-
-    it('returns payout for basis "max" when payoutMax is unset', () => {
-        const s = Scenario({ payout: 100_000, actions: { place: [] } });
-        assert.equal(effectivePayout(s, 'max'), 100_000);
     });
 });
 
@@ -334,7 +324,8 @@ describe('rankForScenario', () => {
 
     const confirmed: Scenario = {
         scenarioName: 'Test',
-        payout: 100_000,
+        payoutMin: 100_000,
+        payoutMax: 100_000,
         actions: { place: [{ resourceId: RESOURCE.GASOLINE, qty: 2 }] },
     };
 
