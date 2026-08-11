@@ -1,1 +1,1 @@
-export const SCENARIOS_VERSION = '4cd5041028d0';
+export const SCENARIOS_VERSION = '27292a78e25a';

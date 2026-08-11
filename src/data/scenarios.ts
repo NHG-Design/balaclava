@@ -53,7 +53,7 @@ export const SCENARIOS: Scenario[] = [
     payoutMax: 220_000,
     actions: {
       ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
-      place: [{ resourceId: RESOURCE.DIESEL, qty: 1 }],
+      place: [{ resourceId: RESOURCE.GASOLINE, qty: 1 }],
       stoke: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1, optional: true }],
       stokeTime: "late",
     },
@@ -181,11 +181,9 @@ export const SCENARIOS: Scenario[] = [
     payoutMax: 210_000,
     actions: {
       ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
-      place: [
-        { resourceId: RESOURCE.HYDROGEN, qty: 1 },
-        { resourceId: RESOURCE.KEROSENE, qty: 1 },
-        { resourceId: RESOURCE.POTASSIUM_NITRATE, qty: 1 },
-      ],
+      place: [{ resourceId: RESOURCE.HYDROGEN, qty: 1 }],
+      stoke: [{ resourceId: RESOURCE.HYDROGEN, qty: 1 }],
+      stokeTime: "early",
     },
   },
 
@@ -295,8 +293,8 @@ export const SCENARIOS: Scenario[] = [
     actions: {
       evidence: [{ resourceId: RESOURCE.TOOTHBRUSH, qty: 1 }],
       ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
-      place: [{ resourceId: RESOURCE.GASOLINE, qty: 3 }],
-      stoke: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1, optional: true }],
+      place: [{ resourceId: RESOURCE.GASOLINE, qty: 2 }],
+      stoke: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 2 }],
       stokeTime: "late",
     },
   },
@@ -383,7 +381,7 @@ export const SCENARIOS: Scenario[] = [
     payout: 360_000,
     payoutMax: 410_000,
     actions: {
-      ignite: [{ resourceId: RESOURCE.LIGHTER, qty: 1 }],
+      ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
       place: [{ resourceId: RESOURCE.HYDROGEN, qty: 1 }],
       stoke: [{ resourceId: RESOURCE.HYDROGEN, qty: 2 }],
       stokeTime: "early",
@@ -405,11 +403,8 @@ export const SCENARIOS: Scenario[] = [
     payoutMax: 290_000,
     actions: {
       ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
-      place: [
-        { resourceId: RESOURCE.GASOLINE, qty: 1 },
-        { resourceId: RESOURCE.HYDROGEN, qty: 1 },
-      ],
-      stoke: [{ resourceId: RESOURCE.METHANE, qty: 1 }],
+      place: [{ resourceId: RESOURCE.HYDROGEN, qty: 1 }],
+      stoke: [{ resourceId: RESOURCE.HYDROGEN, qty: 1 }],
       stokeTime: "late",
     },
   },
@@ -592,8 +587,8 @@ export const SCENARIOS: Scenario[] = [
     payout: 330_000,
     payoutMax: 350_000,
     actions: {
-      ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
-      place: [{ resourceId: RESOURCE.GASOLINE, qty: 3 }],
+      ignite: [{ resourceId: RESOURCE.LIGHTER, qty: 1 }],
+      place: [{ resourceId: RESOURCE.GASOLINE, qty: 4 }],
     },
   },
 
@@ -657,9 +652,9 @@ export const SCENARIOS: Scenario[] = [
     payout: 275_000,
     actions: {
       ignite: [{ resourceId: RESOURCE.LIGHTER, qty: 1 }],
-      place: [{ resourceId: RESOURCE.HYDROGEN, qty: 1 }],
-      stoke: [{ resourceId: RESOURCE.METHANE, qty: 1 }],
-      stokeTime: "52s",
+      place: [{ resourceId: RESOURCE.HYDROGEN, qty: 2 }],
+      stoke: [{ resourceId: RESOURCE.HYDROGEN, qty: 1 }],
+      stokeTime: "early",
     },
   },
 
@@ -743,9 +738,9 @@ export const SCENARIOS: Scenario[] = [
     payout: 170_000,
     payoutMax: 190_000,
     actions: {
-      ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
-      place: [{ resourceId: RESOURCE.GASOLINE, qty: 6 }],
-      stoke: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
+      ignite: [{ resourceId: RESOURCE.LIGHTER, qty: 1 }],
+      place: [{ resourceId: RESOURCE.GASOLINE, qty: 4 }],
+      stoke: [{ resourceId: RESOURCE.LIGHTER, qty: 1, optional: true }],
       stokeTime: "late",
     },
   },
@@ -817,12 +812,9 @@ export const SCENARIOS: Scenario[] = [
     payoutMax: 360_000,
     actions: {
       ignite: [{ resourceId: RESOURCE.LIGHTER, qty: 1 }],
-      place: [
-        { resourceId: RESOURCE.GASOLINE, qty: 1 },
-        { resourceId: RESOURCE.HYDROGEN, qty: 1 },
-      ],
-      stoke: [{ resourceId: RESOURCE.METHANE, qty: 1 }],
-      stokeTime: "late",
+      place: [{ resourceId: RESOURCE.HYDROGEN, qty: 1 }],
+      stoke: [{ resourceId: RESOURCE.HYDROGEN, qty: 1 }],
+      stokeTime: "early",
     },
   },
 
@@ -953,8 +945,9 @@ export const SCENARIOS: Scenario[] = [
     payoutMax: 79_000,
     actions: {
       ignite: [{ resourceId: RESOURCE.LIGHTER, qty: 1 }],
-      place: [{ resourceId: RESOURCE.GASOLINE, qty: 1 }],
+      place: [{ resourceId: RESOURCE.HYDROGEN, qty: 1 }],
     },
+    needsVerification: true,
   },
 
   {
@@ -963,11 +956,8 @@ export const SCENARIOS: Scenario[] = [
     payoutMax: 230_000,
     actions: {
       ignite: [{ resourceId: RESOURCE.LIGHTER, qty: 1 }],
-      place: [
-        { resourceId: RESOURCE.GASOLINE, qty: 1 },
-        { resourceId: RESOURCE.HYDROGEN, qty: 1 },
-        { resourceId: RESOURCE.OXYGEN, qty: 1 },
-      ],
+      place: [{ resourceId: RESOURCE.HYDROGEN, qty: 1 }],
+      stoke: [{ resourceId: RESOURCE.HYDROGEN, qty: 1 }],
     },
   },
 
@@ -990,8 +980,8 @@ export const SCENARIOS: Scenario[] = [
     payout: 74_000,
     payoutMax: 150_000,
     actions: {
-      ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
-      place: [{ resourceId: RESOURCE.GASOLINE, qty: 4 }],
+      ignite: [{ resourceId: RESOURCE.LIGHTER, qty: 1 }],
+      place: [{ resourceId: RESOURCE.GASOLINE, qty: 1 }],
     },
   },
 
@@ -1298,7 +1288,7 @@ export const SCENARIOS: Scenario[] = [
     payout: 110_000,
     payoutMax: 120_000,
     actions: {
-      ignite: [{ resourceId: RESOURCE.LIGHTER, qty: 1 }],
+      ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
       place: [{ resourceId: RESOURCE.GASOLINE, qty: 1 }],
     },
   },
@@ -1408,7 +1398,7 @@ export const SCENARIOS: Scenario[] = [
     payoutMax: 220_000,
     actions: {
       ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
-      place: [{ resourceId: RESOURCE.GASOLINE, qty: 5 }],
+      place: [{ resourceId: RESOURCE.GASOLINE, qty: 4 }],
     },
   },
 
@@ -1484,8 +1474,8 @@ export const SCENARIOS: Scenario[] = [
     payoutMax: 290_000,
     actions: {
       ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
-      place: [{ resourceId: RESOURCE.GASOLINE, qty: 4 }],
-      stoke: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
+      place: [{ resourceId: RESOURCE.GASOLINE, qty: 5 }],
+      stoke: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1, optional: true }],
       stokeTime: "late",
     },
   },
@@ -1546,6 +1536,7 @@ export const SCENARIOS: Scenario[] = [
     actions: {
       ignite: [{ resourceId: RESOURCE.LIGHTER, qty: 1 }],
       place: [{ resourceId: RESOURCE.GASOLINE, qty: 2 }],
+      dampen: [{ resourceId: RESOURCE.BLANKET, qty: 2 }],
     },
   },
 
@@ -1581,11 +1572,8 @@ export const SCENARIOS: Scenario[] = [
     payout: 390_000,
     payoutMax: 480_000,
     actions: {
-      ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
-      place: [
-        { resourceId: RESOURCE.GASOLINE, qty: 1 },
-        { resourceId: RESOURCE.KEROSENE, qty: 2 },
-      ],
+      ignite: [{ resourceId: RESOURCE.LIGHTER, qty: 1 }],
+      place: [{ resourceId: RESOURCE.KEROSENE, qty: 3 }],
     },
   },
 
@@ -1738,7 +1726,7 @@ export const SCENARIOS: Scenario[] = [
     payoutMax: 110_000,
     actions: {
       ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
-      place: [{ resourceId: RESOURCE.GASOLINE, qty: 3 }],
+      place: [{ resourceId: RESOURCE.GASOLINE, qty: 2 }],
     },
   },
 
@@ -2031,10 +2019,7 @@ export const SCENARIOS: Scenario[] = [
     payoutMax: 330_000,
     actions: {
       ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
-      place: [
-        { resourceId: RESOURCE.GASOLINE, qty: 2 },
-        { resourceId: RESOURCE.DIESEL, qty: 1 },
-      ],
+      place: [{ resourceId: RESOURCE.GASOLINE, qty: 3 }],
     },
   },
 
@@ -2055,10 +2040,7 @@ export const SCENARIOS: Scenario[] = [
     payoutMax: 74_000,
     actions: {
       ignite: [{ resourceId: RESOURCE.LIGHTER, qty: 1 }],
-      place: [
-        { resourceId: RESOURCE.HYDROGEN, qty: 1 },
-        { resourceId: RESOURCE.KEROSENE, qty: 1 },
-      ],
+      place: [{ resourceId: RESOURCE.KEROSENE, qty: 1 }],
     },
   },
 
@@ -2171,8 +2153,11 @@ export const SCENARIOS: Scenario[] = [
     payoutMax: 340_000,
     actions: {
       ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
-      place: [{ resourceId: RESOURCE.KEROSENE, qty: 3 }],
-      stoke: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1, optional: true }],
+      place: [{ resourceId: RESOURCE.GASOLINE, qty: 6 }],
+      stoke: [
+        { resourceId: RESOURCE.FLAMETHROWER, qty: 3 },
+        { resourceId: RESOURCE.OXYGEN, qty: 1 },
+      ],
       stokeTime: "late",
     },
   },
@@ -2251,7 +2236,7 @@ export const SCENARIOS: Scenario[] = [
     payout: 470_000,
     actions: {
       ignite: [{ resourceId: RESOURCE.LIGHTER, qty: 1 }],
-      place: [{ resourceId: RESOURCE.KEROSENE, qty: 5 }],
+      place: [{ resourceId: RESOURCE.KEROSENE, qty: 4 }],
     },
   },
 

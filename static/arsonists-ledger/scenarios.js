@@ -103,7 +103,7 @@
       payoutMax: 22e4,
       actions: {
         ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
-        place: [{ resourceId: RESOURCE.DIESEL, qty: 1 }],
+        place: [{ resourceId: RESOURCE.GASOLINE, qty: 1 }],
         stoke: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1, optional: true }],
         stokeTime: "late"
       }
@@ -221,11 +221,9 @@
       payoutMax: 21e4,
       actions: {
         ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
-        place: [
-          { resourceId: RESOURCE.HYDROGEN, qty: 1 },
-          { resourceId: RESOURCE.KEROSENE, qty: 1 },
-          { resourceId: RESOURCE.POTASSIUM_NITRATE, qty: 1 }
-        ]
+        place: [{ resourceId: RESOURCE.HYDROGEN, qty: 1 }],
+        stoke: [{ resourceId: RESOURCE.HYDROGEN, qty: 1 }],
+        stokeTime: "early"
       }
     },
     {
@@ -324,8 +322,8 @@
       actions: {
         evidence: [{ resourceId: RESOURCE.TOOTHBRUSH, qty: 1 }],
         ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
-        place: [{ resourceId: RESOURCE.GASOLINE, qty: 3 }],
-        stoke: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1, optional: true }],
+        place: [{ resourceId: RESOURCE.GASOLINE, qty: 2 }],
+        stoke: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 2 }],
         stokeTime: "late"
       }
     },
@@ -404,7 +402,7 @@
       payout: 36e4,
       payoutMax: 41e4,
       actions: {
-        ignite: [{ resourceId: RESOURCE.LIGHTER, qty: 1 }],
+        ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
         place: [{ resourceId: RESOURCE.HYDROGEN, qty: 1 }],
         stoke: [{ resourceId: RESOURCE.HYDROGEN, qty: 2 }],
         stokeTime: "early"
@@ -425,11 +423,8 @@
       payoutMax: 29e4,
       actions: {
         ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
-        place: [
-          { resourceId: RESOURCE.GASOLINE, qty: 1 },
-          { resourceId: RESOURCE.HYDROGEN, qty: 1 }
-        ],
-        stoke: [{ resourceId: RESOURCE.METHANE, qty: 1 }],
+        place: [{ resourceId: RESOURCE.HYDROGEN, qty: 1 }],
+        stoke: [{ resourceId: RESOURCE.HYDROGEN, qty: 1 }],
         stokeTime: "late"
       }
     },
@@ -594,8 +589,8 @@
       payout: 33e4,
       payoutMax: 35e4,
       actions: {
-        ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
-        place: [{ resourceId: RESOURCE.GASOLINE, qty: 3 }]
+        ignite: [{ resourceId: RESOURCE.LIGHTER, qty: 1 }],
+        place: [{ resourceId: RESOURCE.GASOLINE, qty: 4 }]
       }
     },
     {
@@ -653,9 +648,9 @@
       payout: 275e3,
       actions: {
         ignite: [{ resourceId: RESOURCE.LIGHTER, qty: 1 }],
-        place: [{ resourceId: RESOURCE.HYDROGEN, qty: 1 }],
-        stoke: [{ resourceId: RESOURCE.METHANE, qty: 1 }],
-        stokeTime: "52s"
+        place: [{ resourceId: RESOURCE.HYDROGEN, qty: 2 }],
+        stoke: [{ resourceId: RESOURCE.HYDROGEN, qty: 1 }],
+        stokeTime: "early"
       }
     },
     {
@@ -731,9 +726,9 @@
       payout: 17e4,
       payoutMax: 19e4,
       actions: {
-        ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
-        place: [{ resourceId: RESOURCE.GASOLINE, qty: 6 }],
-        stoke: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
+        ignite: [{ resourceId: RESOURCE.LIGHTER, qty: 1 }],
+        place: [{ resourceId: RESOURCE.GASOLINE, qty: 4 }],
+        stoke: [{ resourceId: RESOURCE.LIGHTER, qty: 1, optional: true }],
         stokeTime: "late"
       }
     },
@@ -798,12 +793,9 @@
       payoutMax: 36e4,
       actions: {
         ignite: [{ resourceId: RESOURCE.LIGHTER, qty: 1 }],
-        place: [
-          { resourceId: RESOURCE.GASOLINE, qty: 1 },
-          { resourceId: RESOURCE.HYDROGEN, qty: 1 }
-        ],
-        stoke: [{ resourceId: RESOURCE.METHANE, qty: 1 }],
-        stokeTime: "late"
+        place: [{ resourceId: RESOURCE.HYDROGEN, qty: 1 }],
+        stoke: [{ resourceId: RESOURCE.HYDROGEN, qty: 1 }],
+        stokeTime: "early"
       }
     },
     {
@@ -922,8 +914,9 @@
       payoutMax: 79e3,
       actions: {
         ignite: [{ resourceId: RESOURCE.LIGHTER, qty: 1 }],
-        place: [{ resourceId: RESOURCE.GASOLINE, qty: 1 }]
-      }
+        place: [{ resourceId: RESOURCE.HYDROGEN, qty: 1 }]
+      },
+      needsVerification: true
     },
     {
       scenarioName: "Cut Corners",
@@ -931,11 +924,8 @@
       payoutMax: 23e4,
       actions: {
         ignite: [{ resourceId: RESOURCE.LIGHTER, qty: 1 }],
-        place: [
-          { resourceId: RESOURCE.GASOLINE, qty: 1 },
-          { resourceId: RESOURCE.HYDROGEN, qty: 1 },
-          { resourceId: RESOURCE.OXYGEN, qty: 1 }
-        ]
+        place: [{ resourceId: RESOURCE.HYDROGEN, qty: 1 }],
+        stoke: [{ resourceId: RESOURCE.HYDROGEN, qty: 1 }]
       }
     },
     {
@@ -956,8 +946,8 @@
       payout: 74e3,
       payoutMax: 15e4,
       actions: {
-        ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
-        place: [{ resourceId: RESOURCE.GASOLINE, qty: 4 }]
+        ignite: [{ resourceId: RESOURCE.LIGHTER, qty: 1 }],
+        place: [{ resourceId: RESOURCE.GASOLINE, qty: 1 }]
       }
     },
     {
@@ -1244,7 +1234,7 @@
       payout: 11e4,
       payoutMax: 12e4,
       actions: {
-        ignite: [{ resourceId: RESOURCE.LIGHTER, qty: 1 }],
+        ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
         place: [{ resourceId: RESOURCE.GASOLINE, qty: 1 }]
       }
     },
@@ -1343,7 +1333,7 @@
       payoutMax: 22e4,
       actions: {
         ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
-        place: [{ resourceId: RESOURCE.GASOLINE, qty: 5 }]
+        place: [{ resourceId: RESOURCE.GASOLINE, qty: 4 }]
       }
     },
     {
@@ -1412,8 +1402,8 @@
       payoutMax: 29e4,
       actions: {
         ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
-        place: [{ resourceId: RESOURCE.GASOLINE, qty: 4 }],
-        stoke: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
+        place: [{ resourceId: RESOURCE.GASOLINE, qty: 5 }],
+        stoke: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1, optional: true }],
         stokeTime: "late"
       }
     },
@@ -1467,7 +1457,8 @@
       payoutMax: 15e4,
       actions: {
         ignite: [{ resourceId: RESOURCE.LIGHTER, qty: 1 }],
-        place: [{ resourceId: RESOURCE.GASOLINE, qty: 2 }]
+        place: [{ resourceId: RESOURCE.GASOLINE, qty: 2 }],
+        dampen: [{ resourceId: RESOURCE.BLANKET, qty: 2 }]
       }
     },
     {
@@ -1499,11 +1490,8 @@
       payout: 39e4,
       payoutMax: 48e4,
       actions: {
-        ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
-        place: [
-          { resourceId: RESOURCE.GASOLINE, qty: 1 },
-          { resourceId: RESOURCE.KEROSENE, qty: 2 }
-        ]
+        ignite: [{ resourceId: RESOURCE.LIGHTER, qty: 1 }],
+        place: [{ resourceId: RESOURCE.KEROSENE, qty: 3 }]
       }
     },
     {
@@ -1641,7 +1629,7 @@
       payoutMax: 11e4,
       actions: {
         ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
-        place: [{ resourceId: RESOURCE.GASOLINE, qty: 3 }]
+        place: [{ resourceId: RESOURCE.GASOLINE, qty: 2 }]
       }
     },
     {
@@ -1906,10 +1894,7 @@
       payoutMax: 33e4,
       actions: {
         ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
-        place: [
-          { resourceId: RESOURCE.GASOLINE, qty: 2 },
-          { resourceId: RESOURCE.DIESEL, qty: 1 }
-        ]
+        place: [{ resourceId: RESOURCE.GASOLINE, qty: 3 }]
       }
     },
     {
@@ -1928,10 +1913,7 @@
       payoutMax: 74e3,
       actions: {
         ignite: [{ resourceId: RESOURCE.LIGHTER, qty: 1 }],
-        place: [
-          { resourceId: RESOURCE.HYDROGEN, qty: 1 },
-          { resourceId: RESOURCE.KEROSENE, qty: 1 }
-        ]
+        place: [{ resourceId: RESOURCE.KEROSENE, qty: 1 }]
       }
     },
     {
@@ -2033,8 +2015,11 @@
       payoutMax: 34e4,
       actions: {
         ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
-        place: [{ resourceId: RESOURCE.KEROSENE, qty: 3 }],
-        stoke: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1, optional: true }],
+        place: [{ resourceId: RESOURCE.GASOLINE, qty: 6 }],
+        stoke: [
+          { resourceId: RESOURCE.FLAMETHROWER, qty: 3 },
+          { resourceId: RESOURCE.OXYGEN, qty: 1 }
+        ],
         stokeTime: "late"
       }
     },
@@ -2105,7 +2090,7 @@
       payout: 47e4,
       actions: {
         ignite: [{ resourceId: RESOURCE.LIGHTER, qty: 1 }],
-        place: [{ resourceId: RESOURCE.KEROSENE, qty: 5 }]
+        place: [{ resourceId: RESOURCE.KEROSENE, qty: 4 }]
       }
     },
     {
