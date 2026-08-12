@@ -2,6 +2,12 @@ import type { RequestHandler } from './$types'
 import { createClient } from '@libsql/client/web'
 import { SCENARIOS } from '../../../../data/scenarios'
 import { CATALOG, type ResourceId } from '../../../../data/catalog'
+import { verifySession, PLAYER_SESSION_COOKIE } from '$lib/server/session'
+
+interface PlayerSession {
+  playerId: string
+  name: string
+}
 
 const RATE_LIMIT_MAX = 5
 const RATE_LIMIT_WINDOW_MINUTES = 60
@@ -193,4 +199,70 @@ async function handler(request: Request, platform: App.Platform | undefined, cli
     status: 201,
     headers: { 'Content-Type': 'application/json' },
   })
+}
+
+/** Public listing: pending/approved/merged submissions with vote scores, plus the requester's
+ *  own vote if they're logged in. Denied submissions are only included via ?status=denied. */
+export const GET: RequestHandler = async ({ url, platform, cookies }) => {
+  try {
+    const dbUrl = platform?.env?.TURSO_DATABASE_URL
+    const authToken = platform?.env?.TURSO_AUTH_TOKEN
+    if (!dbUrl || !authToken) {
+      return new Response('Turso not configured', { status: 500 })
+    }
+
+    const statusFilter = url.searchParams.get('status')
+    const statuses =
+      statusFilter && ['pending', 'approved', 'merged', 'denied'].includes(statusFilter)
+        ? [statusFilter]
+        : ['pending', 'approved', 'merged']
+
+    const client = createClient({ url: dbUrl, authToken })
+    const placeholders = statuses.map(() => '?').join(', ')
+    const rows = await client.execute({
+      sql: `
+        SELECT
+          s.id, s.scenario_name, s.payout_min, s.payout_max, s.submitter_id,
+          s.recipe, s.status, s.pr_number, s.created_at,
+          COALESCE(SUM(v.value), 0) as score
+        FROM recipe_submissions s
+        LEFT JOIN submission_votes v ON v.submission_id = s.id
+        WHERE s.status IN (${placeholders})
+        GROUP BY s.id
+        ORDER BY score DESC, s.created_at DESC
+      `,
+      args: statuses,
+    })
+
+    let yourVotes: Record<number, number> = {}
+    const sessionSecret = platform?.env?.PLAYER_SESSION_SECRET
+    if (sessionSecret) {
+      const session = await verifySession<PlayerSession>(
+        sessionSecret,
+        cookies.get(PLAYER_SESSION_COOKIE),
+      )
+      if (session) {
+        const voteRows = await client.execute({
+          sql: 'SELECT submission_id, value FROM submission_votes WHERE player_id = ?',
+          args: [session.playerId],
+        })
+        yourVotes = Object.fromEntries(
+          voteRows.rows.map((r) => [Number(r.submission_id), Number(r.value)]),
+        )
+      }
+    }
+
+    const submissions = rows.rows.map((r) => ({
+      ...r,
+      yourVote: yourVotes[Number(r.id)] ?? null,
+    }))
+
+    return new Response(JSON.stringify({ submissions }), {
+      status: 200,
+      headers: { 'Content-Type': 'application/json' },
+    })
+  } catch (err) {
+    const msg = err instanceof Error ? `${err.name}: ${err.message}` : String(err)
+    return new Response(msg, { status: 500, headers: { 'Content-Type': 'text/plain' } })
+  }
 }
