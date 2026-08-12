@@ -6,6 +6,8 @@ declare global {
       env: {
         TORN_PUBLIC_API_KEY: string
         TORN_MINIMAL_API_KEY: string
+        TURSO_DATABASE_URL: string
+        TURSO_AUTH_TOKEN: string
         ASSETS: Fetcher
       }
       context: {
