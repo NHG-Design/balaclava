@@ -18,7 +18,7 @@ interface SubmissionPayload {
   submitterId?: string | null
   recipe: {
     place: ActionItemPayload[]
-    igniter: string
+    ignite: ActionItemPayload[]
     stoke?: ActionItemPayload[]
     stokeTime?: string
     dampen?: ActionItemPayload[]
@@ -31,6 +31,13 @@ const resourceIds = new Set(Object.keys(CATALOG) as ResourceId[])
 const igniterIds = new Set(
   (Object.keys(CATALOG) as ResourceId[]).filter((id) => CATALOG[id].category === 'igniter'),
 )
+
+function isValidIgniteItems(items: unknown): items is ActionItemPayload[] {
+  return (
+    isValidActionItems(items) &&
+    (items as ActionItemPayload[]).every((item) => igniterIds.has(item.resourceId as ResourceId))
+  )
+}
 
 function isValidActionItems(items: unknown): items is ActionItemPayload[] {
   return (
@@ -76,7 +83,7 @@ function validate(body: unknown): { ok: true; payload: SubmissionPayload } | { o
   if (!isValidActionItems(recipe.place)) {
     return { ok: false, error: 'Invalid place materials' }
   }
-  if (typeof recipe.igniter !== 'string' || !igniterIds.has(recipe.igniter as ResourceId)) {
+  if (!isValidIgniteItems(recipe.ignite)) {
     return { ok: false, error: 'Invalid igniter' }
   }
   if (recipe.stoke !== undefined && !isValidActionItems(recipe.stoke)) {
