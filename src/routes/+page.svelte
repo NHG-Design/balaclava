@@ -16,4 +16,7 @@
   <p>
     <code>/api/faction/[id]?user=[userId]&amp;stats=attackswon,defendswon&amp;align=center&amp;rounded=true&amp;factionLogo=true&amp;daysInFaction=true</code>
   </p>
+
+  <h2 style="margin-top:2rem;">Arsonist's Ledger</h2>
+  <p><a href="/arson/submissions">Community recipe submissions</a> — vote on payout/material recipes other players have submitted.</p>
 </main>

@@ -1,5 +1,8 @@
 <script lang="ts">
   import { onMount } from 'svelte'
+  import type { PageData } from './$types'
+
+  let { data }: { data: PageData } = $props()
 
   interface ActionItem {
     resourceId: string
@@ -23,6 +26,71 @@
     status: 'pending' | 'approved' | 'merged' | 'denied'
     pr_number: number | null
     created_at: string
+  }
+
+  interface FieldDiff {
+    label: string
+    changed: boolean
+    oldText: string
+    newText: string
+  }
+
+  function itemsKey(items: ActionItem[] | undefined): string {
+    return (items ?? [])
+      .map((i) => `${i.resourceId}:${i.qty}`)
+      .sort()
+      .join(',')
+  }
+
+  function computeDiff(s: Submission, recipe: Recipe | null): FieldDiff[] {
+    const current = data.currentScenarios[s.scenario_name]
+    const fields: FieldDiff[] = []
+
+    const oldPayout = current ? `${current.payoutMin.toLocaleString()}–${current.payoutMax.toLocaleString()}` : '—'
+    const newPayout = `${s.payout_min.toLocaleString()}–${s.payout_max.toLocaleString()}`
+    fields.push({
+      label: 'Payout',
+      changed: !current || current.payoutMin !== s.payout_min || current.payoutMax !== s.payout_max,
+      oldText: oldPayout,
+      newText: newPayout,
+    })
+
+    if (!recipe) return fields
+
+    const rows: Array<[string, ActionItem[] | undefined, ActionItem[] | undefined]> = [
+      ['Place', current?.actions.place, recipe.place],
+      ['Ignite', current?.actions.ignite, recipe.ignite],
+      ['Stoke', current?.actions.stoke, recipe.stoke],
+      ['Dampen', current?.actions.dampen, recipe.dampen],
+    ]
+    for (const [label, oldItems, newItems] of rows) {
+      if (!oldItems && !newItems) continue
+      fields.push({
+        label,
+        changed: itemsKey(oldItems) !== itemsKey(newItems),
+        oldText: formatItems(oldItems),
+        newText: formatItems(newItems),
+      })
+    }
+
+    if (current?.actions.stokeTime !== undefined || recipe.stokeTime !== undefined) {
+      fields.push({
+        label: 'Stoke time',
+        changed: (current?.actions.stokeTime ?? '') !== (recipe.stokeTime ?? ''),
+        oldText: current?.actions.stokeTime ?? '—',
+        newText: recipe.stokeTime ?? '—',
+      })
+    }
+    if (current?.actions.dampenTime !== undefined || recipe.dampenTime !== undefined) {
+      fields.push({
+        label: 'Dampen time',
+        changed: (current?.actions.dampenTime ?? '') !== (recipe.dampenTime ?? ''),
+        oldText: current?.actions.dampenTime ?? '—',
+        newText: recipe.dampenTime ?? '—',
+      })
+    }
+
+    return fields
   }
 
   let submissions = $state<Submission[]>([])
@@ -129,28 +197,34 @@
         </h2>
         {#each group as s (s.id)}
           {@const recipe = parseRecipe(s.recipe)}
+          {@const diff = computeDiff(s, recipe)}
           <article class="submission">
             <div class="row">
-              <span>Payout: {s.payout_min.toLocaleString()}–{s.payout_max.toLocaleString()}</span>
+              <span class="muted">vs. current scenario data</span>
               <span class="muted">Submitted {new Date(s.created_at).toLocaleString()}</span>
             </div>
             {#if recipe}
-              <div class="row"><strong>Place:</strong> {formatItems(recipe.place)}</div>
-              <div class="row"><strong>Ignite:</strong> {formatItems(recipe.ignite)}</div>
-              {#if recipe.stoke}
-                <div class="row">
-                  <strong>Stoke:</strong> {formatItems(recipe.stoke)}
-                  {#if recipe.stokeTime}({recipe.stokeTime}){/if}
-                </div>
-              {/if}
-              {#if recipe.dampen}
-                <div class="row">
-                  <strong>Dampen:</strong> {formatItems(recipe.dampen)}
-                  {#if recipe.dampenTime}({recipe.dampenTime}){/if}
-                </div>
-              {/if}
+              <table class="diff">
+                <tbody>
+                  {#each diff as f (f.label)}
+                    <tr class:changed={f.changed}>
+                      <td class="diff-label">{f.label}</td>
+                      {#if f.changed}
+                        <td class="diff-old">{f.oldText}</td>
+                        <td class="diff-arrow">→</td>
+                        <td class="diff-new">{f.newText}</td>
+                      {:else}
+                        <td class="diff-same" colspan="3">{f.newText} <span class="muted">(unchanged)</span></td>
+                      {/if}
+                    </tr>
+                  {/each}
+                </tbody>
+              </table>
             {:else}
               <div class="row error">Recipe data couldn't be parsed.</div>
+            {/if}
+            {#if !data.currentScenarios[s.scenario_name]}
+              <div class="row muted">No current data for this scenario — this would be a brand new entry.</div>
             {/if}
             {#if s.submitter_id}
               <div class="row muted">Submitter: {s.submitter_id}</div>
@@ -289,6 +363,36 @@
   .deny {
     background: oklch(28% 0.09 25);
     color: oklch(96% 0.012 95);
+  }
+  .diff {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+    margin: 4px 0;
+  }
+  .diff td {
+    padding: 3px 6px 3px 0;
+    vertical-align: top;
+  }
+  .diff-label {
+    color: oklch(58% 0.012 285);
+    white-space: nowrap;
+    width: 1%;
+  }
+  .diff-same {
+    color: oklch(75% 0.006 95);
+  }
+  tr.changed .diff-old {
+    color: #e77;
+    text-decoration: line-through;
+  }
+  tr.changed .diff-new {
+    color: #6d6;
+    font-weight: 600;
+  }
+  .diff-arrow {
+    color: oklch(50% 0.008 285);
+    width: 1%;
   }
   .history-title {
     margin-top: 32px;
