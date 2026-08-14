@@ -847,8 +847,8 @@ export const SCENARIOS: Scenario[] = [
     payoutMin: 33_500,
     payoutMax: 43_000,
     actions: {
+      place: [{ resourceId: RESOURCE.GASOLINE, qty: 3 }],
       ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
-      place: [{ resourceId: RESOURCE.GASOLINE, qty: 2 }],
     },
   },
 
