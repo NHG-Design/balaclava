@@ -94,235 +94,167 @@
     }
     return new Map([...map.entries()].sort(([a], [b]) => a.localeCompare(b)))
   })
+
+  const STATUS_CLASSES: Record<Submission['status'], string> = {
+    pending: 'bg-amber-500/15 text-amber-300',
+    approved: 'bg-sky-500/15 text-sky-300',
+    merged: 'bg-emerald-500/15 text-emerald-300',
+    denied: 'bg-rose-500/15 text-rose-300',
+  }
 </script>
 
 <svelte:head>
   <title>Recipe submissions — Arsonist's Ledger</title>
 </svelte:head>
 
-<main>
-  <header>
-    <h1>Community recipe submissions</h1>
+<div class="min-h-screen bg-ink-950 text-ink-100">
+  <header class="border-b border-ink-800 bg-ink-900/60">
+    <div class="mx-auto max-w-6xl px-6 py-8">
+      <p class="text-xs font-medium tracking-wide text-accent-400 uppercase">Arsonist's Ledger</p>
+      <h1 class="text-2xl font-semibold text-ink-100">Community recipe submissions</h1>
+      <p class="mt-1 text-sm text-ink-400">
+        Recipes submitted from the userscript, browsable by scenario.
+      </p>
+    </div>
   </header>
 
-  <div class="filters">
-    <button class:active={statusFilter === 'default'} onclick={() => (statusFilter = 'default')}>
-      Pending &amp; approved
-    </button>
-    <button class:active={statusFilter === 'denied'} onclick={() => (statusFilter = 'denied')}>
-      Denied
-    </button>
-  </div>
+  <main class="mx-auto max-w-6xl px-6 py-8">
+    <div class="mb-6 inline-flex rounded-full border border-ink-700 bg-ink-900 p-1">
+      <button
+        onclick={() => (statusFilter = 'default')}
+        class="rounded-full px-3.5 py-1.5 text-xs font-medium transition-colors {statusFilter ===
+        'default'
+          ? 'bg-accent-500 text-ink-950'
+          : 'text-ink-400 hover:text-ink-100'}"
+      >
+        Pending &amp; approved
+      </button>
+      <button
+        onclick={() => (statusFilter = 'denied')}
+        class="rounded-full px-3.5 py-1.5 text-xs font-medium transition-colors {statusFilter ===
+        'denied'
+          ? 'bg-accent-500 text-ink-950'
+          : 'text-ink-400 hover:text-ink-100'}"
+      >
+        Denied
+      </button>
+    </div>
 
-  {#if loading}
-    <p class="muted">Loading…</p>
-  {:else if loadError}
-    <p class="error">{loadError}</p>
-  {:else if submissions.length === 0}
-    <p class="muted">No submissions here yet.</p>
-  {:else}
-    {#each [...grouped.entries()] as [scenarioName, group] (scenarioName)}
-      <section class="scenario-group">
-        <h2>{scenarioName}</h2>
-        {#each group as s (s.id)}
-          {@const recipe = parseRecipe(s.recipe)}
-          {@const diff = computeDiff(s, recipe, data.currentScenarios)}
-          <article
-            class="submission"
-            class:highlighted={highlightedId === s.id}
-            id={`submission-${s.id}`}
-          >
-            <div class="row">
-              <span class="status status-{s.status}">{s.status}</span>
-              <div class="row-right">
-                <span class="muted">{new Date(s.created_at).toLocaleString()}</span>
-                <button class="copy-btn" onclick={() => copyLink(s.id)} aria-label="Copy share link">
-                  {#if copiedId === s.id}
-                    Copied!
+    {#if loading}
+      <p class="text-sm text-ink-400">Loading…</p>
+    {:else if loadError}
+      <p class="text-sm text-rose-400">{loadError}</p>
+    {:else if submissions.length === 0}
+      <p class="text-sm text-ink-400">No submissions here yet.</p>
+    {:else}
+      <div class="flex flex-col gap-10">
+        {#each [...grouped.entries()] as [scenarioName, group] (scenarioName)}
+          <section>
+            <h2 class="mb-3 text-base font-semibold text-ink-100">{scenarioName}</h2>
+
+            <div class="grid grid-cols-1 gap-4 lg:grid-cols-2">
+              {#each group as s (s.id)}
+                {@const recipe = parseRecipe(s.recipe)}
+                {@const diff = computeDiff(s, recipe, data.currentScenarios)}
+                <article
+                  id={`submission-${s.id}`}
+                  class="flex scroll-mt-6 flex-col gap-3 rounded-xl border border-ink-700 bg-ink-900 p-4 transition-shadow duration-500 {highlightedId ===
+                  s.id
+                    ? 'border-accent-400 shadow-[0_0_0_2px_var(--color-accent-400)]'
+                    : ''}"
+                >
+                  <div class="flex items-center justify-between gap-2">
+                    <span
+                      class="rounded px-1.5 py-0.5 text-[10px] font-medium tracking-wide uppercase {STATUS_CLASSES[
+                        s.status
+                      ]}"
+                    >
+                      {s.status}
+                    </span>
+                    <div class="flex items-center gap-3">
+                      <span class="text-xs text-ink-400">
+                        {new Date(s.created_at).toLocaleString()}
+                      </span>
+                      <button
+                        onclick={() => copyLink(s.id)}
+                        aria-label="Copy share link"
+                        class="inline-flex items-center gap-1 rounded px-1 py-0.5 text-xs text-ink-400 transition-colors hover:text-accent-400"
+                      >
+                        {#if copiedId === s.id}
+                          Copied!
+                        {:else}
+                          <svg
+                            width="12"
+                            height="12"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            aria-hidden="true"
+                          >
+                            <path d="M9 15l6 -6" />
+                            <path d="M11 6l.463 -.536a5 5 0 0 1 7.071 7.072l-.534 .464" />
+                            <path
+                              d="M13 18l-.397 .534a5.068 5.068 0 0 1 -7.127 0a4.972 4.972 0 0 1 0 -7.071l.524 -.463"
+                            />
+                          </svg>
+                          Copy link
+                        {/if}
+                      </button>
+                    </div>
+                  </div>
+
+                  {#if recipe}
+                    <table class="w-full border-collapse text-[13px]">
+                      <tbody>
+                        {#each diff as f (f.label)}
+                          <tr>
+                            <td class="w-px py-1 pr-3 align-top whitespace-nowrap text-ink-400">
+                              {f.label}
+                            </td>
+                            {#if f.changed}
+                              <td class="py-1 pr-2 align-top text-rose-400 line-through">
+                                {f.oldText}
+                              </td>
+                              <td class="w-px py-1 pr-2 align-top text-ink-600">→</td>
+                              <td class="py-1 align-top font-medium text-emerald-400">
+                                {f.newText}
+                              </td>
+                            {:else}
+                              <td class="py-1 align-top text-ink-200" colspan="3">
+                                {f.newText}
+                                <span class="text-ink-600">(unchanged)</span>
+                              </td>
+                            {/if}
+                          </tr>
+                        {/each}
+                      </tbody>
+                    </table>
                   {:else}
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                      <path d="M9 15l6 -6" />
-                      <path d="M11 6l.463 -.536a5 5 0 0 1 7.071 7.072l-.534 .464" />
-                      <path d="M13 18l-.397 .534a5.068 5.068 0 0 1 -7.127 0a4.972 4.972 0 0 1 0 -7.071l.524 -.463" />
-                    </svg>
-                    Copy link
+                    <p class="text-sm text-rose-400">Recipe data couldn't be parsed.</p>
                   {/if}
-                </button>
-              </div>
+
+                  {#if s.status === 'approved' && s.pr_number}
+                    <p class="text-xs text-ink-400">
+                      Approved — deploying via
+                      <a
+                        href={`https://github.com/NHG-Design/balaclava/pull/${s.pr_number}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        class="text-accent-400 hover:underline"
+                      >
+                        PR #{s.pr_number}
+                      </a>
+                    </p>
+                  {/if}
+                </article>
+              {/each}
             </div>
-            {#if recipe}
-              <table class="diff">
-                <tbody>
-                  {#each diff as f (f.label)}
-                    <tr class:changed={f.changed}>
-                      <td class="diff-label">{f.label}</td>
-                      {#if f.changed}
-                        <td class="diff-old">{f.oldText}</td>
-                        <td class="diff-arrow">→</td>
-                        <td class="diff-new">{f.newText}</td>
-                      {:else}
-                        <td class="diff-same" colspan="3">{f.newText} <span class="muted">(unchanged)</span></td>
-                      {/if}
-                    </tr>
-                  {/each}
-                </tbody>
-              </table>
-            {:else}
-              <div class="row error">Recipe data couldn't be parsed.</div>
-            {/if}
-            {#if s.status === 'approved' && s.pr_number}
-              <div class="row muted">
-                Approved — deploying via
-                <a href={`https://github.com/NHG-Design/balaclava/pull/${s.pr_number}`} target="_blank" rel="noopener noreferrer">PR #{s.pr_number}</a>
-              </div>
-            {/if}
-          </article>
+          </section>
         {/each}
-      </section>
-    {/each}
-  {/if}
-</main>
-
-<style>
-  :global(body) {
-    margin: 0;
-  }
-  main {
-    max-width: 720px;
-    margin: 0 auto;
-    padding: 32px 16px 80px;
-    background: oklch(14% 0.01 260);
-    min-height: 100vh;
-    font-family: system-ui, sans-serif;
-    color: oklch(90% 0.006 95);
-  }
-  header {
-    margin-bottom: 16px;
-  }
-  h1 {
-    font-size: 20px;
-    margin: 0;
-  }
-  h2 {
-    font-size: 15px;
-    margin: 24px 0 8px;
-  }
-  .filters {
-    display: flex;
-    gap: 8px;
-    margin-bottom: 8px;
-  }
-  .filters button {
-    background: oklch(20% 0.008 285);
-    border: 1px solid oklch(27% 0.017 285);
-    color: oklch(70% 0.01 285);
-    border-radius: 6px;
-    padding: 6px 12px;
-    font-size: 12px;
-    cursor: pointer;
-  }
-  .filters button.active {
-    background: color-mix(in oklch, #6d6 22%, oklch(20% 0.008 285));
-    color: oklch(96% 0.012 95);
-    border-color: #6d6;
-  }
-  .muted {
-    color: oklch(55% 0.008 285);
-    font-size: 12px;
-  }
-  .error {
-    color: #e77;
-    font-size: 13px;
-  }
-  .scenario-group {
-    border-bottom: 1px solid oklch(27% 0.017 285);
-    padding-bottom: 8px;
-  }
-  .submission {
-    background: oklch(20% 0.008 285);
-    border: 1px solid oklch(27% 0.017 285);
-    border-radius: 8px;
-    padding: 12px;
-    margin-bottom: 10px;
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-    scroll-margin-top: 24px;
-    box-shadow: 0 0 0 0 transparent;
-    transition: box-shadow 600ms cubic-bezier(0.23, 1, 0.32, 1), border-color 600ms cubic-bezier(0.23, 1, 0.32, 1);
-  }
-  .submission.highlighted {
-    box-shadow: 0 0 0 2px #6d6;
-    border-color: #6d6;
-  }
-  .row {
-    font-size: 13px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 8px;
-    flex-wrap: wrap;
-  }
-  .row-right {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
-  .copy-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    background: none;
-    border: none;
-    color: oklch(58% 0.012 285);
-    cursor: pointer;
-    font-size: 11px;
-    padding: 2px 4px;
-  }
-  .copy-btn:hover {
-    color: #6d6;
-  }
-  .status {
-    text-transform: uppercase;
-    font-size: 10px;
-    padding: 2px 6px;
-    border-radius: 4px;
-    flex-shrink: 0;
-  }
-  .status-pending { background: oklch(30% 0.09 90 / 0.4); color: #e9c23b; }
-  .status-approved { background: oklch(28% 0.06 220 / 0.5); color: #7ac6ff; }
-  .status-merged { background: oklch(30% 0.09 155 / 0.5); color: #6d6; }
-  .status-denied { background: oklch(28% 0.09 25 / 0.5); color: #e77; }
-  a { color: #7ac6ff; }
-
-  .diff {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 12px;
-    margin: 4px 0;
-  }
-  .diff td {
-    padding: 3px 6px 3px 0;
-    vertical-align: top;
-  }
-  .diff-label {
-    color: oklch(58% 0.012 285);
-    white-space: nowrap;
-    width: 1%;
-  }
-  .diff-same {
-    color: oklch(75% 0.006 95);
-  }
-  tr.changed .diff-old {
-    color: #e77;
-    text-decoration: line-through;
-  }
-  tr.changed .diff-new {
-    color: #6d6;
-    font-weight: 600;
-  }
-  .diff-arrow {
-    color: oklch(50% 0.008 285);
-    width: 1%;
-  }
-</style>
+      </div>
+    {/if}
+  </main>
+</div>

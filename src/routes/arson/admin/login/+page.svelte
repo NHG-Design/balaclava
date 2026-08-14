@@ -1,5 +1,7 @@
 <script lang="ts">
   import { goto } from '$app/navigation'
+  import { scale } from 'svelte/transition'
+  import { quintOut } from 'svelte/easing'
 
   let username = $state('')
   let password = $state('')
@@ -16,7 +18,7 @@
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username, password }),
       })
-      const data = await res.json() as { ok?: boolean; error?: string }
+      const data = (await res.json()) as { ok?: boolean; error?: string }
       if (!res.ok || !data.ok) {
         error = data.error ?? 'Login failed'
         return
@@ -34,84 +36,48 @@
   <title>Admin login — Arsonist's Ledger</title>
 </svelte:head>
 
-<main>
-  <form onsubmit={submit}>
-    <h1>Admin login</h1>
-    <label>
-      Username
-      <input type="text" bind:value={username} autocomplete="username" required />
-    </label>
-    <label>
-      Password
-      <input type="password" bind:value={password} autocomplete="current-password" required />
-    </label>
-    {#if error}
-      <p class="error">{error}</p>
-    {/if}
-    <button type="submit" disabled={loading}>{loading ? 'Signing in…' : 'Sign in'}</button>
-  </form>
-</main>
+<div class="flex min-h-screen items-center justify-center bg-ink-950 px-4">
+  <form
+    onsubmit={submit}
+    in:scale={{ start: 0.95, duration: 220, easing: quintOut }}
+    class="flex w-full max-w-sm flex-col gap-4 rounded-2xl border border-ink-700 bg-ink-900 p-8"
+  >
+    <div>
+      <p class="text-xs font-medium tracking-wide text-accent-400 uppercase">Arsonist's Ledger</p>
+      <h1 class="text-lg font-semibold text-ink-100">Admin login</h1>
+    </div>
 
-<style>
-  main {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    min-height: 100vh;
-    background: oklch(14% 0.01 260);
-    font-family: system-ui, sans-serif;
-  }
-  form {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    width: 280px;
-    padding: 24px;
-    background: oklch(20% 0.008 285);
-    border: 1px solid oklch(30% 0 0);
-    border-radius: 10px;
-  }
-  h1 {
-    font-size: 18px;
-    color: oklch(96% 0.012 95);
-    margin: 0 0 4px;
-  }
-  label {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-    font-size: 12px;
-    color: oklch(70% 0.01 285);
-  }
-  input {
-    background: oklch(14.5% 0.011 285);
-    border: 1px solid oklch(27% 0.017 285);
-    color: oklch(90% 0.006 95);
-    padding: 8px 10px;
-    border-radius: 6px;
-    font-size: 14px;
-  }
-  input:focus-visible {
-    outline: none;
-    border-color: #6d6;
-  }
-  button {
-    margin-top: 8px;
-    background: oklch(30% 0.09 155);
-    border: none;
-    color: oklch(96% 0.012 95);
-    padding: 10px;
-    border-radius: 6px;
-    font-size: 14px;
-    cursor: pointer;
-  }
-  button:disabled {
-    opacity: 0.5;
-    cursor: default;
-  }
-  .error {
-    color: #e77;
-    font-size: 12px;
-    margin: 0;
-  }
-</style>
+    <label class="flex flex-col gap-1.5 text-xs text-ink-400">
+      Username
+      <input
+        type="text"
+        bind:value={username}
+        autocomplete="username"
+        required
+        class="rounded-lg border border-ink-700 bg-ink-950 px-3 py-2 text-sm text-ink-100 transition-colors outline-none focus:border-accent-400"
+      />
+    </label>
+    <label class="flex flex-col gap-1.5 text-xs text-ink-400">
+      Password
+      <input
+        type="password"
+        bind:value={password}
+        autocomplete="current-password"
+        required
+        class="rounded-lg border border-ink-700 bg-ink-950 px-3 py-2 text-sm text-ink-100 transition-colors outline-none focus:border-accent-400"
+      />
+    </label>
+
+    {#if error}
+      <p class="text-xs text-rose-400">{error}</p>
+    {/if}
+
+    <button
+      type="submit"
+      disabled={loading}
+      class="mt-1 rounded-lg bg-accent-500 py-2.5 text-sm font-medium text-ink-950 transition-colors hover:bg-accent-400 active:scale-[0.98] disabled:pointer-events-none disabled:opacity-50"
+    >
+      {loading ? 'Signing in…' : 'Sign in'}
+    </button>
+  </form>
+</div>

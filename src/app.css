@@ -1,0 +1,34 @@
+@import "tailwindcss";
+@import "@fontsource/geist-sans/400.css";
+@import "@fontsource/geist-sans/500.css";
+@import "@fontsource/geist-sans/600.css";
+@import "@fontsource/geist-sans/700.css";
+@import "@fontsource/geist-sans/800.css";
+
+@theme {
+  --font-sans:
+    "Geist Sans", ui-sans-serif, system-ui, -apple-system, sans-serif;
+
+  /* The #c9f "excellent" band accent from the Arsonist's Ledger popover UI, carried
+     over as this site's primary accent for visual continuity with the userscript. */
+  --color-accent-50: oklch(94% 0.03 305);
+  --color-accent-200: oklch(85% 0.08 305);
+  --color-accent-400: oklch(75% 0.13 305);
+  --color-accent-500: oklch(70% 0.16 305);
+  --color-accent-600: oklch(62% 0.17 305);
+
+  --color-ink-950: oklch(13% 0.012 285);
+  --color-ink-900: oklch(17% 0.012 285);
+  --color-ink-800: oklch(22% 0.012 285);
+  --color-ink-700: oklch(28% 0.014 285);
+  --color-ink-600: oklch(38% 0.014 285);
+  --color-ink-400: oklch(58% 0.012 285);
+  --color-ink-200: oklch(80% 0.008 285);
+  --color-ink-100: oklch(92% 0.006 285);
+}
+
+body {
+  font-family: var(--font-sans);
+  background: var(--color-ink-950);
+  min-height: 100vh;
+}

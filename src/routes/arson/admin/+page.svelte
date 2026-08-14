@@ -32,12 +32,12 @@
         window.location.href = '/arson/admin/login'
         return
       }
-      const data = (await res.json()) as { submissions?: Submission[]; error?: string }
+      const json = (await res.json()) as { submissions?: Submission[]; error?: string }
       if (!res.ok) {
-        loadError = data.error ?? `HTTP ${res.status}`
+        loadError = json.error ?? `HTTP ${res.status}`
         return
       }
-      submissions = data.submissions ?? []
+      submissions = json.submissions ?? []
     } catch {
       loadError = 'Network error'
     } finally {
@@ -54,9 +54,9 @@
       const res = await fetch(`/api/arson/admin/recipe-submissions/${id}/${action}`, {
         method: 'POST',
       })
-      const data = (await res.json()) as { ok?: boolean; error?: string }
-      if (!res.ok || !data.ok) {
-        actionError = { ...actionError, [id]: data.error ?? `HTTP ${res.status}` }
+      const json = (await res.json()) as { ok?: boolean; error?: string }
+      if (!res.ok || !json.ok) {
+        actionError = { ...actionError, [id]: json.error ?? `HTTP ${res.status}` }
         return
       }
       await load()
@@ -78,254 +78,193 @@
     return map
   })
   let others = $derived(submissions.filter((s) => s.status !== 'pending'))
+
+  const STATUS_CLASSES: Record<Submission['status'], string> = {
+    pending: 'bg-amber-500/15 text-amber-300',
+    approved: 'bg-sky-500/15 text-sky-300',
+    merged: 'bg-emerald-500/15 text-emerald-300',
+    denied: 'bg-rose-500/15 text-rose-300',
+  }
+
+  async function logout() {
+    await fetch('/api/arson/admin/auth/logout', { method: 'POST' })
+    window.location.href = '/arson/admin/login'
+  }
 </script>
 
 <svelte:head>
   <title>Recipe submissions — Admin</title>
 </svelte:head>
 
-<main>
-  <h1>Recipe submissions</h1>
+<div class="min-h-screen bg-ink-950 text-ink-100">
+  <header class="border-b border-ink-800 bg-ink-900/60">
+    <div class="mx-auto flex max-w-6xl items-center justify-between px-6 py-5">
+      <div>
+        <p class="text-xs font-medium tracking-wide text-accent-400 uppercase">
+          Arsonist's Ledger
+        </p>
+        <h1 class="text-xl font-semibold text-ink-100">Recipe submissions</h1>
+      </div>
+      <button
+        onclick={logout}
+        class="rounded-md px-3 py-1.5 text-sm text-ink-400 transition-colors hover:text-ink-100"
+      >
+        Log out
+      </button>
+    </div>
+  </header>
 
-  {#if loading}
-    <p class="muted">Loading…</p>
-  {:else if loadError}
-    <p class="error">{loadError}</p>
-  {:else if pending.length === 0 && others.length === 0}
-    <p class="muted">No submissions yet.</p>
-  {:else}
-    {#if pending.length === 0}
-      <p class="muted">No pending submissions.</p>
-    {/if}
+  <main class="mx-auto max-w-6xl px-6 py-10">
+    {#if loading}
+      <p class="text-sm text-ink-400">Loading…</p>
+    {:else if loadError}
+      <p class="text-sm text-rose-400">{loadError}</p>
+    {:else if pending.length === 0 && others.length === 0}
+      <p class="text-sm text-ink-400">No submissions yet.</p>
+    {:else}
+      {#if pending.length === 0}
+        <p class="mb-8 text-sm text-ink-400">No pending submissions.</p>
+      {/if}
 
-    {#each [...grouped.entries()] as [scenarioName, group] (scenarioName)}
-      <section class="scenario-group">
-        <h2>
-          {scenarioName}
-          {#if group.length > 1}
-            <span class="badge">{group.length} competing submissions</span>
-          {/if}
-        </h2>
-        {#each group as s (s.id)}
-          {@const recipe = parseRecipe(s.recipe)}
-          {@const diff = computeDiff(s, recipe, data.currentScenarios)}
-          <article class="submission">
-            <div class="row">
-              <span class="muted">vs. current scenario data</span>
-              <span class="muted">Submitted {new Date(s.created_at).toLocaleString()}</span>
+      <div class="flex flex-col gap-10">
+        {#each [...grouped.entries()] as [scenarioName, group] (scenarioName)}
+          <section>
+            <div class="mb-3 flex items-center gap-2.5">
+              <h2 class="text-base font-semibold text-ink-100">{scenarioName}</h2>
+              {#if group.length > 1}
+                <span
+                  class="rounded-full border border-amber-400/40 px-2 py-0.5 text-[10px] font-medium tracking-wide text-amber-300 uppercase"
+                >
+                  {group.length} competing
+                </span>
+              {/if}
             </div>
-            {#if recipe}
-              <table class="diff">
+
+            <div class="grid grid-cols-1 gap-4 lg:grid-cols-2">
+              {#each group as s (s.id)}
+                {@const recipe = parseRecipe(s.recipe)}
+                {@const diff = computeDiff(s, recipe, data.currentScenarios)}
+                <article class="flex flex-col gap-3 rounded-xl border border-ink-700 bg-ink-900 p-4">
+                  <div class="flex items-center justify-between text-xs text-ink-400">
+                    <span>vs. current scenario data</span>
+                    <span>{new Date(s.created_at).toLocaleString()}</span>
+                  </div>
+
+                  {#if recipe}
+                    <table class="w-full border-collapse text-[13px]">
+                      <tbody>
+                        {#each diff as f (f.label)}
+                          <tr>
+                            <td class="w-px py-1 pr-3 align-top whitespace-nowrap text-ink-400">
+                              {f.label}
+                            </td>
+                            {#if f.changed}
+                              <td class="py-1 pr-2 align-top text-rose-400 line-through">
+                                {f.oldText}
+                              </td>
+                              <td class="w-px py-1 pr-2 align-top text-ink-600">→</td>
+                              <td class="py-1 align-top font-medium text-emerald-400">
+                                {f.newText}
+                              </td>
+                            {:else}
+                              <td class="py-1 align-top text-ink-200" colspan="3">
+                                {f.newText}
+                                <span class="text-ink-600">(unchanged)</span>
+                              </td>
+                            {/if}
+                          </tr>
+                        {/each}
+                      </tbody>
+                    </table>
+                  {:else}
+                    <p class="text-sm text-rose-400">Recipe data couldn't be parsed.</p>
+                  {/if}
+
+                  {#if !data.currentScenarios[s.scenario_name]}
+                    <p class="text-xs text-ink-400">
+                      No current data for this scenario — this would be a brand new entry.
+                    </p>
+                  {/if}
+                  {#if s.submitter_id}
+                    <p class="text-xs text-ink-400">Submitter: {s.submitter_id}</p>
+                  {/if}
+                  {#if actionError[s.id]}
+                    <p class="text-xs text-rose-400">{actionError[s.id]}</p>
+                  {/if}
+
+                  <div class="mt-1 flex gap-2">
+                    <button
+                      disabled={actionBusy[s.id]}
+                      onclick={() => act(s.id, 'approve')}
+                      class="rounded-md bg-emerald-500/15 px-3 py-1.5 text-xs font-medium text-emerald-300 transition-colors hover:bg-emerald-500/25 active:scale-[0.97] disabled:pointer-events-none disabled:opacity-40"
+                    >
+                      {actionBusy[s.id] ? 'Working…' : 'Approve'}
+                    </button>
+                    <button
+                      disabled={actionBusy[s.id]}
+                      onclick={() => act(s.id, 'deny')}
+                      class="rounded-md bg-rose-500/15 px-3 py-1.5 text-xs font-medium text-rose-300 transition-colors hover:bg-rose-500/25 active:scale-[0.97] disabled:pointer-events-none disabled:opacity-40"
+                    >
+                      {actionBusy[s.id] ? 'Working…' : 'Deny'}
+                    </button>
+                  </div>
+                </article>
+              {/each}
+            </div>
+          </section>
+        {/each}
+
+        {#if others.length > 0}
+          <section>
+            <h2 class="mb-3 text-base font-semibold text-ink-100">History</h2>
+            <div class="overflow-x-auto rounded-xl border border-ink-700">
+              <table class="w-full border-collapse text-[13px]">
+                <thead>
+                  <tr class="border-b border-ink-700 text-left text-xs text-ink-400">
+                    <th class="px-4 py-2.5 font-medium">Scenario</th>
+                    <th class="px-4 py-2.5 font-medium">Status</th>
+                    <th class="px-4 py-2.5 font-medium">PR</th>
+                    <th class="px-4 py-2.5 font-medium">Created</th>
+                  </tr>
+                </thead>
                 <tbody>
-                  {#each diff as f (f.label)}
-                    <tr class:changed={f.changed}>
-                      <td class="diff-label">{f.label}</td>
-                      {#if f.changed}
-                        <td class="diff-old">{f.oldText}</td>
-                        <td class="diff-arrow">→</td>
-                        <td class="diff-new">{f.newText}</td>
-                      {:else}
-                        <td class="diff-same" colspan="3">{f.newText} <span class="muted">(unchanged)</span></td>
-                      {/if}
+                  {#each others as s (s.id)}
+                    <tr class="border-b border-ink-800 last:border-0">
+                      <td class="px-4 py-2.5 text-ink-100">{s.scenario_name}</td>
+                      <td class="px-4 py-2.5">
+                        <span
+                          class="rounded px-1.5 py-0.5 text-[10px] font-medium tracking-wide uppercase {STATUS_CLASSES[
+                            s.status
+                          ]}"
+                        >
+                          {s.status}
+                        </span>
+                      </td>
+                      <td class="px-4 py-2.5">
+                        {#if s.pr_number}
+                          <a
+                            href={`https://github.com/NHG-Design/balaclava/pull/${s.pr_number}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            class="text-accent-400 hover:underline"
+                          >
+                            #{s.pr_number}
+                          </a>
+                        {:else}
+                          <span class="text-ink-600">—</span>
+                        {/if}
+                      </td>
+                      <td class="px-4 py-2.5 text-ink-400">
+                        {new Date(s.created_at).toLocaleDateString()}
+                      </td>
                     </tr>
                   {/each}
                 </tbody>
               </table>
-            {:else}
-              <div class="row error">Recipe data couldn't be parsed.</div>
-            {/if}
-            {#if !data.currentScenarios[s.scenario_name]}
-              <div class="row muted">No current data for this scenario — this would be a brand new entry.</div>
-            {/if}
-            {#if s.submitter_id}
-              <div class="row muted">Submitter: {s.submitter_id}</div>
-            {/if}
-
-            {#if actionError[s.id]}
-              <p class="error">{actionError[s.id]}</p>
-            {/if}
-            <div class="actions">
-              <button
-                class="approve"
-                disabled={actionBusy[s.id]}
-                onclick={() => act(s.id, 'approve')}
-              >
-                {actionBusy[s.id] ? 'Working…' : 'Approve'}
-              </button>
-              <button class="deny" disabled={actionBusy[s.id]} onclick={() => act(s.id, 'deny')}>
-                {actionBusy[s.id] ? 'Working…' : 'Deny'}
-              </button>
             </div>
-          </article>
-        {/each}
-      </section>
-    {/each}
-
-    {#if others.length > 0}
-      <h2 class="history-title">History</h2>
-      <table>
-        <thead>
-          <tr>
-            <th>Scenario</th>
-            <th>Status</th>
-            <th>PR</th>
-            <th>Created</th>
-          </tr>
-        </thead>
-        <tbody>
-          {#each others as s (s.id)}
-            <tr>
-              <td>{s.scenario_name}</td>
-              <td><span class="status status-{s.status}">{s.status}</span></td>
-              <td>
-                {#if s.pr_number}
-                  <a href={`https://github.com/NHG-Design/balaclava/pull/${s.pr_number}`} target="_blank" rel="noopener noreferrer">#{s.pr_number}</a>
-                {:else}
-                  —
-                {/if}
-              </td>
-              <td>{new Date(s.created_at).toLocaleDateString()}</td>
-            </tr>
-          {/each}
-        </tbody>
-      </table>
+          </section>
+        {/if}
+      </div>
     {/if}
-  {/if}
-</main>
-
-<style>
-  main {
-    max-width: 720px;
-    margin: 0 auto;
-    padding: 32px 16px;
-    background: oklch(14% 0.01 260);
-    min-height: 100vh;
-    font-family: system-ui, sans-serif;
-    color: oklch(90% 0.006 95);
-  }
-  h1 {
-    font-size: 22px;
-    margin-bottom: 20px;
-  }
-  h2 {
-    font-size: 15px;
-    margin: 24px 0 8px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-  .badge {
-    font-size: 10px;
-    text-transform: uppercase;
-    color: #e9a23b;
-    border: 1px solid #e9a23b;
-    border-radius: 4px;
-    padding: 2px 6px;
-  }
-  .scenario-group {
-    border-bottom: 1px solid oklch(27% 0.017 285);
-    padding-bottom: 8px;
-  }
-  .submission {
-    background: oklch(20% 0.008 285);
-    border: 1px solid oklch(27% 0.017 285);
-    border-radius: 8px;
-    padding: 12px;
-    margin-bottom: 10px;
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-  }
-  .row {
-    font-size: 13px;
-    display: flex;
-    justify-content: space-between;
-    gap: 8px;
-    flex-wrap: wrap;
-  }
-  .muted {
-    color: oklch(55% 0.008 285);
-    font-size: 12px;
-  }
-  .error {
-    color: #e77;
-    font-size: 12px;
-  }
-  .actions {
-    display: flex;
-    gap: 8px;
-    margin-top: 8px;
-  }
-  button {
-    border: none;
-    border-radius: 6px;
-    padding: 6px 12px;
-    font-size: 12px;
-    cursor: pointer;
-  }
-  button:disabled {
-    opacity: 0.5;
-    cursor: default;
-  }
-  .approve {
-    background: oklch(30% 0.09 155);
-    color: oklch(96% 0.012 95);
-  }
-  .deny {
-    background: oklch(28% 0.09 25);
-    color: oklch(96% 0.012 95);
-  }
-  .diff {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 12px;
-    margin: 4px 0;
-  }
-  .diff td {
-    padding: 3px 6px 3px 0;
-    vertical-align: top;
-  }
-  .diff-label {
-    color: oklch(58% 0.012 285);
-    white-space: nowrap;
-    width: 1%;
-  }
-  .diff-same {
-    color: oklch(75% 0.006 95);
-  }
-  tr.changed .diff-old {
-    color: #e77;
-    text-decoration: line-through;
-  }
-  tr.changed .diff-new {
-    color: #6d6;
-    font-weight: 600;
-  }
-  .diff-arrow {
-    color: oklch(50% 0.008 285);
-    width: 1%;
-  }
-  .history-title {
-    margin-top: 32px;
-  }
-  table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 12px;
-  }
-  th, td {
-    text-align: left;
-    padding: 6px 8px;
-    border-bottom: 1px solid oklch(27% 0.017 285);
-  }
-  .status {
-    text-transform: uppercase;
-    font-size: 10px;
-    padding: 2px 6px;
-    border-radius: 4px;
-  }
-  .status-approved { background: oklch(28% 0.06 220 / 0.5); color: #7ac6ff; }
-  .status-merged { background: oklch(30% 0.09 155 / 0.5); color: #6d6; }
-  .status-denied { background: oklch(28% 0.09 25 / 0.5); color: #e77; }
-  a { color: #7ac6ff; }
-</style>
+  </main>
+</div>
