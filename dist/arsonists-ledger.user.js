@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        Torn Arsonist's Ledger
 // @namespace   https://greasyfork.org/en/users/942572-yukio-mizsima
-// @version     1.1.0
+// @version     1.2.0
 // @description Arson profit-per-nerve calculator and scenario guide for Torn's Crimes page
 // @icon        https://www.google.com/s2/favicons?sz=64&domain=torn.com
 // @author      Yukio [906148]
@@ -18,7 +18,7 @@
 "use strict";
 (() => {
   // src/data/scenarios-version.ts
-  var SCENARIOS_VERSION = "71599ee30d81";
+  var SCENARIOS_VERSION = "ff292a86749e";
 
   // src/data/catalog.ts
   var CATALOG_UPDATED = "2026-08-08";
@@ -862,10 +862,14 @@
       actions: {
         ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
         place: [
-          { resourceId: RESOURCE.GASOLINE, qty: 4 },
-          { resourceId: RESOURCE.THERMITE, qty: 1 }
+          { resourceId: RESOURCE.GASOLINE, qty: 2 },
+          { resourceId: RESOURCE.POTASSIUM_NITRATE, qty: 1 }
         ],
-        stoke: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }]
+        stoke: [
+          { resourceId: RESOURCE.DIESEL, qty: 1 },
+          { resourceId: RESOURCE.DIESEL, qty: 2, optional: true }
+        ],
+        stokeTime: "late"
       }
     },
     {
@@ -967,8 +971,7 @@
       actions: {
         ignite: [{ resourceId: RESOURCE.LIGHTER, qty: 1 }],
         place: [{ resourceId: RESOURCE.HYDROGEN, qty: 1 }]
-      },
-      needsVerification: true
+      }
     },
     {
       scenarioName: "Cut Corners",
@@ -1923,10 +1926,7 @@
       payoutMax: 12e4,
       actions: {
         ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
-        place: [
-          { resourceId: RESOURCE.DIESEL, qty: 2 },
-          { resourceId: RESOURCE.MAGNESIUM, qty: 1 }
-        ]
+        place: [{ resourceId: RESOURCE.DIESEL, qty: 3 }]
       },
       needsVerification: true
     },
@@ -3899,7 +3899,19 @@
     /** Wrapper for a single material's button+image within an ITEM_GROUP. */
     ITEM_CELL_WRAP: '[class*="itemCellWrap___"]',
     /** The material's item image — its `src`/`srcset` numeric id maps to a Torn item id. */
-    ITEM_IMAGE: '[class*="image___"]'
+    ITEM_IMAGE: '[class*="image___"]',
+    /**
+     * Desktop-only wrapper around the "Abandon target" close button, inside
+     * TITLE_SECTION. Absent on mobile/tablet layout. Recipe-submit trigger
+     * button is injected as a sibling here.
+     */
+    ABANDON_BUTTON_WRAPPER: '[class*="abandonButtonWrapper___"]',
+    /**
+     * Torn's top-nav user info block, containing a link to the logged-in
+     * player's own profile (`/profiles.php?XID=<id>`). Queried from
+     * `document` directly — outside `.arson-root`.
+     */
+    USER_INFORMATION: '[class*="user-information"]'
   };
 
   // src/userscripts/arsonists-ledger/api.ts
@@ -3927,6 +3939,144 @@
     }
   }
 
+  // src/userscripts/arsonists-ledger/popover.ts
+  var stylesInjected = false;
+  function injectPopoverStyles() {
+    if (stylesInjected || document.getElementById("pyro-popover-styles")) {
+      stylesInjected = true;
+      return;
+    }
+    const style = el("style");
+    style.id = "pyro-popover-styles";
+    style.textContent = `
+.pyro-popover-wrap {
+    --pyro-tooltip-bg: oklch(24% 0 0);
+    --pyro-tooltip-border: oklch(30% 0 0);
+    --pyro-tooltip-shadow: oklch(12% 0.01 260 / 0.55);
+    --pyro-tooltip-radius: 8px;
+    --pyro-tooltip-arrow-size: 12px;
+    --pyro-popover-btn-size: 24px;
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+}
+.pyro-popover-btn {
+    width: var(--pyro-popover-btn-size);
+    height: var(--pyro-popover-btn-size);
+    padding: 0;
+    background: color-mix(in oklch, var(--pyro-tooltip-bg) 86%, black);
+    border: 1px solid var(--pyro-tooltip-border);
+    color: #ff8a3d;
+    cursor: pointer;
+    border-radius: var(--pyro-tooltip-radius);
+    font-size: 13px;
+    line-height: 1;
+    user-select: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 100ms ease-out, background 120ms ease-out, color 120ms ease-out;
+}
+@media (hover: hover) and (pointer: fine) {
+    .pyro-popover-btn:hover { background: color-mix(in oklch, var(--pyro-tooltip-bg) 94%, white 6%); color: oklch(96% 0.012 95); }
+}
+.pyro-popover-btn:active { transform: scale(0.94); }
+.pyro-popover-panel {
+    position: absolute;
+    top: calc(100% + 10px);
+    right: 0;
+    z-index: 9999;
+    background: var(--pyro-tooltip-bg);
+    color: oklch(96% 0.012 95);
+    border: 1px solid var(--pyro-tooltip-border);
+    border-radius: var(--pyro-tooltip-radius);
+    min-width: 290px;
+    max-width: 360px;
+    box-shadow: 0 2px 8px var(--pyro-tooltip-shadow);
+    overflow: visible;
+    transform-origin: calc(100% - (var(--pyro-popover-btn-size) / 2)) calc(0px - var(--pyro-tooltip-arrow-size));
+    transform: scale(0.95);
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: transform 150ms ease-out, opacity 150ms ease-out, visibility 0ms linear 150ms;
+}
+.pyro-popover-panel::before {
+    content: '';
+    position: absolute;
+    top: calc(var(--pyro-tooltip-arrow-size) / -2);
+    right: calc((var(--pyro-popover-btn-size) / 2) - (var(--pyro-tooltip-arrow-size) / 2));
+    width: var(--pyro-tooltip-arrow-size);
+    height: var(--pyro-tooltip-arrow-size);
+    background: var(--pyro-tooltip-bg);
+    border: 1px solid var(--pyro-tooltip-border);
+    transform: rotate(45deg);
+    box-sizing: border-box;
+    border-right: none;
+    border-bottom: none;
+    border-radius: 3px;
+}
+.pyro-popover-panel.is-open {
+    transform: scale(1);
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+    transition: transform 150ms ease-out, opacity 150ms ease-out, visibility 0ms linear 0ms;
+}
+.pyro-popover-panel:not(.is-open) {
+    transition: transform 100ms ease-out, opacity 100ms ease-out, visibility 0ms linear 100ms;
+}
+`;
+    document.head.appendChild(style);
+    stylesInjected = true;
+  }
+  function createPopover(opts) {
+    injectPopoverStyles();
+    const wrap = el(
+      "div",
+      opts.wrapClass ? `pyro-popover-wrap ${opts.wrapClass}` : "pyro-popover-wrap"
+    );
+    const btn = el("button", "pyro-popover-btn");
+    btn.type = "button";
+    if (opts.btnId) btn.id = opts.btnId;
+    btn.setAttribute("aria-label", opts.buttonAriaLabel);
+    btn.setAttribute("aria-expanded", "false");
+    btn.innerHTML = opts.buttonContent;
+    const panel = el("div", "pyro-popover-panel");
+    if (opts.panelId) panel.id = opts.panelId;
+    wrap.appendChild(btn);
+    wrap.appendChild(panel);
+    function open() {
+      panel.classList.add("is-open");
+      btn.setAttribute("aria-expanded", "true");
+    }
+    function close() {
+      panel.classList.remove("is-open");
+      btn.setAttribute("aria-expanded", "false");
+    }
+    function toggle() {
+      if (panel.classList.contains("is-open")) close();
+      else open();
+    }
+    btn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      toggle();
+    });
+    panel.addEventListener("click", (e) => {
+      e.stopPropagation();
+    });
+    document.addEventListener(
+      "click",
+      (e) => {
+        const path = typeof e.composedPath === "function" ? e.composedPath() : [];
+        const clickedInside = path.length > 0 ? path.includes(wrap) : wrap.contains(e.target);
+        if (!clickedInside) close();
+      },
+      { passive: true }
+    );
+    return { wrap, btn, panel, open, close, toggle };
+  }
+
   // src/userscripts/arsonists-ledger/icons.ts
   var S = 'xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"';
   var BLANK = '<path stroke="none" d="M0 0h24v24H0z" fill="none"/>';
@@ -3942,6 +4092,714 @@
   var ICON_PIN = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640" fill="currentColor"><path d="M128 252.6C128 148.4 214 64 320 64C426 64 512 148.4 512 252.6C512 371.9 391.8 514.9 341.6 569.4C329.8 582.2 310.1 582.2 298.3 569.4C248.1 514.9 127.9 371.9 127.9 252.6zM320 320C355.3 320 384 291.3 384 256C384 220.7 355.3 192 320 192C284.7 192 256 220.7 256 256C256 291.3 284.7 320 320 320z"/></svg>`;
   var ICON_SIREN = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640" fill="currentColor"><path d="M69.3 100L117.3 132C128.3 139.4 131.3 154.3 124 165.3C116.7 176.3 101.7 179.3 90.7 172L42.7 140C31.7 132.6 28.7 117.7 36 106.7C43.3 95.7 58.3 92.7 69.3 100zM597.3 140L549.3 172C538.3 179.4 523.4 176.4 516 165.3C508.6 154.2 511.6 139.4 522.7 132L570.7 100C581.7 92.6 596.6 95.6 604 106.7C611.4 117.8 608.4 132.6 597.3 140zM24 256L88 256C101.3 256 112 266.7 112 280C112 293.3 101.3 304 88 304L24 304C10.7 304 0 293.3 0 280C0 266.7 10.7 256 24 256zM552 256L616 256C629.3 256 640 266.7 640 280C640 293.3 629.3 304 616 304L552 304C538.7 304 528 293.3 528 280C528 266.7 538.7 256 552 256zM144 368L169.4 152.5C173.1 120.3 200.5 96 232.9 96L407.1 96C439.6 96 466.9 120.3 470.7 152.5L496 368L258.3 368L271.9 218.2C273.1 205 263.4 193.3 250.2 192.1C237 190.9 225.3 200.6 224.1 213.8L210.1 368L144 368zM96 448C96 430.3 110.3 416 128 416L512 416C529.7 416 544 430.3 544 448L544 512C544 529.7 529.7 544 512 544L128 544C110.3 544 96 529.7 96 512L96 448z"/></svg>`;
   var ICON_EMBER = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640" fill="currentColor"><path d="M281.6 93.9L297.6 72.6C301.6 67.2 308 64 314.7 64C326.4 64 336 73.6 336 85.3L336 107.4C336 120.5 341.4 133.1 350.9 142.1L435.6 223C484.4 269.6 512 334.2 512 401.7C512 498 434 576 337.7 576L320 576C214 576 128 490 128 384L128 380.2C128 331.4 147.4 284.6 181.9 250.1L185.4 246.6C189.6 242.4 195.4 240 201.4 240C213.9 240 224 250.1 224 262.6L224 352C224 387.3 252.7 416 288 416C323.3 416 352 387.3 352 352L352 348.1C352 330.1 344.8 312.8 332.1 300.1L293.5 261.5C269.5 237.5 256 204.8 256 170.8C256 143.1 265 116 281.6 93.9z"/></svg>`;
+  var ICON_PLUS = `<svg ${S} width="12" height="12" style="vertical-align:middle">${BLANK}<path d="M12 5l0 14"/><path d="M5 12l14 0"/></svg>`;
+  var ICON_TRASH = `<svg ${S} width="12" height="12" style="vertical-align:middle">${BLANK}<path d="M4 7l16 0"/><path d="M10 11l0 6"/><path d="M14 11l0 6"/><path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12"/><path d="M9 7v-3a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v3"/></svg>`;
+  var ICON_SEND = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M10 14l11 -11"/><path d="M21 3l-6.5 18a0.55 .55 0 0 1 -1 0l-3.5 -7l-7 -3.5a0.55 .55 0 0 1 0 -1l18 -6.5"/></svg>`;
+  var ICON_CHEVRON_DOWN = `<svg ${S} width="16" height="16" aria-hidden="true">${BLANK}<path d="M6 9l6 6l6 -6"/></svg>`;
+  var ICON_CHECK_MASK_PATH = "M9 16.2l-3.5-3.5-1.4 1.4L9 19 20 8l-1.4-1.4z";
+
+  // src/userscripts/arsonists-ledger/submit-tab.ts
+  var SUBMIT_URL = "https://balaclava.app/api/arson/recipe-submissions";
+  var TIME_PATTERN = /^(early|late|\d+(\.\d+)?(%|s))$/;
+  var CHECKMARK_DATA_URI = `data:image/svg+xml,${encodeURIComponent(
+    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="${ICON_CHECK_MASK_PATH}"/></svg>`
+  )}`;
+  var scenarioByName = new Map(SCENARIOS.map((s) => [s.scenarioName, s]));
+  var preselectedScenario = null;
+  function setPreselectedScenario(name) {
+    preselectedScenario = name;
+  }
+  var RESOURCE_OPTIONS = [
+    {
+      label: "Liquids",
+      ids: Object.values(CATALOG).filter((r) => r.category === "liquid").map((r) => r.id)
+    },
+    {
+      label: "Solids",
+      ids: Object.values(CATALOG).filter((r) => r.category === "solid").map((r) => r.id)
+    },
+    {
+      label: "Gases",
+      ids: Object.values(CATALOG).filter((r) => r.category === "gaseous").map((r) => r.id)
+    },
+    {
+      label: "Igniters",
+      ids: Object.values(CATALOG).filter((r) => r.category === "igniter").map((r) => r.id)
+    },
+    {
+      label: "Dampeners",
+      ids: Object.values(CATALOG).filter((r) => r.category === "dampener").map((r) => r.id)
+    }
+  ];
+  var PLACE_RESOURCE_OPTIONS = RESOURCE_OPTIONS.filter(
+    (group) => group.label !== "Igniters" && group.label !== "Dampeners"
+  );
+  var STOKE_RESOURCE_OPTIONS = RESOURCE_OPTIONS.filter((group) => group.label !== "Dampeners");
+  var DAMPEN_RESOURCE_OPTIONS = RESOURCE_OPTIONS.filter((group) => group.label === "Dampeners");
+  var IGNITER_IDS = Object.values(CATALOG).filter((r) => r.category === "igniter").map((r) => r.id);
+  function postSubmission(body, onDone) {
+    const payload = JSON.stringify(body);
+    if (typeof GM_xmlhttpRequest !== "undefined") {
+      GM_xmlhttpRequest({
+        method: "POST",
+        url: SUBMIT_URL,
+        data: payload,
+        headers: { "Content-Type": "application/json" },
+        onload(r) {
+          if (r.status >= 200 && r.status < 300) {
+            onDone({ ok: true });
+            return;
+          }
+          try {
+            const parsed = JSON.parse(r.responseText);
+            onDone({ ok: false, error: parsed.error ?? `HTTP ${r.status}` });
+          } catch {
+            onDone({ ok: false, error: `HTTP ${r.status}` });
+          }
+        },
+        onerror() {
+          onDone({ ok: false, error: "Network error" });
+        }
+      });
+      return;
+    }
+    fetch(SUBMIT_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: payload
+    }).then(async (r) => {
+      if (r.ok) {
+        onDone({ ok: true });
+        return;
+      }
+      try {
+        const parsed = await r.json();
+        onDone({ ok: false, error: parsed.error ?? `HTTP ${r.status}` });
+      } catch {
+        onDone({ ok: false, error: `HTTP ${r.status}` });
+      }
+    }).catch(() => onDone({ ok: false, error: "Network error" }));
+  }
+  function injectSubmitTabStyles() {
+    if (document.getElementById("pyro-submit-tab-styles")) return;
+    const style = el("style");
+    style.id = "pyro-submit-tab-styles";
+    style.textContent = `
+.pyro-rc-group { display: flex; flex-direction: column; gap: 6px; }
+.pyro-rc-place-group > .pyro-rc-group-title { margin-bottom: 4px; }
+.pyro-rc-group-title { font-size: 11px; text-transform: uppercase; color: oklch(58% 0.012 285); display: flex; align-items: center; justify-content: space-between; }
+.pyro-rc-payout-row { display: flex; gap: 6px; align-items: center; }
+.pyro-rc-input {
+    background: oklch(14.5% 0.011 285);
+    border: 1px solid oklch(27% 0.017 285);
+    color: oklch(82% 0.007 285);
+    font-size: 11px;
+    padding: 4px 6px;
+    border-radius: 5px;
+}
+.pyro-rc-input:focus-visible { outline: none; border-color: #6d6; }
+.pyro-rc-input.pyro-rc-err { border-color: #c66; }
+.pyro-rc-payout-row .pyro-rc-input { width: 100%; text-align: right; }
+.pyro-rc-input[type=number] { -moz-appearance: textfield; }
+.pyro-rc-input[type=number]::-webkit-inner-spin-button,
+.pyro-rc-input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+.pyro-rc-row { display: flex; gap: 4px; align-items: center; }
+.pyro-rc-row select { flex: 1; min-width: 0; }
+.pyro-rc-row .pyro-rc-input[type=number] { width: 48px; text-align: right; }
+
+.pyro-rc-select {
+    appearance: base-select;
+    background: oklch(14.5% 0.011 285);
+    border: 1px solid oklch(27% 0.017 285);
+    color: oklch(82% 0.007 285);
+    font-size: 12px;
+    padding: 4px 6px;
+    border-radius: 5px;
+    transition: border-color 120ms ease-out;
+}
+.pyro-rc-select:focus-visible { outline: none; border-color: #6d6; }
+.pyro-rc-select::picker-icon { display: none; }
+.pyro-rc-select button {
+    all: unset;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 6px;
+    width: 100%;
+    box-sizing: border-box;
+    cursor: pointer;
+}
+.pyro-rc-select-icon { display: flex; color: oklch(55% 0.012 285); transition: transform 120ms ease-out; flex-shrink: 0; }
+.pyro-rc-select:open .pyro-rc-select-icon { transform: rotate(180deg); }
+.pyro-rc-select::picker(select) {
+    appearance: base-select;
+    background: oklch(20% 0.008 285);
+    border: 1px solid oklch(30% 0 0);
+    border-radius: 6px;
+    padding: 4px;
+    box-shadow: 0 4px 14px oklch(12% 0.01 260 / 0.5);
+    scrollbar-width: thin;
+    scrollbar-color: oklch(40% 0.01 285) oklch(20% 0.008 285);
+}
+.pyro-rc-select::picker(select)::-webkit-scrollbar { width: 6px; }
+.pyro-rc-select::picker(select)::-webkit-scrollbar-track { background: oklch(20% 0.008 285); }
+.pyro-rc-select::picker(select)::-webkit-scrollbar-thumb {
+    background: oklch(40% 0.01 285);
+    border-radius: 3px;
+}
+.pyro-rc-select::picker(select)::-webkit-scrollbar-button {
+    display: none;
+    width: 0;
+    height: 0;
+    background: oklch(20% 0.008 285);
+}
+.pyro-rc-select::picker(select)::-webkit-scrollbar-corner { background: oklch(20% 0.008 285); }
+.pyro-rc-select option {
+    border-radius: 4px;
+    color: oklch(82% 0.007 285);
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+}
+@media (hover: hover) and (pointer: fine) {
+    .pyro-rc-select option:hover { background: oklch(28% 0.012 285); }
+}
+.pyro-rc-select option:checked {
+    background: color-mix(in oklch, #6d6 22%, oklch(20% 0.008 285));
+    color: oklch(96% 0.012 95);
+}
+.pyro-rc-select option::checkmark {
+    content: "";
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    background-color: #6d6;
+    -webkit-mask-image: url("${CHECKMARK_DATA_URI}");
+    mask-image: url("${CHECKMARK_DATA_URI}");
+    -webkit-mask-size: contain;
+    mask-size: contain;
+    -webkit-mask-repeat: no-repeat;
+    mask-repeat: no-repeat;
+}
+.pyro-rc-select optgroup {
+    color: oklch(50% 0.01 285);
+    font-size: 10px;
+    text-transform: uppercase;
+}
+.pyro-rc-scenario-select { width: 100%; }
+
+.pyro-rc-icon-btn {
+    background: oklch(15% 0.012 285);
+    border: 1px solid oklch(28% 0.018 285);
+    color: oklch(60% 0.009 285);
+    cursor: pointer;
+    border-radius: 5px;
+    padding: 4px 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+@media (hover: hover) and (pointer: fine) {
+    .pyro-rc-icon-btn:hover:not(:disabled) { background: oklch(21% 0.016 285); color: oklch(85% 0.006 285); }
+}
+.pyro-rc-icon-btn:disabled { opacity: 0.28; cursor: default; }
+.pyro-rc-add-btn {
+    background: none;
+    border: none;
+    color: oklch(58% 0.012 285);
+    font-size: 10px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    padding: 0;
+}
+@media (hover: hover) and (pointer: fine) { .pyro-rc-add-btn:hover { color: oklch(85% 0.006 285); } }
+.pyro-rc-check-row { display: flex; align-items: center; gap: 6px; font-size: 12px; color: oklch(62% 0.009 285); cursor: pointer; user-select: none; }
+.pyro-rc-toggle-body { display: flex; flex-direction: column; gap: 6px; padding-left: 4px; border-left: 2px solid oklch(27% 0.017 285); }
+.pyro-rc-time-row { display: flex; align-items: center; gap: 6px; }
+.pyro-rc-time-row .pyro-rc-input { flex: 1; }
+.pyro-rc-submit-btn {
+    background: oklch(15% 0.012 285);
+    border: 1px solid oklch(28% 0.018 285);
+    color: oklch(85% 0.006 285);
+    cursor: pointer;
+    border-radius: 5px;
+    padding: 6px 10px;
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+}
+@media (hover: hover) and (pointer: fine) { .pyro-rc-submit-btn:hover:not(:disabled) { background: oklch(21% 0.016 285); } }
+.pyro-rc-submit-btn:disabled { opacity: 0.4; cursor: default; }
+.pyro-rc-status { font-size: 10px; min-height: 13px; color: oklch(38% 0.008 285); display: flex; align-items: center; gap: 2px; }
+.pyro-rc-status.ok { color: #6d6; }
+.pyro-rc-status.err { color: #c66; }
+.pyro-rc-status.hint { color: oklch(45% 0.008 285); }
+.pyro-rc-external-link { font-size: 11px; color: ${BAND_COLOR.excellent}; text-decoration: none; display: inline-flex; align-items: center; gap: 3px; align-self: flex-start; }
+.pyro-rc-external-link:hover { text-decoration: underline; }
+.pyro-rc-external-link svg { width: 10px; height: 10px; flex-shrink: 0; }
+.pyro-rc-field-err { font-size: 10px; color: #c66; min-height: 12px; }
+`;
+    document.head.appendChild(style);
+  }
+  function addSelectChrome(select) {
+    const button = document.createElement("button");
+    button.type = "button";
+    const selectedContent = document.createElement("selectedcontent");
+    button.appendChild(selectedContent);
+    const chevron = document.createElement("span");
+    chevron.className = "pyro-rc-select-icon";
+    chevron.innerHTML = ICON_CHEVRON_DOWN;
+    button.appendChild(chevron);
+    select.insertBefore(button, select.firstChild);
+  }
+  function materialSelect(draft, onChange, options) {
+    const select = el("select", "pyro-rc-select");
+    const blank = document.createElement("option");
+    blank.value = "";
+    blank.textContent = "Select material\u2026";
+    select.appendChild(blank);
+    for (const group of options) {
+      if (group.ids.length === 0) continue;
+      const optgroup = document.createElement("optgroup");
+      optgroup.label = group.label;
+      for (const id of group.ids) {
+        const opt = document.createElement("option");
+        opt.value = id;
+        opt.textContent = CATALOG[id].name;
+        optgroup.appendChild(opt);
+      }
+      select.appendChild(optgroup);
+    }
+    select.value = draft.resourceId;
+    select.addEventListener("change", () => {
+      draft.resourceId = select.value;
+      onChange();
+    });
+    addSelectChrome(select);
+    return select;
+  }
+  function materialRow(draft, onRemove, canRemove, onChange, options) {
+    const row2 = el("div", "pyro-rc-row");
+    row2.appendChild(materialSelect(draft, onChange, options));
+    const qty = el("input", "pyro-rc-input");
+    qty.type = "number";
+    qty.min = "1";
+    qty.value = String(draft.qty);
+    qty.addEventListener("input", () => {
+      const val = parseInt(qty.value, 10);
+      draft.qty = Number.isFinite(val) && val > 0 ? val : 1;
+      onChange();
+    });
+    row2.appendChild(qty);
+    const removeBtn = el("button", "pyro-rc-icon-btn");
+    removeBtn.type = "button";
+    removeBtn.innerHTML = ICON_TRASH;
+    removeBtn.setAttribute("aria-label", "Remove material");
+    removeBtn.disabled = !canRemove();
+    removeBtn.addEventListener("click", onRemove);
+    row2.appendChild(removeBtn);
+    return row2;
+  }
+  function materialRowsGroup(drafts, onChange, options = RESOURCE_OPTIONS) {
+    const rowsWrap = el("div", "pyro-rc-group");
+    const rowsContainer = el("div", "pyro-rc-group");
+    function render() {
+      rowsContainer.innerHTML = "";
+      drafts.forEach((draft, i) => {
+        rowsContainer.appendChild(
+          materialRow(
+            draft,
+            () => {
+              drafts.splice(i, 1);
+              render();
+              onChange();
+            },
+            () => drafts.length > 1,
+            onChange,
+            options
+          )
+        );
+      });
+    }
+    render();
+    const addBtn = el("button", "pyro-rc-add-btn");
+    addBtn.type = "button";
+    addBtn.innerHTML = `${ICON_PLUS}<span>Add step</span>`;
+    addBtn.addEventListener("click", () => {
+      drafts.push({ resourceId: "", qty: 1 });
+      render();
+      onChange();
+    });
+    rowsWrap.appendChild(rowsContainer);
+    rowsWrap.appendChild(addBtn);
+    return rowsWrap;
+  }
+  function draftsFromItems(items) {
+    if (!items || items.length === 0) return [{ resourceId: "", qty: 1 }];
+    return items.map((i) => ({ resourceId: i.resourceId, qty: i.qty }));
+  }
+  function toggleSection(label, timeLabel, drafts, timeState, enabledInitially, onChange, options) {
+    const root = el("div", "pyro-rc-group");
+    const checkRow = el("label", "pyro-rc-check-row");
+    const checkbox = document.createElement("input");
+    checkbox.type = "checkbox";
+    checkbox.checked = enabledInitially;
+    const lbl = el("span");
+    lbl.textContent = label;
+    checkRow.appendChild(checkbox);
+    checkRow.appendChild(lbl);
+    root.appendChild(checkRow);
+    const body = el("div", "pyro-rc-toggle-body");
+    body.style.display = enabledInitially ? "flex" : "none";
+    body.appendChild(materialRowsGroup(drafts, onChange, options));
+    const itemsErr = el("div", "pyro-rc-field-err");
+    body.appendChild(itemsErr);
+    const timeRow = el("div", "pyro-rc-time-row");
+    const timeInputLbl = el("span", "pyro-rc-group-title");
+    timeInputLbl.textContent = timeLabel;
+    const timeInput = el("input", "pyro-rc-input");
+    timeInput.type = "text";
+    timeInput.placeholder = "e.g. early, late, 98%, 30s";
+    timeInput.value = timeState.value;
+    timeInput.addEventListener("input", () => {
+      timeState.value = timeInput.value;
+      onChange();
+    });
+    timeRow.appendChild(timeInputLbl);
+    timeRow.appendChild(timeInput);
+    body.appendChild(timeRow);
+    const timeErr = el("div", "pyro-rc-field-err");
+    body.appendChild(timeErr);
+    root.appendChild(body);
+    checkbox.addEventListener("change", () => {
+      body.style.display = checkbox.checked ? "flex" : "none";
+      onChange();
+    });
+    return { root, isEnabled: () => checkbox.checked, itemsErr, timeErr };
+  }
+  function buildForm(scenarioName) {
+    const form = el("div", "pyro-rc-group");
+    const knownScenario = scenarioByName.get(scenarioName);
+    const known = knownScenario?.actions;
+    let revalidate = () => {
+    };
+    const onChange = () => revalidate();
+    const payoutGroup = el("div", "pyro-rc-group");
+    const payoutTitle = el("div", "pyro-rc-group-title");
+    payoutTitle.textContent = "Payout range ($)";
+    payoutGroup.appendChild(payoutTitle);
+    const payoutRow = el("div", "pyro-rc-payout-row");
+    const payoutMinInput = el("input", "pyro-rc-input");
+    payoutMinInput.type = "number";
+    payoutMinInput.min = "0";
+    payoutMinInput.placeholder = "Min";
+    if (knownScenario) payoutMinInput.value = String(knownScenario.payoutMin);
+    const payoutMaxInput = el("input", "pyro-rc-input");
+    payoutMaxInput.type = "number";
+    payoutMaxInput.min = "0";
+    payoutMaxInput.placeholder = "Max";
+    if (knownScenario) payoutMaxInput.value = String(knownScenario.payoutMax);
+    payoutRow.appendChild(payoutMinInput);
+    payoutRow.appendChild(payoutMaxInput);
+    payoutGroup.appendChild(payoutRow);
+    const payoutErr = el("div", "pyro-rc-field-err");
+    payoutGroup.appendChild(payoutErr);
+    form.appendChild(payoutGroup);
+    payoutMinInput.addEventListener("input", onChange);
+    payoutMaxInput.addEventListener("input", onChange);
+    const placeDrafts = draftsFromItems(known?.place);
+    const placeGroup = el("div", "pyro-rc-group pyro-rc-place-group");
+    const placeTitle = el("div", "pyro-rc-group-title");
+    placeTitle.textContent = "Materials to place";
+    placeGroup.appendChild(placeTitle);
+    placeGroup.appendChild(
+      materialRowsGroup(placeDrafts, onChange, PLACE_RESOURCE_OPTIONS)
+    );
+    const placeErr = el("div", "pyro-rc-field-err");
+    placeGroup.appendChild(placeErr);
+    form.appendChild(placeGroup);
+    const igniterGroup = el("div", "pyro-rc-group");
+    const igniterTitle = el("div", "pyro-rc-group-title");
+    igniterTitle.textContent = "Igniter";
+    igniterGroup.appendChild(igniterTitle);
+    const igniterSelect = el("select", "pyro-rc-select");
+    const igniterBlank = document.createElement("option");
+    igniterBlank.value = "";
+    igniterBlank.textContent = "Select igniter\u2026";
+    igniterSelect.appendChild(igniterBlank);
+    for (const id of IGNITER_IDS) {
+      const opt = document.createElement("option");
+      opt.value = id;
+      opt.textContent = CATALOG[id].name;
+      igniterSelect.appendChild(opt);
+    }
+    const knownIgniter = known?.ignite?.[0]?.resourceId;
+    if (knownIgniter) igniterSelect.value = knownIgniter;
+    addSelectChrome(igniterSelect);
+    igniterGroup.appendChild(igniterSelect);
+    const igniterErr = el("div", "pyro-rc-field-err");
+    igniterGroup.appendChild(igniterErr);
+    form.appendChild(igniterGroup);
+    igniterSelect.addEventListener("change", onChange);
+    const stokeDrafts = draftsFromItems(known?.stoke);
+    const stokeTime = { value: known?.stokeTime ?? "" };
+    const stoke = toggleSection(
+      "Stoke",
+      "Stoke time (optional)",
+      stokeDrafts,
+      stokeTime,
+      !!known?.stoke,
+      onChange,
+      STOKE_RESOURCE_OPTIONS
+    );
+    form.appendChild(stoke.root);
+    const dampenDrafts = draftsFromItems(known?.dampen);
+    const dampenTime = { value: known?.dampenTime ?? "" };
+    const dampen = toggleSection(
+      "Dampen",
+      "Dampen time (optional)",
+      dampenDrafts,
+      dampenTime,
+      !!known?.dampen,
+      onChange,
+      DAMPEN_RESOURCE_OPTIONS
+    );
+    form.appendChild(dampen.root);
+    const submitBtn = el("button", "pyro-rc-submit-btn");
+    submitBtn.type = "button";
+    submitBtn.innerHTML = `${ICON_SEND}<span>Submit</span>`;
+    form.appendChild(submitBtn);
+    const status = el("div", "pyro-rc-status");
+    form.appendChild(status);
+    function clearFieldErrors() {
+      payoutErr.textContent = "";
+      placeErr.textContent = "";
+      igniterErr.textContent = "";
+      stoke.itemsErr.textContent = "";
+      stoke.timeErr.textContent = "";
+      dampen.itemsErr.textContent = "";
+      dampen.timeErr.textContent = "";
+      payoutMinInput.classList.remove("pyro-rc-err");
+      payoutMaxInput.classList.remove("pyro-rc-err");
+    }
+    function validItems(drafts) {
+      const items = drafts.filter((d) => d.resourceId !== "");
+      if (items.length === 0) return null;
+      return items.map((d) => ({
+        resourceId: d.resourceId,
+        qty: d.qty
+      }));
+    }
+    const baseline = {
+      payoutMin: knownScenario?.payoutMin ?? null,
+      payoutMax: knownScenario?.payoutMax ?? null,
+      place: (known?.place ?? []).map((i) => ({
+        resourceId: i.resourceId,
+        qty: i.qty
+      })),
+      ignite: (known?.ignite ?? []).map((i) => ({
+        resourceId: i.resourceId,
+        qty: i.qty
+      })),
+      stokeEnabled: !!known?.stoke,
+      stoke: (known?.stoke ?? []).map((i) => ({
+        resourceId: i.resourceId,
+        qty: i.qty
+      })),
+      stokeTime: known?.stokeTime ?? "",
+      dampenEnabled: !!known?.dampen,
+      dampen: (known?.dampen ?? []).map((i) => ({
+        resourceId: i.resourceId,
+        qty: i.qty
+      })),
+      dampenTime: known?.dampenTime ?? ""
+    };
+    revalidate = () => {
+      clearFieldErrors();
+      const payoutMin = parseFloat(payoutMinInput.value);
+      const payoutMax = parseFloat(payoutMaxInput.value);
+      let isValid = true;
+      if (payoutMinInput.value.trim() === "" || payoutMaxInput.value.trim() === "" || !Number.isFinite(payoutMin) || !Number.isFinite(payoutMax) || payoutMin < 0 || payoutMax < 0) {
+        payoutErr.textContent = "Enter a valid payout range.";
+        payoutMinInput.classList.add("pyro-rc-err");
+        payoutMaxInput.classList.add("pyro-rc-err");
+        isValid = false;
+      } else if (payoutMax < payoutMin) {
+        payoutErr.textContent = "Max must be \u2265 min.";
+        payoutMaxInput.classList.add("pyro-rc-err");
+        isValid = false;
+      }
+      const place = validItems(placeDrafts);
+      if (!place) {
+        placeErr.textContent = "Add at least one material.";
+        isValid = false;
+      }
+      if (!igniterSelect.value) {
+        igniterErr.textContent = "Select an igniter.";
+        isValid = false;
+      }
+      let stokeItems = null;
+      if (stoke.isEnabled()) {
+        stokeItems = validItems(stokeDrafts);
+        if (!stokeItems) {
+          stoke.itemsErr.textContent = "Add at least one material, or disable Stoke.";
+          isValid = false;
+        }
+        if (stokeTime.value.trim() && !TIME_PATTERN.test(stokeTime.value.trim())) {
+          stoke.timeErr.textContent = "Use early, late, <number>%, or <number>s.";
+          isValid = false;
+        }
+      }
+      let dampenItems = null;
+      if (dampen.isEnabled()) {
+        dampenItems = validItems(dampenDrafts);
+        if (!dampenItems) {
+          dampen.itemsErr.textContent = "Add at least one material, or disable Dampen.";
+          isValid = false;
+        }
+        if (dampenTime.value.trim() && !TIME_PATTERN.test(dampenTime.value.trim())) {
+          dampen.timeErr.textContent = "Use early, late, <number>%, or <number>s.";
+          isValid = false;
+        }
+      }
+      const current = {
+        payoutMin: Number.isFinite(payoutMin) ? payoutMin : null,
+        payoutMax: Number.isFinite(payoutMax) ? payoutMax : null,
+        place: place ?? [],
+        ignite: igniterSelect.value ? [{ resourceId: igniterSelect.value, qty: 1 }] : [],
+        stokeEnabled: stoke.isEnabled(),
+        stoke: stoke.isEnabled() ? stokeItems ?? [] : [],
+        stokeTime: stoke.isEnabled() ? stokeTime.value.trim() : "",
+        dampenEnabled: dampen.isEnabled(),
+        dampen: dampen.isEnabled() ? dampenItems ?? [] : [],
+        dampenTime: dampen.isEnabled() ? dampenTime.value.trim() : ""
+      };
+      const changed = JSON.stringify(current) !== JSON.stringify(baseline);
+      submitBtn.disabled = !isValid || !changed;
+      if (isValid && !changed) {
+        status.textContent = "No changes to submit yet.";
+        status.className = "pyro-rc-status hint";
+      } else if (status.className === "pyro-rc-status hint") {
+        status.textContent = "";
+        status.className = "pyro-rc-status";
+      }
+    };
+    revalidate();
+    submitBtn.addEventListener("click", () => {
+      revalidate();
+      if (submitBtn.disabled) return;
+      const payoutMin = parseFloat(payoutMinInput.value);
+      const payoutMax = parseFloat(payoutMaxInput.value);
+      const place = validItems(placeDrafts);
+      submitBtn.disabled = true;
+      status.textContent = "Submitting\u2026";
+      status.className = "pyro-rc-status";
+      const recipe = {
+        place,
+        ignite: [{ resourceId: igniterSelect.value, qty: 1 }]
+      };
+      if (stoke.isEnabled()) {
+        const items = validItems(stokeDrafts);
+        if (items) recipe.stoke = items;
+        if (stokeTime.value.trim()) recipe.stokeTime = stokeTime.value.trim();
+      }
+      if (dampen.isEnabled()) {
+        const items = validItems(dampenDrafts);
+        if (items) recipe.dampen = items;
+        if (dampenTime.value.trim()) recipe.dampenTime = dampenTime.value.trim();
+      }
+      const playerInfo = getPlayerInfoSafe();
+      postSubmission(
+        {
+          scenarioName,
+          payoutMin,
+          payoutMax,
+          submitterId: playerInfo.id,
+          submitterName: playerInfo.name,
+          recipe
+        },
+        (result) => {
+          if (result.ok) {
+            status.innerHTML = ICON_CHECK;
+            status.appendChild(txt("Submitted!"));
+            status.className = "pyro-rc-status ok";
+          } else {
+            status.innerHTML = ICON_X;
+            status.appendChild(txt(result.error));
+            status.className = "pyro-rc-status err";
+            revalidate();
+          }
+        }
+      );
+    });
+    return form;
+  }
+  function getPlayerInfoSafe() {
+    try {
+      const link = document.querySelector(
+        '[class*="user-information"] a[href*="profiles.php?XID="]'
+      );
+      if (!link) return { id: null, name: null };
+      const match = /XID=(\d+)/.exec(link.href);
+      const name = link.textContent?.trim() || null;
+      return { id: match ? match[1] : null, name };
+    } catch {
+      return { id: null, name: null };
+    }
+  }
+  function buildSubmitTab(ctx) {
+    injectSubmitTabStyles();
+    const root = el("div", "pyro-rc-group");
+    const submissionsLink = el("a", "pyro-rc-external-link");
+    submissionsLink.href = "https://balaclava.app/arson/submissions";
+    submissionsLink.target = "_blank";
+    submissionsLink.rel = "noopener noreferrer";
+    submissionsLink.innerHTML = `View submitted recipes ${ICON_EXTERNAL_LINK}`;
+    root.appendChild(submissionsLink);
+    const visibleNames = ctx.getVisibleScenarioNames();
+    const initialSelection = preselectedScenario && visibleNames.includes(preselectedScenario) ? preselectedScenario : visibleNames[0] ?? "";
+    preselectedScenario = null;
+    const scenarioGroup = el("div", "pyro-rc-group");
+    const scenarioTitle = el("div", "pyro-rc-group-title");
+    scenarioTitle.textContent = "Scenario";
+    scenarioGroup.appendChild(scenarioTitle);
+    const scenarioSelect = el(
+      "select",
+      "pyro-rc-select pyro-rc-scenario-select"
+    );
+    if (visibleNames.length === 0) {
+      const opt = document.createElement("option");
+      opt.value = "";
+      opt.textContent = "No scenarios visible on this page";
+      scenarioSelect.appendChild(opt);
+      scenarioSelect.disabled = true;
+    } else {
+      for (const name of visibleNames) {
+        const opt = document.createElement("option");
+        opt.value = name;
+        opt.textContent = name;
+        scenarioSelect.appendChild(opt);
+      }
+      scenarioSelect.value = initialSelection;
+    }
+    addSelectChrome(scenarioSelect);
+    scenarioGroup.appendChild(scenarioSelect);
+    root.appendChild(scenarioGroup);
+    const formSlot = el("div");
+    if (initialSelection) formSlot.appendChild(buildForm(initialSelection));
+    root.appendChild(formSlot);
+    scenarioSelect.addEventListener("change", () => {
+      formSlot.innerHTML = "";
+      if (scenarioSelect.value)
+        formSlot.appendChild(buildForm(scenarioSelect.value));
+    });
+    return root;
+  }
 
   // src/userscripts/arsonists-ledger/settings.ts
   function setOkStatus(statusEl, message) {
@@ -3958,86 +4816,12 @@
     style.id = "pyro-settings-styles";
     style.textContent = `
 .pyro-settings-wrap {
-    --pyro-tooltip-bg: oklch(24% 0 0);
-    --pyro-tooltip-border: oklch(30% 0 0);
-    --pyro-tooltip-shadow: oklch(12% 0.01 260 / 0.55);
-    --pyro-tooltip-radius: 8px;
-    --pyro-tooltip-arrow-size: 12px;
-    --pyro-settings-btn-size: 24px;
-    position: relative;
-    display: inline-flex;
-    align-items: center;
     margin-left: 8px;
 }
-#pyro-settings-btn {
-    padding: 4px 8px;
-    background: color-mix(in oklch, var(--pyro-tooltip-bg) 86%, black);
-    border: 1px solid var(--pyro-tooltip-border);
-    color: oklch(76% 0.006 95);
-    cursor: pointer;
-    border-radius: var(--pyro-tooltip-radius);
-    font-size: 13px;
-    line-height: 1;
-    user-select: none;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: transform 100ms ease-out, background 120ms ease-out, color 120ms ease-out;
-}
-@media (hover: hover) and (pointer: fine) {
-    #pyro-settings-btn:hover {
-        background: color-mix(in oklch, var(--pyro-tooltip-bg) 94%, white 6%);
-        color: oklch(96% 0.012 95);
-    }
-}
-#pyro-settings-btn:active { transform: scale(0.94); }
 #pyro-settings-panel {
     --pyro-api-color: #6d6;
     --pyro-manual-color: #7af;
     --pyro-db-color: oklch(46% 0.008 285);
-    position: absolute;
-    top: calc(100% + 10px);
-    right: 0;
-    z-index: 9999;
-    background: var(--pyro-tooltip-bg);
-    color: oklch(96% 0.012 95);
-    border: 1px solid var(--pyro-tooltip-border);
-    border-radius: var(--pyro-tooltip-radius);
-    min-width: 290px;
-    max-width: 360px;
-    box-shadow: 0 2px 8px var(--pyro-tooltip-shadow);
-    overflow: visible;
-    transform-origin: calc(100% - (var(--pyro-settings-btn-size) / 2)) calc(0px - var(--pyro-tooltip-arrow-size));
-    transform: scale(0.95);
-    opacity: 0;
-    visibility: hidden;
-    pointer-events: none;
-    transition: transform 150ms ease-out, opacity 150ms ease-out, visibility 0ms linear 150ms;
-}
-#pyro-settings-panel::before {
-    content: '';
-    position: absolute;
-    top: calc(var(--pyro-tooltip-arrow-size) / -2);
-    right: calc((var(--pyro-settings-btn-size) / 2) - (var(--pyro-tooltip-arrow-size) / 2));
-    width: var(--pyro-tooltip-arrow-size);
-    height: var(--pyro-tooltip-arrow-size);
-    background: var(--pyro-tooltip-bg);
-    border: 1px solid var(--pyro-tooltip-border);
-    transform: rotate(45deg);
-    box-sizing: border-box;
-    border-right: none;
-    border-bottom: none;
-    border-radius: 3px;
-}
-#pyro-settings-panel.is-open {
-    transform: scale(1);
-    opacity: 1;
-    visibility: visible;
-    pointer-events: auto;
-    transition: transform 150ms ease-out, opacity 150ms ease-out, visibility 0ms linear 0ms;
-}
-#pyro-settings-panel:not(.is-open) {
-    transition: transform 100ms ease-out, opacity 100ms ease-out, visibility 0ms linear 100ms;
 }
 .pyro-tab-bar { display: flex; border-bottom: 1px solid var(--pyro-tooltip-border); }
 .pyro-tab {
@@ -4047,7 +4831,7 @@
     border-bottom: 1px solid transparent;
     color: oklch(70% 0.008 95 / 0.8);
     cursor: pointer;
-    padding: 8px 2px;
+    padding: 8px 16px;
     font: inherit;
     font-size: 14px;
     transition: color 120ms ease-out;
@@ -4060,7 +4844,7 @@
     border-bottom-color: ${BAND_COLOR.excellent};
     background: linear-gradient(0deg, color-mix(in oklch, ${BAND_COLOR.excellent} 20%, transparent 80%), transparent 55%);
 }
-.pyro-tab-content { padding: 10px; max-height: 380px; overflow-y: auto; }
+.pyro-tab-content { padding: 10px; max-height: 380px; overflow-y: auto; scrollbar-gutter: stable; }
 .pyro-tab-content>div { display: flex; flex-direction: column; gap: 14px; }
 .pyro-tab-content::-webkit-scrollbar { width: 3px; }
 .pyro-tab-content::-webkit-scrollbar-track { background: transparent; }
@@ -4186,7 +4970,7 @@
 }
 .pyro-s-section-note { display: flex; align-items: flex-start; gap: 5px; font-size: 10px; line-height: 1.4; color: oklch(57% 0.008 285); margin-bottom: 6px; }
 .pyro-s-section-note > svg { width: 10px; height: 10px; flex-shrink: 0; margin-top: 1px; }
-.pyro-s-section-note strong { color: oklch(64% 0.009 285); font-weight: 600; }
+.pyro-s-section-note strong { color: oklch(88% 0.006 95); font-weight: normal; }
 .pyro-s-section-note a { color: ${BAND_COLOR.excellent}; text-decoration: none; display: inline-flex; align-items: center; gap: 3px; }
 .pyro-s-section-note a:hover { text-decoration: underline; }
 .pyro-s-section-note a svg { width: 10px; height: 10px; flex-shrink: 0; }
@@ -4268,9 +5052,11 @@
     const actionGroup = el("div", "pyro-s-group");
     const actionRow = el("div", "pyro-s-refresh-row");
     const refreshBtn = el("button", "pyro-s-btn");
+    refreshBtn.type = "button";
     refreshBtn.textContent = "Refresh";
     if (!ctx.getApiKey()) refreshBtn.disabled = true;
     const resetBtn = el("button", "pyro-s-btn");
+    resetBtn.type = "button";
     resetBtn.textContent = "Reset";
     if (!hasManualOverrides && !hasApiPrices) resetBtn.disabled = true;
     const tsEl = el("span", "pyro-s-timestamp");
@@ -4618,6 +5404,7 @@
     keyInput.autocomplete = "off";
     keyInput.spellcheck = false;
     const saveBtn = el("button", "pyro-s-btn");
+    saveBtn.type = "button";
     saveBtn.textContent = "Validate & save";
     keyRow.appendChild(keyInput);
     keyRow.appendChild(saveBtn);
@@ -4666,7 +5453,8 @@
       { id: "prices", label: "Prices" },
       { id: "thresholds", label: "Thresholds" },
       { id: "visuals", label: "Visuals" },
-      { id: "api", label: "API" }
+      { id: "api", label: "API" },
+      { id: "submit", label: "Submit" }
     ];
     const bar = el("div", "pyro-tab-bar");
     for (const tab of tabs) {
@@ -4674,6 +5462,7 @@
         "button",
         tab.id === activeId ? "pyro-tab active" : "pyro-tab"
       );
+      btn.type = "button";
       btn.textContent = tab.label;
       btn.dataset.tab = tab.id;
       btn.addEventListener("click", () => {
@@ -4701,11 +5490,17 @@
         return buildVisualsTab(ctx);
       case "api":
         return buildApiTab(ctx);
+      case "submit":
+        return buildSubmitTab(ctx);
       default:
         return buildPricesTab(ctx, panel);
     }
   }
+  var currentPanel = null;
+  var currentBtn = null;
+  var currentCtx = null;
   function injectSettings(root, ctx) {
+    currentCtx = ctx;
     const existing = document.getElementById("pyro-settings-btn");
     if (existing) {
       if (root.contains(existing)) return;
@@ -4713,14 +5508,15 @@
     }
     injectSettingsStyles();
     const anchor = root.querySelector(SEL.RESULT_COUNTS) ?? root.querySelector(SEL.TITLE_BAR) ?? root;
-    const wrap = el("div", "pyro-settings-wrap");
-    const btn = el("button");
-    btn.id = "pyro-settings-btn";
-    btn.setAttribute("aria-label", "Arsonist's Ledger settings");
-    btn.setAttribute("aria-expanded", "false");
-    btn.innerHTML = ICON_FLAME;
-    const panel = el("div");
-    panel.id = "pyro-settings-panel";
+    const { wrap, btn, panel } = createPopover({
+      buttonAriaLabel: "Arsonist's Ledger settings",
+      buttonContent: ICON_FLAME,
+      btnId: "pyro-settings-btn",
+      panelId: "pyro-settings-panel",
+      wrapClass: "pyro-settings-wrap"
+    });
+    currentPanel = panel;
+    currentBtn = btn;
     const activeTabId = ctx.getActiveTab() || "prices";
     panel.appendChild(
       buildTabBar(activeTabId, (tabId) => {
@@ -4731,30 +5527,18 @@
     const content = el("div", "pyro-tab-content");
     content.appendChild(buildTabContent(activeTabId, ctx, panel));
     panel.appendChild(content);
-    wrap.appendChild(btn);
-    wrap.appendChild(panel);
     anchor.appendChild(wrap);
-    btn.addEventListener("click", (e) => {
-      e.stopPropagation();
-      const isOpen = panel.classList.contains("is-open");
-      panel.classList.toggle("is-open", !isOpen);
-      btn.setAttribute("aria-expanded", String(!isOpen));
-    });
-    panel.addEventListener("click", (e) => {
-      e.stopPropagation();
-    });
-    document.addEventListener(
-      "click",
-      (e) => {
-        const path = typeof e.composedPath === "function" ? e.composedPath() : [];
-        const clickedInside = path.length > 0 ? path.includes(wrap) : wrap.contains(e.target);
-        if (!clickedInside) {
-          panel.classList.remove("is-open");
-          btn.setAttribute("aria-expanded", "false");
-        }
-      },
-      { passive: true }
-    );
+  }
+  function openSettingsToSubmit(scenarioName) {
+    if (!currentPanel || !currentBtn || !currentCtx) return;
+    setPreselectedScenario(scenarioName);
+    currentCtx.setActiveTab("submit");
+    currentPanel.querySelectorAll(".pyro-tab").forEach((b) => b.classList.remove("active"));
+    currentPanel.querySelector('.pyro-tab[data-tab="submit"]')?.classList.add("active");
+    rerenderTab(currentPanel, "submit", currentCtx);
+    currentPanel.classList.add("is-open");
+    currentBtn.setAttribute("aria-expanded", "true");
+    currentBtn.scrollIntoView({ behavior: "smooth", block: "center" });
   }
 
   // src/data/buildings.ts
@@ -5911,6 +6695,19 @@
     wrap.appendChild(msg);
     return wrap;
   }
+  function attachRecipeSubmitTrigger(wrapperEl, scenarioName) {
+    if (wrapperEl.querySelector(".pyro-submit-trigger-btn")) return;
+    injectPopoverStyles();
+    const btn = el("button", "pyro-popover-btn pyro-submit-trigger-btn");
+    btn.type = "button";
+    btn.setAttribute("aria-label", "Submit a recipe for this scenario");
+    btn.innerHTML = ICON_FLAME;
+    btn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      openSettingsToSubmit(scenarioName);
+    });
+    wrapperEl.appendChild(btn);
+  }
   function applyToSection(section, ranked, building) {
     section.querySelector(".pyro-label")?.remove();
     section.classList.forEach((c) => {
@@ -5932,6 +6729,12 @@
     }
     section.classList.add(`pyro-band--${ranked.band}`);
     if (hoverTarget !== section) ensureValuePill(hoverTarget, ranked);
+    const abandonWrapper = section.querySelector(
+      SEL.ABANDON_BUTTON_WRAPPER
+    );
+    if (abandonWrapper) {
+      attachRecipeSubmitTrigger(abandonWrapper, ranked.Scenario.scenarioName);
+    }
     wireTooltip(section, hoverTarget, () => {
       const statsOnly = isPendingCollect(section) && !ranked.Scenario.needsVerification;
       return buildTooltipContentWithStyles(
@@ -6012,6 +6815,16 @@
   function isArsonPage() {
     return !!document.querySelector(SEL.ROOT);
   }
+  function getVisibleScenarioNames() {
+    const names = /* @__PURE__ */ new Set();
+    getRoot().querySelectorAll(SEL.CARD).forEach((section) => {
+      const scenarioEl = section.querySelector('[class*="scenario___"]');
+      const rawName = scenarioEl?.textContent?.trim() ?? "";
+      const scenario = rawName ? scenarioIndex.get(rawName.toLowerCase()) ?? null : null;
+      if (scenario) names.add(scenario.scenarioName);
+    });
+    return Array.from(names).sort();
+  }
   function scanPage() {
     if (!isArsonPage()) return;
     const prices = effectivePrices();
@@ -6058,6 +6871,7 @@
     getShowMaterialSuspicion: () => showMaterialSuspicion,
     getShowMaterialIgnitionRisk: () => showMaterialIgnitionRisk,
     getShowMaterialStokingRisk: () => showMaterialStokingRisk,
+    getVisibleScenarioNames,
     setManualPrice,
     clearManualPrices,
     clearManualPrice,

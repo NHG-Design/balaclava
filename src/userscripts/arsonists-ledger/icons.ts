@@ -26,3 +26,17 @@ export const ICON_SIREN = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 
 export const ICON_MAGNIFYING_GLASS = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640" fill="currentColor"><path d="M480 272C480 317.9 465.1 360.3 440 394.7L566.6 521.4C579.1 533.9 579.1 554.2 566.6 566.7C554.1 579.2 533.8 579.2 521.3 566.7L394.7 440C360.3 465.1 317.9 480 272 480C157.1 480 64 386.9 64 272C64 157.1 157.1 64 272 64C386.9 64 480 157.1 480 272zM272 416C351.5 416 416 351.5 416 272C416 192.5 351.5 128 272 128C192.5 128 128 192.5 128 272C128 351.5 192.5 416 272 416z"/></svg>`;
 
 export const ICON_EMBER = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640" fill="currentColor"><path d="M281.6 93.9L297.6 72.6C301.6 67.2 308 64 314.7 64C326.4 64 336 73.6 336 85.3L336 107.4C336 120.5 341.4 133.1 350.9 142.1L435.6 223C484.4 269.6 512 334.2 512 401.7C512 498 434 576 337.7 576L320 576C214 576 128 490 128 384L128 380.2C128 331.4 147.4 284.6 181.9 250.1L185.4 246.6C189.6 242.4 195.4 240 201.4 240C213.9 240 224 250.1 224 262.6L224 352C224 387.3 252.7 416 288 416C323.3 416 352 387.3 352 352L352 348.1C352 330.1 344.8 312.8 332.1 300.1L293.5 261.5C269.5 237.5 256 204.8 256 170.8C256 143.1 265 116 281.6 93.9z"/></svg>`;
+
+export const ICON_PLUS = `<svg ${S} width="12" height="12" style="vertical-align:middle">${BLANK}<path d="M12 5l0 14"/><path d="M5 12l14 0"/></svg>`;
+
+export const ICON_MATCHSTICK = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M3 21l14 -9" /><path d="M16 12a1 1 0 1 0 2 0a1 1 0 1 0 -2 0" /><path d="M17 3l3.62 7.29a4.007 4.007 0 0 1 -.764 4.51a4 4 0 0 1 -6.493 -4.464l3.637 -7.336" /></svg>`;
+
+export const ICON_TRASH = `<svg ${S} width="12" height="12" style="vertical-align:middle">${BLANK}<path d="M4 7l16 0"/><path d="M10 11l0 6"/><path d="M14 11l0 6"/><path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12"/><path d="M9 7v-3a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v3"/></svg>`;
+
+export const ICON_SEND = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M10 14l11 -11"/><path d="M21 3l-6.5 18a0.55 .55 0 0 1 -1 0l-3.5 -7l-7 -3.5a0.55 .55 0 0 1 0 -1l18 -6.5"/></svg>`;
+
+export const ICON_CHEVRON_DOWN = `<svg ${S} width="16" height="16" aria-hidden="true">${BLANK}<path d="M6 9l6 6l6 -6"/></svg>`;
+
+/** Bare filled path (no viewBox wrapper) — used as a mask-image source for CSS ::checkmark, not injected via innerHTML. */
+export const ICON_CHECK_MASK_PATH =
+  "M9 16.2l-3.5-3.5-1.4 1.4L9 19 20 8l-1.4-1.4z";

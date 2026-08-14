@@ -12,6 +12,8 @@ import { fetchApiPrices } from "./api.js";
 import { SEL } from "./selectors.js";
 import { BAND_COLOR } from "./colors.js";
 import { el, txt, svgEl } from "./dom.js";
+import { createPopover } from "./popover.js";
+import { buildSubmitTab, setPreselectedScenario } from "./submit-tab.js";
 import {
   ICON_INFO,
   ICON_CHECK,
@@ -51,6 +53,8 @@ export interface SettingsCtx {
   getShowMaterialSuspicion(): boolean;
   getShowMaterialIgnitionRisk(): boolean;
   getShowMaterialStokingRisk(): boolean;
+  /** Scenario names currently matched/rendered on the page, for the Submit tab's scenario picker. */
+  getVisibleScenarioNames(): string[];
 
   setManualPrice(id: ResourceId, price: number): void;
   clearManualPrices(): void;
@@ -103,86 +107,12 @@ export function injectSettingsStyles(): void {
   style.id = "pyro-settings-styles";
   style.textContent = `
 .pyro-settings-wrap {
-    --pyro-tooltip-bg: oklch(24% 0 0);
-    --pyro-tooltip-border: oklch(30% 0 0);
-    --pyro-tooltip-shadow: oklch(12% 0.01 260 / 0.55);
-    --pyro-tooltip-radius: 8px;
-    --pyro-tooltip-arrow-size: 12px;
-    --pyro-settings-btn-size: 24px;
-    position: relative;
-    display: inline-flex;
-    align-items: center;
     margin-left: 8px;
 }
-#pyro-settings-btn {
-    padding: 4px 8px;
-    background: color-mix(in oklch, var(--pyro-tooltip-bg) 86%, black);
-    border: 1px solid var(--pyro-tooltip-border);
-    color: oklch(76% 0.006 95);
-    cursor: pointer;
-    border-radius: var(--pyro-tooltip-radius);
-    font-size: 13px;
-    line-height: 1;
-    user-select: none;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: transform 100ms ease-out, background 120ms ease-out, color 120ms ease-out;
-}
-@media (hover: hover) and (pointer: fine) {
-    #pyro-settings-btn:hover {
-        background: color-mix(in oklch, var(--pyro-tooltip-bg) 94%, white 6%);
-        color: oklch(96% 0.012 95);
-    }
-}
-#pyro-settings-btn:active { transform: scale(0.94); }
 #pyro-settings-panel {
     --pyro-api-color: #6d6;
     --pyro-manual-color: #7af;
     --pyro-db-color: oklch(46% 0.008 285);
-    position: absolute;
-    top: calc(100% + 10px);
-    right: 0;
-    z-index: 9999;
-    background: var(--pyro-tooltip-bg);
-    color: oklch(96% 0.012 95);
-    border: 1px solid var(--pyro-tooltip-border);
-    border-radius: var(--pyro-tooltip-radius);
-    min-width: 290px;
-    max-width: 360px;
-    box-shadow: 0 2px 8px var(--pyro-tooltip-shadow);
-    overflow: visible;
-    transform-origin: calc(100% - (var(--pyro-settings-btn-size) / 2)) calc(0px - var(--pyro-tooltip-arrow-size));
-    transform: scale(0.95);
-    opacity: 0;
-    visibility: hidden;
-    pointer-events: none;
-    transition: transform 150ms ease-out, opacity 150ms ease-out, visibility 0ms linear 150ms;
-}
-#pyro-settings-panel::before {
-    content: '';
-    position: absolute;
-    top: calc(var(--pyro-tooltip-arrow-size) / -2);
-    right: calc((var(--pyro-settings-btn-size) / 2) - (var(--pyro-tooltip-arrow-size) / 2));
-    width: var(--pyro-tooltip-arrow-size);
-    height: var(--pyro-tooltip-arrow-size);
-    background: var(--pyro-tooltip-bg);
-    border: 1px solid var(--pyro-tooltip-border);
-    transform: rotate(45deg);
-    box-sizing: border-box;
-    border-right: none;
-    border-bottom: none;
-    border-radius: 3px;
-}
-#pyro-settings-panel.is-open {
-    transform: scale(1);
-    opacity: 1;
-    visibility: visible;
-    pointer-events: auto;
-    transition: transform 150ms ease-out, opacity 150ms ease-out, visibility 0ms linear 0ms;
-}
-#pyro-settings-panel:not(.is-open) {
-    transition: transform 100ms ease-out, opacity 100ms ease-out, visibility 0ms linear 100ms;
 }
 .pyro-tab-bar { display: flex; border-bottom: 1px solid var(--pyro-tooltip-border); }
 .pyro-tab {
@@ -192,7 +122,7 @@ export function injectSettingsStyles(): void {
     border-bottom: 1px solid transparent;
     color: oklch(70% 0.008 95 / 0.8);
     cursor: pointer;
-    padding: 8px 2px;
+    padding: 8px 16px;
     font: inherit;
     font-size: 14px;
     transition: color 120ms ease-out;
@@ -205,7 +135,7 @@ export function injectSettingsStyles(): void {
     border-bottom-color: ${BAND_COLOR.excellent};
     background: linear-gradient(0deg, color-mix(in oklch, ${BAND_COLOR.excellent} 20%, transparent 80%), transparent 55%);
 }
-.pyro-tab-content { padding: 10px; max-height: 380px; overflow-y: auto; }
+.pyro-tab-content { padding: 10px; max-height: 380px; overflow-y: auto; scrollbar-gutter: stable; }
 .pyro-tab-content>div { display: flex; flex-direction: column; gap: 14px; }
 .pyro-tab-content::-webkit-scrollbar { width: 3px; }
 .pyro-tab-content::-webkit-scrollbar-track { background: transparent; }
@@ -331,7 +261,7 @@ export function injectSettingsStyles(): void {
 }
 .pyro-s-section-note { display: flex; align-items: flex-start; gap: 5px; font-size: 10px; line-height: 1.4; color: oklch(57% 0.008 285); margin-bottom: 6px; }
 .pyro-s-section-note > svg { width: 10px; height: 10px; flex-shrink: 0; margin-top: 1px; }
-.pyro-s-section-note strong { color: oklch(64% 0.009 285); font-weight: 600; }
+.pyro-s-section-note strong { color: oklch(88% 0.006 95); font-weight: normal; }
 .pyro-s-section-note a { color: ${BAND_COLOR.excellent}; text-decoration: none; display: inline-flex; align-items: center; gap: 3px; }
 .pyro-s-section-note a:hover { text-decoration: underline; }
 .pyro-s-section-note a svg { width: 10px; height: 10px; flex-shrink: 0; }
@@ -436,10 +366,12 @@ function buildPricesTab(ctx: SettingsCtx, panel: HTMLElement): HTMLElement {
   const actionRow = el("div", "pyro-s-refresh-row");
 
   const refreshBtn = el("button", "pyro-s-btn");
+  refreshBtn.type = "button";
   refreshBtn.textContent = "Refresh";
   if (!ctx.getApiKey()) refreshBtn.disabled = true;
 
   const resetBtn = el("button", "pyro-s-btn");
+  resetBtn.type = "button";
   resetBtn.textContent = "Reset";
   if (!hasManualOverrides && !hasApiPrices) resetBtn.disabled = true;
 
@@ -866,6 +798,7 @@ function buildApiTab(ctx: SettingsCtx): HTMLElement {
   keyInput.spellcheck = false;
 
   const saveBtn = el("button", "pyro-s-btn");
+  saveBtn.type = "button";
   saveBtn.textContent = "Validate & save";
   keyRow.appendChild(keyInput);
   keyRow.appendChild(saveBtn);
@@ -921,7 +854,7 @@ function formatTimestamp(ts: number): string {
 // Tab switching
 // ---------------------------------------------------------------------------
 
-type TabId = "prices" | "thresholds" | "visuals" | "api";
+type TabId = "prices" | "thresholds" | "visuals" | "api" | "submit";
 
 function buildTabBar(
   activeId: string,
@@ -932,6 +865,7 @@ function buildTabBar(
     { id: "thresholds", label: "Thresholds" },
     { id: "visuals", label: "Visuals" },
     { id: "api", label: "API" },
+    { id: "submit", label: "Submit" },
   ];
   const bar = el("div", "pyro-tab-bar");
   for (const tab of tabs) {
@@ -939,6 +873,7 @@ function buildTabBar(
       "button",
       tab.id === activeId ? "pyro-tab active" : "pyro-tab",
     );
+    btn.type = "button";
     btn.textContent = tab.label;
     btn.dataset.tab = tab.id;
     btn.addEventListener("click", () => {
@@ -978,6 +913,8 @@ function buildTabContent(
       return buildVisualsTab(ctx);
     case "api":
       return buildApiTab(ctx);
+    case "submit":
+      return buildSubmitTab(ctx);
     default:
       return buildPricesTab(ctx, panel);
   }
@@ -987,7 +924,13 @@ function buildTabContent(
 // Entry point
 // ---------------------------------------------------------------------------
 
+let currentPanel: HTMLElement | null = null;
+let currentBtn: HTMLElement | null = null;
+let currentCtx: SettingsCtx | null = null;
+
 export function injectSettings(root: Element, ctx: SettingsCtx): void {
+  currentCtx = ctx;
+
   const existing = document.getElementById("pyro-settings-btn");
   if (existing) {
     if (root.contains(existing)) return;
@@ -1001,16 +944,15 @@ export function injectSettings(root: Element, ctx: SettingsCtx): void {
     root.querySelector(SEL.TITLE_BAR) ??
     root;
 
-  const wrap = el("div", "pyro-settings-wrap");
-
-  const btn = el("button");
-  btn.id = "pyro-settings-btn";
-  btn.setAttribute("aria-label", "Arsonist's Ledger settings");
-  btn.setAttribute("aria-expanded", "false");
-  btn.innerHTML = ICON_FLAME;
-
-  const panel = el("div");
-  panel.id = "pyro-settings-panel";
+  const { wrap, btn, panel } = createPopover({
+    buttonAriaLabel: "Arsonist's Ledger settings",
+    buttonContent: ICON_FLAME,
+    btnId: "pyro-settings-btn",
+    panelId: "pyro-settings-panel",
+    wrapClass: "pyro-settings-wrap",
+  });
+  currentPanel = panel;
+  currentBtn = btn;
 
   const activeTabId = ctx.getActiveTab() || "prices";
   panel.appendChild(
@@ -1024,32 +966,30 @@ export function injectSettings(root: Element, ctx: SettingsCtx): void {
   content.appendChild(buildTabContent(activeTabId, ctx, panel));
   panel.appendChild(content);
 
-  wrap.appendChild(btn);
-  wrap.appendChild(panel);
   anchor.appendChild(wrap);
+}
 
-  btn.addEventListener("click", (e) => {
-    e.stopPropagation();
-    const isOpen = panel.classList.contains("is-open");
-    panel.classList.toggle("is-open", !isOpen);
-    btn.setAttribute("aria-expanded", String(!isOpen));
-  });
+/**
+ * Opens the (singleton) settings popover directly to the Submit tab with the
+ * given scenario preselected. Called by the per-card recipe-submit trigger
+ * button so a player can tweak an existing recipe without re-entering it.
+ */
+export function openSettingsToSubmit(scenarioName: string): void {
+  if (!currentPanel || !currentBtn || !currentCtx) return;
 
-  panel.addEventListener("click", (e) => {
-    e.stopPropagation();
-  });
+  setPreselectedScenario(scenarioName);
+  currentCtx.setActiveTab("submit");
 
-  document.addEventListener(
-    "click",
-    (e) => {
-      const path = typeof e.composedPath === "function" ? e.composedPath() : [];
-      const clickedInside =
-        path.length > 0 ? path.includes(wrap) : wrap.contains(e.target as Node);
-      if (!clickedInside) {
-        panel.classList.remove("is-open");
-        btn.setAttribute("aria-expanded", "false");
-      }
-    },
-    { passive: true },
-  );
+  currentPanel
+    .querySelectorAll(".pyro-tab")
+    .forEach((b) => b.classList.remove("active"));
+  currentPanel
+    .querySelector<HTMLElement>('.pyro-tab[data-tab="submit"]')
+    ?.classList.add("active");
+
+  rerenderTab(currentPanel, "submit", currentCtx);
+  currentPanel.classList.add("is-open");
+  currentBtn.setAttribute("aria-expanded", "true");
+
+  currentBtn.scrollIntoView({ behavior: "smooth", block: "center" });
 }

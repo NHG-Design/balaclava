@@ -86,4 +86,18 @@ export const SEL = {
 
     /** The material's item image — its `src`/`srcset` numeric id maps to a Torn item id. */
     ITEM_IMAGE: '[class*="image___"]',
+
+    /**
+     * Desktop-only wrapper around the "Abandon target" close button, inside
+     * TITLE_SECTION. Absent on mobile/tablet layout. Recipe-submit trigger
+     * button is injected as a sibling here.
+     */
+    ABANDON_BUTTON_WRAPPER: '[class*="abandonButtonWrapper___"]',
+
+    /**
+     * Torn's top-nav user info block, containing a link to the logged-in
+     * player's own profile (`/profiles.php?XID=<id>`). Queried from
+     * `document` directly — outside `.arson-root`.
+     */
+    USER_INFORMATION: '[class*="user-information"]',
 } as const;

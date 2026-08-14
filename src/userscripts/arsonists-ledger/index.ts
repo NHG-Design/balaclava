@@ -19,7 +19,13 @@ import {
 } from "./tooltip.js";
 import { SEL } from "./selectors.js";
 import { BAND_COLOR } from "./colors.js";
-import { injectSettings, type SettingsCtx } from "./settings.js";
+import {
+  injectSettings,
+  openSettingsToSubmit,
+  type SettingsCtx,
+} from "./settings.js";
+import { injectPopoverStyles } from "./popover.js";
+import { ICON_FLAME, ICON_MATCHSTICK, ICON_SEND } from "./icons.js";
 import { el, txt } from "./dom.js";
 import { CATALOG_UPDATED, type ResourceId } from "../../data/catalog.js";
 import {
@@ -69,8 +75,7 @@ const KEY_SHOW_MATERIAL_MOMENTUM = "pyroLedger.v1.showMaterialMomentum";
 const KEY_SHOW_MATERIAL_SUSPICION = "pyroLedger.v1.showMaterialSuspicion";
 const KEY_SHOW_MATERIAL_IGNITION_RISK =
   "pyroLedger.v1.showMaterialIgnitionRisk";
-const KEY_SHOW_MATERIAL_STOKING_RISK =
-  "pyroLedger.v1.showMaterialStokingRisk";
+const KEY_SHOW_MATERIAL_STOKING_RISK = "pyroLedger.v1.showMaterialStokingRisk";
 
 // ---------------------------------------------------------------------------
 // Minimal GM storage shim (falls back to localStorage in dev/non-GM contexts)
@@ -203,11 +208,9 @@ function loadState(): void {
   showRurality = store_get(KEY_SHOW_RURALITY, "1") !== "0";
   showUrgency = store_get(KEY_SHOW_URGENCY, "1") !== "0";
   showMaterialData = store_get(KEY_SHOW_MATERIAL_DATA, "0") !== "0";
-  showMaterialIntensity =
-    store_get(KEY_SHOW_MATERIAL_INTENSITY, "1") !== "0";
+  showMaterialIntensity = store_get(KEY_SHOW_MATERIAL_INTENSITY, "1") !== "0";
   showMaterialMomentum = store_get(KEY_SHOW_MATERIAL_MOMENTUM, "1") !== "0";
-  showMaterialSuspicion =
-    store_get(KEY_SHOW_MATERIAL_SUSPICION, "1") !== "0";
+  showMaterialSuspicion = store_get(KEY_SHOW_MATERIAL_SUSPICION, "1") !== "0";
   showMaterialIgnitionRisk =
     store_get(KEY_SHOW_MATERIAL_IGNITION_RISK, "1") !== "0";
   showMaterialStokingRisk =
@@ -877,6 +880,24 @@ function buildUnknownTooltip(): HTMLElement {
   return wrap;
 }
 
+function attachRecipeSubmitTrigger(
+  wrapperEl: HTMLElement,
+  scenarioName: string,
+): void {
+  if (wrapperEl.querySelector(".pyro-submit-trigger-btn")) return;
+  injectPopoverStyles();
+
+  const btn = el("button", "pyro-popover-btn pyro-submit-trigger-btn");
+  btn.type = "button";
+  btn.setAttribute("aria-label", "Submit a recipe for this scenario");
+  btn.innerHTML = ICON_FLAME;
+  btn.addEventListener("click", (e) => {
+    e.stopPropagation();
+    openSettingsToSubmit(scenarioName);
+  });
+  wrapperEl.appendChild(btn);
+}
+
 function applyToSection(
   section: HTMLElement,
   ranked: RankedScenario | null,
@@ -906,6 +927,14 @@ function applyToSection(
 
   section.classList.add(`pyro-band--${ranked.band}`);
   if (hoverTarget !== section) ensureValuePill(hoverTarget, ranked);
+
+  const abandonWrapper = section.querySelector<HTMLElement>(
+    SEL.ABANDON_BUTTON_WRAPPER,
+  );
+  if (abandonWrapper) {
+    attachRecipeSubmitTrigger(abandonWrapper, ranked.Scenario.scenarioName);
+  }
+
   wireTooltip(section, hoverTarget, () => {
     const statsOnly =
       isPendingCollect(section) && !ranked.Scenario.needsVerification;
@@ -1022,6 +1051,21 @@ function isArsonPage(): boolean {
   return !!document.querySelector(SEL.ROOT);
 }
 
+function getVisibleScenarioNames(): string[] {
+  const names = new Set<string>();
+  getRoot()
+    .querySelectorAll<HTMLElement>(SEL.CARD)
+    .forEach((section) => {
+      const scenarioEl = section.querySelector('[class*="scenario___"]');
+      const rawName = scenarioEl?.textContent?.trim() ?? "";
+      const scenario = rawName
+        ? (scenarioIndex.get(rawName.toLowerCase()) ?? null)
+        : null;
+      if (scenario) names.add(scenario.scenarioName);
+    });
+  return Array.from(names).sort();
+}
+
 function scanPage(): void {
   if (!isArsonPage()) return;
   const prices = effectivePrices();
@@ -1085,6 +1129,7 @@ const settingsCtx: SettingsCtx = {
   getShowMaterialSuspicion: () => showMaterialSuspicion,
   getShowMaterialIgnitionRisk: () => showMaterialIgnitionRisk,
   getShowMaterialStokingRisk: () => showMaterialStokingRisk,
+  getVisibleScenarioNames,
 
   setManualPrice,
   clearManualPrices,
