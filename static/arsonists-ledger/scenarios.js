@@ -282,8 +282,8 @@
       payoutMin: 1e5,
       payoutMax: 13e4,
       actions: {
-        ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
-        place: [{ resourceId: RESOURCE.GASOLINE, qty: 3 }]
+        place: [{ resourceId: RESOURCE.GASOLINE, qty: 3 }],
+        ignite: [{ resourceId: RESOURCE.LIGHTER, qty: 1 }]
       }
     },
     {
@@ -904,8 +904,10 @@
       payoutMin: 33e4,
       payoutMax: 38e4,
       actions: {
+        place: [{ resourceId: RESOURCE.KEROSENE, qty: 3 }],
         ignite: [{ resourceId: RESOURCE.LIGHTER, qty: 1 }],
-        place: [{ resourceId: RESOURCE.KEROSENE, qty: 3 }]
+        stoke: [{ resourceId: RESOURCE.METHANE, qty: 2 }],
+        stokeTime: "early"
       }
     },
     {
@@ -1533,30 +1535,30 @@
     {
       scenarioName: "Low Rent",
       payoutMin: 42e3,
-      payoutMax: 2e5,
+      payoutMax: 21e4,
       actions: {
-        ignite: [{ resourceId: RESOURCE.LIGHTER, qty: 1 }],
         place: [{ resourceId: RESOURCE.GASOLINE, qty: 2 }],
+        ignite: [{ resourceId: RESOURCE.LIGHTER, qty: 1 }],
         stoke: [{ resourceId: RESOURCE.METHANE, qty: 2 }],
         stokeTime: "early"
       }
     },
     {
       scenarioName: "Make a Killing",
-      payoutMin: 39e4,
+      payoutMin: 34e4,
       payoutMax: 48e4,
       actions: {
-        ignite: [{ resourceId: RESOURCE.LIGHTER, qty: 1 }],
-        place: [{ resourceId: RESOURCE.KEROSENE, qty: 3 }]
+        place: [{ resourceId: RESOURCE.KEROSENE, qty: 3 }],
+        ignite: [{ resourceId: RESOURCE.LIGHTER, qty: 1 }]
       }
     },
     {
       scenarioName: "Mallrats",
       payoutMin: 41e4,
-      payoutMax: 41e4,
+      payoutMax: 44e4,
       actions: {
-        ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
         place: [{ resourceId: RESOURCE.GASOLINE, qty: 4 }],
+        ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
         stoke: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }]
       }
     },
@@ -1822,11 +1824,11 @@
     },
     {
       scenarioName: "Second Hand Smoke",
-      payoutMin: 18e4,
+      payoutMin: 15e4,
       payoutMax: 21e4,
       actions: {
-        ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
         place: [{ resourceId: RESOURCE.GASOLINE, qty: 2 }],
+        ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
         stoke: [{ resourceId: RESOURCE.METHANE, qty: 2 }],
         stokeTime: "early"
       }
@@ -1902,11 +1904,11 @@
     },
     {
       scenarioName: "Smoke Signals",
-      payoutMin: 12e4,
+      payoutMin: 11e4,
       payoutMax: 12e4,
       actions: {
-        ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
-        place: [{ resourceId: RESOURCE.DIESEL, qty: 3 }]
+        place: [{ resourceId: RESOURCE.DIESEL, qty: 3 }],
+        ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }]
       }
     },
     {
@@ -2196,8 +2198,8 @@
       payoutMin: 75500,
       payoutMax: 1e5,
       actions: {
-        ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
-        place: [{ resourceId: RESOURCE.GASOLINE, qty: 4 }]
+        place: [{ resourceId: RESOURCE.GASOLINE, qty: 4 }],
+        ignite: [{ resourceId: RESOURCE.LIGHTER, qty: 1 }]
       }
     },
     {
