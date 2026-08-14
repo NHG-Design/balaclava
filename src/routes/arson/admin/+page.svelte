@@ -216,88 +216,76 @@
             <div class="grid grid-cols-1 gap-4 lg:grid-cols-2">
               {#each group as s (s.id)}
                 {@const recipe = parseRecipe(s.recipe)}
-                {@const diff = computeDiff(s, recipe, data.currentScenarios)}
+                {@const diff = computeDiff(s, recipe, data.currentScenarios).filter((f) => f.changed)}
+                {@const isNew = !data.currentScenarios[s.scenario_name]}
                 <article
-                  class="flex flex-col gap-3 rounded-xl border p-4 {s.isStale
+                  class="flex flex-col gap-2.5 rounded-xl border p-4 {s.isStale
                     ? 'border-ink-800 bg-ink-900/50 opacity-60'
                     : 'border-ink-700 bg-ink-900'}"
                 >
-                  <div class="flex items-center justify-between text-xs text-ink-400">
-                    <span>vs. current scenario data</span>
+                  <div class="flex flex-wrap items-center justify-between gap-x-3 gap-y-1 text-xs text-ink-400">
+                    <span class="flex flex-wrap items-center gap-x-2 gap-y-1">
+                      <span class="font-medium text-ink-200">#{s.id}</span>
+                      {#if s.submitter_id}
+                        <a
+                          href={`https://www.torn.com/profiles.php?XID=${s.submitter_id}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          class="text-accent-400 hover:underline"
+                        >
+                          {s.submitter_name ?? `#${s.submitter_id}`}
+                        </a>
+                      {/if}
+                      {#if isNew}
+                        <span
+                          class="rounded-full border border-accent-400/40 px-1.5 py-px text-[10px] font-medium tracking-wide text-accent-400 uppercase"
+                        >
+                          New scenario
+                        </span>
+                      {/if}
+                      {#if s.isStale}
+                        <span
+                          class="rounded-full border border-ink-600 px-1.5 py-px text-[10px] font-medium tracking-wide text-ink-400 uppercase"
+                        >
+                          Already approved
+                        </span>
+                      {/if}
+                    </span>
                     <span>{new Date(s.created_at).toLocaleString()}</span>
                   </div>
 
-                  {#if s.isStale}
-                    <span
-                      class="w-fit rounded-full border border-ink-600 px-2 py-0.5 text-[10px] font-medium tracking-wide text-ink-400 uppercase"
-                    >
-                      Scenario already has an approved recipe
-                    </span>
+                  {#if !recipe}
+                    <p class="text-sm text-rose-400">Recipe data couldn't be parsed.</p>
+                  {:else if diff.length === 0}
+                    <p class="text-sm text-ink-400">No changes from current data.</p>
+                  {:else}
+                    <div class="flex flex-col gap-1 text-[13px]">
+                      {#each diff as f (f.label)}
+                        <p>
+                          <span class="text-ink-400">{f.label}:</span>
+                          <span class="text-rose-400 line-through">{f.oldText}</span>
+                          <span class="text-ink-600">→</span>
+                          <span class="font-medium text-emerald-400">{f.newText}</span>
+                        </p>
+                      {/each}
+                    </div>
                   {/if}
 
                   {#if group.length > 1}
-                    {#each group.filter((other) => other.id !== s.id) as sibling (sibling.id)}
-                      <p class="text-xs text-ink-400">
-                        vs. submission #{sibling.id}: <span class="text-ink-200"
-                          >{siblingDelta(s, sibling)}</span
-                        >
-                      </p>
-                    {/each}
+                    <div class="flex flex-col gap-0.5">
+                      {#each group.filter((other) => other.id !== s.id) as sibling (sibling.id)}
+                        <p class="text-xs text-ink-400">
+                          vs #{sibling.id}: {siblingDelta(s, sibling)}
+                        </p>
+                      {/each}
+                    </div>
                   {/if}
 
-                  {#if recipe}
-                    <table class="w-full border-collapse text-[13px]">
-                      <tbody>
-                        {#each diff as f (f.label)}
-                          <tr>
-                            <td class="w-px py-1 pr-3 align-top whitespace-nowrap text-ink-400">
-                              {f.label}
-                            </td>
-                            {#if f.changed}
-                              <td class="py-1 pr-2 align-top text-rose-400 line-through">
-                                {f.oldText}
-                              </td>
-                              <td class="w-px py-1 pr-2 align-top text-ink-600">→</td>
-                              <td class="py-1 align-top font-medium text-emerald-400">
-                                {f.newText}
-                              </td>
-                            {:else}
-                              <td class="py-1 align-top text-ink-200" colspan="3">
-                                {f.newText}
-                                <span class="text-ink-600">(unchanged)</span>
-                              </td>
-                            {/if}
-                          </tr>
-                        {/each}
-                      </tbody>
-                    </table>
-                  {:else}
-                    <p class="text-sm text-rose-400">Recipe data couldn't be parsed.</p>
-                  {/if}
-
-                  {#if !data.currentScenarios[s.scenario_name]}
-                    <p class="text-xs text-ink-400">
-                      No current data for this scenario — this would be a brand new entry.
-                    </p>
-                  {/if}
-                  {#if s.submitter_id}
-                    <p class="text-xs text-ink-400">
-                      Submitter:
-                      <a
-                        href={`https://www.torn.com/profiles.php?XID=${s.submitter_id}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        class="text-accent-400 hover:underline"
-                      >
-                        {s.submitter_name ?? `#${s.submitter_id}`}
-                      </a>
-                    </p>
-                  {/if}
                   {#if actionError[s.id]}
                     <p class="text-xs text-rose-400">{actionError[s.id]}</p>
                   {/if}
 
-                  <div class="mt-1 flex gap-2">
+                  <div class="flex gap-2">
                     <button
                       disabled={actionBusy[s.id]}
                       onclick={() => act(s.id, 'approve', s.scenario_name)}
