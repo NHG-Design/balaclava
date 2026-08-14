@@ -1,7 +1,11 @@
 # Recipe Submission Review, Voting & Promotion
 
-> Meridian map · Status: superseded · Started: 2026-08-12
-> Superseded 2026-08-14 by [recipe-submission-backlog.md](recipe-submission-backlog.md) — the voting/login half of this Destination was dropped as too much to ask of users. The review/promotion pipeline (admin approve/deny → GitHub PR → merge webhook) stands as-is.
+> Meridian map · Status: superseded (destination), reopened for decision #15 (2026-08-14) · Started: 2026-08-12
+> Superseded 2026-08-14 by [recipe-submission-backlog.md](recipe-submission-backlog.md) — the voting/login half of this Destination was dropped as too much to ask of users. The review/promotion pipeline (admin approve/deny → GitHub PR → merge webhook) stands as-is and is still actively amended here.
+
+## Reopened: competing-submission handling (2026-08-14)
+
+Triggered by the user hitting a real two-submission conflict in admin (both for "Cook it Rare", near-identical). Decision #15's original resolution ("admin sees them grouped/badged, approves one, manually denies the rest — no auto-deny") is confirmed still correct in spirit, but three concrete gaps surfaced in practice — see the new Frontier entries below (#22–#24).
 
 ## Destination
 
@@ -47,6 +51,14 @@ Community-submitted arson recipes are publicly visible on balaclava.app, players
 | # | Open decision | Type | Blocked by |
 |---|---------------|------|------------|
 
+## Decision log (reopened section)
+
+| # | Decision | Resolution | Via |
+|---|----------|------------|-----|
+| 22 | Deny-rest prompt | Inline confirm banner shown after a successful approve, only when pending siblings remain for that scenario — one "Deny all" button plus each sibling still individually denyable below. Not a blocking native `confirm()`, not force-bundled. | J |
+| 23 | Sibling diff | Keep the existing vs-live diff table on every submission (still the "does this change anything" view); add one compact extra line per submission when siblings exist, e.g. "vs. submission #3: + stokeTime" — reuses `computeDiff` pointed at a sibling's recipe instead of `currentScenarios`, no new comparison UI | J |
+| 24 | Staleness flag | Small badge ("scenario already has an approved recipe") on a pending submission whose scenario has an approved/merged entry from another submission; that submission also sorts to the bottom of its scenario group. Still requires an explicit admin Deny — no auto-deny. | J |
+
 ## Fog
 
 - Whether merged community-approved recipes should feed the existing `arson-changelog` skill (Torn-forum changelog generator, diffs `scenarios.ts` between versions) — plausibly yes since it already diffs exactly this file, but not scoped here. Clarifies when: this feature has shipped and produced a first real merged PR to see what the diff actually looks like in practice.
@@ -79,3 +91,15 @@ Community-submitted arson recipes are publicly visible on balaclava.app, players
 10. [x] Build the public `/arson/submissions` page: unauthenticated view, lists pending (votable, sorted by vote score) and approved/merged (reference/history) submissions, denied hidden behind a status filter; vote buttons prompt the route-3 login flow if not logged in; loading/empty/error states per the Polished appetite — from decisions #13, #14, #1. Done: `src/routes/arson/submissions/+page.svelte`, plus a new `GET` handler on `/api/arson/recipe-submissions` (public, joins `submission_votes` for live scores + the requester's own vote). Clicking a vote arrow while logged out opens a login modal instead of failing; the vote that triggered it fires automatically on successful login. `pnpm check` (0 warnings after an a11y pass on the modal) + `pnpm build` pass.
 
 **First move:** Route #1 — the schema migration, since routes 3 through 9 all read or write columns/tables it introduces.
+
+### Reopened route (2026-08-14): competing-submission tooling
+
+11. [x] Admin approve endpoint: after a successful approve, also query for other `pending` submissions sharing the approved one's `scenario_name`, and return them in the response (`siblingsToDeny: [...]`) — from decision #22. Done.
+12. [x] Admin UI: render an inline banner when `siblingsToDeny` comes back non-empty ("N other pending submissions exist for `<scenario>`"), with a "Deny all" button that calls the existing deny endpoint per sibling id, plus each sibling still individually visible/denyable in its normal card below — from decision #22. Done.
+13. [x] Admin UI: for a submission with pending siblings, add a compact per-sibling delta line ("vs. submission #N: + stokeTime") computed by calling `computeDiff` with the sibling's parsed recipe passed as a synthetic single-entry `currentScenarios` map instead of `data.currentScenarios` — from decision #23. Done.
+14. [x] Admin list endpoint: for each pending submission, check whether any other submission for the same `scenario_name` has `status IN ('approved', 'merged')`; if so mark it stale in the response — from decision #24. Done: `isStale` field added to the list response.
+15. [x] Admin UI: render a "scenario already has an approved recipe" badge on stale submissions, and sort stale entries to the bottom within their scenario group — from decision #24. Done. `pnpm check` + `pnpm build` pass for the full reopened route.
+
+**First move (reopened route):** #11 — the approve endpoint needs to report siblings before the UI (#12) has anything to render.
+
+**Status: reopened route complete.**

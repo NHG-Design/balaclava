@@ -16,6 +16,7 @@
     status: 'pending' | 'approved' | 'merged' | 'denied'
     pr_number: number | null
     created_at: string
+    isStale: boolean
   }
 
   let submissions = $state<Submission[]>([])
@@ -23,6 +24,8 @@
   let loadError = $state('')
   let actionError = $state<Record<number, string>>({})
   let actionBusy = $state<Record<number, boolean>>({})
+  let denyPrompt = $state<{ scenarioName: string; ids: number[] } | null>(null)
+  let denyPromptBusy = $state(false)
 
   async function load() {
     loading = true
@@ -48,23 +51,46 @@
 
   onMount(load)
 
-  async function act(id: number, action: 'approve' | 'deny') {
+  async function act(id: number, action: 'approve' | 'deny', scenarioName?: string) {
     actionBusy = { ...actionBusy, [id]: true }
     actionError = { ...actionError, [id]: '' }
     try {
       const res = await fetch(`/api/arson/admin/recipe-submissions/${id}/${action}`, {
         method: 'POST',
       })
-      const json = (await res.json()) as { ok?: boolean; error?: string }
+      const json = (await res.json()) as {
+        ok?: boolean
+        error?: string
+        siblingsToDeny?: number[]
+      }
       if (!res.ok || !json.ok) {
         actionError = { ...actionError, [id]: json.error ?? `HTTP ${res.status}` }
         return
+      }
+      if (action === 'approve' && json.siblingsToDeny?.length && scenarioName) {
+        denyPrompt = { scenarioName, ids: json.siblingsToDeny }
       }
       await load()
     } catch {
       actionError = { ...actionError, [id]: 'Network error' }
     } finally {
       actionBusy = { ...actionBusy, [id]: false }
+    }
+  }
+
+  async function denyAllSiblings() {
+    if (!denyPrompt) return
+    denyPromptBusy = true
+    try {
+      await Promise.all(
+        denyPrompt.ids.map((id) =>
+          fetch(`/api/arson/admin/recipe-submissions/${id}/deny`, { method: 'POST' }),
+        ),
+      )
+      denyPrompt = null
+      await load()
+    } finally {
+      denyPromptBusy = false
     }
   }
 
@@ -76,9 +102,29 @@
       list.push(s)
       map.set(s.scenario_name, list)
     }
+    for (const list of map.values()) {
+      list.sort((a, b) => Number(a.isStale) - Number(b.isStale))
+    }
     return map
   })
   let others = $derived(submissions.filter((s) => s.status !== 'pending'))
+
+  function siblingDelta(s: Submission, sibling: Submission): string {
+    const recipe = parseRecipe(s.recipe)
+    const siblingRecipe = parseRecipe(sibling.recipe)
+    if (!recipe || !siblingRecipe) return ''
+    const asCurrentScenario = {
+      [s.scenario_name]: {
+        payoutMin: sibling.payout_min,
+        payoutMax: sibling.payout_max,
+        actions: siblingRecipe,
+      },
+    }
+    const changed = computeDiff(s, recipe, asCurrentScenario)
+      .filter((f) => f.changed)
+      .map((f) => f.label)
+    return changed.length > 0 ? changed.join(', ') : 'identical'
+  }
 
   const STATUS_CLASSES: Record<Submission['status'], string> = {
     pending: 'bg-amber-500/15 text-amber-300',
@@ -116,6 +162,32 @@
   </header>
 
   <main class="mx-auto max-w-6xl px-6 py-10">
+    {#if denyPrompt}
+      <div
+        class="mb-6 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-amber-400/40 bg-amber-500/10 px-4 py-3 text-sm text-amber-200"
+      >
+        <span>
+          {denyPrompt.ids.length} other pending submission{denyPrompt.ids.length === 1 ? '' : 's'} for
+          <strong>{denyPrompt.scenarioName}</strong>.
+        </span>
+        <div class="flex gap-2">
+          <button
+            disabled={denyPromptBusy}
+            onclick={denyAllSiblings}
+            class="rounded-md bg-rose-500/20 px-3 py-1.5 text-xs font-medium text-rose-200 transition-colors hover:bg-rose-500/30 active:scale-[0.97] disabled:pointer-events-none disabled:opacity-40"
+          >
+            {denyPromptBusy ? 'Working…' : 'Deny all'}
+          </button>
+          <button
+            onclick={() => (denyPrompt = null)}
+            class="rounded-md px-3 py-1.5 text-xs text-amber-300 transition-colors hover:text-amber-100"
+          >
+            Dismiss
+          </button>
+        </div>
+      </div>
+    {/if}
+
     {#if loading}
       <p class="text-sm text-ink-400">Loading…</p>
     {:else if loadError}
@@ -145,11 +217,33 @@
               {#each group as s (s.id)}
                 {@const recipe = parseRecipe(s.recipe)}
                 {@const diff = computeDiff(s, recipe, data.currentScenarios)}
-                <article class="flex flex-col gap-3 rounded-xl border border-ink-700 bg-ink-900 p-4">
+                <article
+                  class="flex flex-col gap-3 rounded-xl border p-4 {s.isStale
+                    ? 'border-ink-800 bg-ink-900/50 opacity-60'
+                    : 'border-ink-700 bg-ink-900'}"
+                >
                   <div class="flex items-center justify-between text-xs text-ink-400">
                     <span>vs. current scenario data</span>
                     <span>{new Date(s.created_at).toLocaleString()}</span>
                   </div>
+
+                  {#if s.isStale}
+                    <span
+                      class="w-fit rounded-full border border-ink-600 px-2 py-0.5 text-[10px] font-medium tracking-wide text-ink-400 uppercase"
+                    >
+                      Scenario already has an approved recipe
+                    </span>
+                  {/if}
+
+                  {#if group.length > 1}
+                    {#each group.filter((other) => other.id !== s.id) as sibling (sibling.id)}
+                      <p class="text-xs text-ink-400">
+                        vs. submission #{sibling.id}: <span class="text-ink-200"
+                          >{siblingDelta(s, sibling)}</span
+                        >
+                      </p>
+                    {/each}
+                  {/if}
 
                   {#if recipe}
                     <table class="w-full border-collapse text-[13px]">
@@ -206,7 +300,7 @@
                   <div class="mt-1 flex gap-2">
                     <button
                       disabled={actionBusy[s.id]}
-                      onclick={() => act(s.id, 'approve')}
+                      onclick={() => act(s.id, 'approve', s.scenario_name)}
                       class="rounded-md bg-emerald-500/15 px-3 py-1.5 text-xs font-medium text-emerald-300 transition-colors hover:bg-emerald-500/25 active:scale-[0.97] disabled:pointer-events-none disabled:opacity-40"
                     >
                       {actionBusy[s.id] ? 'Working…' : 'Approve'}

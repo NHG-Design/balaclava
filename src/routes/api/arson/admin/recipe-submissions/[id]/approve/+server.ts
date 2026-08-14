@@ -124,7 +124,13 @@ export const POST: RequestHandler = async ({ params, platform, cookies }) => {
       args: [prNumber, submissionId],
     })
 
-    return new Response(JSON.stringify({ ok: true, prNumber, prUrl }), {
+    const siblings = await client.execute({
+      sql: `SELECT id FROM recipe_submissions WHERE scenario_name = ? AND status = 'pending' AND id != ?`,
+      args: [row.scenario_name, submissionId],
+    })
+    const siblingsToDeny = siblings.rows.map((r) => Number(r.id))
+
+    return new Response(JSON.stringify({ ok: true, prNumber, prUrl, siblingsToDeny }), {
       status: 200,
       headers: { 'Content-Type': 'application/json' },
     })
