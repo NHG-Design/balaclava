@@ -1,6 +1,7 @@
 # Recipe Submission Review, Voting & Promotion
 
-> Meridian map · Status: route-ready · Started: 2026-08-12
+> Meridian map · Status: superseded · Started: 2026-08-12
+> Superseded 2026-08-14 by [recipe-submission-backlog.md](recipe-submission-backlog.md) — the voting/login half of this Destination was dropped as too much to ask of users. The review/promotion pipeline (admin approve/deny → GitHub PR → merge webhook) stands as-is.
 
 ## Destination
 

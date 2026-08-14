@@ -1,18 +1,10 @@
 <script lang="ts">
-  import { onMount } from 'svelte'
+  import { onMount, tick } from 'svelte'
+  import type { PageData } from './$types'
+  import { computeDiff, parseRecipe } from '$lib/recipe-diff'
 
-  interface ActionItem {
-    resourceId: string
-    qty: number
-  }
-  interface Recipe {
-    place: ActionItem[]
-    ignite: ActionItem[]
-    stoke?: ActionItem[]
-    stokeTime?: string
-    dampen?: ActionItem[]
-    dampenTime?: string
-  }
+  let { data }: { data: PageData } = $props()
+
   interface Submission {
     id: number
     scenario_name: string
@@ -23,8 +15,6 @@
     status: 'pending' | 'approved' | 'merged' | 'denied'
     pr_number: number | null
     created_at: string
-    score: number
-    yourVote: number | null
   }
 
   type StatusFilter = 'default' | 'denied'
@@ -33,16 +23,8 @@
   let loading = $state(true)
   let loadError = $state('')
   let statusFilter = $state<StatusFilter>('default')
-
-  let loggedIn = $state(false)
-  let playerName = $state('')
-  let showLogin = $state(false)
-  let apiKey = $state('')
-  let loginError = $state('')
-  let loginLoading = $state(false)
-  let pendingVote: { id: number; value: number } | null = $state(null)
-
-  let voteBusy = $state<Record<number, boolean>>({})
+  let copiedId = $state<number | null>(null)
+  let highlightedId = $state<number | null>(null)
 
   async function loadSubmissions() {
     loading = true
@@ -50,12 +32,12 @@
     try {
       const qs = statusFilter === 'denied' ? '?status=denied' : ''
       const res = await fetch(`/api/arson/recipe-submissions${qs}`)
-      const data = (await res.json()) as { submissions?: Submission[]; error?: string }
+      const json = (await res.json()) as { submissions?: Submission[]; error?: string }
       if (!res.ok) {
-        loadError = data.error ?? `HTTP ${res.status}`
+        loadError = json.error ?? `HTTP ${res.status}`
         return
       }
-      submissions = data.submissions ?? []
+      submissions = json.submissions ?? []
     } catch {
       loadError = 'Network error'
     } finally {
@@ -63,20 +45,23 @@
     }
   }
 
-  async function checkSession() {
-    try {
-      const res = await fetch('/api/arson/auth/me')
-      const data = (await res.json()) as { loggedIn: boolean; name?: string }
-      loggedIn = data.loggedIn
-      playerName = data.name ?? ''
-    } catch {
-      loggedIn = false
-    }
+  async function scrollToHash() {
+    const hash = window.location.hash
+    const match = /^#submission-(\d+)$/.exec(hash)
+    if (!match) return
+    const id = Number(match[1])
+    await tick()
+    const el = document.getElementById(`submission-${id}`)
+    if (!el) return
+    el.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    highlightedId = id
+    setTimeout(() => {
+      if (highlightedId === id) highlightedId = null
+    }, 2000)
   }
 
   onMount(() => {
-    void checkSession()
-    void loadSubmissions()
+    void loadSubmissions().then(scrollToHash)
   })
 
   $effect(() => {
@@ -84,85 +69,31 @@
     void loadSubmissions()
   })
 
-  function parseRecipe(raw: string): Recipe | null {
+  async function copyLink(id: number) {
+    const url = `${window.location.origin}${window.location.pathname}#submission-${id}`
     try {
-      return JSON.parse(raw) as Recipe
+      await navigator.clipboard.writeText(url)
+      copiedId = id
+      setTimeout(() => {
+        if (copiedId === id) copiedId = null
+      }, 1500)
     } catch {
-      return null
+      /* clipboard unavailable — link is still visible in the URL bar after a manual click */
     }
   }
 
-  function formatItems(items: ActionItem[] | undefined): string {
-    if (!items || items.length === 0) return '—'
-    return items.map((i) => `${i.qty}× ${i.resourceId}`).join(', ')
-  }
-
-  async function castVote(id: number, value: number) {
-    if (!loggedIn) {
-      pendingVote = { id, value }
-      showLogin = true
-      return
+  let grouped = $derived.by(() => {
+    const map = new Map<string, Submission[]>()
+    for (const s of submissions) {
+      const list = map.get(s.scenario_name) ?? []
+      list.push(s)
+      map.set(s.scenario_name, list)
     }
-
-    const current = submissions.find((s) => s.id === id)
-    const nextValue = current?.yourVote === value ? 0 : value
-
-    voteBusy = { ...voteBusy, [id]: true }
-    try {
-      const res = await fetch(`/api/arson/recipe-submissions/${id}/vote`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ value: nextValue }),
-      })
-      const data = (await res.json()) as { score?: number; yourVote?: number | null; error?: string }
-      if (res.ok) {
-        submissions = submissions.map((s) =>
-          s.id === id ? { ...s, score: data.score ?? s.score, yourVote: data.yourVote ?? null } : s,
-        )
-      }
-    } catch {
-      /* transient — vote just doesn't update, no crash */
-    } finally {
-      voteBusy = { ...voteBusy, [id]: false }
+    for (const list of map.values()) {
+      list.sort((a, b) => b.created_at.localeCompare(a.created_at))
     }
-  }
-
-  async function submitLogin(e: Event) {
-    e.preventDefault()
-    loginError = ''
-    loginLoading = true
-    try {
-      const res = await fetch('/api/arson/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ apiKey }),
-      })
-      const data = (await res.json()) as { ok?: boolean; name?: string; error?: string }
-      if (!res.ok || !data.ok) {
-        loginError = data.error ?? 'Login failed'
-        return
-      }
-      loggedIn = true
-      playerName = data.name ?? ''
-      showLogin = false
-      apiKey = ''
-      if (pendingVote) {
-        const { id, value } = pendingVote
-        pendingVote = null
-        await castVote(id, value)
-      }
-    } catch {
-      loginError = 'Network error'
-    } finally {
-      loginLoading = false
-    }
-  }
-
-  async function logout() {
-    await fetch('/api/arson/auth/logout', { method: 'POST' })
-    loggedIn = false
-    playerName = ''
-  }
+    return new Map([...map.entries()].sort(([a], [b]) => a.localeCompare(b)))
+  })
 </script>
 
 <svelte:head>
@@ -172,14 +103,6 @@
 <main>
   <header>
     <h1>Community recipe submissions</h1>
-    {#if loggedIn}
-      <div class="session">
-        <span>Logged in as {playerName}</span>
-        <button class="link" onclick={logout}>Log out</button>
-      </div>
-    {:else}
-      <button class="login-btn" onclick={() => (showLogin = true)}>Log in to vote</button>
-    {/if}
   </header>
 
   <div class="filters">
@@ -198,102 +121,67 @@
   {:else if submissions.length === 0}
     <p class="muted">No submissions here yet.</p>
   {:else}
-    {#each submissions as s (s.id)}
-      {@const recipe = parseRecipe(s.recipe)}
-      <article class="submission">
-        <div class="vote-col">
-          <button
-            class="vote-btn"
-            class:active={s.yourVote === 1}
-            disabled={voteBusy[s.id]}
-            onclick={() => castVote(s.id, 1)}
-            aria-label="Upvote"
+    {#each [...grouped.entries()] as [scenarioName, group] (scenarioName)}
+      <section class="scenario-group">
+        <h2>{scenarioName}</h2>
+        {#each group as s (s.id)}
+          {@const recipe = parseRecipe(s.recipe)}
+          {@const diff = computeDiff(s, recipe, data.currentScenarios)}
+          <article
+            class="submission"
+            class:highlighted={highlightedId === s.id}
+            id={`submission-${s.id}`}
           >
-            ▲
-          </button>
-          <span class="score">{s.score}</span>
-          <button
-            class="vote-btn"
-            class:active={s.yourVote === -1}
-            disabled={voteBusy[s.id]}
-            onclick={() => castVote(s.id, -1)}
-            aria-label="Downvote"
-          >
-            ▼
-          </button>
-        </div>
-        <div class="content">
-          <div class="row">
-            <strong>{s.scenario_name}</strong>
-            <span class="status status-{s.status}">{s.status}</span>
-          </div>
-          <div class="row muted">
-            Payout: {s.payout_min.toLocaleString()}–{s.payout_max.toLocaleString()}
-          </div>
-          {#if recipe}
-            <div class="row"><span class="label">Place:</span> {formatItems(recipe.place)}</div>
-            <div class="row"><span class="label">Ignite:</span> {formatItems(recipe.ignite)}</div>
-            {#if recipe.stoke}
-              <div class="row">
-                <span class="label">Stoke:</span> {formatItems(recipe.stoke)}
-                {#if recipe.stokeTime}({recipe.stokeTime}){/if}
+            <div class="row">
+              <span class="status status-{s.status}">{s.status}</span>
+              <div class="row-right">
+                <span class="muted">{new Date(s.created_at).toLocaleString()}</span>
+                <button class="copy-btn" onclick={() => copyLink(s.id)} aria-label="Copy share link">
+                  {#if copiedId === s.id}
+                    Copied!
+                  {:else}
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                      <path d="M9 15l6 -6" />
+                      <path d="M11 6l.463 -.536a5 5 0 0 1 7.071 7.072l-.534 .464" />
+                      <path d="M13 18l-.397 .534a5.068 5.068 0 0 1 -7.127 0a4.972 4.972 0 0 1 0 -7.071l.524 -.463" />
+                    </svg>
+                    Copy link
+                  {/if}
+                </button>
               </div>
-            {/if}
-            {#if recipe.dampen}
-              <div class="row">
-                <span class="label">Dampen:</span> {formatItems(recipe.dampen)}
-                {#if recipe.dampenTime}({recipe.dampenTime}){/if}
-              </div>
-            {/if}
-          {/if}
-          {#if s.status === 'approved' && s.pr_number}
-            <div class="row muted">
-              Approved — deploying via
-              <a href={`https://github.com/NHG-Design/balaclava/pull/${s.pr_number}`} target="_blank" rel="noopener noreferrer">PR #{s.pr_number}</a>
             </div>
-          {/if}
-        </div>
-      </article>
+            {#if recipe}
+              <table class="diff">
+                <tbody>
+                  {#each diff as f (f.label)}
+                    <tr class:changed={f.changed}>
+                      <td class="diff-label">{f.label}</td>
+                      {#if f.changed}
+                        <td class="diff-old">{f.oldText}</td>
+                        <td class="diff-arrow">→</td>
+                        <td class="diff-new">{f.newText}</td>
+                      {:else}
+                        <td class="diff-same" colspan="3">{f.newText} <span class="muted">(unchanged)</span></td>
+                      {/if}
+                    </tr>
+                  {/each}
+                </tbody>
+              </table>
+            {:else}
+              <div class="row error">Recipe data couldn't be parsed.</div>
+            {/if}
+            {#if s.status === 'approved' && s.pr_number}
+              <div class="row muted">
+                Approved — deploying via
+                <a href={`https://github.com/NHG-Design/balaclava/pull/${s.pr_number}`} target="_blank" rel="noopener noreferrer">PR #{s.pr_number}</a>
+              </div>
+            {/if}
+          </article>
+        {/each}
+      </section>
     {/each}
   {/if}
 </main>
-
-{#if showLogin}
-  <div
-    class="modal-backdrop"
-    role="button"
-    tabindex="-1"
-    aria-label="Close dialog"
-    onclick={() => (showLogin = false)}
-    onkeydown={(e) => e.key === 'Escape' && (showLogin = false)}
-  >
-    <div
-      class="modal-stop"
-      role="dialog"
-      aria-modal="true"
-      aria-label="Log in with your Torn API key"
-      tabindex="-1"
-      onclick={(e) => e.stopPropagation()}
-      onkeydown={(e) => e.stopPropagation()}
-    >
-      <form class="modal" onsubmit={submitLogin}>
-        <h2>Log in with your Torn API key</h2>
-        <p class="muted">
-          Use a <strong>Public</strong> access key (Preferences → API). We only read your player ID
-          and name to verify your identity — nothing else, and the key itself isn't stored.
-        </p>
-        <input type="password" bind:value={apiKey} placeholder="Torn API key" autocomplete="off" required />
-        {#if loginError}
-          <p class="error">{loginError}</p>
-        {/if}
-        <div class="modal-actions">
-          <button type="button" class="link" onclick={() => (showLogin = false)}>Cancel</button>
-          <button type="submit" disabled={loginLoading}>{loginLoading ? 'Checking…' : 'Log in'}</button>
-        </div>
-      </form>
-    </div>
-  </div>
-{/if}
 
 <style>
   :global(body) {
@@ -309,45 +197,20 @@
     color: oklch(90% 0.006 95);
   }
   header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    flex-wrap: wrap;
-    gap: 12px;
     margin-bottom: 16px;
   }
   h1 {
     font-size: 20px;
     margin: 0;
   }
-  .session {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 12px;
-    color: oklch(70% 0.01 285);
-  }
-  .login-btn {
-    background: oklch(30% 0.09 155);
-    color: oklch(96% 0.012 95);
-    border: none;
-    border-radius: 6px;
-    padding: 8px 14px;
-    font-size: 13px;
-    cursor: pointer;
-  }
-  .link {
-    background: none;
-    border: none;
-    color: #7ac6ff;
-    cursor: pointer;
-    padding: 0;
-    font-size: 12px;
+  h2 {
+    font-size: 15px;
+    margin: 24px 0 8px;
   }
   .filters {
     display: flex;
     gap: 8px;
-    margin-bottom: 16px;
+    margin-bottom: 8px;
   }
   .filters button {
     background: oklch(20% 0.008 285);
@@ -365,65 +228,59 @@
   }
   .muted {
     color: oklch(55% 0.008 285);
-    font-size: 13px;
+    font-size: 12px;
   }
   .error {
     color: #e77;
     font-size: 13px;
   }
+  .scenario-group {
+    border-bottom: 1px solid oklch(27% 0.017 285);
+    padding-bottom: 8px;
+  }
   .submission {
-    display: flex;
-    gap: 12px;
     background: oklch(20% 0.008 285);
     border: 1px solid oklch(27% 0.017 285);
     border-radius: 8px;
     padding: 12px;
     margin-bottom: 10px;
-  }
-  .vote-col {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 2px;
-    flex-shrink: 0;
-    width: 36px;
-  }
-  .vote-btn {
-    background: none;
-    border: none;
-    color: oklch(55% 0.008 285);
-    cursor: pointer;
-    font-size: 16px;
-    line-height: 1;
-    padding: 2px;
-  }
-  .vote-btn:disabled {
-    opacity: 0.4;
-    cursor: default;
-  }
-  .vote-btn.active {
-    color: #6d6;
-  }
-  .score {
-    font-size: 13px;
-    font-weight: 600;
-  }
-  .content {
-    flex: 1;
-    min-width: 0;
     display: flex;
     flex-direction: column;
     gap: 4px;
+    scroll-margin-top: 24px;
+    box-shadow: 0 0 0 0 transparent;
+    transition: box-shadow 600ms cubic-bezier(0.23, 1, 0.32, 1), border-color 600ms cubic-bezier(0.23, 1, 0.32, 1);
+  }
+  .submission.highlighted {
+    box-shadow: 0 0 0 2px #6d6;
+    border-color: #6d6;
   }
   .row {
     font-size: 13px;
     display: flex;
     justify-content: space-between;
+    align-items: center;
     gap: 8px;
     flex-wrap: wrap;
   }
-  .label {
+  .row-right {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .copy-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: none;
+    border: none;
     color: oklch(58% 0.012 285);
+    cursor: pointer;
+    font-size: 11px;
+    padding: 2px 4px;
+  }
+  .copy-btn:hover {
+    color: #6d6;
   }
   .status {
     text-transform: uppercase;
@@ -438,54 +295,34 @@
   .status-denied { background: oklch(28% 0.09 25 / 0.5); color: #e77; }
   a { color: #7ac6ff; }
 
-  .modal-backdrop {
-    position: fixed;
-    inset: 0;
-    background: oklch(0% 0 0 / 0.6);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 100;
+  .diff {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+    margin: 4px 0;
   }
-  .modal {
-    background: oklch(20% 0.008 285);
-    border: 1px solid oklch(30% 0 0);
-    border-radius: 10px;
-    padding: 20px;
-    width: 320px;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
+  .diff td {
+    padding: 3px 6px 3px 0;
+    vertical-align: top;
   }
-  .modal h2 {
-    font-size: 15px;
-    margin: 0;
+  .diff-label {
+    color: oklch(58% 0.012 285);
+    white-space: nowrap;
+    width: 1%;
   }
-  .modal input {
-    background: oklch(14.5% 0.011 285);
-    border: 1px solid oklch(27% 0.017 285);
-    color: oklch(90% 0.006 95);
-    padding: 8px 10px;
-    border-radius: 6px;
-    font-size: 14px;
+  .diff-same {
+    color: oklch(75% 0.006 95);
   }
-  .modal-actions {
-    display: flex;
-    justify-content: flex-end;
-    gap: 12px;
-    align-items: center;
+  tr.changed .diff-old {
+    color: #e77;
+    text-decoration: line-through;
   }
-  .modal-actions button[type='submit'] {
-    background: oklch(30% 0.09 155);
-    color: oklch(96% 0.012 95);
-    border: none;
-    border-radius: 6px;
-    padding: 8px 14px;
-    font-size: 13px;
-    cursor: pointer;
+  tr.changed .diff-new {
+    color: #6d6;
+    font-weight: 600;
   }
-  .modal-actions button:disabled {
-    opacity: 0.5;
-    cursor: default;
+  .diff-arrow {
+    color: oklch(50% 0.008 285);
+    width: 1%;
   }
 </style>

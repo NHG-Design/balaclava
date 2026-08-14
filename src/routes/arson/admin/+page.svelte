@@ -1,21 +1,10 @@
 <script lang="ts">
   import { onMount } from 'svelte'
   import type { PageData } from './$types'
+  import { computeDiff, parseRecipe } from '$lib/recipe-diff'
 
   let { data }: { data: PageData } = $props()
 
-  interface ActionItem {
-    resourceId: string
-    qty: number
-  }
-  interface Recipe {
-    place: ActionItem[]
-    ignite: ActionItem[]
-    stoke?: ActionItem[]
-    stokeTime?: string
-    dampen?: ActionItem[]
-    dampenTime?: string
-  }
   interface Submission {
     id: number
     scenario_name: string
@@ -26,71 +15,6 @@
     status: 'pending' | 'approved' | 'merged' | 'denied'
     pr_number: number | null
     created_at: string
-  }
-
-  interface FieldDiff {
-    label: string
-    changed: boolean
-    oldText: string
-    newText: string
-  }
-
-  function itemsKey(items: ActionItem[] | undefined): string {
-    return (items ?? [])
-      .map((i) => `${i.resourceId}:${i.qty}`)
-      .sort()
-      .join(',')
-  }
-
-  function computeDiff(s: Submission, recipe: Recipe | null): FieldDiff[] {
-    const current = data.currentScenarios[s.scenario_name]
-    const fields: FieldDiff[] = []
-
-    const oldPayout = current ? `${current.payoutMin.toLocaleString()}–${current.payoutMax.toLocaleString()}` : '—'
-    const newPayout = `${s.payout_min.toLocaleString()}–${s.payout_max.toLocaleString()}`
-    fields.push({
-      label: 'Payout',
-      changed: !current || current.payoutMin !== s.payout_min || current.payoutMax !== s.payout_max,
-      oldText: oldPayout,
-      newText: newPayout,
-    })
-
-    if (!recipe) return fields
-
-    const rows: Array<[string, ActionItem[] | undefined, ActionItem[] | undefined]> = [
-      ['Place', current?.actions.place, recipe.place],
-      ['Ignite', current?.actions.ignite, recipe.ignite],
-      ['Stoke', current?.actions.stoke, recipe.stoke],
-      ['Dampen', current?.actions.dampen, recipe.dampen],
-    ]
-    for (const [label, oldItems, newItems] of rows) {
-      if (!oldItems && !newItems) continue
-      fields.push({
-        label,
-        changed: itemsKey(oldItems) !== itemsKey(newItems),
-        oldText: formatItems(oldItems),
-        newText: formatItems(newItems),
-      })
-    }
-
-    if (current?.actions.stokeTime !== undefined || recipe.stokeTime !== undefined) {
-      fields.push({
-        label: 'Stoke time',
-        changed: (current?.actions.stokeTime ?? '') !== (recipe.stokeTime ?? ''),
-        oldText: current?.actions.stokeTime ?? '—',
-        newText: recipe.stokeTime ?? '—',
-      })
-    }
-    if (current?.actions.dampenTime !== undefined || recipe.dampenTime !== undefined) {
-      fields.push({
-        label: 'Dampen time',
-        changed: (current?.actions.dampenTime ?? '') !== (recipe.dampenTime ?? ''),
-        oldText: current?.actions.dampenTime ?? '—',
-        newText: recipe.dampenTime ?? '—',
-      })
-    }
-
-    return fields
   }
 
   let submissions = $state<Submission[]>([])
@@ -122,19 +46,6 @@
   }
 
   onMount(load)
-
-  function parseRecipe(raw: string): Recipe | null {
-    try {
-      return JSON.parse(raw) as Recipe
-    } catch {
-      return null
-    }
-  }
-
-  function formatItems(items: ActionItem[] | undefined): string {
-    if (!items || items.length === 0) return '—'
-    return items.map((i) => `${i.qty}× ${i.resourceId}`).join(', ')
-  }
 
   async function act(id: number, action: 'approve' | 'deny') {
     actionBusy = { ...actionBusy, [id]: true }
@@ -197,7 +108,7 @@
         </h2>
         {#each group as s (s.id)}
           {@const recipe = parseRecipe(s.recipe)}
-          {@const diff = computeDiff(s, recipe)}
+          {@const diff = computeDiff(s, recipe, data.currentScenarios)}
           <article class="submission">
             <div class="row">
               <span class="muted">vs. current scenario data</span>

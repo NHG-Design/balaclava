@@ -8,7 +8,6 @@ declare global {
         TORN_MINIMAL_API_KEY: string
         TURSO_DATABASE_URL: string
         TURSO_AUTH_TOKEN: string
-        PLAYER_SESSION_SECRET: string
         SCENARIO_ADMIN_USERNAME: string
         SCENARIO_ADMIN_PASSWORD_HASH: string
         SCENARIO_ADMIN_SESSION_SECRET: string

@@ -1,4 +1,3 @@
-export const PLAYER_SESSION_COOKIE = 'pyro_player_session'
 export const ADMIN_SESSION_COOKIE = 'pyro_admin_session'
 
 /** Unsalted SHA-256 hex digest — matches the convention implied by SCENARIO_ADMIN_PASSWORD_HASH's
