@@ -19,6 +19,7 @@ function formatRetryAfter(seconds: number): string {
 interface ActionItemPayload {
   resourceId: string
   qty: number
+  optional?: boolean
 }
 
 interface SubmissionPayload {

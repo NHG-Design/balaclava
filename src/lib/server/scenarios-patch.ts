@@ -1,6 +1,7 @@
 export interface ActionItemPayload {
   resourceId: string
   qty: number
+  optional?: boolean
 }
 
 export interface RecipePayload {
@@ -30,7 +31,8 @@ function findMatchingBrace(source: string, openIndex: number): number {
 }
 
 function serializeActionItem(item: ActionItemPayload): string {
-  return `{ resourceId: RESOURCE.${item.resourceId.toUpperCase()}, qty: ${item.qty} }`
+  const optional = item.optional ? ', optional: true' : ''
+  return `{ resourceId: RESOURCE.${item.resourceId.toUpperCase()}, qty: ${item.qty}${optional} }`
 }
 
 function serializeActionItems(items: ActionItemPayload[]): string {

@@ -1,6 +1,7 @@
 export interface ActionItem {
   resourceId: string
   qty: number
+  optional?: boolean
 }
 
 export interface Recipe {
@@ -41,12 +42,12 @@ export function parseRecipe(raw: string): Recipe | null {
 
 export function formatItems(items: ActionItem[] | undefined): string {
   if (!items || items.length === 0) return '—'
-  return items.map((i) => `${i.qty}× ${i.resourceId}`).join(', ')
+  return items.map((i) => `${i.qty}× ${i.resourceId}${i.optional ? ' (optional)' : ''}`).join(', ')
 }
 
 export function itemsKey(items: ActionItem[] | undefined): string {
   return (items ?? [])
-    .map((i) => `${i.resourceId}:${i.qty}`)
+    .map((i) => `${i.resourceId}:${i.qty}:${i.optional ? 1 : 0}`)
     .sort()
     .join(',')
 }
