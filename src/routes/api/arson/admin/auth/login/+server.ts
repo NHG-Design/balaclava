@@ -55,7 +55,10 @@ export const POST: RequestHandler = async ({ request, platform, cookies }) => {
       headers: { 'Content-Type': 'application/json' },
     })
   } catch (err) {
-    const msg = err instanceof Error ? `${err.name}: ${err.message}` : String(err)
-    return new Response(msg, { status: 500, headers: { 'Content-Type': 'text/plain' } })
+    console.error('admin login failed', err)
+    return new Response(JSON.stringify({ error: 'Internal server error' }), {
+      status: 500,
+      headers: { 'Content-Type': 'application/json' },
+    })
   }
 }

@@ -149,10 +149,10 @@ export const POST: RequestHandler = async ({ request, platform, getClientAddress
     }
     return response
   } catch (err) {
-    const msg = err instanceof Error ? `${err.name}: ${err.message}` : String(err)
-    return new Response(msg, {
+    console.error('recipe-submissions POST failed', err)
+    return new Response(JSON.stringify({ error: 'Internal server error' }), {
       status: 500,
-      headers: { 'Content-Type': 'text/plain', ...CORS_HEADERS },
+      headers: { 'Content-Type': 'application/json', ...CORS_HEADERS },
     })
   }
 }
@@ -286,7 +286,10 @@ export const GET: RequestHandler = async ({ url, platform }) => {
       headers: { 'Content-Type': 'application/json' },
     })
   } catch (err) {
-    const msg = err instanceof Error ? `${err.name}: ${err.message}` : String(err)
-    return new Response(msg, { status: 500, headers: { 'Content-Type': 'text/plain' } })
+    console.error('recipe-submissions GET failed', err)
+    return new Response(JSON.stringify({ error: 'Internal server error' }), {
+      status: 500,
+      headers: { 'Content-Type': 'application/json' },
+    })
   }
 }

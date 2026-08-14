@@ -23,8 +23,11 @@ export const GET: RequestHandler = async ({ request, platform }) => {
   try {
     return await handler(request, platform)
   } catch (err) {
-    const msg = err instanceof Error ? `${err.name}: ${err.message}\n${err.stack}` : String(err)
-    return new Response(msg, { status: 500, headers: { 'Content-Type': 'text/plain' } })
+    console.error('sig GET failed', err)
+    return new Response(JSON.stringify({ error: 'Internal server error' }), {
+      status: 500,
+      headers: { 'Content-Type': 'application/json' },
+    })
   }
 }
 
