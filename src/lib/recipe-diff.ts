@@ -44,11 +44,30 @@ export function formatItems(items: ActionItem[] | undefined): string {
   return items.map((i) => `${i.qty}× ${i.resourceId}`).join(', ')
 }
 
-function itemsKey(items: ActionItem[] | undefined): string {
+export function itemsKey(items: ActionItem[] | undefined): string {
   return (items ?? [])
     .map((i) => `${i.resourceId}:${i.qty}`)
     .sort()
     .join(',')
+}
+
+/** A normalized signature identifying a (payout, recipe) pair regardless of array order —
+ *  used to detect duplicate submissions carrying the same effective change. */
+export function recipeSignature(
+  payoutMin: number,
+  payoutMax: number,
+  recipe: Recipe,
+): string {
+  return JSON.stringify({
+    payoutMin,
+    payoutMax,
+    place: itemsKey(recipe.place),
+    ignite: itemsKey(recipe.ignite),
+    stoke: recipe.stoke ? itemsKey(recipe.stoke) : null,
+    stokeTime: recipe.stokeTime ?? null,
+    dampen: recipe.dampen ? itemsKey(recipe.dampen) : null,
+    dampenTime: recipe.dampenTime ?? null,
+  })
 }
 
 /** Diffs a submission's payout/recipe against the scenario's currently-live data, field by field. */

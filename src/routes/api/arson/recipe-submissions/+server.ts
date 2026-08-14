@@ -2,6 +2,7 @@ import type { RequestHandler } from './$types'
 import { createClient } from '@libsql/client/web'
 import { SCENARIOS } from '../../../../data/scenarios'
 import { CATALOG, type ResourceId } from '../../../../data/catalog'
+import { recipeSignature } from '$lib/recipe-diff'
 
 const RATE_LIMIT_MAX = 20
 const RATE_LIMIT_WINDOW_MINUTES = 60
@@ -205,6 +206,30 @@ async function handler(request: Request, platform: App.Platform | undefined, cli
   }
 
   const { payload } = result
+
+  const existing = await client.execute({
+    sql: `SELECT payout_min, payout_max, recipe FROM recipe_submissions WHERE scenario_name = ? AND status IN ('pending', 'approved', 'merged')`,
+    args: [payload.scenarioName],
+  })
+  const newSignature = recipeSignature(payload.payoutMin, payload.payoutMax, payload.recipe)
+  const isDuplicate = existing.rows.some((row) => {
+    try {
+      const recipe = JSON.parse(String(row.recipe))
+      return recipeSignature(Number(row.payout_min), Number(row.payout_max), recipe) === newSignature
+    } catch {
+      return false
+    }
+  })
+  if (isDuplicate) {
+    return new Response(
+      JSON.stringify({
+        error:
+          'Someone already submitted this exact recipe for this scenario — no need to submit it again.',
+      }),
+      { status: 409, headers: { 'Content-Type': 'application/json' } },
+    )
+  }
+
   await client.execute({
     sql: `INSERT INTO recipe_submissions (scenario_name, payout_min, payout_max, submitter_id, submitter_name, submitter_ip, recipe) VALUES (?, ?, ?, ?, ?, ?, ?)`,
     args: [
