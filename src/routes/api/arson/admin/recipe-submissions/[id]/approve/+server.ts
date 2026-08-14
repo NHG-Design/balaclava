@@ -34,7 +34,9 @@ interface PooledSubmission {
 }
 
 function buildPrBody(pooled: PooledSubmission[]): string {
-  const list = pooled.map((p) => `- #${p.id} — ${p.scenario_name}`).join('\n')
+  // No leading "#" before the id — GitHub auto-links "#N" to issues/PRs in this repo,
+  // which have nothing to do with these submission ids.
+  const list = pooled.map((p) => `- submission ${p.id} — ${p.scenario_name}`).join('\n')
   return (
     `Auto-generated from approved community submission(s) on balaclava.app.\n\n` +
     `Pooled submissions:\n${list}\n\n` +
@@ -174,7 +176,7 @@ export const POST: RequestHandler = async ({ params, platform, cookies }) => {
 
         const pr = await createPullRequest(
           githubToken,
-          `Approve community recipe: ${row.scenario_name}`,
+          'Approve community recipes',
           POOL_BRANCH,
           BASE_BRANCH,
           buildPrBody([{ id: submissionId, scenario_name: row.scenario_name }]),

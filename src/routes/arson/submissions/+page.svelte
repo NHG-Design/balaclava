@@ -83,18 +83,24 @@
     }
   }
 
-  let grouped = $derived.by(() => {
+  function groupByScenario(list: Submission[]): Map<string, Submission[]> {
     const map = new Map<string, Submission[]>()
-    for (const s of submissions) {
-      const list = map.get(s.scenario_name) ?? []
-      list.push(s)
-      map.set(s.scenario_name, list)
+    for (const s of list) {
+      const group = map.get(s.scenario_name) ?? []
+      group.push(s)
+      map.set(s.scenario_name, group)
     }
-    for (const list of map.values()) {
-      list.sort((a, b) => b.created_at.localeCompare(a.created_at))
+    for (const group of map.values()) {
+      group.sort((a, b) => b.created_at.localeCompare(a.created_at))
     }
     return new Map([...map.entries()].sort(([a], [b]) => a.localeCompare(b)))
-  })
+  }
+
+  let groupedPending = $derived(groupByScenario(submissions.filter((s) => s.status === 'pending')))
+  let groupedAccepted = $derived(
+    groupByScenario(submissions.filter((s) => s.status === 'approved' || s.status === 'merged')),
+  )
+  let groupedDenied = $derived(groupByScenario(submissions.filter((s) => s.status === 'denied')))
 
   const STATUS_CLASSES: Record<Submission['status'], string> = {
     pending: 'bg-amber-500/15 text-amber-300',
@@ -141,17 +147,11 @@
       </button>
     </div>
 
-    {#if loading}
-      <p class="text-sm text-ink-400">Loading…</p>
-    {:else if loadError}
-      <p class="text-sm text-rose-400">{loadError}</p>
-    {:else if submissions.length === 0}
-      <p class="text-sm text-ink-400">No submissions here yet.</p>
-    {:else}
+    {#snippet scenarioGroups(groups: Map<string, Submission[]>)}
       <div class="flex flex-col gap-10">
-        {#each [...grouped.entries()] as [scenarioName, group] (scenarioName)}
+        {#each [...groups.entries()] as [scenarioName, group] (scenarioName)}
           <section>
-            <h2 class="mb-3 text-base font-semibold text-ink-100">{scenarioName}</h2>
+            <h3 class="mb-3 text-base font-semibold text-ink-100">{scenarioName}</h3>
 
             <div class="grid grid-cols-1 gap-4 lg:grid-cols-2">
               {#each group as s (s.id)}
@@ -263,12 +263,58 @@
                         PR #{s.pr_number}
                       </a>
                     </p>
+                  {:else if s.status === 'merged' && s.pr_number}
+                    <p class="text-xs text-ink-400">
+                      Merged — shipped via
+                      <a
+                        href={`https://github.com/NHG-Design/balaclava/pull/${s.pr_number}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        class="text-accent-400 hover:underline"
+                      >
+                        PR #{s.pr_number}
+                      </a>
+                    </p>
                   {/if}
                 </article>
               {/each}
             </div>
           </section>
         {/each}
+      </div>
+    {/snippet}
+
+    {#if loading}
+      <p class="text-sm text-ink-400">Loading…</p>
+    {:else if loadError}
+      <p class="text-sm text-rose-400">{loadError}</p>
+    {:else if submissions.length === 0}
+      <p class="text-sm text-ink-400">No submissions here yet.</p>
+    {:else if statusFilter === 'denied'}
+      {#if groupedDenied.size === 0}
+        <p class="text-sm text-ink-400">No denied submissions.</p>
+      {:else}
+        {@render scenarioGroups(groupedDenied)}
+      {/if}
+    {:else}
+      <div class="flex flex-col gap-12">
+        <section>
+          <h2 class="mb-4 text-lg font-semibold text-ink-100">Pending</h2>
+          {#if groupedPending.size === 0}
+            <p class="text-sm text-ink-400">No pending submissions.</p>
+          {:else}
+            {@render scenarioGroups(groupedPending)}
+          {/if}
+        </section>
+
+        <section>
+          <h2 class="mb-4 text-lg font-semibold text-ink-100">Approved</h2>
+          {#if groupedAccepted.size === 0}
+            <p class="text-sm text-ink-400">No approved submissions yet.</p>
+          {:else}
+            {@render scenarioGroups(groupedAccepted)}
+          {/if}
+        </section>
       </div>
     {/if}
   </main>
