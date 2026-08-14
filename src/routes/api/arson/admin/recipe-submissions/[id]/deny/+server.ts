@@ -1,8 +1,9 @@
 import type { RequestHandler } from './$types'
 import { createClient } from '@libsql/client/web'
 import { isAdminRequest } from '$lib/server/session'
+import { logAdminAction } from '$lib/server/audit'
 
-export const POST: RequestHandler = async ({ params, platform, cookies }) => {
+export const POST: RequestHandler = async ({ params, platform, cookies, getClientAddress }) => {
   try {
     if (!(await isAdminRequest(platform?.env?.SCENARIO_ADMIN_SESSION_SECRET, cookies))) {
       return new Response(JSON.stringify({ error: 'Not authorized' }), {
@@ -34,6 +35,8 @@ export const POST: RequestHandler = async ({ params, platform, cookies }) => {
         headers: { 'Content-Type': 'application/json' },
       })
     }
+
+    await logAdminAction(client, 'deny', submissionId, getClientAddress())
 
     return new Response(JSON.stringify({ ok: true }), {
       status: 200,

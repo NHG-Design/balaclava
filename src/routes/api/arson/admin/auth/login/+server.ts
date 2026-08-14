@@ -1,6 +1,7 @@
 import type { RequestHandler } from './$types'
 import { createClient } from '@libsql/client/web'
 import { signSession, verifyPassword, timingSafeEqual, ADMIN_SESSION_COOKIE } from '$lib/server/session'
+import { logAdminAction } from '$lib/server/audit'
 
 const SESSION_MAX_AGE_SECONDS = 12 * 60 * 60 // 12 hours
 const LOGIN_RATE_LIMIT_WINDOW_MINUTES = 15
@@ -66,6 +67,8 @@ export const POST: RequestHandler = async ({ request, platform, cookies, getClie
         headers: { 'Content-Type': 'application/json' },
       })
     }
+
+    await logAdminAction(client, 'login', null, clientIp)
 
     const token = await signSession(sessionSecret, { admin: true }, SESSION_MAX_AGE_SECONDS)
     cookies.set(ADMIN_SESSION_COOKIE, token, {

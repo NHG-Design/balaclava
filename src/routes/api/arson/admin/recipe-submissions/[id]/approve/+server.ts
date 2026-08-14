@@ -1,6 +1,7 @@
 import type { RequestHandler } from './$types'
 import { createClient } from '@libsql/client/web'
 import { isAdminRequest } from '$lib/server/session'
+import { logAdminAction } from '$lib/server/audit'
 import { patchScenarioSource, type RecipePayload } from '$lib/server/scenarios-patch'
 import { bumpPatch } from '$lib/server/version-bump'
 import {
@@ -74,7 +75,7 @@ async function refreshVersionBump(githubToken: string, branch: string): Promise<
   )
 }
 
-export const POST: RequestHandler = async ({ params, platform, cookies }) => {
+export const POST: RequestHandler = async ({ params, platform, cookies, getClientAddress }) => {
   try {
     if (!(await isAdminRequest(platform?.env?.SCENARIO_ADMIN_SESSION_SECRET, cookies))) {
       return new Response(JSON.stringify({ error: 'Not authorized' }), {
@@ -206,6 +207,8 @@ export const POST: RequestHandler = async ({ params, platform, cookies }) => {
       sql: `UPDATE recipe_submissions SET status = 'approved', pr_number = ? WHERE id = ?`,
       args: [prNumber, submissionId],
     })
+
+    await logAdminAction(client, 'approve', submissionId, getClientAddress())
 
     // Best-effort: refresh the PR body with the full pooled list. Doesn't fail the request —
     // the approve itself (branch, patch, PR, DB) already succeeded by this point.
