@@ -244,8 +244,8 @@ export const SCENARIOS: Scenario[] = [
     payoutMin: 100_000,
     payoutMax: 130_000,
     actions: {
-      ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
       place: [{ resourceId: RESOURCE.GASOLINE, qty: 3 }],
+      ignite: [{ resourceId: RESOURCE.LIGHTER, qty: 1 }],
     },
   },
 
@@ -926,8 +926,10 @@ export const SCENARIOS: Scenario[] = [
     payoutMin: 330_000,
     payoutMax: 380_000,
     actions: {
-      ignite: [{ resourceId: RESOURCE.LIGHTER, qty: 1 }],
       place: [{ resourceId: RESOURCE.KEROSENE, qty: 3 }],
+      ignite: [{ resourceId: RESOURCE.LIGHTER, qty: 1 }],
+      stoke: [{ resourceId: RESOURCE.METHANE, qty: 2 }],
+      stokeTime: "early",
     },
   },
 
@@ -1610,10 +1612,10 @@ export const SCENARIOS: Scenario[] = [
   {
     scenarioName: "Low Rent",
     payoutMin: 42_000,
-    payoutMax: 200_000,
+    payoutMax: 210_000,
     actions: {
-      ignite: [{ resourceId: RESOURCE.LIGHTER, qty: 1 }],
       place: [{ resourceId: RESOURCE.GASOLINE, qty: 2 }],
+      ignite: [{ resourceId: RESOURCE.LIGHTER, qty: 1 }],
       stoke: [{ resourceId: RESOURCE.METHANE, qty: 2 }],
       stokeTime: "early",
     },
@@ -1621,21 +1623,21 @@ export const SCENARIOS: Scenario[] = [
 
   {
     scenarioName: "Make a Killing",
-    payoutMin: 390_000,
+    payoutMin: 340_000,
     payoutMax: 480_000,
     actions: {
-      ignite: [{ resourceId: RESOURCE.LIGHTER, qty: 1 }],
       place: [{ resourceId: RESOURCE.KEROSENE, qty: 3 }],
+      ignite: [{ resourceId: RESOURCE.LIGHTER, qty: 1 }],
     },
   },
 
   {
     scenarioName: "Mallrats",
     payoutMin: 410_000,
-    payoutMax: 410_000,
+    payoutMax: 440_000,
     actions: {
-      ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
       place: [{ resourceId: RESOURCE.GASOLINE, qty: 4 }],
+      ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
       stoke: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
     },
   },
@@ -1929,11 +1931,11 @@ export const SCENARIOS: Scenario[] = [
 
   {
     scenarioName: "Second Hand Smoke",
-    payoutMin: 180_000,
+    payoutMin: 150_000,
     payoutMax: 210_000,
     actions: {
-      ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
       place: [{ resourceId: RESOURCE.GASOLINE, qty: 2 }],
+      ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
       stoke: [{ resourceId: RESOURCE.METHANE, qty: 2 }],
       stokeTime: "early",
     },
@@ -2017,11 +2019,11 @@ export const SCENARIOS: Scenario[] = [
 
   {
     scenarioName: "Smoke Signals",
-    payoutMin: 120_000,
+    payoutMin: 110_000,
     payoutMax: 120_000,
     actions: {
-      ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
       place: [{ resourceId: RESOURCE.DIESEL, qty: 3 }],
+      ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
     },
   },
 
@@ -2341,8 +2343,8 @@ export const SCENARIOS: Scenario[] = [
     payoutMin: 75_500,
     payoutMax: 100_000,
     actions: {
-      ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
       place: [{ resourceId: RESOURCE.GASOLINE, qty: 4 }],
+      ignite: [{ resourceId: RESOURCE.LIGHTER, qty: 1 }],
     },
   },
 
