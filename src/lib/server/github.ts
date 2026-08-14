@@ -7,6 +7,7 @@ function headers(token: string): Record<string, string> {
     Authorization: `Bearer ${token}`,
     Accept: 'application/vnd.github+json',
     'Content-Type': 'application/json',
+    'User-Agent': 'balaclava.app-arson-bot',
   }
 }
 
