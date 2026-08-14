@@ -2019,11 +2019,11 @@ export const SCENARIOS: Scenario[] = [
 
   {
     scenarioName: "Smoke Signals",
-    payoutMin: 120_000,
+    payoutMin: 110_000,
     payoutMax: 120_000,
     actions: {
-      ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
       place: [{ resourceId: RESOURCE.DIESEL, qty: 3 }],
+      ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
     },
   },
 
