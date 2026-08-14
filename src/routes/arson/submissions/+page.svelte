@@ -11,6 +11,7 @@
     payout_min: number
     payout_max: number
     submitter_id: string | null
+    submitter_name: string | null
     recipe: string
     status: 'pending' | 'approved' | 'merged' | 'denied'
     pr_number: number | null
@@ -234,6 +235,20 @@
                     </table>
                   {:else}
                     <p class="text-sm text-rose-400">Recipe data couldn't be parsed.</p>
+                  {/if}
+
+                  {#if s.submitter_id}
+                    <p class="text-xs text-ink-400">
+                      Submitted by
+                      <a
+                        href={`https://www.torn.com/profiles.php?XID=${s.submitter_id}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        class="text-accent-400 hover:underline"
+                      >
+                        {s.submitter_name ?? `#${s.submitter_id}`}
+                      </a>
+                    </p>
                   {/if}
 
                   {#if s.status === 'approved' && s.pr_number}

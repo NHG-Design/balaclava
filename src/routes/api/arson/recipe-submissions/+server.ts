@@ -16,6 +16,7 @@ interface SubmissionPayload {
   payoutMin: number
   payoutMax: number
   submitterId?: string | null
+  submitterName?: string | null
   recipe: {
     place: ActionItemPayload[]
     ignite: ActionItemPayload[]
@@ -101,6 +102,10 @@ function validate(body: unknown): { ok: true; payload: SubmissionPayload } | { o
 
   const submitterId =
     typeof b.submitterId === 'string' && b.submitterId.trim() !== '' ? b.submitterId.trim() : null
+  const submitterName =
+    typeof b.submitterName === 'string' && b.submitterName.trim() !== ''
+      ? b.submitterName.trim().slice(0, 50)
+      : null
 
   return {
     ok: true,
@@ -109,6 +114,7 @@ function validate(body: unknown): { ok: true; payload: SubmissionPayload } | { o
       payoutMin,
       payoutMax,
       submitterId,
+      submitterName,
       recipe,
     },
   }
@@ -178,12 +184,13 @@ async function handler(request: Request, platform: App.Platform | undefined, cli
 
   const { payload } = result
   await client.execute({
-    sql: `INSERT INTO recipe_submissions (scenario_name, payout_min, payout_max, submitter_id, submitter_ip, recipe) VALUES (?, ?, ?, ?, ?, ?)`,
+    sql: `INSERT INTO recipe_submissions (scenario_name, payout_min, payout_max, submitter_id, submitter_name, submitter_ip, recipe) VALUES (?, ?, ?, ?, ?, ?, ?)`,
     args: [
       payload.scenarioName,
       payload.payoutMin,
       payload.payoutMax,
       payload.submitterId ?? null,
+      payload.submitterName ?? null,
       clientIp,
       JSON.stringify(payload.recipe),
     ],
@@ -215,7 +222,7 @@ export const GET: RequestHandler = async ({ url, platform }) => {
     const placeholders = statuses.map(() => '?').join(', ')
     const rows = await client.execute({
       sql: `
-        SELECT id, scenario_name, payout_min, payout_max, submitter_id, recipe, status, pr_number, created_at
+        SELECT id, scenario_name, payout_min, payout_max, submitter_id, submitter_name, recipe, status, pr_number, created_at
         FROM recipe_submissions
         WHERE status IN (${placeholders})
         ORDER BY scenario_name ASC, created_at DESC

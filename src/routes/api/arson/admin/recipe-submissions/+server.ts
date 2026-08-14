@@ -17,7 +17,7 @@ export const GET: RequestHandler = async ({ platform, cookies }) => {
 
     const client = createClient({ url: dbUrl, authToken })
     const result = await client.execute(
-      `SELECT id, scenario_name, payout_min, payout_max, submitter_id, recipe, status, pr_number, created_at
+      `SELECT id, scenario_name, payout_min, payout_max, submitter_id, submitter_name, recipe, status, pr_number, created_at
        FROM recipe_submissions
        ORDER BY (status = 'pending') DESC, scenario_name ASC, created_at DESC`,
     )
