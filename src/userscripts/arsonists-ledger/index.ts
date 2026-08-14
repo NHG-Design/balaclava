@@ -1051,21 +1051,6 @@ function isArsonPage(): boolean {
   return !!document.querySelector(SEL.ROOT);
 }
 
-function getVisibleScenarioNames(): string[] {
-  const names = new Set<string>();
-  getRoot()
-    .querySelectorAll<HTMLElement>(SEL.CARD)
-    .forEach((section) => {
-      const scenarioEl = section.querySelector('[class*="scenario___"]');
-      const rawName = scenarioEl?.textContent?.trim() ?? "";
-      const scenario = rawName
-        ? (scenarioIndex.get(rawName.toLowerCase()) ?? null)
-        : null;
-      if (scenario) names.add(scenario.scenarioName);
-    });
-  return Array.from(names).sort();
-}
-
 function scanPage(): void {
   if (!isArsonPage()) return;
   const prices = effectivePrices();
@@ -1129,7 +1114,6 @@ const settingsCtx: SettingsCtx = {
   getShowMaterialSuspicion: () => showMaterialSuspicion,
   getShowMaterialIgnitionRisk: () => showMaterialIgnitionRisk,
   getShowMaterialStokingRisk: () => showMaterialStokingRisk,
-  getVisibleScenarioNames,
 
   setManualPrice,
   clearManualPrices,

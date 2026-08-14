@@ -1,6 +1,6 @@
 # Recipe Approval PR Pooling + Version Bump
 
-> Meridian map · Status: route-ready · Started: 2026-08-15
+> Meridian map · Status: complete · Started: 2026-08-15
 
 ## Destination
 
@@ -40,15 +40,15 @@ Approved recipe changes land in a single pooled open PR (instead of one PR per a
 
 ## Route
 
-1. [ ] `src/lib/server/github.ts`: add `findOpenPullRequest(token, branch)` (`GET /pulls?head=<owner>:<branch>&state=open`, returns the PR number/body or null) and `updatePullRequestBody(token, prNumber, body)` (`PATCH /pulls/{number}`) — from decisions #4, #7
-2. [ ] New `src/lib/server/version-bump.ts`: `bumpPatch(version: string): string` (semver patch +1) — from decision #3
-3. [ ] Rewrite `src/routes/api/arson/admin/recipe-submissions/[id]/approve/+server.ts`:
+1. [x] `src/lib/server/github.ts`: add `findOpenPullRequest(token, branch)` (`GET /pulls?head=<owner>:<branch>&state=open`, returns the PR number/body or null) and `updatePullRequestBody(token, prNumber, body)` (`PATCH /pulls/{number}`) — from decisions #4, #7. Done: implemented; required an added `User-Agent` header on all GitHub requests to avoid a `403 Request forbidden by administrative rules` on the `/pulls?head=...` search.
+2. [x] New `src/lib/server/version-bump.ts`: `bumpPatch(version: string): string` (semver patch +1) — from decision #3. Done: implemented and unit-verified (`1.2.0→1.2.1`, `1.2.9→1.2.10`, throws on non-semver input).
+3. [x] Rewrite `src/routes/api/arson/admin/recipe-submissions/[id]/approve/+server.ts`:
    - Look up an open `recipe-pool` PR via route-1's helper.
    - **If found:** fetch `scenarios.ts` from that branch (not `main`), apply the patch, push; fetch `main`'s `versions.json`, compute the fresh bump, compare against the pool branch's current `versions.json` and only push an update if it differs; rewrite the PR body to list every pooled submission (id + scenario); set this submission's `status='approved'` + `pr_number` = the existing pool PR's number.
    - **If not found:** delete any stale `recipe-pool` ref, branch fresh off `main`, apply the scenario patch + a fresh version bump (both computed from `main`), open the PR, same status/pr_number update as today.
    - Preserve the existing rollback behavior (delete the branch on failure) *only* when this invocation created the branch — never delete a pool branch that already held other approved submissions' work.
-   — from decisions #2, #3, #4, #5, #6, #7
-4. [ ] Confirm (no code change expected, just a check): `GET /api/arson/github-webhook`'s merge-detection query already updates *every* row sharing a merged PR's `pr_number` to `merged` — verify this still holds true for a pooled PR with 3+ submissions before calling the route done
-5. [ ] Full `pnpm check` + `pnpm build` pass; manually exercise the pool path locally against the real `balaclava-arson-recipes` Turso DB + a scratch GitHub branch before trusting it against real submissions (open one pool PR, approve a second submission into it, confirm one commit updates `scenarios.ts` and — only if `main`'s version actually changed — a second commit updates `versions.json`)
+   — from decisions #2, #3, #4, #5, #6, #7. Done: implemented and live-verified against real Turso/GitHub (see route #5).
+4. [x] Confirm (no code change expected, just a check): `GET /api/arson/github-webhook`'s merge-detection query already updates *every* row sharing a merged PR's `pr_number` to `merged` — verify this still holds true for a pooled PR with 3+ submissions before calling the route done. Done: confirmed by reading `src/routes/api/arson/github-webhook/+server.ts` — its `UPDATE ... WHERE pr_number = ? AND status = 'approved'` is unscoped to a single submission id, so it flips every row sharing a merged PR's number regardless of pool size. No change needed.
+5. [x] Full `pnpm check` + `pnpm build` pass; manually exercise the pool path locally against the real `balaclava-arson-recipes` Turso DB + a scratch GitHub branch before trusting it against real submissions (open one pool PR, approve a second submission into it, confirm one commit updates `scenarios.ts` and — only if `main`'s version actually changed — a second commit updates `versions.json`). Done: live-tested end-to-end. Approved submission #11 → opened PR #24 on `recipe-pool`, `scenarios.ts` patched, `versions.json` bumped 1.2.0→1.2.1. Approved submission #12 → pooled into the *same* PR #24 (not a new PR), second scenario patched alongside the first, `versions.json` bump correctly stayed at 1.2.1 (not double-bumped), PR body updated to list both submissions. Verified via direct Turso query and the GitHub API (PR body + `.diff`). Test artifacts cleaned up afterward: PR #24 closed without merging, `recipe-pool` branch deleted, submissions #11/#12 removed from Turso.
 
-**First move:** Route #1 — the two new GitHub API helpers, since routes 2 and 3 aren't buildable without them.
+**Status: complete.** All route items done and live-verified against real infrastructure.

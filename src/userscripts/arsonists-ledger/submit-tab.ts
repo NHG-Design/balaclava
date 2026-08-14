@@ -30,6 +30,9 @@ const SUBMIT_URL = "https://balaclava.app/api/arson/recipe-submissions";
 /** Matches ScenarioActions' ActionTime: "early" | "late" | `${number}s` | `${number}%`. */
 const TIME_PATTERN = /^(early|late|\d+(\.\d+)?(%|s))$/;
 
+/** Warn in the submit status once this many (or fewer) submissions remain in the rate-limit window. */
+const RATE_LIMIT_WARN_THRESHOLD = 5;
+
 const CHECKMARK_DATA_URI = `data:image/svg+xml,${encodeURIComponent(
   `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="${ICON_CHECK_MASK_PATH}"/></svg>`,
 )}`;
@@ -105,18 +108,32 @@ const PLACE_RESOURCE_OPTIONS = RESOURCE_OPTIONS.filter(
 );
 
 /** Stoke materials exclude dampeners — you stoke with fuel/igniters, not dampening agents. */
-const STOKE_RESOURCE_OPTIONS = RESOURCE_OPTIONS.filter((group) => group.label !== "Dampeners");
+const STOKE_RESOURCE_OPTIONS = RESOURCE_OPTIONS.filter(
+  (group) => group.label !== "Dampeners",
+);
 
 /** Dampen materials are dampeners only. */
-const DAMPEN_RESOURCE_OPTIONS = RESOURCE_OPTIONS.filter((group) => group.label === "Dampeners");
+const DAMPEN_RESOURCE_OPTIONS = RESOURCE_OPTIONS.filter(
+  (group) => group.label === "Dampeners",
+);
 
 const IGNITER_IDS = Object.values(CATALOG)
   .filter((r) => r.category === "igniter")
   .map((r) => r.id as ResourceId);
 
+interface SubmitSuccess {
+  ok: true;
+  remaining?: number;
+  limit?: number;
+}
+interface SubmitFailure {
+  ok: false;
+  error: string;
+}
+
 function postSubmission(
   body: unknown,
-  onDone: (result: { ok: true } | { ok: false; error: string }) => void,
+  onDone: (result: SubmitSuccess | SubmitFailure) => void,
 ): void {
   const payload = JSON.stringify(body);
 
@@ -128,7 +145,19 @@ function postSubmission(
       headers: { "Content-Type": "application/json" },
       onload(r) {
         if (r.status >= 200 && r.status < 300) {
-          onDone({ ok: true });
+          try {
+            const parsed = JSON.parse(r.responseText) as {
+              remaining?: number;
+              limit?: number;
+            };
+            onDone({
+              ok: true,
+              remaining: parsed.remaining,
+              limit: parsed.limit,
+            });
+          } catch {
+            onDone({ ok: true });
+          }
           return;
         }
         try {
@@ -152,7 +181,19 @@ function postSubmission(
   })
     .then(async (r) => {
       if (r.ok) {
-        onDone({ ok: true });
+        try {
+          const parsed = (await r.json()) as {
+            remaining?: number;
+            limit?: number;
+          };
+          onDone({
+            ok: true,
+            remaining: parsed.remaining,
+            limit: parsed.limit,
+          });
+        } catch {
+          onDone({ ok: true });
+        }
         return;
       }
       try {
@@ -182,7 +223,7 @@ function injectSubmitTabStyles(): void {
     background: oklch(14.5% 0.011 285);
     border: 1px solid oklch(27% 0.017 285);
     color: oklch(82% 0.007 285);
-    font-size: 11px;
+    font-size: 12px;
     padding: 4px 6px;
     border-radius: 5px;
 }
@@ -275,7 +316,51 @@ function injectSubmitTabStyles(): void {
     font-size: 10px;
     text-transform: uppercase;
 }
-.pyro-rc-scenario-select { width: 100%; }
+.pyro-rc-combobox { position: relative; width: 100%; }
+.pyro-rc-combobox-input { width: 100%; box-sizing: border-box; }
+.pyro-rc-combobox-list {
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0;
+    right: 0;
+    z-index: 20;
+    max-height: 180px;
+    overflow-y: auto;
+    flex-direction: column;
+    background: oklch(20% 0.008 285);
+    border: 1px solid oklch(30% 0 0);
+    border-radius: 6px;
+    padding: 4px;
+    box-shadow: 0 4px 14px oklch(12% 0.01 260 / 0.5);
+    scrollbar-width: thin;
+    scrollbar-color: oklch(40% 0.01 285) oklch(20% 0.008 285);
+}
+.pyro-rc-combobox-list::-webkit-scrollbar { width: 6px; }
+.pyro-rc-combobox-list::-webkit-scrollbar-track { background: oklch(20% 0.008 285); }
+.pyro-rc-combobox-list::-webkit-scrollbar-thumb { background: oklch(40% 0.01 285); border-radius: 3px; }
+.pyro-rc-combobox-item {
+    all: unset;
+    box-sizing: border-box;
+    width: 100%;
+    padding: 5px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    color: oklch(82% 0.007 285);
+    cursor: pointer;
+}
+.pyro-rc-combobox-item.highlighted,
+.pyro-rc-combobox-item:hover {
+    background: oklch(28% 0.012 285);
+}
+.pyro-rc-combobox-item.selected {
+    background: color-mix(in oklch, #6d6 22%, oklch(20% 0.008 285));
+    color: oklch(96% 0.012 95);
+}
+.pyro-rc-combobox-empty {
+    padding: 6px 8px;
+    font-size: 11px;
+    color: oklch(50% 0.008 285);
+}
 
 .pyro-rc-icon-btn {
     background: oklch(15% 0.012 285);
@@ -328,6 +413,7 @@ function injectSubmitTabStyles(): void {
 .pyro-rc-status.ok { color: #6d6; }
 .pyro-rc-status.err { color: #c66; }
 .pyro-rc-status.hint { color: oklch(45% 0.008 285); }
+.pyro-rc-status-warn { color: #e9a23b; margin-left: 3px; }
 .pyro-rc-external-link { font-size: 11px; color: ${BAND_COLOR.excellent}; text-decoration: none; display: inline-flex; align-items: center; gap: 3px; align-self: flex-start; }
 .pyro-rc-external-link:hover { text-decoration: underline; }
 .pyro-rc-external-link svg { width: 10px; height: 10px; flex-shrink: 0; }
@@ -835,6 +921,17 @@ function buildForm(scenarioName: string): HTMLElement {
           status.innerHTML = ICON_CHECK;
           status.appendChild(txt("Submitted!"));
           status.className = "pyro-rc-status ok";
+          if (
+            result.remaining !== undefined &&
+            result.remaining <= RATE_LIMIT_WARN_THRESHOLD
+          ) {
+            const warn = el("span", "pyro-rc-status-warn");
+            warn.textContent =
+              result.remaining === 0
+                ? " — that was your last submission this hour."
+                : ` — ${result.remaining} submission${result.remaining === 1 ? "" : "s"} left this hour.`;
+            status.appendChild(warn);
+          }
         } else {
           status.innerHTML = ICON_X;
           status.appendChild(txt(result.error));
@@ -872,7 +969,7 @@ function getPlayerInfoSafe(): { id: string | null; name: string | null } {
 // Tab entry point
 // ---------------------------------------------------------------------------
 
-export function buildSubmitTab(ctx: SettingsCtx): HTMLElement {
+export function buildSubmitTab(_ctx: SettingsCtx): HTMLElement {
   injectSubmitTabStyles();
 
   const root = el("div", "pyro-rc-group");
@@ -884,11 +981,13 @@ export function buildSubmitTab(ctx: SettingsCtx): HTMLElement {
   submissionsLink.innerHTML = `View submitted recipes ${ICON_EXTERNAL_LINK}`;
   root.appendChild(submissionsLink);
 
-  const visibleNames = ctx.getVisibleScenarioNames();
+  const allNames = Array.from(scenarioByName.keys()).sort((a, b) =>
+    a.localeCompare(b),
+  );
   const initialSelection =
-    preselectedScenario && visibleNames.includes(preselectedScenario)
+    preselectedScenario && scenarioByName.has(preselectedScenario)
       ? preselectedScenario
-      : (visibleNames[0] ?? "");
+      : (allNames[0] ?? "");
   preselectedScenario = null;
 
   const scenarioGroup = el("div", "pyro-rc-group");
@@ -896,38 +995,143 @@ export function buildSubmitTab(ctx: SettingsCtx): HTMLElement {
   scenarioTitle.textContent = "Scenario";
   scenarioGroup.appendChild(scenarioTitle);
 
-  const scenarioSelect = el(
-    "select",
-    "pyro-rc-select pyro-rc-scenario-select",
-  ) as HTMLSelectElement;
-  if (visibleNames.length === 0) {
-    const opt = document.createElement("option");
-    opt.value = "";
-    opt.textContent = "No scenarios visible on this page";
-    scenarioSelect.appendChild(opt);
-    scenarioSelect.disabled = true;
-  } else {
-    for (const name of visibleNames) {
-      const opt = document.createElement("option");
-      opt.value = name;
-      opt.textContent = name;
-      scenarioSelect.appendChild(opt);
-    }
-    scenarioSelect.value = initialSelection;
-  }
-  addSelectChrome(scenarioSelect);
-  scenarioGroup.appendChild(scenarioSelect);
-  root.appendChild(scenarioGroup);
-
   const formSlot = el("div");
   if (initialSelection) formSlot.appendChild(buildForm(initialSelection));
+
+  const combobox = buildScenarioCombobox(allNames, initialSelection, (name) => {
+    formSlot.innerHTML = "";
+    formSlot.appendChild(buildForm(name));
+  });
+  scenarioGroup.appendChild(combobox);
+  root.appendChild(scenarioGroup);
   root.appendChild(formSlot);
 
-  scenarioSelect.addEventListener("change", () => {
-    formSlot.innerHTML = "";
-    if (scenarioSelect.value)
-      formSlot.appendChild(buildForm(scenarioSelect.value));
+  return root;
+}
+
+// ---------------------------------------------------------------------------
+// Scenario combobox (searchable — the full scenario list, not just what's
+// currently visible on the page)
+// ---------------------------------------------------------------------------
+
+function buildScenarioCombobox(
+  allNames: string[],
+  initialSelection: string,
+  onSelect: (name: string) => void,
+): HTMLElement {
+  const wrap = el("div", "pyro-rc-combobox");
+
+  const input = el(
+    "input",
+    "pyro-rc-input pyro-rc-combobox-input",
+  ) as HTMLInputElement;
+  input.type = "text";
+  input.placeholder = "Search scenarios…";
+  input.autocomplete = "off";
+  input.spellcheck = false;
+  input.value = initialSelection;
+  input.setAttribute("role", "combobox");
+  input.setAttribute("aria-expanded", "false");
+  input.setAttribute("aria-autocomplete", "list");
+
+  const list = el("div", "pyro-rc-combobox-list");
+  list.setAttribute("role", "listbox");
+  list.style.display = "none";
+
+  let selected = initialSelection;
+  let filtered: string[] = allNames;
+  let highlighted = -1;
+
+  function filterNames(query: string): string[] {
+    const q = query.trim().toLowerCase();
+    if (!q) return allNames;
+    return allNames.filter((n) => n.toLowerCase().includes(q));
+  }
+
+  function renderList(): void {
+    list.innerHTML = "";
+    if (filtered.length === 0) {
+      const empty = el("div", "pyro-rc-combobox-empty");
+      empty.textContent = "No matching scenarios";
+      list.appendChild(empty);
+      return;
+    }
+    filtered.forEach((name, i) => {
+      const item = el("button", "pyro-rc-combobox-item") as HTMLButtonElement;
+      item.type = "button";
+      item.textContent = name;
+      item.setAttribute("role", "option");
+      if (name === selected) item.classList.add("selected");
+      if (i === highlighted) item.classList.add("highlighted");
+      item.addEventListener("mousedown", (e) => {
+        e.preventDefault(); // fire before input blur
+        choose(name);
+      });
+      list.appendChild(item);
+    });
+  }
+
+  function openList(): void {
+    list.style.display = "flex";
+    input.setAttribute("aria-expanded", "true");
+  }
+  function closeList(): void {
+    list.style.display = "none";
+    input.setAttribute("aria-expanded", "false");
+    highlighted = -1;
+  }
+  function choose(name: string): void {
+    selected = name;
+    input.value = name;
+    closeList();
+    onSelect(name);
+  }
+
+  input.addEventListener("focus", () => {
+    filtered = filterNames(input.value === selected ? "" : input.value);
+    highlighted = -1;
+    renderList();
+    openList();
+  });
+  input.addEventListener("input", () => {
+    filtered = filterNames(input.value);
+    highlighted = -1;
+    renderList();
+    openList();
+  });
+  input.addEventListener("blur", () => {
+    setTimeout(() => {
+      input.value = selected;
+      closeList();
+    }, 120);
+  });
+  input.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") {
+      input.value = selected;
+      closeList();
+      input.blur();
+      return;
+    }
+    if (e.key === "ArrowDown") {
+      e.preventDefault();
+      if (list.style.display === "none") {
+        filtered = filterNames("");
+        openList();
+      }
+      highlighted = Math.min(highlighted + 1, filtered.length - 1);
+      renderList();
+    } else if (e.key === "ArrowUp") {
+      e.preventDefault();
+      highlighted = Math.max(highlighted - 1, 0);
+      renderList();
+    } else if (e.key === "Enter") {
+      e.preventDefault();
+      if (highlighted >= 0 && filtered[highlighted])
+        choose(filtered[highlighted]);
+    }
   });
 
-  return root;
+  wrap.appendChild(input);
+  wrap.appendChild(list);
+  return wrap;
 }

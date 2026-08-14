@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        Torn Arsonist's Ledger
 // @namespace   https://greasyfork.org/en/users/942572-yukio-mizsima
-// @version     1.2.0
+// @version     1.2.1
 // @description Arson profit-per-nerve calculator and scenario guide for Torn's Crimes page
 // @icon        https://www.google.com/s2/favicons?sz=64&domain=torn.com
 // @author      Yukio [906148]
@@ -18,7 +18,7 @@
 "use strict";
 (() => {
   // src/data/scenarios-version.ts
-  var SCENARIOS_VERSION = "ff292a86749e";
+  var SCENARIOS_VERSION = "a857a5929ddf";
 
   // src/data/catalog.ts
   var CATALOG_UPDATED = "2026-08-08";
@@ -637,7 +637,7 @@
     {
       scenarioName: "Beggars Can't be Choosers",
       payoutMin: 48e4,
-      payoutMax: 51e4,
+      payoutMax: 57e4,
       actions: {
         ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
         place: [
@@ -1927,8 +1927,7 @@
       actions: {
         ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
         place: [{ resourceId: RESOURCE.DIESEL, qty: 3 }]
-      },
-      needsVerification: true
+      }
     },
     {
       scenarioName: "Smoke Screen",
@@ -2381,6 +2380,7 @@
       payoutMax: 17e4,
       actions: {
         evidence: [{ resourceId: RESOURCE.LIPSTICK, qty: 1 }],
+        ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
         place: [{ resourceId: RESOURCE.GASOLINE, qty: 4 }]
       },
       needsVerification: true
@@ -2389,15 +2389,19 @@
       scenarioName: "A Bitter Taste",
       payoutMin: 4e4,
       payoutMax: 55e3,
-      actions: { place: [{ resourceId: RESOURCE.GASOLINE, qty: 2 }] },
-      needsVerification: true
+      actions: {
+        place: [{ resourceId: RESOURCE.GASOLINE, qty: 2 }],
+        ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }]
+      }
     },
     {
       scenarioName: "Blown to High Heaven",
       payoutMin: 16e3,
       payoutMax: 94e3,
-      actions: { place: [{ resourceId: RESOURCE.OXYGEN, qty: 1 }] },
-      needsVerification: true
+      actions: {
+        place: [{ resourceId: RESOURCE.OXYGEN, qty: 1 }],
+        ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }]
+      }
     },
     {
       scenarioName: "Bugging Me",
@@ -4101,6 +4105,7 @@
   // src/userscripts/arsonists-ledger/submit-tab.ts
   var SUBMIT_URL = "https://balaclava.app/api/arson/recipe-submissions";
   var TIME_PATTERN = /^(early|late|\d+(\.\d+)?(%|s))$/;
+  var RATE_LIMIT_WARN_THRESHOLD = 5;
   var CHECKMARK_DATA_URI = `data:image/svg+xml,${encodeURIComponent(
     `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="${ICON_CHECK_MASK_PATH}"/></svg>`
   )}`;
@@ -4134,8 +4139,12 @@
   var PLACE_RESOURCE_OPTIONS = RESOURCE_OPTIONS.filter(
     (group) => group.label !== "Igniters" && group.label !== "Dampeners"
   );
-  var STOKE_RESOURCE_OPTIONS = RESOURCE_OPTIONS.filter((group) => group.label !== "Dampeners");
-  var DAMPEN_RESOURCE_OPTIONS = RESOURCE_OPTIONS.filter((group) => group.label === "Dampeners");
+  var STOKE_RESOURCE_OPTIONS = RESOURCE_OPTIONS.filter(
+    (group) => group.label !== "Dampeners"
+  );
+  var DAMPEN_RESOURCE_OPTIONS = RESOURCE_OPTIONS.filter(
+    (group) => group.label === "Dampeners"
+  );
   var IGNITER_IDS = Object.values(CATALOG).filter((r) => r.category === "igniter").map((r) => r.id);
   function postSubmission(body, onDone) {
     const payload = JSON.stringify(body);
@@ -4147,7 +4156,16 @@
         headers: { "Content-Type": "application/json" },
         onload(r) {
           if (r.status >= 200 && r.status < 300) {
-            onDone({ ok: true });
+            try {
+              const parsed = JSON.parse(r.responseText);
+              onDone({
+                ok: true,
+                remaining: parsed.remaining,
+                limit: parsed.limit
+              });
+            } catch {
+              onDone({ ok: true });
+            }
             return;
           }
           try {
@@ -4169,7 +4187,16 @@
       body: payload
     }).then(async (r) => {
       if (r.ok) {
-        onDone({ ok: true });
+        try {
+          const parsed = await r.json();
+          onDone({
+            ok: true,
+            remaining: parsed.remaining,
+            limit: parsed.limit
+          });
+        } catch {
+          onDone({ ok: true });
+        }
         return;
       }
       try {
@@ -4193,7 +4220,7 @@
     background: oklch(14.5% 0.011 285);
     border: 1px solid oklch(27% 0.017 285);
     color: oklch(82% 0.007 285);
-    font-size: 11px;
+    font-size: 12px;
     padding: 4px 6px;
     border-radius: 5px;
 }
@@ -4286,7 +4313,51 @@
     font-size: 10px;
     text-transform: uppercase;
 }
-.pyro-rc-scenario-select { width: 100%; }
+.pyro-rc-combobox { position: relative; width: 100%; }
+.pyro-rc-combobox-input { width: 100%; box-sizing: border-box; }
+.pyro-rc-combobox-list {
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0;
+    right: 0;
+    z-index: 20;
+    max-height: 180px;
+    overflow-y: auto;
+    flex-direction: column;
+    background: oklch(20% 0.008 285);
+    border: 1px solid oklch(30% 0 0);
+    border-radius: 6px;
+    padding: 4px;
+    box-shadow: 0 4px 14px oklch(12% 0.01 260 / 0.5);
+    scrollbar-width: thin;
+    scrollbar-color: oklch(40% 0.01 285) oklch(20% 0.008 285);
+}
+.pyro-rc-combobox-list::-webkit-scrollbar { width: 6px; }
+.pyro-rc-combobox-list::-webkit-scrollbar-track { background: oklch(20% 0.008 285); }
+.pyro-rc-combobox-list::-webkit-scrollbar-thumb { background: oklch(40% 0.01 285); border-radius: 3px; }
+.pyro-rc-combobox-item {
+    all: unset;
+    box-sizing: border-box;
+    width: 100%;
+    padding: 5px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    color: oklch(82% 0.007 285);
+    cursor: pointer;
+}
+.pyro-rc-combobox-item.highlighted,
+.pyro-rc-combobox-item:hover {
+    background: oklch(28% 0.012 285);
+}
+.pyro-rc-combobox-item.selected {
+    background: color-mix(in oklch, #6d6 22%, oklch(20% 0.008 285));
+    color: oklch(96% 0.012 95);
+}
+.pyro-rc-combobox-empty {
+    padding: 6px 8px;
+    font-size: 11px;
+    color: oklch(50% 0.008 285);
+}
 
 .pyro-rc-icon-btn {
     background: oklch(15% 0.012 285);
@@ -4339,6 +4410,7 @@
 .pyro-rc-status.ok { color: #6d6; }
 .pyro-rc-status.err { color: #c66; }
 .pyro-rc-status.hint { color: oklch(45% 0.008 285); }
+.pyro-rc-status-warn { color: #e9a23b; margin-left: 3px; }
 .pyro-rc-external-link { font-size: 11px; color: ${BAND_COLOR.excellent}; text-decoration: none; display: inline-flex; align-items: center; gap: 3px; align-self: flex-start; }
 .pyro-rc-external-link:hover { text-decoration: underline; }
 .pyro-rc-external-link svg { width: 10px; height: 10px; flex-shrink: 0; }
@@ -4728,6 +4800,11 @@
             status.innerHTML = ICON_CHECK;
             status.appendChild(txt("Submitted!"));
             status.className = "pyro-rc-status ok";
+            if (result.remaining !== void 0 && result.remaining <= RATE_LIMIT_WARN_THRESHOLD) {
+              const warn = el("span", "pyro-rc-status-warn");
+              warn.textContent = result.remaining === 0 ? " \u2014 that was your last submission this hour." : ` \u2014 ${result.remaining} submission${result.remaining === 1 ? "" : "s"} left this hour.`;
+              status.appendChild(warn);
+            }
           } else {
             status.innerHTML = ICON_X;
             status.appendChild(txt(result.error));
@@ -4752,7 +4829,7 @@
       return { id: null, name: null };
     }
   }
-  function buildSubmitTab(ctx) {
+  function buildSubmitTab(_ctx) {
     injectSubmitTabStyles();
     const root = el("div", "pyro-rc-group");
     const submissionsLink = el("a", "pyro-rc-external-link");
@@ -4761,44 +4838,134 @@
     submissionsLink.rel = "noopener noreferrer";
     submissionsLink.innerHTML = `View submitted recipes ${ICON_EXTERNAL_LINK}`;
     root.appendChild(submissionsLink);
-    const visibleNames = ctx.getVisibleScenarioNames();
-    const initialSelection = preselectedScenario && visibleNames.includes(preselectedScenario) ? preselectedScenario : visibleNames[0] ?? "";
+    const allNames = Array.from(scenarioByName.keys()).sort(
+      (a, b) => a.localeCompare(b)
+    );
+    const initialSelection = preselectedScenario && scenarioByName.has(preselectedScenario) ? preselectedScenario : allNames[0] ?? "";
     preselectedScenario = null;
     const scenarioGroup = el("div", "pyro-rc-group");
     const scenarioTitle = el("div", "pyro-rc-group-title");
     scenarioTitle.textContent = "Scenario";
     scenarioGroup.appendChild(scenarioTitle);
-    const scenarioSelect = el(
-      "select",
-      "pyro-rc-select pyro-rc-scenario-select"
-    );
-    if (visibleNames.length === 0) {
-      const opt = document.createElement("option");
-      opt.value = "";
-      opt.textContent = "No scenarios visible on this page";
-      scenarioSelect.appendChild(opt);
-      scenarioSelect.disabled = true;
-    } else {
-      for (const name of visibleNames) {
-        const opt = document.createElement("option");
-        opt.value = name;
-        opt.textContent = name;
-        scenarioSelect.appendChild(opt);
-      }
-      scenarioSelect.value = initialSelection;
-    }
-    addSelectChrome(scenarioSelect);
-    scenarioGroup.appendChild(scenarioSelect);
-    root.appendChild(scenarioGroup);
     const formSlot = el("div");
     if (initialSelection) formSlot.appendChild(buildForm(initialSelection));
-    root.appendChild(formSlot);
-    scenarioSelect.addEventListener("change", () => {
+    const combobox = buildScenarioCombobox(allNames, initialSelection, (name) => {
       formSlot.innerHTML = "";
-      if (scenarioSelect.value)
-        formSlot.appendChild(buildForm(scenarioSelect.value));
+      formSlot.appendChild(buildForm(name));
     });
+    scenarioGroup.appendChild(combobox);
+    root.appendChild(scenarioGroup);
+    root.appendChild(formSlot);
     return root;
+  }
+  function buildScenarioCombobox(allNames, initialSelection, onSelect) {
+    const wrap = el("div", "pyro-rc-combobox");
+    const input = el(
+      "input",
+      "pyro-rc-input pyro-rc-combobox-input"
+    );
+    input.type = "text";
+    input.placeholder = "Search scenarios\u2026";
+    input.autocomplete = "off";
+    input.spellcheck = false;
+    input.value = initialSelection;
+    input.setAttribute("role", "combobox");
+    input.setAttribute("aria-expanded", "false");
+    input.setAttribute("aria-autocomplete", "list");
+    const list = el("div", "pyro-rc-combobox-list");
+    list.setAttribute("role", "listbox");
+    list.style.display = "none";
+    let selected = initialSelection;
+    let filtered = allNames;
+    let highlighted = -1;
+    function filterNames(query) {
+      const q = query.trim().toLowerCase();
+      if (!q) return allNames;
+      return allNames.filter((n) => n.toLowerCase().includes(q));
+    }
+    function renderList() {
+      list.innerHTML = "";
+      if (filtered.length === 0) {
+        const empty = el("div", "pyro-rc-combobox-empty");
+        empty.textContent = "No matching scenarios";
+        list.appendChild(empty);
+        return;
+      }
+      filtered.forEach((name, i) => {
+        const item = el("button", "pyro-rc-combobox-item");
+        item.type = "button";
+        item.textContent = name;
+        item.setAttribute("role", "option");
+        if (name === selected) item.classList.add("selected");
+        if (i === highlighted) item.classList.add("highlighted");
+        item.addEventListener("mousedown", (e) => {
+          e.preventDefault();
+          choose(name);
+        });
+        list.appendChild(item);
+      });
+    }
+    function openList() {
+      list.style.display = "flex";
+      input.setAttribute("aria-expanded", "true");
+    }
+    function closeList() {
+      list.style.display = "none";
+      input.setAttribute("aria-expanded", "false");
+      highlighted = -1;
+    }
+    function choose(name) {
+      selected = name;
+      input.value = name;
+      closeList();
+      onSelect(name);
+    }
+    input.addEventListener("focus", () => {
+      filtered = filterNames(input.value === selected ? "" : input.value);
+      highlighted = -1;
+      renderList();
+      openList();
+    });
+    input.addEventListener("input", () => {
+      filtered = filterNames(input.value);
+      highlighted = -1;
+      renderList();
+      openList();
+    });
+    input.addEventListener("blur", () => {
+      setTimeout(() => {
+        input.value = selected;
+        closeList();
+      }, 120);
+    });
+    input.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") {
+        input.value = selected;
+        closeList();
+        input.blur();
+        return;
+      }
+      if (e.key === "ArrowDown") {
+        e.preventDefault();
+        if (list.style.display === "none") {
+          filtered = filterNames("");
+          openList();
+        }
+        highlighted = Math.min(highlighted + 1, filtered.length - 1);
+        renderList();
+      } else if (e.key === "ArrowUp") {
+        e.preventDefault();
+        highlighted = Math.max(highlighted - 1, 0);
+        renderList();
+      } else if (e.key === "Enter") {
+        e.preventDefault();
+        if (highlighted >= 0 && filtered[highlighted])
+          choose(filtered[highlighted]);
+      }
+    });
+    wrap.appendChild(input);
+    wrap.appendChild(list);
+    return wrap;
   }
 
   // src/userscripts/arsonists-ledger/settings.ts
@@ -6815,16 +6982,6 @@
   function isArsonPage() {
     return !!document.querySelector(SEL.ROOT);
   }
-  function getVisibleScenarioNames() {
-    const names = /* @__PURE__ */ new Set();
-    getRoot().querySelectorAll(SEL.CARD).forEach((section) => {
-      const scenarioEl = section.querySelector('[class*="scenario___"]');
-      const rawName = scenarioEl?.textContent?.trim() ?? "";
-      const scenario = rawName ? scenarioIndex.get(rawName.toLowerCase()) ?? null : null;
-      if (scenario) names.add(scenario.scenarioName);
-    });
-    return Array.from(names).sort();
-  }
   function scanPage() {
     if (!isArsonPage()) return;
     const prices = effectivePrices();
@@ -6871,7 +7028,6 @@
     getShowMaterialSuspicion: () => showMaterialSuspicion,
     getShowMaterialIgnitionRisk: () => showMaterialIgnitionRisk,
     getShowMaterialStokingRisk: () => showMaterialStokingRisk,
-    getVisibleScenarioNames,
     setManualPrice,
     clearManualPrices,
     clearManualPrice,

@@ -612,7 +612,7 @@ export const SCENARIOS: Scenario[] = [
   {
     scenarioName: "Beggars Can't be Choosers",
     payoutMin: 480_000,
-    payoutMax: 510_000,
+    payoutMax: 570_000,
     actions: {
       ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
       place: [
@@ -2023,7 +2023,6 @@ export const SCENARIOS: Scenario[] = [
       ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
       place: [{ resourceId: RESOURCE.DIESEL, qty: 3 }],
     },
-    needsVerification: true,
   },
 
   {
@@ -2522,6 +2521,7 @@ export const SCENARIOS: Scenario[] = [
     payoutMax: 170_000,
     actions: {
       evidence: [{ resourceId: RESOURCE.LIPSTICK, qty: 1 }],
+      ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
       place: [{ resourceId: RESOURCE.GASOLINE, qty: 4 }],
     },
     needsVerification: true,
@@ -2530,15 +2530,19 @@ export const SCENARIOS: Scenario[] = [
     scenarioName: "A Bitter Taste",
     payoutMin: 40_000,
     payoutMax: 55_000,
-    actions: { place: [{ resourceId: RESOURCE.GASOLINE, qty: 2 }] },
-    needsVerification: true,
+    actions: {
+      place: [{ resourceId: RESOURCE.GASOLINE, qty: 2 }],
+      ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
+    },
   },
   {
     scenarioName: "Blown to High Heaven",
     payoutMin: 16_000,
     payoutMax: 94_000,
-    actions: { place: [{ resourceId: RESOURCE.OXYGEN, qty: 1 }] },
-    needsVerification: true,
+    actions: {
+      place: [{ resourceId: RESOURCE.OXYGEN, qty: 1 }],
+      ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
+    },
   },
   {
     scenarioName: "Bugging Me",

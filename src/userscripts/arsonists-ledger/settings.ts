@@ -53,8 +53,6 @@ export interface SettingsCtx {
   getShowMaterialSuspicion(): boolean;
   getShowMaterialIgnitionRisk(): boolean;
   getShowMaterialStokingRisk(): boolean;
-  /** Scenario names currently matched/rendered on the page, for the Submit tab's scenario picker. */
-  getVisibleScenarioNames(): string[];
 
   setManualPrice(id: ResourceId, price: number): void;
   clearManualPrices(): void;

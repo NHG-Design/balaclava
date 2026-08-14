@@ -617,7 +617,7 @@
     {
       scenarioName: "Beggars Can't be Choosers",
       payoutMin: 48e4,
-      payoutMax: 51e4,
+      payoutMax: 57e4,
       actions: {
         ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
         place: [
@@ -1907,8 +1907,7 @@
       actions: {
         ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
         place: [{ resourceId: RESOURCE.DIESEL, qty: 3 }]
-      },
-      needsVerification: true
+      }
     },
     {
       scenarioName: "Smoke Screen",
@@ -2361,6 +2360,7 @@
       payoutMax: 17e4,
       actions: {
         evidence: [{ resourceId: RESOURCE.LIPSTICK, qty: 1 }],
+        ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
         place: [{ resourceId: RESOURCE.GASOLINE, qty: 4 }]
       },
       needsVerification: true
@@ -2369,15 +2369,19 @@
       scenarioName: "A Bitter Taste",
       payoutMin: 4e4,
       payoutMax: 55e3,
-      actions: { place: [{ resourceId: RESOURCE.GASOLINE, qty: 2 }] },
-      needsVerification: true
+      actions: {
+        place: [{ resourceId: RESOURCE.GASOLINE, qty: 2 }],
+        ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }]
+      }
     },
     {
       scenarioName: "Blown to High Heaven",
       payoutMin: 16e3,
       payoutMax: 94e3,
-      actions: { place: [{ resourceId: RESOURCE.OXYGEN, qty: 1 }] },
-      needsVerification: true
+      actions: {
+        place: [{ resourceId: RESOURCE.OXYGEN, qty: 1 }],
+        ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }]
+      }
     },
     {
       scenarioName: "Bugging Me",
