@@ -1931,11 +1931,11 @@ export const SCENARIOS: Scenario[] = [
 
   {
     scenarioName: "Second Hand Smoke",
-    payoutMin: 180_000,
+    payoutMin: 150_000,
     payoutMax: 210_000,
     actions: {
-      ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
       place: [{ resourceId: RESOURCE.GASOLINE, qty: 2 }],
+      ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
       stoke: [{ resourceId: RESOURCE.METHANE, qty: 2 }],
       stokeTime: "early",
     },
