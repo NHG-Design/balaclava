@@ -109,6 +109,44 @@ export async function createPullRequest(
   return { number: data.number, htmlUrl: data.html_url }
 }
 
+export interface OpenPullRequest {
+  number: number
+  htmlUrl: string
+  body: string
+}
+
+/** Finds the open PR (if any) whose head is the given branch. Returns null if none is open. */
+export async function findOpenPullRequest(
+  token: string,
+  branch: string,
+): Promise<OpenPullRequest | null> {
+  const res = await githubFetch(
+    token,
+    `/pulls?head=${encodeURIComponent(`${OWNER}:${branch}`)}&state=open`,
+  )
+  if (!res.ok) {
+    throw new Error(`GitHub findOpenPullRequest failed: HTTP ${res.status} ${await res.text()}`)
+  }
+  const data = (await res.json()) as Array<{ number: number; html_url: string; body: string | null }>
+  const pr = data[0]
+  return pr ? { number: pr.number, htmlUrl: pr.html_url, body: pr.body ?? '' } : null
+}
+
+/** Rewrites a PR's body — used to keep the pooled-submissions list current as more get added. */
+export async function updatePullRequestBody(
+  token: string,
+  prNumber: number,
+  body: string,
+): Promise<void> {
+  const res = await githubFetch(token, `/pulls/${prNumber}`, {
+    method: 'PATCH',
+    body: JSON.stringify({ body }),
+  })
+  if (!res.ok) {
+    throw new Error(`GitHub updatePullRequestBody failed: HTTP ${res.status} ${await res.text()}`)
+  }
+}
+
 /** Verifies a GitHub webhook payload signature (X-Hub-Signature-256) via HMAC-SHA256. */
 export async function verifyWebhookSignature(
   secret: string,
