@@ -70,6 +70,39 @@ export function recipeSignature(
   })
 }
 
+export interface RecipeField {
+  label: string
+  text: string
+}
+
+/** Plain (non-diffed) summary of a submission's payout/recipe — used once a submission has
+ *  merged, since by then the scenario's live data equals the submission and a diff against
+ *  "current" would show everything as unchanged. */
+export function summarizeRecipe(s: SubmissionLike, recipe: Recipe | null): RecipeField[] {
+  const fields: RecipeField[] = [
+    {
+      label: 'Payout',
+      text: `${s.payout_min.toLocaleString()}–${s.payout_max.toLocaleString()}`,
+    },
+  ]
+  if (!recipe) return fields
+
+  const rows: Array<[string, ActionItem[] | undefined]> = [
+    ['Place', recipe.place],
+    ['Ignite', recipe.ignite],
+    ['Stoke', recipe.stoke],
+    ['Dampen', recipe.dampen],
+  ]
+  for (const [label, items] of rows) {
+    if (!items) continue
+    fields.push({ label, text: formatItems(items) })
+  }
+  if (recipe.stokeTime) fields.push({ label: 'Stoke time', text: recipe.stokeTime })
+  if (recipe.dampenTime) fields.push({ label: 'Dampen time', text: recipe.dampenTime })
+
+  return fields
+}
+
 /** Diffs a submission's payout/recipe against the scenario's currently-live data, field by field. */
 export function computeDiff(
   s: SubmissionLike,

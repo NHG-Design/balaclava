@@ -1,7 +1,7 @@
 <script lang="ts">
   import { onMount, tick } from 'svelte'
   import type { PageData } from './$types'
-  import { computeDiff, parseRecipe } from '$lib/recipe-diff'
+  import { computeDiff, parseRecipe, summarizeRecipe } from '$lib/recipe-diff'
 
   let { data }: { data: PageData } = $props()
 
@@ -156,7 +156,11 @@
             <div class="grid grid-cols-1 gap-4 lg:grid-cols-2">
               {#each group as s (s.id)}
                 {@const recipe = parseRecipe(s.recipe)}
-                {@const diff = computeDiff(s, recipe, data.currentScenarios)}
+                {@const diff =
+                  s.status === 'merged'
+                    ? null
+                    : computeDiff(s, recipe, data.currentScenarios).filter((f) => f.changed)}
+                {@const summary = s.status === 'merged' ? summarizeRecipe(s, recipe) : null}
                 <article
                   id={`submission-${s.id}`}
                   class="flex scroll-mt-6 flex-col gap-3 rounded-xl border border-ink-700 bg-ink-900 p-4 transition-shadow duration-500 {highlightedId ===
@@ -207,34 +211,30 @@
                     </div>
                   </div>
 
-                  {#if recipe}
-                    <table class="w-full border-collapse text-[13px]">
-                      <tbody>
-                        {#each diff as f (f.label)}
-                          <tr>
-                            <td class="w-px py-1 pr-3 align-top whitespace-nowrap text-ink-400">
-                              {f.label}
-                            </td>
-                            {#if f.changed}
-                              <td class="py-1 pr-2 align-top text-rose-400 line-through">
-                                {f.oldText}
-                              </td>
-                              <td class="w-px py-1 pr-2 align-top text-ink-600">→</td>
-                              <td class="py-1 align-top font-medium text-emerald-400">
-                                {f.newText}
-                              </td>
-                            {:else}
-                              <td class="py-1 align-top text-ink-200" colspan="3">
-                                {f.newText}
-                                <span class="text-ink-600">(unchanged)</span>
-                              </td>
-                            {/if}
-                          </tr>
-                        {/each}
-                      </tbody>
-                    </table>
-                  {:else}
+                  {#if !recipe}
                     <p class="text-sm text-rose-400">Recipe data couldn't be parsed.</p>
+                  {:else if summary}
+                    <div class="flex flex-col gap-1 text-[13px]">
+                      {#each summary as f (f.label)}
+                        <p>
+                          <span class="text-ink-400">{f.label}:</span>
+                          <span class="font-medium text-ink-200">{f.text}</span>
+                        </p>
+                      {/each}
+                    </div>
+                  {:else if diff && diff.length === 0}
+                    <p class="text-sm text-ink-400">No changes from current data.</p>
+                  {:else if diff}
+                    <div class="flex flex-col gap-1 text-[13px]">
+                      {#each diff as f (f.label)}
+                        <p>
+                          <span class="text-ink-400">{f.label}:</span>
+                          <span class="text-rose-400 line-through">{f.oldText}</span>
+                          <span class="text-ink-600">→</span>
+                          <span class="font-medium text-emerald-400">{f.newText}</span>
+                        </p>
+                      {/each}
+                    </div>
                   {/if}
 
                   {#if s.submitter_id}
@@ -253,7 +253,7 @@
 
                   {#if s.status === 'approved' && s.pr_number}
                     <p class="text-xs text-ink-400">
-                      Approved — deploying via
+                      Final review in
                       <a
                         href={`https://github.com/NHG-Design/balaclava/pull/${s.pr_number}`}
                         target="_blank"
@@ -265,7 +265,7 @@
                     </p>
                   {:else if s.status === 'merged' && s.pr_number}
                     <p class="text-xs text-ink-400">
-                      Merged — shipped via
+                      Shipped via
                       <a
                         href={`https://github.com/NHG-Design/balaclava/pull/${s.pr_number}`}
                         target="_blank"

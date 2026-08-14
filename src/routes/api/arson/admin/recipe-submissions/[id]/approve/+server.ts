@@ -34,9 +34,12 @@ interface PooledSubmission {
 }
 
 function buildPrBody(pooled: PooledSubmission[]): string {
-  // No leading "#" before the id — GitHub auto-links "#N" to issues/PRs in this repo,
-  // which have nothing to do with these submission ids.
-  const list = pooled.map((p) => `- submission ${p.id} — ${p.scenario_name}`).join('\n')
+  // Link the scenario name to its submission page instead of showing a bare "#N" —
+  // GitHub auto-links "#N" text to issues/PRs in this repo, which have nothing to do
+  // with these submission ids.
+  const list = pooled
+    .map((p) => `- [${p.scenario_name}](https://balaclava.app/arson/submissions#submission-${p.id})`)
+    .join('\n')
   return (
     `Auto-generated from approved community submission(s) on balaclava.app.\n\n` +
     `Pooled submissions:\n${list}\n\n` +
