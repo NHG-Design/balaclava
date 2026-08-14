@@ -2,7 +2,7 @@ import type { RequestHandler } from './$types'
 import { createClient } from '@libsql/client/web'
 import { isAdminRequest } from '$lib/server/session'
 
-export const GET: RequestHandler = async ({ platform, cookies }) => {
+export const GET: RequestHandler = async ({ url, platform, cookies }) => {
   try {
     if (!(await isAdminRequest(platform?.env?.SCENARIO_ADMIN_SESSION_SECRET, cookies))) {
       return new Response(JSON.stringify({ error: 'Not authorized' }), {
@@ -15,12 +15,17 @@ export const GET: RequestHandler = async ({ platform, cookies }) => {
     const authToken = platform?.env?.TURSO_AUTH_TOKEN
     if (!dbUrl || !authToken) return new Response('Not configured', { status: 500 })
 
+    const limit = Math.min(Math.max(Number(url.searchParams.get('limit')) || 200, 1), 500)
+    const offset = Math.max(Number(url.searchParams.get('offset')) || 0, 0)
+
     const client = createClient({ url: dbUrl, authToken })
-    const result = await client.execute(
-      `SELECT id, scenario_name, payout_min, payout_max, submitter_id, submitter_name, recipe, status, pr_number, created_at
+    const result = await client.execute({
+      sql: `SELECT id, scenario_name, payout_min, payout_max, submitter_id, submitter_name, recipe, status, pr_number, created_at
        FROM recipe_submissions
-       ORDER BY (status = 'pending') DESC, scenario_name ASC, created_at DESC`,
-    )
+       ORDER BY (status = 'pending') DESC, scenario_name ASC, created_at DESC
+       LIMIT ? OFFSET ?`,
+      args: [limit, offset],
+    })
 
     const decided = await client.execute(
       `SELECT DISTINCT scenario_name FROM recipe_submissions WHERE status IN ('approved', 'merged')`,

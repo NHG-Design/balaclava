@@ -267,6 +267,9 @@ export const GET: RequestHandler = async ({ url, platform }) => {
         ? [statusFilter]
         : ['pending', 'approved', 'merged']
 
+    const limit = Math.min(Math.max(Number(url.searchParams.get('limit')) || 100, 1), 200)
+    const offset = Math.max(Number(url.searchParams.get('offset')) || 0, 0)
+
     const client = createClient({ url: dbUrl, authToken })
     const placeholders = statuses.map(() => '?').join(', ')
     const rows = await client.execute({
@@ -275,8 +278,9 @@ export const GET: RequestHandler = async ({ url, platform }) => {
         FROM recipe_submissions
         WHERE status IN (${placeholders})
         ORDER BY scenario_name ASC, created_at DESC
+        LIMIT ? OFFSET ?
       `,
-      args: statuses,
+      args: [...statuses, limit, offset],
     })
 
     const submissions = rows.rows
