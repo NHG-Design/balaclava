@@ -1,0 +1,259 @@
+:root .dark-mode .crimes-app {
+  --crimes-crimeHeading-background: linear-gradient(180deg, #555, #333);
+  --crimes-crimeTitle-textShadow: 0 0 2px #000;
+  --crimes-baseText-color: #fff;
+  --crimes-subText-color: #ddd;
+  --crimes-subtleSubText-color: #ccc;
+  --crimes-locked-color: #666;
+  --crimes-green-color: #82c91e;
+  --crimes-stats-textShadow: none;
+  --crimes-stats-successes-color: #a9e34b;
+  --crimes-stats-fails-color: #ddd;
+  --crimes-stats-criticalFails-color: #ffa8a8;
+  --crimes-stats-icons-filter: none;
+  --crimes-statsPanel-bgColor: rgba(42, 42, 42, 0.95);
+  --crimes-statsPanel-filter: none;
+  --crimes-statsPanel-statisticLabel-color: #fff;
+  --crimes-statsPanel-statisticValue-color: #ccc;
+  --crimes-statsPanel-statisticValue-notOwned-color: #888;
+  --crimes-levelProgressBar-bar-bgColor: #000;
+  --crimes-levelProgressBar-bar-borderColor: #444;
+  --crimes-levelProgressBar-track-background: linear-gradient(
+    180deg,
+    #333,
+    #555
+  );
+  --crimes-levelProgressBar-trackDivider-bgColor: #444;
+  --crimes-levelProgressBar-trackDivider-boxShadow: none;
+  --crimes-levelProgressBar-fill-background:
+    url(/images/v2/crimes/progressbar-dark-stripes.svg) repeat-x,
+    linear-gradient(180deg, #3d7816, #1c3e0a);
+  --crimes-levelProgressBar-fill-boxShadow: none;
+  --crimes-progressBar-borderColor: var(--crimes-itemCell-outline-borderColor);
+  --crimes-progressBar-greenFill-background: var(
+    --crimes-levelProgressBar-fill-background
+  );
+  --crimes-progressBar-redFill-background:
+    url(/images/v2/crimes/progressbar-stripes.svg) repeat-x,
+    linear-gradient(180deg, #e3242b, #b90e0a);
+  --crimes-progressBar-segmentDelimiter-color: rgba(255, 255, 255, 0.2);
+  --crimes-crimeOption-bgColor: #333;
+  --crimes-crimeOption-hover-bgColor: #2a2a2a;
+  --crimes-crimeOption-sectionDelimiter-borderImage: linear-gradient(
+    180deg,
+    transparent,
+    #111 53%,
+    transparent
+  );
+  --crimes-crimeOption-borderBottomColor: #222;
+  --crimes-crimeOption-image-bgGradient: linear-gradient(
+    0deg,
+    rgba(51, 51, 51, 0.75),
+    transparent 10px
+  );
+  --crimes-commitButton-dividerLeftHalf-bg: linear-gradient(
+    180deg,
+    transparent,
+    #000 53%,
+    transparent
+  );
+  --crimes-commitButton-dividerRightHalf-bg: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0),
+    rgba(255, 255, 255, 0.1) 53%,
+    rgba(255, 255, 255, 0)
+  );
+  --crimes-commitButton-inactive-dividerLeftHalf-bg: var(
+    --crimes-commitButton-dividerLeftHalf-bg
+  );
+  --crimes-commitButton-pressed-dividerLeftHalf-bg: var(
+    --crimes-commitButton-dividerLeftHalf-bg
+  );
+  --crimes-outcome-success-bgColor: #414b31;
+  --crimes-outcome-uniqueSuccess-shineColor: rgba(235, 246, 217, 0.035);
+  --crimes-outcome-success-textColor: #f4fce3;
+  --crimes-outcome-success-largeColoredText-color: #a9e34b;
+  --crimes-outcome-success-largeColoredText-textShadow: none;
+  --crimes-outcome-success-description-color: #f4fce3;
+  --crimes-outcome-failure-bgColor: #484230;
+  --crimes-outcome-failure-textColor: #fff9db;
+  --crimes-outcome-failure-largeColoredText-color: #ffe066;
+  --crimes-outcome-failure-largeColoredText-textShadow: none;
+  --crimes-outcome-criticalFailure-bgColor: #513737;
+  --crimes-outcome-criticalFailure-textColor: #fff5f5;
+  --crimes-outcome-criticalFailure-largeColoredText-color: #ff6b6b;
+  --crimes-outcome-criticalFailure-largeColoredText-textShadow: none;
+  --crimes-outcomeDivider-color: #555;
+  --crimes-outcomeID-color: #c5c5b3;
+  --crimes-itemCell-background: linear-gradient(180deg, #333, #404040);
+  --crimes-itemCell-boxShadow: inset 0 2px 4px rgba(0, 0, 0, 0.25);
+  --crimes-itemCell-filled-border: 1px solid #5b5b5b;
+  --crimes-itemCell-outline-borderColor: #5b5b5b;
+  --crimes-itemCell-disabled-background: linear-gradient(180deg, #000, #333);
+  --crimes-itemCell-count-textColor: #fff;
+  --crimes-itemCell-count-textShadow:
+    0 -2px 1px rgba(0, 0, 0, 0.467), 0 2px 1px rgba(0, 0, 0, 0.467),
+    2px 0 1px rgba(0, 0, 0, 0.467), -2px 0 1px rgba(0, 0, 0, 0.467);
+  --crimes-skeleton-element-color: #111;
+  --crimes-skeleton-group-dim-bg: rgba(51, 51, 51, 0.5);
+  --crimes-fullLock-panel-bgColor: #444;
+  --crimes-fullLock-panel-shadow: 0 0 2px rgba(0, 0, 0, 0.25);
+  --crimes-fullLock-separatorUpperPixel: linear-gradient(
+    90deg,
+    transparent,
+    rgba(0, 0, 0, 0.5) 50%,
+    transparent
+  );
+  --crimes-fullLock-separatorBottomPixel: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.1) 50%,
+    transparent
+  );
+  --crimes-fullLock-textColor: #fff;
+  --crimes-fullLock-missingRequirement-image-boxShadow: inset 0 2px 4px
+    rgba(0, 0, 0, 0.25);
+  --crimes-fullLock-missingRequirement-image-outline: 1px solid #5b5b5b;
+  --crimes-cracking-rig-contextMenu-enabledButton-color: #fff;
+  --crimes-cracking-rig-contextMenu-enabledButton-hover-bgColor: #555;
+  --crimes-cracking-rig-contextMenu-disabledButton-color: #666;
+  --crimes-scamming-dropdown-toggler-bg: #300c0c;
+  --crimes-scamming-dropdown-item-diminished-bg: rgba(240, 62, 62, 0.1);
+  --crimes-scamming-dropdown-item-diminished-bg-hover: rgba(240, 62, 62, 0.2);
+}
+
+:root .crimes-app {
+  --crimes-crimeHeading-background: linear-gradient(180deg, #fff, #ddd);
+  --crimes-crimeTitle-textShadow: none;
+  --crimes-baseText-color: #666;
+  --crimes-subText-color: #888;
+  --crimes-subtleSubText-color: #999;
+  --crimes-locked-color: #ccc;
+  --crimes-green-color: #5c940d;
+  --crimes-stats-textShadow: 0 1px 0 #fff;
+  --crimes-stats-successes-color: #678c00;
+  --crimes-stats-fails-color: #888;
+  --crimes-stats-criticalFails-color: #d83400;
+  --crimes-stats-icons-filter: drop-shadow(0 1px 0 #fff);
+  --crimes-statsPanel-bgColor: rgba(255, 255, 255, 0.89);
+  --crimes-statsPanel-filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.45));
+  --crimes-statsPanel-statisticLabel-color: #444;
+  --crimes-statsPanel-statisticValue-color: #888;
+  --crimes-statsPanel-statisticValue-notOwned-color: #ccc;
+  --crimes-levelProgressBar-bar-bgColor: #fff;
+  --crimes-levelProgressBar-bar-borderColor: #ccc;
+  --crimes-levelProgressBar-track-background: linear-gradient(
+    180deg,
+    #bbb,
+    #ddd
+  );
+  --crimes-levelProgressBar-trackDivider-bgColor: #fff;
+  --crimes-levelProgressBar-trackDivider-boxShadow: 1px 0 0 rgba(0, 0, 0, 0.07);
+  --crimes-levelProgressBar-fill-background:
+    url(/images/v2/crimes/progressbar-stripes.svg) repeat-x,
+    linear-gradient(180deg, #a3d900, #360);
+  --crimes-levelProgressBar-fill-boxShadow: 0 0 5px rgba(191, 255, 0, 0.45);
+  --crimes-progressBar-borderColor: var(--crimes-itemCell-outline-borderColor);
+  --crimes-progressBar-greenFill-background: var(
+    --crimes-levelProgressBar-fill-background
+  );
+  --crimes-progressBar-redFill-background:
+    url(/images/v2/crimes/progressbar-stripes.svg) repeat-x,
+    linear-gradient(180deg, #e3242b, #b90e0a);
+  --crimes-progressBar-segmentDelimiter-color: rgba(0, 0, 0, 0.1);
+  --crimes-crimeOption-bgColor: #f2f2f2;
+  --crimes-crimeOption-hover-bgColor: #fff;
+  --crimes-crimeOption-sectionDelimiter-borderImage: linear-gradient(
+    180deg,
+    transparent,
+    #ddd 53%,
+    transparent
+  );
+  --crimes-crimeOption-borderBottomColor: #ddd;
+  --crimes-crimeOption-image-bgGradient: linear-gradient(
+    0deg,
+    rgba(204, 204, 204, 0.75),
+    transparent 10px
+  );
+  --crimes-commitButton-dividerLeftHalf-bg: linear-gradient(
+    180deg,
+    rgba(170, 170, 170, 0),
+    #aaa 53%,
+    rgba(170, 170, 170, 0)
+  );
+  --crimes-commitButton-dividerRightHalf-bg: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0),
+    rgba(255, 255, 255, 0.5) 53%,
+    rgba(255, 255, 255, 0)
+  );
+  --crimes-commitButton-inactive-dividerLeftHalf-bg: linear-gradient(
+    180deg,
+    rgba(187, 187, 187, 0),
+    #bbb 53%,
+    rgba(187, 187, 187, 0)
+  );
+  --crimes-commitButton-pressed-dividerLeftHalf-bg: var(
+    --crimes-commitButton-inactive-dividerLeftHalf-bg
+  );
+  --crimes-outcome-success-bgColor: #ebf6d9;
+  --crimes-outcome-uniqueSuccess-shineColor: rgba(255, 255, 255, 0.333);
+  --crimes-outcome-success-textColor: #888;
+  --crimes-outcome-success-largeColoredText-color: #85b200;
+  --crimes-outcome-success-largeColoredText-textShadow: 0 0 10px #a9e34b;
+  --crimes-outcome-success-description-color: #888;
+  --crimes-outcome-failure-bgColor: #fff9db;
+  --crimes-outcome-failure-textColor: #888;
+  --crimes-outcome-failure-largeColoredText-color: #f08c00;
+  --crimes-outcome-failure-largeColoredText-textShadow: none;
+  --crimes-outcome-criticalFailure-bgColor: #fff9f7;
+  --crimes-outcome-criticalFailure-textColor: #888;
+  --crimes-outcome-criticalFailure-largeColoredText-color: #ff3f00;
+  --crimes-outcome-criticalFailure-largeColoredText-textShadow: 0 0 5px
+    rgba(255, 63, 0, 0.35);
+  --crimes-outcomeDivider-color: #ddd;
+  --crimes-outcomeID-color: #c5c5b3;
+  --crimes-itemCell-background: linear-gradient(180deg, #ddd, #ebebeb);
+  --crimes-itemCell-boxShadow:
+    inset 0 2px 4px rgba(0, 0, 0, 0.25), 0 1px 0 #fff;
+  --crimes-itemCell-filled-border: none;
+  --crimes-itemCell-outline-borderColor: #ddd;
+  --crimes-itemCell-disabled-background: linear-gradient(
+    180deg,
+    rgba(0, 0, 0, 0.1),
+    rgba(0, 0, 0, 0.03)
+  );
+  --crimes-itemCell-count-textColor: #666;
+  --crimes-itemCell-count-textShadow:
+    0 -2px 1px #fff, 0 2px 1px #fff, 2px 0 1px #fff, -2px 0 1px #fff;
+  --crimes-skeleton-element-color: #ddd;
+  --crimes-skeleton-group-dim-bg: rgba(204, 204, 204, 0.5);
+  --crimes-fullLock-panel-bgColor: #f2f2f2;
+  --crimes-fullLock-panel-shadow: 0 0 2px rgba(0, 0, 0, 0.25);
+  --crimes-fullLock-separatorUpperPixel: linear-gradient(
+    90deg,
+    transparent,
+    #ccc 50%,
+    transparent
+  );
+  --crimes-fullLock-separatorBottomPixel: linear-gradient(
+    90deg,
+    transparent,
+    #fff 50%,
+    transparent
+  );
+  --crimes-fullLock-textColor: #666;
+  --crimes-fullLock-missingRequirement-image-boxShadow:
+    inset 0 2px 4px rgba(0, 0, 0, 0.25), 0 1px 0px #fff;
+  --crimes-fullLock-missingRequirement-image-outline: none;
+  --crimes-cracking-rig-contextMenu-enabledButton-color: #000;
+  --crimes-cracking-rig-contextMenu-enabledButton-hover-bgColor: #ddd;
+  --crimes-cracking-rig-contextMenu-disabledButton-color: #aaa;
+  --crimes-scamming-dropdown-toggler-bg: linear-gradient(
+    180deg,
+    #e5d2d2,
+    #f1dfdf
+  );
+  --crimes-scamming-dropdown-item-diminished-bg: #fff5f5;
+  --crimes-scamming-dropdown-item-diminished-bg-hover: #ffe3e3;
+}

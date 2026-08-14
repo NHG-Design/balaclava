@@ -115,9 +115,9 @@ export function injectSettingsStyles(): void {
     margin-left: 8px;
 }
 #pyro-settings-panel {
-    --pyro-api-color: #6d6;
+    --pyro-api-color: var(--pyro-success);
     --pyro-manual-color: #7af;
-    --pyro-db-color: oklch(46% 0.008 285);
+    --pyro-db-color: var(--pyro-text-muted);
 }
 .pyro-tab-bar { display: flex; border-bottom: 1px solid var(--pyro-tooltip-border); }
 .pyro-tab {
@@ -125,7 +125,7 @@ export function injectSettingsStyles(): void {
     background: none;
     border: none;
     border-bottom: 1px solid transparent;
-    color: oklch(70% 0.008 95 / 0.8);
+    color: var(--pyro-text-muted);
     cursor: pointer;
     padding: 8px 16px;
     font: inherit;
@@ -133,10 +133,10 @@ export function injectSettingsStyles(): void {
     transition: color 120ms ease-out;
 }
 @media (hover: hover) and (pointer: fine) {
-    .pyro-tab:hover { color: oklch(96% 0.012 95); }
+    .pyro-tab:hover { color: var(--pyro-tooltip-text); }
 }
 .pyro-tab.active {
-    color: oklch(96% 0.012 95);
+    color: var(--pyro-tooltip-text);
     border-bottom-color: ${BAND_COLOR.excellent};
     background: linear-gradient(0deg, color-mix(in oklch, ${BAND_COLOR.excellent} 20%, transparent 80%), transparent 55%);
 }
@@ -144,19 +144,19 @@ export function injectSettingsStyles(): void {
 .pyro-tab-content>div { display: flex; flex-direction: column; gap: 14px; }
 .pyro-tab-content::-webkit-scrollbar { width: 3px; }
 .pyro-tab-content::-webkit-scrollbar-track { background: transparent; }
-.pyro-tab-content::-webkit-scrollbar-thumb { background: oklch(57% 0.008 285); border-radius: 2px; }
+.pyro-tab-content::-webkit-scrollbar-thumb { background: var(--pyro-text-muted); border-radius: 2px; }
 .pyro-s-group { display: flex; flex-direction: column; gap: 8px; }
 .pyro-s-group-title {
     font-size: 14px;
     text-transform: uppercase;
-    color: oklch(58% 0.012 285);
+    color: var(--pyro-text-muted);
 }
 .pyro-s-rows { display: flex; flex-direction: column; gap: 4px; }
 .pyro-s-row { display: flex; align-items: center; gap: 6px; }
 .pyro-s-label {
     flex: 1;
     font-size: 12px;
-    color: oklch(62% 0.009 285);
+    color: var(--pyro-text-muted);
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -164,9 +164,9 @@ export function injectSettingsStyles(): void {
 }
 .pyro-s-input {
     width: 76px;
-    background: oklch(14.5% 0.011 285);
-    border: 1px solid oklch(27% 0.017 285);
-    color: oklch(82% 0.007 285);
+    background: var(--pyro-surface);
+    border: 1px solid var(--pyro-surface-border);
+    color: var(--pyro-tooltip-text);
     font-size: 12px;
     padding: 3px 5px;
     border-radius: 5px;
@@ -177,15 +177,15 @@ export function injectSettingsStyles(): void {
 .pyro-s-input::-webkit-inner-spin-button,
 .pyro-s-input::-webkit-outer-spin-button { -webkit-appearance: none; }
 .pyro-s-input:focus-visible { outline: none; border-color: ${BAND_COLOR.excellent}; }
-.pyro-s-input.from-api   { border-color: #4a4; color: #6d6; }
+.pyro-s-input.from-api   { border-color: var(--pyro-success); color: var(--pyro-success); }
 .pyro-s-input.overridden { border-color: #48a; color: #7af; }
 .pyro-s-divider { border: none; border-top: 1px solid var(--pyro-tooltip-border); margin: 8px 0; }
 .pyro-s-key-row { display: flex; gap: 6px; margin-bottom: 6px; }
 .pyro-s-key-input {
     flex: 1;
-    background: oklch(14.5% 0.011 285);
-    border: 1px solid oklch(27% 0.017 285);
-    color: oklch(82% 0.007 285);
+    background: var(--pyro-surface);
+    border: 1px solid var(--pyro-surface-border);
+    color: var(--pyro-tooltip-text);
     font-size: 12px;
     padding: 4px 6px;
     border-radius: 5px;
@@ -201,9 +201,9 @@ export function injectSettingsStyles(): void {
     gap: 4px;
     box-sizing: border-box;
     min-height: 24px;
-    background: oklch(15% 0.012 285);
-    border: 1px solid oklch(28% 0.018 285);
-    color: oklch(60% 0.009 285);
+    background: var(--pyro-surface);
+    border: 1px solid var(--pyro-surface-border);
+    color: var(--pyro-text-muted);
     cursor: pointer;
     border-radius: 5px;
     padding: 4px 9px;
@@ -213,38 +213,38 @@ export function injectSettingsStyles(): void {
 }
 .pyro-s-btn svg { width: 12px; height: 12px; flex-shrink: 0; }
 @media (hover: hover) and (pointer: fine) {
-    .pyro-s-btn:hover:not(:disabled) { background: oklch(21% 0.016 285); color: oklch(85% 0.006 285); }
+    .pyro-s-btn:hover:not(:disabled) { background: var(--pyro-surface-hover); color: var(--pyro-tooltip-text); }
 }
 .pyro-s-btn:active:not(:disabled) { transform: scale(0.97); }
 .pyro-s-btn:disabled { opacity: 0.28; cursor: default; }
 .pyro-s-btn-danger {
-    background: oklch(19% 0.03 25);
-    border-color: oklch(32% 0.06 25);
-    color: oklch(72% 0.09 25);
+    background: var(--pyro-danger-bg);
+    border-color: var(--pyro-danger-border);
+    color: var(--pyro-danger);
 }
 @media (hover: hover) and (pointer: fine) {
-    .pyro-s-btn-danger:hover:not(:disabled) { background: oklch(24% 0.07 25); color: oklch(82% 0.1 25); }
+    .pyro-s-btn-danger:hover:not(:disabled) { background: var(--pyro-danger-bg-hover); color: var(--pyro-danger); }
 }
 .pyro-s-status {
     font-size: 10px;
     min-height: 13px;
-    color: oklch(38% 0.008 285);
+    color: var(--pyro-text-muted);
     display: flex;
     align-items: center;
     gap: 2px;
     flex-wrap: nowrap;
 }
 .pyro-s-status.ok  { color: ${BAND_COLOR.good}; }
-.pyro-s-status.err { color: #c66; }
+.pyro-s-status.err { color: var(--pyro-danger); }
 .pyro-s-status:empty { display: none; }
 .pyro-s-refresh-row { display: flex; align-items: center; gap: 8px; }
-.pyro-s-timestamp { font-size: 10px; color: oklch(57% 0.008 285); }
+.pyro-s-timestamp { font-size: 10px; color: var(--pyro-text-muted); }
 .pyro-s-check-row {
     display: flex;
     align-items: center;
     gap: 7px;
     font-size: 12px;
-    color: oklch(62% 0.009 285);
+    color: var(--pyro-text-muted);
     cursor: pointer;
     user-select: none;
 }
@@ -260,9 +260,9 @@ export function injectSettingsStyles(): void {
     height: 15px;
     margin: 0;
     flex-shrink: 0;
-    border: 1px solid oklch(42% 0.02 285);
+    border: 1px solid var(--pyro-surface-border);
     border-radius: 3px;
-    background: oklch(14.5% 0.011 285);
+    background: var(--pyro-surface);
     accent-color: ${BAND_COLOR.excellent};
     cursor: pointer;
     display: inline-flex;
@@ -290,36 +290,36 @@ export function injectSettingsStyles(): void {
 .pyro-s-toggle-group {
     display: inline-flex;
     align-self: flex-start;
-    border: 1px solid oklch(27% 0.017 285);
+    border: 1px solid var(--pyro-surface-border);
     border-radius: 5px;
     overflow: hidden;
 }
 .pyro-s-toggle-btn {
-    background: oklch(14.5% 0.011 285);
+    background: var(--pyro-surface);
     border: none;
-    color: oklch(62% 0.009 285);
+    color: var(--pyro-text-muted);
     font: inherit;
     font-size: 12px;
     padding: 4px 12px;
     cursor: pointer;
     transition: background 120ms ease-out, color 120ms ease-out;
 }
-.pyro-s-toggle-btn + .pyro-s-toggle-btn { border-left: 1px solid oklch(27% 0.017 285); }
+.pyro-s-toggle-btn + .pyro-s-toggle-btn { border-left: 1px solid var(--pyro-surface-border); }
 @media (hover: hover) and (pointer: fine) {
-    .pyro-s-toggle-btn:not(.active):hover { color: oklch(82% 0.007 285); }
+    .pyro-s-toggle-btn:not(.active):hover { color: var(--pyro-tooltip-text); }
 }
 .pyro-s-toggle-btn.active {
     background: ${BAND_COLOR.excellent};
     color: oklch(18% 0 0);
 }
-.pyro-s-section-note { display: flex; align-items: flex-start; gap: 5px; font-size: 10px; line-height: 1.4; color: oklch(57% 0.008 285); margin-bottom: 6px; }
+.pyro-s-section-note { display: flex; align-items: flex-start; gap: 5px; font-size: 10px; line-height: 1.4; color: var(--pyro-text-muted); margin-bottom: 6px; }
 .pyro-s-section-note > svg { width: 10px; height: 10px; flex-shrink: 0; margin-top: 1px; }
-.pyro-s-section-note strong { color: oklch(88% 0.006 95); font-weight: normal; }
+.pyro-s-section-note span strong { color: var(--pyro-tooltip-text); font-weight: normal; }
 .pyro-s-section-note a { color: ${BAND_COLOR.excellent}; text-decoration: none; display: inline-flex; align-items: center; gap: 3px; }
 .pyro-s-section-note a:hover { text-decoration: underline; }
 .pyro-s-section-note a svg { width: 10px; height: 10px; flex-shrink: 0; }
-.pyro-s-missing-header { font-size: 10px; color: oklch(40% 0.007 285); margin: 8px 0 4px; }
-.pyro-s-missing-list { font-size: 10px; color: oklch(46% 0.008 285); padding-left: 14px; margin: 0; }
+.pyro-s-missing-header { font-size: 10px; color: var(--pyro-text-muted); margin: 8px 0 4px; }
+.pyro-s-missing-list { font-size: 10px; color: var(--pyro-text-muted); padding-left: 14px; margin: 0; }
 `;
   document.head.appendChild(style);
 }
@@ -418,7 +418,10 @@ function buildPricesTab(ctx: SettingsCtx, panel: HTMLElement): HTMLElement {
   const actionGroup = el("div", "pyro-s-group");
   const actionRow = el("div", "pyro-s-refresh-row");
 
-  const resetBtn = el("button", "pyro-s-btn pyro-s-btn-danger") as HTMLButtonElement;
+  const resetBtn = el(
+    "button",
+    "pyro-s-btn pyro-s-btn-danger",
+  ) as HTMLButtonElement;
   resetBtn.type = "button";
   resetBtn.innerHTML = `${ICON_RESET}<span>Reset</span>`;
   if (!hasManualOverrides && !hasApiPrices) resetBtn.disabled = true;

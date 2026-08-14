@@ -21,12 +21,26 @@ export function injectPopoverStyles(): void {
   style.id = "pyro-popover-styles";
   style.textContent = `
 .pyro-popover-wrap {
-    --pyro-tooltip-bg: oklch(24% 0 0);
-    --pyro-tooltip-border: oklch(30% 0 0);
-    --pyro-tooltip-shadow: oklch(12% 0.01 260 / 0.55);
+    /* Thin-divider color only (tab bar, settings divider) -- the panel/button/arrow borders use
+       Torn's own --mini-profile-border shorthand directly instead. */
+    --pyro-tooltip-border: color-mix(in oklch, var(--crimes-outcomeDivider-color, oklch(30% 0 0)) 75%, black 25%);
+    --pyro-tooltip-text: var(--crimes-baseText-color, oklch(82% 0.007 285));
+    /* Pulled partway toward the base text color -- the raw subtleSubText-color is too washed
+       out for inactive tab labels / default button text, especially in light mode. */
+    --pyro-text-muted: color-mix(in oklch, var(--crimes-subtleSubText-color, oklch(58% 0.012 285)) 55%, var(--crimes-baseText-color, oklch(82% 0.007 285)) 45%);
+    --pyro-success: var(--crimes-stats-successes-color, #6d6);
+    --pyro-danger: var(--crimes-stats-criticalFails-color, #c66);
+    --pyro-danger-bg: color-mix(in oklch, var(--pyro-danger) 16%, var(--pyro-surface));
+    --pyro-danger-border: color-mix(in oklch, var(--pyro-danger) 45%, var(--pyro-surface));
+    --pyro-danger-bg-hover: color-mix(in oklch, var(--pyro-danger) 26%, var(--pyro-surface));
     --pyro-tooltip-radius: 8px;
     --pyro-tooltip-arrow-size: 12px;
     --pyro-popover-btn-size: 24px;
+    /* Surface used for dropdowns/inputs/buttons -- kept as a mix off Torn's own tooltip bg
+       so those still read as a distinct "sunken" layer against the panel. */
+    --pyro-surface: color-mix(in oklch, var(--tooltip-bg-color, oklch(24% 0 0)) 85%, black 15%);
+    --pyro-surface-hover: color-mix(in oklch, var(--pyro-surface) 78%, white 22%);
+    --pyro-surface-border: color-mix(in oklch, var(--pyro-surface) 55%, white 45%);
     position: relative;
     display: inline-flex;
     align-items: center;
@@ -35,8 +49,8 @@ export function injectPopoverStyles(): void {
     width: var(--pyro-popover-btn-size);
     height: var(--pyro-popover-btn-size);
     padding: 0;
-    background: color-mix(in oklch, var(--pyro-tooltip-bg) 86%, black);
-    border: 1px solid var(--pyro-tooltip-border);
+    border: 1px solid #fff;
+    border: var(--mini-profile-border);
     color: #ff8a3d;
     cursor: pointer;
     border-radius: var(--pyro-tooltip-radius);
@@ -49,7 +63,7 @@ export function injectPopoverStyles(): void {
     transition: transform 100ms ease-out, background 120ms ease-out, color 120ms ease-out;
 }
 @media (hover: hover) and (pointer: fine) {
-    .pyro-popover-btn:hover { background: color-mix(in oklch, var(--pyro-tooltip-bg) 94%, white 6%); color: oklch(96% 0.012 95); }
+    .pyro-popover-btn:hover { background: color-mix(in oklch, var(--tooltip-bg-color, oklch(24% 0 0)) 94%, white 6%); color: var(--pyro-tooltip-text); }
 }
 .pyro-popover-btn:active { transform: scale(0.94); }
 .pyro-popover-panel {
@@ -57,13 +71,14 @@ export function injectPopoverStyles(): void {
     top: calc(100% + 10px);
     right: 0;
     z-index: 9999;
-    background: var(--pyro-tooltip-bg);
-    color: oklch(96% 0.012 95);
-    border: 1px solid var(--pyro-tooltip-border);
+    background: var(--tooltip-bg-color) 0 0 no-repeat;
+    color: var(--pyro-tooltip-text);
+    border: 1px solid #fff;
+    border: var(--mini-profile-border);
+    box-shadow: var(--mini-profile-box-shadow);
     border-radius: var(--pyro-tooltip-radius);
     min-width: 290px;
     max-width: 360px;
-    box-shadow: 0 2px 8px var(--pyro-tooltip-shadow);
     overflow: visible;
     transform-origin: calc(100% - (var(--pyro-popover-btn-size) / 2)) calc(0px - var(--pyro-tooltip-arrow-size));
     transform: scale(0.95);
@@ -72,6 +87,9 @@ export function injectPopoverStyles(): void {
     pointer-events: none;
     transition: transform 150ms ease-out, opacity 150ms ease-out, visibility 0ms linear 150ms;
 }
+.pyro-popover-panel svg {
+  filter: initial !important;
+}
 .pyro-popover-panel::before {
     content: '';
     position: absolute;
@@ -79,8 +97,9 @@ export function injectPopoverStyles(): void {
     right: calc((var(--pyro-popover-btn-size) / 2) - (var(--pyro-tooltip-arrow-size) / 2));
     width: var(--pyro-tooltip-arrow-size);
     height: var(--pyro-tooltip-arrow-size);
-    background: var(--pyro-tooltip-bg);
-    border: 1px solid var(--pyro-tooltip-border);
+    background: var(--tooltip-bg-color);
+    border: 1px solid #fff;
+    border: var(--mini-profile-border);
     transform: rotate(45deg);
     box-sizing: border-box;
     border-right: none;

@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        Balaclava Tooltip
 // @namespace   https://greasyfork.org/en/users/942572-yukio-mizsima
-// @version     1.0.7
+// @version     1.0.11
 // @description Universal tooltip injection for userscript managers
 // @author      Yukio [906148]
 // @license     MIT
@@ -59,8 +59,20 @@
       setupGlobalListeners();
       scanAll();
       setupMutationObserver();
+    }, syncTornThemeVars = function() {
+      if (!host) return;
+      const source = document.querySelector(".crimes-app");
+      if (!source) return;
+      const computed = getComputedStyle(source);
+      for (const name of TORN_THEME_VARS) {
+        const value = computed.getPropertyValue(name).trim();
+        if (value) host.style.setProperty(name, value);
+      }
     }, ensureHost = function() {
-      if (host) return;
+      if (host) {
+        syncTornThemeVars();
+        return;
+      }
       host = document.createElement("div");
       host.id = HOST_ID;
       host.style.position = "fixed";
@@ -78,13 +90,14 @@
       styleEl = document.createElement("style");
       styleEl.textContent = buildStylesheet();
       shadow.appendChild(styleEl);
+      syncTornThemeVars();
     }, buildStylesheet = function() {
       const visualConfig = getVisualConfig();
       return `
       .balaclava-tooltip {
-        --balaclava-tooltip-bg: ${THEME_TOKENS.dark.bgColor};
-        --balaclava-tooltip-text: ${THEME_TOKENS.dark.textColor};
-        --balaclava-tooltip-border: ${THEME_TOKENS.dark.borderColor};
+        --balaclava-tooltip-bg: var(--tooltip-bg-color, ${THEME_TOKENS.dark.bgColor});
+        --balaclava-tooltip-text: var(--crimes-baseText-color, ${THEME_TOKENS.dark.textColor});
+        --balaclava-tooltip-border: color-mix(in oklch, var(--crimes-outcomeDivider-color, ${THEME_TOKENS.dark.borderColor}) 75%, black 25%);
         --balaclava-tooltip-shadow: ${THEME_TOKENS.dark.shadowColor};
         --balaclava-tooltip-border-size: ${visualConfig.borderSize};
         --balaclava-tooltip-border-radius: ${visualConfig.borderRadius};
@@ -99,7 +112,6 @@
         box-sizing: border-box;
         max-width: ${visualConfig.maxWidth};
         color: var(--balaclava-tooltip-text);
-        color-scheme: dark;
         font-family: "Fjalla One", sans-serif;
         font-size: ${visualConfig.fontSize};
         line-height: 1.5;
@@ -110,6 +122,7 @@
         border: var(--balaclava-tooltip-border-size) solid var(--balaclava-tooltip-border);
         border-radius: var(--balaclava-tooltip-border-radius);
         box-shadow: 0 2px 8px var(--balaclava-tooltip-shadow);
+        box-shadow: var(--mini-profile-box-shadow);
         transition:
           opacity ${visualConfig.animationDuration} ease-out;
       }
@@ -135,30 +148,6 @@
         border-style: solid;
         border-width: var(--balaclava-tooltip-arrow-border-size);
         border-radius: var(--balaclava-tooltip-arrow-border-radius);
-      }
-
-      .balaclava-tooltip.is-theme-system,
-      .balaclava-tooltip.is-theme-dark {
-        --balaclava-tooltip-bg: ${THEME_TOKENS.dark.bgColor};
-        --balaclava-tooltip-text: ${THEME_TOKENS.dark.textColor};
-        --balaclava-tooltip-border: ${THEME_TOKENS.dark.borderColor};
-        --balaclava-tooltip-shadow: ${THEME_TOKENS.dark.shadowColor};
-        color-scheme: dark;
-      }
-
-      .balaclava-tooltip.is-theme-light {
-        --balaclava-tooltip-bg: ${THEME_TOKENS.light.bgColor};
-        --balaclava-tooltip-text: ${THEME_TOKENS.light.textColor};
-        --balaclava-tooltip-border: ${THEME_TOKENS.light.borderColor};
-        --balaclava-tooltip-shadow: ${THEME_TOKENS.light.shadowColor};
-        color-scheme: light;
-      }
-
-      .balaclava-tooltip.is-theme-custom {
-        --balaclava-tooltip-bg: ${config.bgColor};
-        --balaclava-tooltip-text: ${config.textColor};
-        --balaclava-tooltip-border: ${config.borderColor};
-        --balaclava-tooltip-shadow: ${config.shadowColor};
       }
 
       .balaclava-tooltip.is-top .balaclava-tooltip-arrow {
@@ -211,16 +200,6 @@
 
       .balaclava-tooltip.is-exiting {
         opacity: 0;
-      }
-
-      @media (prefers-color-scheme: light) {
-        .balaclava-tooltip.is-theme-system {
-          --balaclava-tooltip-bg: ${THEME_TOKENS.light.bgColor};
-          --balaclava-tooltip-text: ${THEME_TOKENS.light.textColor};
-          --balaclava-tooltip-border: ${THEME_TOKENS.light.borderColor};
-          --balaclava-tooltip-shadow: ${THEME_TOKENS.light.shadowColor};
-          color-scheme: light;
-        }
       }
 
       @media (prefers-reduced-motion: reduce) {
@@ -738,7 +717,7 @@
         value && typeof value === "object" && typeof value.nodeType === "number" && typeof value.cloneNode === "function"
       );
     };
-    init2 = init, ensureHost2 = ensureHost, buildStylesheet2 = buildStylesheet, getVisualConfig2 = getVisualConfig, exposeApi2 = exposeApi, setupGlobalListeners2 = setupGlobalListeners, handleKeydown2 = handleKeydown, scheduleScrollUpdate2 = scheduleScrollUpdate, updateVisibleTooltip2 = updateVisibleTooltip, showTooltip2 = showTooltip, hideTooltip2 = hideTooltip, configure2 = configure, attachTooltip2 = attachTooltip, resolveContent2 = resolveContent, scanAll2 = scanAll, scanElement2 = scanElement, setupMutationObserver2 = setupMutationObserver, scanAddedNode2 = scanAddedNode, cleanupRemovedNode2 = cleanupRemovedNode, cleanupAttachedElement2 = cleanupAttachedElement, refreshElement2 = refreshElement, renderTooltip2 = renderTooltip, setupIntersectionObserver2 = setupIntersectionObserver, cleanupIntersectionObserver2 = cleanupIntersectionObserver, cleanupTooltip2 = cleanupTooltip, destroy2 = destroy, trackTargetPosition2 = trackTargetPosition, updateTooltipPosition2 = updateTooltipPosition, getInitialPosition2 = getInitialPosition, applyFallback2 = applyFallback, clampToViewport2 = clampToViewport, updateArrowOffset2 = updateArrowOffset, calculatePercentageOffset2 = calculatePercentageOffset, sameRect2 = sameRect, normalizePosition2 = normalizePosition, normalizeTheme2 = normalizeTheme, normalizeOptionalTheme2 = normalizeOptionalTheme, getTooltipClassName2 = getTooltipClassName, refreshTooltipClassName2 = refreshTooltipClassName, isConfigKey2 = isConfigKey, isElement2 = isElement, isNode2 = isNode;
+    init2 = init, syncTornThemeVars2 = syncTornThemeVars, ensureHost2 = ensureHost, buildStylesheet2 = buildStylesheet, getVisualConfig2 = getVisualConfig, exposeApi2 = exposeApi, setupGlobalListeners2 = setupGlobalListeners, handleKeydown2 = handleKeydown, scheduleScrollUpdate2 = scheduleScrollUpdate, updateVisibleTooltip2 = updateVisibleTooltip, showTooltip2 = showTooltip, hideTooltip2 = hideTooltip, configure2 = configure, attachTooltip2 = attachTooltip, resolveContent2 = resolveContent, scanAll2 = scanAll, scanElement2 = scanElement, setupMutationObserver2 = setupMutationObserver, scanAddedNode2 = scanAddedNode, cleanupRemovedNode2 = cleanupRemovedNode, cleanupAttachedElement2 = cleanupAttachedElement, refreshElement2 = refreshElement, renderTooltip2 = renderTooltip, setupIntersectionObserver2 = setupIntersectionObserver, cleanupIntersectionObserver2 = cleanupIntersectionObserver, cleanupTooltip2 = cleanupTooltip, destroy2 = destroy, trackTargetPosition2 = trackTargetPosition, updateTooltipPosition2 = updateTooltipPosition, getInitialPosition2 = getInitialPosition, applyFallback2 = applyFallback, clampToViewport2 = clampToViewport, updateArrowOffset2 = updateArrowOffset, calculatePercentageOffset2 = calculatePercentageOffset, sameRect2 = sameRect, normalizePosition2 = normalizePosition, normalizeTheme2 = normalizeTheme, normalizeOptionalTheme2 = normalizeOptionalTheme, getTooltipClassName2 = getTooltipClassName, refreshTooltipClassName2 = refreshTooltipClassName, isConfigKey2 = isConfigKey, isElement2 = isElement, isNode2 = isNode;
     const DEFAULT_CONFIG = Object.freeze({
       theme: "dark",
       bgColor: THEME_TOKENS.dark.bgColor,
@@ -782,6 +761,14 @@
     const tooltipId = `balaclava-tt-${Math.random().toString(36).slice(2, 11)}`;
     let attachedElements = /* @__PURE__ */ new WeakMap();
     const attachmentDetachers = /* @__PURE__ */ new Set();
+    const TORN_THEME_VARS = [
+      "--crimes-crimeOption-bgColor",
+      "--crimes-outcomeDivider-color",
+      "--crimes-baseText-color",
+      "--tooltip-bg-color",
+      "--mini-profile-border",
+      "--mini-profile-box-shadow"
+    ];
     exposeApi();
     if (document.readyState === "loading") {
       readyController = new AbortController();
@@ -798,6 +785,7 @@
     }
   }
   var init2;
+  var syncTornThemeVars2;
   var ensureHost2;
   var buildStylesheet2;
   var getVisualConfig2;

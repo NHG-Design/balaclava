@@ -169,8 +169,39 @@ if (!rootWindow[API_NAME]?.version) {
     setupMutationObserver();
   }
 
+  /**
+   * Torn's page theme variables (--crimes-*) are scoped to `.crimes-app`, not `:root`/`body` --
+   * and `host` is deliberately appended straight to `document.body` (outside that subtree, so
+   * fixed-position tracking isn't at the mercy of `.crimes-app`'s own layout/transforms). That
+   * means the shadow tree never inherits them naturally, shadow DOM or not. Resolve the live
+   * values from an actual `.crimes-app` element and forward them as inline custom properties on
+   * `host` itself, which the shadow tree *does* inherit from directly.
+   */
+  const TORN_THEME_VARS = [
+    "--crimes-crimeOption-bgColor",
+    "--crimes-outcomeDivider-color",
+    "--crimes-baseText-color",
+    "--tooltip-bg-color",
+    "--mini-profile-border",
+    "--mini-profile-box-shadow",
+  ];
+
+  function syncTornThemeVars(): void {
+    if (!host) return;
+    const source = document.querySelector<HTMLElement>(".crimes-app");
+    if (!source) return;
+    const computed = getComputedStyle(source);
+    for (const name of TORN_THEME_VARS) {
+      const value = computed.getPropertyValue(name).trim();
+      if (value) host.style.setProperty(name, value);
+    }
+  }
+
   function ensureHost(): void {
-    if (host) return;
+    if (host) {
+      syncTornThemeVars();
+      return;
+    }
 
     host = document.createElement("div");
     host.id = HOST_ID;
@@ -191,6 +222,7 @@ if (!rootWindow[API_NAME]?.version) {
     styleEl = document.createElement("style");
     styleEl.textContent = buildStylesheet();
     shadow.appendChild(styleEl);
+    syncTornThemeVars();
   }
 
   function buildStylesheet(): string {
@@ -198,9 +230,9 @@ if (!rootWindow[API_NAME]?.version) {
 
     return `
       .balaclava-tooltip {
-        --balaclava-tooltip-bg: ${THEME_TOKENS.dark.bgColor};
-        --balaclava-tooltip-text: ${THEME_TOKENS.dark.textColor};
-        --balaclava-tooltip-border: ${THEME_TOKENS.dark.borderColor};
+        --balaclava-tooltip-bg: var(--tooltip-bg-color, ${THEME_TOKENS.dark.bgColor});
+        --balaclava-tooltip-text: var(--crimes-baseText-color, ${THEME_TOKENS.dark.textColor});
+        --balaclava-tooltip-border: color-mix(in oklch, var(--crimes-outcomeDivider-color, ${THEME_TOKENS.dark.borderColor}) 75%, black 25%);
         --balaclava-tooltip-shadow: ${THEME_TOKENS.dark.shadowColor};
         --balaclava-tooltip-border-size: ${visualConfig.borderSize};
         --balaclava-tooltip-border-radius: ${visualConfig.borderRadius};
@@ -215,7 +247,6 @@ if (!rootWindow[API_NAME]?.version) {
         box-sizing: border-box;
         max-width: ${visualConfig.maxWidth};
         color: var(--balaclava-tooltip-text);
-        color-scheme: dark;
         font-family: "Fjalla One", sans-serif;
         font-size: ${visualConfig.fontSize};
         line-height: 1.5;
@@ -226,6 +257,7 @@ if (!rootWindow[API_NAME]?.version) {
         border: var(--balaclava-tooltip-border-size) solid var(--balaclava-tooltip-border);
         border-radius: var(--balaclava-tooltip-border-radius);
         box-shadow: 0 2px 8px var(--balaclava-tooltip-shadow);
+        box-shadow: var(--mini-profile-box-shadow);
         transition:
           opacity ${visualConfig.animationDuration} ease-out;
       }
@@ -251,30 +283,6 @@ if (!rootWindow[API_NAME]?.version) {
         border-style: solid;
         border-width: var(--balaclava-tooltip-arrow-border-size);
         border-radius: var(--balaclava-tooltip-arrow-border-radius);
-      }
-
-      .balaclava-tooltip.is-theme-system,
-      .balaclava-tooltip.is-theme-dark {
-        --balaclava-tooltip-bg: ${THEME_TOKENS.dark.bgColor};
-        --balaclava-tooltip-text: ${THEME_TOKENS.dark.textColor};
-        --balaclava-tooltip-border: ${THEME_TOKENS.dark.borderColor};
-        --balaclava-tooltip-shadow: ${THEME_TOKENS.dark.shadowColor};
-        color-scheme: dark;
-      }
-
-      .balaclava-tooltip.is-theme-light {
-        --balaclava-tooltip-bg: ${THEME_TOKENS.light.bgColor};
-        --balaclava-tooltip-text: ${THEME_TOKENS.light.textColor};
-        --balaclava-tooltip-border: ${THEME_TOKENS.light.borderColor};
-        --balaclava-tooltip-shadow: ${THEME_TOKENS.light.shadowColor};
-        color-scheme: light;
-      }
-
-      .balaclava-tooltip.is-theme-custom {
-        --balaclava-tooltip-bg: ${config.bgColor};
-        --balaclava-tooltip-text: ${config.textColor};
-        --balaclava-tooltip-border: ${config.borderColor};
-        --balaclava-tooltip-shadow: ${config.shadowColor};
       }
 
       .balaclava-tooltip.is-top .balaclava-tooltip-arrow {
@@ -327,16 +335,6 @@ if (!rootWindow[API_NAME]?.version) {
 
       .balaclava-tooltip.is-exiting {
         opacity: 0;
-      }
-
-      @media (prefers-color-scheme: light) {
-        .balaclava-tooltip.is-theme-system {
-          --balaclava-tooltip-bg: ${THEME_TOKENS.light.bgColor};
-          --balaclava-tooltip-text: ${THEME_TOKENS.light.textColor};
-          --balaclava-tooltip-border: ${THEME_TOKENS.light.borderColor};
-          --balaclava-tooltip-shadow: ${THEME_TOKENS.light.shadowColor};
-          color-scheme: light;
-        }
       }
 
       @media (prefers-reduced-motion: reduce) {
