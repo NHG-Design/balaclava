@@ -1623,11 +1623,11 @@ export const SCENARIOS: Scenario[] = [
 
   {
     scenarioName: "Make a Killing",
-    payoutMin: 390_000,
+    payoutMin: 340_000,
     payoutMax: 480_000,
     actions: {
-      ignite: [{ resourceId: RESOURCE.LIGHTER, qty: 1 }],
       place: [{ resourceId: RESOURCE.KEROSENE, qty: 3 }],
+      ignite: [{ resourceId: RESOURCE.LIGHTER, qty: 1 }],
     },
   },
 
