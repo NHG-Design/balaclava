@@ -3,8 +3,17 @@ import { createClient } from '@libsql/client/web'
 import { SCENARIOS } from '../../../../data/scenarios'
 import { CATALOG, type ResourceId } from '../../../../data/catalog'
 
-const RATE_LIMIT_MAX = 5
+const RATE_LIMIT_MAX = 20
 const RATE_LIMIT_WINDOW_MINUTES = 60
+
+function formatRetryAfter(seconds: number): string {
+  if (seconds < 60) return `${seconds}s`
+  const minutes = Math.ceil(seconds / 60)
+  if (minutes < 60) return `${minutes} min`
+  const hours = Math.floor(minutes / 60)
+  const remMinutes = minutes % 60
+  return remMinutes > 0 ? `${hours}h ${remMinutes}min` : `${hours}h`
+}
 
 interface ActionItemPayload {
   resourceId: string
@@ -171,15 +180,28 @@ async function handler(request: Request, platform: App.Platform | undefined, cli
   const client = createClient({ url: dbUrl, authToken })
 
   const recent = await client.execute({
-    sql: `SELECT COUNT(*) as count FROM recipe_submissions WHERE submitter_ip = ? AND created_at >= datetime('now', ?)`,
+    sql: `SELECT COUNT(*) as count, MIN(created_at) as oldest FROM recipe_submissions WHERE submitter_ip = ? AND created_at >= datetime('now', ?)`,
     args: [clientIp, `-${RATE_LIMIT_WINDOW_MINUTES} minutes`],
   })
   const recentCount = Number(recent.rows[0]?.count ?? 0)
   if (recentCount >= RATE_LIMIT_MAX) {
-    return new Response(JSON.stringify({ error: 'Rate limit exceeded, try again later' }), {
-      status: 429,
-      headers: { 'Content-Type': 'application/json' },
-    })
+    const oldest = recent.rows[0]?.oldest
+    const oldestMs = typeof oldest === 'string' ? Date.parse(`${oldest.replace(' ', 'T')}Z`) : NaN
+    const retryAfterSeconds = Number.isFinite(oldestMs)
+      ? Math.max(0, Math.ceil((oldestMs + RATE_LIMIT_WINDOW_MINUTES * 60_000 - Date.now()) / 1000))
+      : RATE_LIMIT_WINDOW_MINUTES * 60
+    return new Response(
+      JSON.stringify({
+        error: `Rate limit exceeded: max ${RATE_LIMIT_MAX} submissions per ${RATE_LIMIT_WINDOW_MINUTES} minutes per IP. Try again in ${formatRetryAfter(retryAfterSeconds)}.`,
+        limit: RATE_LIMIT_MAX,
+        windowMinutes: RATE_LIMIT_WINDOW_MINUTES,
+        retryAfterSeconds,
+      }),
+      {
+        status: 429,
+        headers: { 'Content-Type': 'application/json', 'Retry-After': String(retryAfterSeconds) },
+      },
+    )
   }
 
   const { payload } = result
@@ -196,7 +218,8 @@ async function handler(request: Request, platform: App.Platform | undefined, cli
     ],
   })
 
-  return new Response(JSON.stringify({ ok: true }), {
+  const remaining = Math.max(0, RATE_LIMIT_MAX - (recentCount + 1))
+  return new Response(JSON.stringify({ ok: true, remaining, limit: RATE_LIMIT_MAX }), {
     status: 201,
     headers: { 'Content-Type': 'application/json' },
   })
