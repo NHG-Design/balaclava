@@ -11,7 +11,11 @@ import {
 import { fetchApiPrices } from "./api.js";
 import { SEL } from "./selectors.js";
 import { BAND_COLOR } from "./colors.js";
-import { el, txt, svgEl } from "./dom.js";
+import { el, txt, svgEl, injectStyleOnce } from "../../lib/shared-ui/dom.js";
+import { setIconStatus } from "../shared/status.js";
+import { checkboxCss } from "../shared/checkbox.js";
+import { buildButtonGroup } from "../shared/button-group.js";
+import { buildNumberInput } from "../shared/number-input.js";
 import { createPopover } from "./popover.js";
 import { buildSubmitTab, setPreselectedScenario } from "./submit-tab.js";
 import {
@@ -21,14 +25,9 @@ import {
   ICON_ARROW_RIGHT,
   ICON_FLAME,
   ICON_EXTERNAL_LINK,
-  ICON_CHECK_MASK_PATH,
   ICON_RESET,
   ICON_REFRESH,
 } from "./icons.js";
-
-const CHECKMARK_DATA_URI = `data:image/svg+xml,${encodeURIComponent(
-  `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="${ICON_CHECK_MASK_PATH}"/></svg>`,
-)}`;
 
 // ---------------------------------------------------------------------------
 // Context
@@ -93,13 +92,11 @@ export interface SettingsCtx {
 // ---------------------------------------------------------------------------
 
 function setOkStatus(statusEl: HTMLElement, message: string): void {
-  statusEl.innerHTML = ICON_CHECK;
-  statusEl.appendChild(txt(message));
+  setIconStatus(statusEl, ICON_CHECK, message);
 }
 
 function setErrStatus(statusEl: HTMLElement, message: string): void {
-  statusEl.innerHTML = ICON_X;
-  statusEl.appendChild(txt(message));
+  setIconStatus(statusEl, ICON_X, message);
 }
 
 // ---------------------------------------------------------------------------
@@ -107,25 +104,22 @@ function setErrStatus(statusEl: HTMLElement, message: string): void {
 // ---------------------------------------------------------------------------
 
 export function injectSettingsStyles(): void {
-  if (document.getElementById("pyro-settings-styles")) return;
-  const style = el("style");
-  style.id = "pyro-settings-styles";
-  style.textContent = `
+  injectStyleOnce("pyro-settings-styles", `
 .pyro-settings-wrap {
     margin-left: 8px;
 }
 #pyro-settings-panel {
-    --pyro-api-color: var(--pyro-success);
+    --pyro-api-color: var(--shared-success);
     --pyro-manual-color: #7af;
-    --pyro-db-color: var(--pyro-text-muted);
+    --pyro-db-color: var(--shared-text-muted);
 }
-.pyro-tab-bar { display: flex; border-bottom: 1px solid var(--pyro-tooltip-border); }
+.pyro-tab-bar { display: flex; border-bottom: 1px solid var(--shared-border); }
 .pyro-tab {
     flex: 1;
     background: none;
     border: none;
     border-bottom: 1px solid transparent;
-    color: var(--pyro-text-muted);
+    color: var(--shared-text-muted);
     cursor: pointer;
     padding: 8px 16px;
     font: inherit;
@@ -133,10 +127,10 @@ export function injectSettingsStyles(): void {
     transition: color 120ms ease-out;
 }
 @media (hover: hover) and (pointer: fine) {
-    .pyro-tab:hover { color: var(--pyro-tooltip-text); }
+    .pyro-tab:hover { color: var(--shared-text); }
 }
 .pyro-tab.active {
-    color: var(--pyro-tooltip-text);
+    color: var(--shared-text);
     border-bottom-color: ${BAND_COLOR.excellent};
     background: linear-gradient(0deg, color-mix(in oklch, ${BAND_COLOR.excellent} 20%, transparent 80%), transparent 55%);
 }
@@ -144,19 +138,19 @@ export function injectSettingsStyles(): void {
 .pyro-tab-content>div { display: flex; flex-direction: column; gap: 14px; }
 .pyro-tab-content::-webkit-scrollbar { width: 3px; }
 .pyro-tab-content::-webkit-scrollbar-track { background: transparent; }
-.pyro-tab-content::-webkit-scrollbar-thumb { background: var(--pyro-text-muted); border-radius: 2px; }
+.pyro-tab-content::-webkit-scrollbar-thumb { background: var(--shared-text-muted); border-radius: 2px; }
 .pyro-s-group { display: flex; flex-direction: column; gap: 8px; }
 .pyro-s-group-title {
     font-size: 14px;
     text-transform: uppercase;
-    color: var(--pyro-text-muted);
+    color: var(--shared-text-muted);
 }
 .pyro-s-rows { display: flex; flex-direction: column; gap: 4px; }
 .pyro-s-row { display: flex; align-items: center; gap: 6px; }
 .pyro-s-label {
     flex: 1;
     font-size: 12px;
-    color: var(--pyro-text-muted);
+    color: var(--shared-text-muted);
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -164,9 +158,9 @@ export function injectSettingsStyles(): void {
 }
 .pyro-s-input {
     width: 76px;
-    background: var(--pyro-surface);
-    border: 1px solid var(--pyro-surface-border);
-    color: var(--pyro-tooltip-text);
+    background: var(--shared-surface);
+    border: 1px solid var(--shared-surface-border);
+    color: var(--shared-text);
     font-size: 12px;
     padding: 3px 5px;
     border-radius: 5px;
@@ -177,15 +171,15 @@ export function injectSettingsStyles(): void {
 .pyro-s-input::-webkit-inner-spin-button,
 .pyro-s-input::-webkit-outer-spin-button { -webkit-appearance: none; }
 .pyro-s-input:focus-visible { outline: none; border-color: ${BAND_COLOR.excellent}; }
-.pyro-s-input.from-api   { border-color: var(--pyro-success); color: var(--pyro-success); }
+.pyro-s-input.from-api   { border-color: var(--shared-success); color: var(--shared-success); }
 .pyro-s-input.overridden { border-color: #48a; color: #7af; }
-.pyro-s-divider { border: none; border-top: 1px solid var(--pyro-tooltip-border); margin: 8px 0; }
+.pyro-s-divider { border: none; border-top: 1px solid var(--shared-border); margin: 8px 0; }
 .pyro-s-key-row { display: flex; gap: 6px; margin-bottom: 6px; }
 .pyro-s-key-input {
     flex: 1;
-    background: var(--pyro-surface);
-    border: 1px solid var(--pyro-surface-border);
-    color: var(--pyro-tooltip-text);
+    background: var(--shared-surface);
+    border: 1px solid var(--shared-surface-border);
+    color: var(--shared-text);
     font-size: 12px;
     padding: 4px 6px;
     border-radius: 5px;
@@ -201,9 +195,9 @@ export function injectSettingsStyles(): void {
     gap: 4px;
     box-sizing: border-box;
     min-height: 24px;
-    background: var(--pyro-surface);
-    border: 1px solid var(--pyro-surface-border);
-    color: var(--pyro-text-muted);
+    background: var(--shared-surface);
+    border: 1px solid var(--shared-surface-border);
+    color: var(--shared-text-muted);
     cursor: pointer;
     border-radius: 5px;
     padding: 4px 9px;
@@ -213,38 +207,38 @@ export function injectSettingsStyles(): void {
 }
 .pyro-s-btn svg { width: 12px; height: 12px; flex-shrink: 0; }
 @media (hover: hover) and (pointer: fine) {
-    .pyro-s-btn:hover:not(:disabled) { background: var(--pyro-surface-hover); color: var(--pyro-tooltip-text); }
+    .pyro-s-btn:hover:not(:disabled) { background: var(--shared-surface-hover); color: var(--shared-text); }
 }
 .pyro-s-btn:active:not(:disabled) { transform: scale(0.97); }
 .pyro-s-btn:disabled { opacity: 0.28; cursor: default; }
 .pyro-s-btn-danger {
-    background: var(--pyro-danger-bg);
-    border-color: var(--pyro-danger-border);
-    color: var(--pyro-danger);
+    background: var(--shared-danger-bg);
+    border-color: var(--shared-danger-border);
+    color: var(--shared-danger);
 }
 @media (hover: hover) and (pointer: fine) {
-    .pyro-s-btn-danger:hover:not(:disabled) { background: var(--pyro-danger-bg-hover); color: var(--pyro-danger); }
+    .pyro-s-btn-danger:hover:not(:disabled) { background: var(--shared-danger-bg-hover); color: var(--shared-danger); }
 }
 .pyro-s-status {
     font-size: 10px;
     min-height: 13px;
-    color: var(--pyro-text-muted);
+    color: var(--shared-text-muted);
     display: flex;
     align-items: center;
     gap: 2px;
     flex-wrap: nowrap;
 }
 .pyro-s-status.ok  { color: ${BAND_COLOR.good}; }
-.pyro-s-status.err { color: var(--pyro-danger); }
+.pyro-s-status.err { color: var(--shared-danger); }
 .pyro-s-status:empty { display: none; }
 .pyro-s-refresh-row { display: flex; align-items: center; gap: 8px; }
-.pyro-s-timestamp { font-size: 10px; color: var(--pyro-text-muted); }
+.pyro-s-timestamp { font-size: 10px; color: var(--shared-text-muted); }
 .pyro-s-check-row {
     display: flex;
     align-items: center;
     gap: 7px;
     font-size: 12px;
-    color: var(--pyro-text-muted);
+    color: var(--shared-text-muted);
     cursor: pointer;
     user-select: none;
 }
@@ -252,76 +246,42 @@ export function injectSettingsStyles(): void {
     opacity: 0.4;
     cursor: not-allowed;
 }
-.pyro-s-checkbox {
-    appearance: none;
-    -webkit-appearance: none;
-    box-sizing: border-box;
-    width: 15px;
-    height: 15px;
-    margin: 0;
-    flex-shrink: 0;
-    border: 1px solid var(--pyro-surface-border);
-    border-radius: 3px;
-    background: var(--pyro-surface);
-    accent-color: ${BAND_COLOR.excellent};
-    cursor: pointer;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-}
-.pyro-s-checkbox:checked {
-    background: ${BAND_COLOR.excellent};
-    border-color: ${BAND_COLOR.excellent};
-}
-.pyro-s-checkbox:checked::after {
-    content: "";
-    width: 9px;
-    height: 9px;
-    background-color: oklch(18% 0 0);
-    -webkit-mask-image: url("${CHECKMARK_DATA_URI}");
-    mask-image: url("${CHECKMARK_DATA_URI}");
-    -webkit-mask-size: contain;
-    mask-size: contain;
-    -webkit-mask-repeat: no-repeat;
-    mask-repeat: no-repeat;
-}
-.pyro-s-checkbox:focus-visible { outline: 2px solid ${BAND_COLOR.excellent}; outline-offset: 1px; }
+${checkboxCss("pyro-s-checkbox", BAND_COLOR.excellent)}
 .pyro-s-checkbox:disabled, .pyro-s-check-row--disabled .pyro-s-checkbox { cursor: not-allowed; }
 .pyro-s-toggle-group {
     display: inline-flex;
     align-self: flex-start;
-    border: 1px solid var(--pyro-surface-border);
+    border: 1px solid var(--shared-surface-border);
     border-radius: 5px;
     overflow: hidden;
 }
 .pyro-s-toggle-btn {
-    background: var(--pyro-surface);
+    background: var(--shared-surface);
     border: none;
-    color: var(--pyro-text-muted);
+    color: var(--shared-text-muted);
     font: inherit;
     font-size: 12px;
     padding: 4px 12px;
     cursor: pointer;
     transition: background 120ms ease-out, color 120ms ease-out;
 }
-.pyro-s-toggle-btn + .pyro-s-toggle-btn { border-left: 1px solid var(--pyro-surface-border); }
+.pyro-s-toggle-btn + .pyro-s-toggle-btn { border-left: 1px solid var(--shared-surface-border); }
 @media (hover: hover) and (pointer: fine) {
-    .pyro-s-toggle-btn:not(.active):hover { color: var(--pyro-tooltip-text); }
+    .pyro-s-toggle-btn:not(.active):hover { color: var(--shared-text); }
 }
 .pyro-s-toggle-btn.active {
     background: ${BAND_COLOR.excellent};
     color: oklch(18% 0 0);
 }
-.pyro-s-section-note { display: flex; align-items: flex-start; gap: 5px; font-size: 10px; line-height: 1.4; color: var(--pyro-text-muted); margin-bottom: 6px; }
+.pyro-s-section-note { display: flex; align-items: flex-start; gap: 5px; font-size: 10px; line-height: 1.4; color: var(--shared-text-muted); margin-bottom: 6px; }
 .pyro-s-section-note > svg { width: 10px; height: 10px; flex-shrink: 0; margin-top: 1px; }
-.pyro-s-section-note span strong { color: var(--pyro-tooltip-text); font-weight: normal; }
+.pyro-s-section-note span strong { color: var(--shared-text); font-weight: normal; }
 .pyro-s-section-note a { color: ${BAND_COLOR.excellent}; text-decoration: none; display: inline-flex; align-items: center; gap: 3px; }
 .pyro-s-section-note a:hover { text-decoration: underline; }
 .pyro-s-section-note a svg { width: 10px; height: 10px; flex-shrink: 0; }
-.pyro-s-missing-header { font-size: 10px; color: var(--pyro-text-muted); margin: 8px 0 4px; }
-.pyro-s-missing-list { font-size: 10px; color: var(--pyro-text-muted); padding-left: 14px; margin: 0; }
-`;
-  document.head.appendChild(style);
+.pyro-s-missing-header { font-size: 10px; color: var(--shared-text-muted); margin: 8px 0 4px; }
+.pyro-s-missing-list { font-size: 10px; color: var(--shared-text-muted); padding-left: 14px; margin: 0; }
+`);
 }
 
 // ---------------------------------------------------------------------------
@@ -524,22 +484,7 @@ function thresholdInput(
   lbl.appendChild(txt(before.trim()));
   lbl.appendChild(svgEl(ICON_ARROW_RIGHT));
   lbl.appendChild(txt((after ?? "").trim()));
-  const input = el("input", "pyro-s-input");
-  input.type = "number";
-  input.min = "0";
-  input.value = String(getVal());
-  input.addEventListener("blur", () => {
-    const val = Math.round(parseFloat(input.value));
-    if (!isNaN(val) && val >= 0) {
-      setVal(val);
-      input.value = String(val);
-    } else {
-      input.value = String(getVal());
-    }
-  });
-  input.addEventListener("keydown", (e) => {
-    if (e.key === "Enter") input.blur();
-  });
+  const input = buildNumberInput(getVal, setVal, { className: "pyro-s-input" });
   row.appendChild(lbl);
   row.appendChild(input);
   return row;
@@ -637,32 +582,17 @@ function toggleGroupRow<T extends string>(
 
   const labelId = `pyro-s-toggle-label-${idSlug}`;
 
-  const wrap = el("div", "pyro-s-toggle-group");
-  wrap.setAttribute("role", "group");
+  const { wrap } = buildButtonGroup(
+    {
+      wrapClassName: "pyro-s-toggle-group",
+      btnClassName: "pyro-s-toggle-btn",
+      ariaGroup: true,
+    },
+    options,
+    getVal,
+    setVal,
+  );
   wrap.setAttribute("aria-labelledby", labelId);
-
-  const buttons = options.map(({ value, label: btnLabel }) => {
-    const btn = el("button", "pyro-s-toggle-btn") as HTMLButtonElement;
-    btn.type = "button";
-    btn.textContent = btnLabel;
-    btn.addEventListener("click", () => {
-      setVal(value);
-      sync();
-    });
-    wrap.appendChild(btn);
-    return { value, btn };
-  });
-
-  function sync(): void {
-    const current = getVal();
-    for (const { value, btn } of buttons) {
-      const active = value === current;
-      btn.setAttribute("aria-pressed", String(active));
-      btn.classList.toggle("active", active);
-    }
-  }
-
-  sync();
   row.appendChild(wrap);
 
   const lbl = el("span", "pyro-s-label");
@@ -918,32 +848,30 @@ function buildTabBar(
   activeId: string,
   onSwitch: (id: TabId) => void,
 ): HTMLElement {
-  const tabs: Array<{ id: TabId; label: string }> = [
-    { id: "prices", label: "Prices" },
-    { id: "thresholds", label: "Thresholds" },
-    { id: "visuals", label: "Visuals" },
-    { id: "api", label: "API" },
-    { id: "submit", label: "Submit" },
+  const tabs: Array<{ value: TabId; label: string }> = [
+    { value: "prices", label: "Prices" },
+    { value: "thresholds", label: "Thresholds" },
+    { value: "visuals", label: "Visuals" },
+    { value: "api", label: "API" },
+    { value: "submit", label: "Submit" },
   ];
-  const bar = el("div", "pyro-tab-bar");
-  for (const tab of tabs) {
-    const btn = el(
-      "button",
-      tab.id === activeId ? "pyro-tab active" : "pyro-tab",
-    );
-    btn.type = "button";
-    btn.textContent = tab.label;
-    btn.dataset.tab = tab.id;
-    btn.addEventListener("click", () => {
-      bar
-        .querySelectorAll(".pyro-tab")
-        .forEach((b) => b.classList.remove("active"));
-      btn.classList.add("active");
-      onSwitch(tab.id);
-    });
-    bar.appendChild(btn);
-  }
-  return bar;
+  let current = activeId as TabId;
+  const { wrap } = buildButtonGroup(
+    {
+      wrapClassName: "pyro-tab-bar",
+      btnClassName: "pyro-tab",
+      onButtonCreated(btn, option) {
+        btn.dataset.tab = option.value;
+      },
+    },
+    tabs,
+    () => current,
+    (id) => {
+      current = id;
+      onSwitch(id);
+    },
+  );
+  return wrap;
 }
 
 function rerenderTab(

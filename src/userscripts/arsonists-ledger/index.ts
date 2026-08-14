@@ -26,7 +26,7 @@ import {
 } from "./settings.js";
 import { injectPopoverStyles } from "./popover.js";
 import { ICON_FLAME, ICON_MATCHSTICK, ICON_SEND } from "./icons.js";
-import { el, txt } from "./dom.js";
+import { el, txt, injectStyleOnce } from "../../lib/shared-ui/dom.js";
 import { CATALOG_UPDATED, type ResourceId } from "../../data/catalog.js";
 import {
   BUILDINGS,
@@ -505,10 +505,9 @@ function scheduleScenarioRefresh(): void {
 // Highlight CSS
 // ---------------------------------------------------------------------------
 function injectHighlightStyles(): void {
-  if (document.getElementById("pyro-highlight-styles")) return;
-  const style = document.createElement("style");
-  style.id = "pyro-highlight-styles";
-  style.textContent = `
+  injectStyleOnce(
+    "pyro-highlight-styles",
+    `
         .pyro-label { display: none; }
 
         :root { --pyro-bar-x: -5px; }
@@ -605,9 +604,9 @@ function injectHighlightStyles(): void {
             justify-content: center;
             width: 14px;
             height: 14px;
-            border: 1px solid #444;
+            border: 1px solid var(--crimes-outcomeDivider-color, #444);
             border-radius: 50%;
-            background: #333;
+            background: var(--crimes-crimeOption-bgColor, #222);
             position: absolute;
             right: -3px;
             top: -5px;
@@ -624,12 +623,10 @@ function injectHighlightStyles(): void {
             padding: 0;
             box-sizing: border-box;
             border-radius: 50%;
-            background: #333;
             color: #ff8a3d;
-            filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.5));
         }
-    `;
-  document.head.appendChild(style);
+    `,
+  );
 }
 
 // ---------------------------------------------------------------------------

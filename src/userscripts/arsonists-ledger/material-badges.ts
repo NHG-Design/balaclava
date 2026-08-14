@@ -6,7 +6,8 @@ import {
   type IgniterInfo,
 } from "../../data/arson-information.js";
 import { BAND_COLOR } from "./colors.js";
-import { el } from "./dom.js";
+import { el, injectStyleOnce } from "../../lib/shared-ui/dom.js";
+import { buildSegmentTrack } from "../shared/segment-bar.js";
 import { SEL } from "./selectors.js";
 import { buildStatTooltipGroup } from "./tooltip.js";
 
@@ -207,12 +208,13 @@ function buildBarRow(bar: BarSpec, tooltip: TooltipCtx): HTMLElement {
   label.textContent = bar.label;
   row.appendChild(label);
 
-  const track = el("div", "pyro-mat-bar-track");
-  for (let i = 0; i < SEGMENT_COUNT; i++) {
-    const seg = el("span", "pyro-mat-bar-seg");
-    if (i < filledCount) seg.style.background = color;
-    track.appendChild(seg);
-  }
+  const track = buildSegmentTrack(
+    "pyro-mat-bar-track",
+    "pyro-mat-bar-seg",
+    SEGMENT_COUNT,
+    filledCount,
+    color,
+  );
   row.appendChild(track);
 
   const value = el("span", "pyro-mat-bar-value");
@@ -328,10 +330,7 @@ export function resetMaterialBadges(): void {
 }
 
 export function injectMaterialBadgeStyles(): void {
-  if (document.getElementById("pyro-mat-badge-styles")) return;
-  const style = document.createElement("style");
-  style.id = "pyro-mat-badge-styles";
-  style.textContent = `
+  injectStyleOnce("pyro-mat-badge-styles", `
         .pyro-mat-badges {
             display: flex;
             flex-direction: column;
@@ -382,6 +381,5 @@ export function injectMaterialBadgeStyles(): void {
                 display: block;
             }
         }
-    `;
-  document.head.appendChild(style);
+    `);
 }

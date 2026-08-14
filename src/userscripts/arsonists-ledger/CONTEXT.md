@@ -36,7 +36,6 @@ Arsonist's Ledger is a userscript that augments Torn's Arson crime page. It scan
 | `selectors.ts` | `SEL.*` — all Torn DOM selectors, isolating obfuscated-class coupling |
 | `api.ts` | Fetches live prices from Torn's `v2/torn/items` endpoint |
 | `colors.ts` | `BAND_COLOR` palette shared by highlight CSS, settings, and tooltip |
-| `dom.ts` | Generic `el`/`txt`/`svgEl` DOM helpers |
 | `icons.ts` | Inline SVG icon constants for the settings panel |
 | `scenarios.ts` | Standalone bootstrap exposing `window.BalaclavaScenarios` — not part of `index.ts`'s import graph |
 | `engine.test.ts` | Unit tests for `engine.ts` and `CATALOG`/`SCENARIOS` data integrity |

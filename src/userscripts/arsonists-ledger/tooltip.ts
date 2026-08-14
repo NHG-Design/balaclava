@@ -2,7 +2,8 @@ import { CATALOG, RESOURCE } from "../../data/catalog.js";
 import type { ActionItem, ActionTime } from "../../data/scenarios.js";
 import { type RankedScenario, type PriceMap, formatPpn } from "./engine.js";
 import { BAND_COLOR } from "./colors.js";
-import { el } from "./dom.js";
+import { el } from "../../lib/shared-ui/dom.js";
+import { buildSegmentTrack } from "../shared/segment-bar.js";
 
 function row(label: string, value: string, highlight?: boolean): HTMLElement {
   const div = el("div", "pyro-tt-row");
@@ -214,15 +215,14 @@ function buildStatBar(bar: StatBar): HTMLElement {
   const ratio = (bar.value - bar.min) / (bar.max - bar.min);
   const color = barColor(ratio, bar.invert);
 
-  const track = el("div", "pyro-stat-bar-track");
-  for (let i = 0; i < segCount; i++) {
-    const seg = el("span", "pyro-stat-bar-seg");
-    if (i < filled) {
-      seg.classList.add("pyro-stat-bar-seg--filled");
-      seg.style.background = color;
-    }
-    track.appendChild(seg);
-  }
+  const track = buildSegmentTrack(
+    "pyro-stat-bar-track",
+    "pyro-stat-bar-seg",
+    segCount,
+    filled,
+    color,
+    "pyro-stat-bar-seg--filled",
+  );
   wrap.appendChild(track);
 
   const labels = el("div", "pyro-stat-bar-labels");
@@ -328,7 +328,7 @@ function buildStatTooltipStyles(): string {
     flex: 1;
     height: 5px;
     border-radius: 2px;
-    background: oklch(40% 0 0);
+    background: color-mix(in srgb, var(--balaclava-tooltip-text) 50%, var(--balaclava-tooltip-bg) 50%);
 }
 .pyro-stat-bar-labels {
     display: flex;

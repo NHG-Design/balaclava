@@ -13,3 +13,11 @@ export function svgEl(html: string): SVGSVGElement {
     tmp.innerHTML = html;
     return tmp.firstElementChild as SVGSVGElement;
 }
+
+export function injectStyleOnce(id: string, css: string): void {
+    if (document.getElementById(id)) return;
+    const style = document.createElement('style');
+    style.id = id;
+    style.textContent = css;
+    document.head.appendChild(style);
+}

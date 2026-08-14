@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        Torn Arsonist's Ledger
 // @namespace   https://greasyfork.org/en/users/942572-yukio-mizsima
-// @version     1.2.13
+// @version     1.2.14
 // @description Arson profit-per-nerve calculator and scenario guide for Torn's Crimes page
 // @icon        https://www.google.com/s2/favicons?sz=64&domain=torn.com
 // @author      Yukio [906148]
@@ -2557,6 +2557,146 @@
     }
   ];
 
+  // src/lib/shared-ui/theme-bridge.ts
+  var TORN_THEME_VAR_NAMES = [
+    "--crimes-crimeOption-bgColor",
+    "--crimes-outcomeDivider-color",
+    "--crimes-baseText-color",
+    "--crimes-subtleSubText-color",
+    "--crimes-stats-successes-color",
+    "--crimes-stats-criticalFails-color",
+    "--tooltip-bg-color",
+    "--mini-profile-border",
+    "--mini-profile-box-shadow"
+  ];
+  function syncTornThemeVars(target, sourceSelector = ".crimes-app") {
+    const source = document.querySelector(sourceSelector);
+    if (!source) return;
+    const computed = getComputedStyle(source);
+    for (const name of TORN_THEME_VAR_NAMES) {
+      const value = computed.getPropertyValue(name).trim();
+      if (value) target.style.setProperty(name, value);
+    }
+  }
+
+  // src/lib/shared-ui/anchor-position.ts
+  var DEFAULTS = {
+    offset: 8,
+    safezone: 8,
+    arrowOffsetMin: 10,
+    arrowOffsetMax: 90,
+    arrowOffsetDefault: 50,
+    viewportWidth: 0,
+    viewportHeight: 0
+  };
+  function initialPosition(targetRect, side, panelWidth, panelHeight, offset) {
+    const targetCenterX = targetRect.left + targetRect.width / 2;
+    const targetCenterY = targetRect.top + targetRect.height / 2;
+    switch (side) {
+      case "top":
+        return { top: targetRect.top - panelHeight - offset, left: targetCenterX - panelWidth / 2 };
+      case "left":
+        return { top: targetCenterY - panelHeight / 2, left: targetRect.left - panelWidth - offset };
+      case "right":
+        return { top: targetCenterY - panelHeight / 2, left: targetRect.right + offset };
+      case "bottom":
+      default:
+        return { top: targetRect.bottom + offset, left: targetCenterX - panelWidth / 2 };
+    }
+  }
+  function applyFallback(position, side, targetRect, panelWidth, panelHeight, offset, safezone, viewportWidth, viewportHeight) {
+    switch (side) {
+      case "bottom": {
+        const alternateTop = targetRect.top - panelHeight - offset;
+        if (position.top + panelHeight > viewportHeight - safezone && alternateTop >= safezone) {
+          position.top = alternateTop;
+          return "top";
+        }
+        break;
+      }
+      case "top": {
+        const alternateTop = targetRect.bottom + offset;
+        if (position.top < safezone && alternateTop + panelHeight <= viewportHeight - safezone) {
+          position.top = alternateTop;
+          return "bottom";
+        }
+        break;
+      }
+      case "left": {
+        const alternateLeft = targetRect.right + offset;
+        if (position.left < safezone && alternateLeft + panelWidth <= viewportWidth - safezone) {
+          position.left = alternateLeft;
+          return "right";
+        }
+        break;
+      }
+      case "right": {
+        const alternateLeft = targetRect.left - panelWidth - offset;
+        if (position.left + panelWidth > viewportWidth - safezone && alternateLeft >= safezone) {
+          position.left = alternateLeft;
+          return "left";
+        }
+        break;
+      }
+    }
+    return side;
+  }
+  function clampToViewport(position, panelWidth, panelHeight, safezone, viewportWidth, viewportHeight) {
+    const maxTop = Math.max(safezone, viewportHeight - panelHeight - safezone);
+    const maxLeft = Math.max(safezone, viewportWidth - panelWidth - safezone);
+    return {
+      top: Math.max(safezone, Math.min(position.top, maxTop)),
+      left: Math.max(safezone, Math.min(position.left, maxLeft))
+    };
+  }
+  function percentageOffset(offset, dimension, min, max, fallback) {
+    if (!dimension) return fallback;
+    const percentage = offset / dimension * 100;
+    return Math.max(min, Math.min(max, percentage));
+  }
+  function computeAnchorPosition(targetRect, panelWidth, panelHeight, requestedSide, options = {}) {
+    const opts = { ...DEFAULTS, ...options };
+    const viewportWidth = opts.viewportWidth || window.innerWidth;
+    const viewportHeight = opts.viewportHeight || window.innerHeight;
+    const position = initialPosition(targetRect, requestedSide, panelWidth, panelHeight, opts.offset);
+    const side = applyFallback(
+      position,
+      requestedSide,
+      targetRect,
+      panelWidth,
+      panelHeight,
+      opts.offset,
+      opts.safezone,
+      viewportWidth,
+      viewportHeight
+    );
+    const original = { ...position };
+    const clamped = clampToViewport(position, panelWidth, panelHeight, opts.safezone, viewportWidth, viewportHeight);
+    let arrowOffsetPercent = opts.arrowOffsetDefault;
+    if (side === "top" || side === "bottom") {
+      if (original.left !== clamped.left) {
+        const targetCenterX = targetRect.left + targetRect.width / 2;
+        arrowOffsetPercent = percentageOffset(
+          targetCenterX - clamped.left,
+          panelWidth,
+          opts.arrowOffsetMin,
+          opts.arrowOffsetMax,
+          opts.arrowOffsetDefault
+        );
+      }
+    } else if (original.top !== clamped.top) {
+      const targetCenterY = targetRect.top + targetRect.height / 2;
+      arrowOffsetPercent = percentageOffset(
+        targetCenterY - clamped.top,
+        panelHeight,
+        opts.arrowOffsetMin,
+        opts.arrowOffsetMax,
+        opts.arrowOffsetDefault
+      );
+    }
+    return { top: clamped.top, left: clamped.left, side, arrowOffsetPercent };
+  }
+
   // src/userscripts/balaclava-tooltip/index.ts
   var API_NAME = "BalaclavaTooltip";
   var HOST_ID = "balaclava-tooltip-host";
@@ -2604,18 +2744,12 @@
       setupGlobalListeners();
       scanAll();
       setupMutationObserver();
-    }, syncTornThemeVars = function() {
+    }, syncTornThemeVars2 = function() {
       if (!host) return;
-      const source = document.querySelector(".crimes-app");
-      if (!source) return;
-      const computed = getComputedStyle(source);
-      for (const name of TORN_THEME_VARS) {
-        const value = computed.getPropertyValue(name).trim();
-        if (value) host.style.setProperty(name, value);
-      }
+      syncTornThemeVars(host);
     }, ensureHost = function() {
       if (host) {
-        syncTornThemeVars();
+        syncTornThemeVars2();
         return;
       }
       host = document.createElement("div");
@@ -2635,7 +2769,7 @@
       styleEl = document.createElement("style");
       styleEl.textContent = buildStylesheet();
       shadow.appendChild(styleEl);
-      syncTornThemeVars();
+      syncTornThemeVars2();
     }, buildStylesheet = function() {
       const visualConfig = getVisualConfig();
       return `
@@ -3123,118 +3257,26 @@
       positionTrackingId = requestAnimationFrame(trackTargetPosition);
     }, updateTooltipPosition = function() {
       if (!targetRect || !tooltipEl) return;
-      preferredPosition = requestedPosition;
-      arrowOffset = ARROW_OFFSET_DEFAULT;
       const rect = tooltipEl.getBoundingClientRect();
-      const tooltipWidth = rect.width;
-      const tooltipHeight = rect.height;
-      const position = getInitialPosition(tooltipWidth, tooltipHeight);
-      applyFallback(position, tooltipWidth, tooltipHeight);
-      clampToViewport(position, tooltipWidth, tooltipHeight);
-      tooltipEl.style.top = `${Math.round(position.top)}px`;
-      tooltipEl.style.left = `${Math.round(position.left)}px`;
+      const result = computeAnchorPosition(
+        targetRect,
+        rect.width,
+        rect.height,
+        requestedPosition,
+        {
+          offset: config.offset,
+          safezone: SAFEZONE,
+          arrowOffsetMin: ARROW_OFFSET_MIN,
+          arrowOffsetMax: ARROW_OFFSET_MAX,
+          arrowOffsetDefault: ARROW_OFFSET_DEFAULT
+        }
+      );
+      preferredPosition = result.side;
+      arrowOffset = showArrow ? result.arrowOffsetPercent : ARROW_OFFSET_DEFAULT;
+      tooltipEl.style.top = `${Math.round(result.top)}px`;
+      tooltipEl.style.left = `${Math.round(result.left)}px`;
       tooltipEl.style.setProperty("--arrow-offset", `${arrowOffset}%`);
       refreshTooltipClassName();
-    }, getInitialPosition = function(tooltipWidth, tooltipHeight) {
-      if (!targetRect) return { top: SAFEZONE, left: SAFEZONE };
-      const targetCenterX = targetRect.left + targetRect.width / 2;
-      const targetCenterY = targetRect.top + targetRect.height / 2;
-      switch (preferredPosition) {
-        case "top":
-          return {
-            top: targetRect.top - tooltipHeight - config.offset,
-            left: targetCenterX - tooltipWidth / 2
-          };
-        case "left":
-          return {
-            top: targetCenterY - tooltipHeight / 2,
-            left: targetRect.left - tooltipWidth - config.offset
-          };
-        case "right":
-          return {
-            top: targetCenterY - tooltipHeight / 2,
-            left: targetRect.right + config.offset
-          };
-        case "bottom":
-        default:
-          return {
-            top: targetRect.bottom + config.offset,
-            left: targetCenterX - tooltipWidth / 2
-          };
-      }
-    }, applyFallback = function(position, tooltipWidth, tooltipHeight) {
-      if (!targetRect) return;
-      const viewportWidth = window.innerWidth;
-      const viewportHeight = window.innerHeight;
-      switch (preferredPosition) {
-        case "bottom": {
-          const alternateTop = targetRect.top - tooltipHeight - config.offset;
-          if (position.top + tooltipHeight > viewportHeight - SAFEZONE && alternateTop >= SAFEZONE) {
-            position.top = alternateTop;
-            preferredPosition = "top";
-          }
-          break;
-        }
-        case "top": {
-          const alternateTop = targetRect.bottom + config.offset;
-          if (position.top < SAFEZONE && alternateTop + tooltipHeight <= viewportHeight - SAFEZONE) {
-            position.top = alternateTop;
-            preferredPosition = "bottom";
-          }
-          break;
-        }
-        case "left": {
-          const alternateLeft = targetRect.right + config.offset;
-          if (position.left < SAFEZONE && alternateLeft + tooltipWidth <= viewportWidth - SAFEZONE) {
-            position.left = alternateLeft;
-            preferredPosition = "right";
-          }
-          break;
-        }
-        case "right": {
-          const alternateLeft = targetRect.left - tooltipWidth - config.offset;
-          if (position.left + tooltipWidth > viewportWidth - SAFEZONE && alternateLeft >= SAFEZONE) {
-            position.left = alternateLeft;
-            preferredPosition = "left";
-          }
-          break;
-        }
-      }
-    }, clampToViewport = function(position, tooltipWidth, tooltipHeight) {
-      const original = { top: position.top, left: position.left };
-      const maxTop = Math.max(
-        SAFEZONE,
-        window.innerHeight - tooltipHeight - SAFEZONE
-      );
-      const maxLeft = Math.max(
-        SAFEZONE,
-        window.innerWidth - tooltipWidth - SAFEZONE
-      );
-      position.top = Math.max(SAFEZONE, Math.min(position.top, maxTop));
-      position.left = Math.max(SAFEZONE, Math.min(position.left, maxLeft));
-      if (showArrow) {
-        updateArrowOffset(original, position, tooltipWidth, tooltipHeight);
-      }
-    }, updateArrowOffset = function(original, clamped, tooltipWidth, tooltipHeight) {
-      if (!targetRect) return;
-      arrowOffset = ARROW_OFFSET_DEFAULT;
-      if (preferredPosition === "top" || preferredPosition === "bottom") {
-        if (original.left !== clamped.left) {
-          const targetCenterX = targetRect.left + targetRect.width / 2;
-          const offset = targetCenterX - clamped.left;
-          arrowOffset = calculatePercentageOffset(offset, tooltipWidth);
-        }
-        return;
-      }
-      if (original.top !== clamped.top) {
-        const targetCenterY = targetRect.top + targetRect.height / 2;
-        const offset = targetCenterY - clamped.top;
-        arrowOffset = calculatePercentageOffset(offset, tooltipHeight);
-      }
-    }, calculatePercentageOffset = function(offset, dimension) {
-      if (!dimension) return ARROW_OFFSET_DEFAULT;
-      const percentage = offset / dimension * 100;
-      return Math.max(ARROW_OFFSET_MIN, Math.min(ARROW_OFFSET_MAX, percentage));
     }, sameRect = function(left, right) {
       if (!left || !right) return false;
       return left.top === right.top && left.right === right.right && left.bottom === right.bottom && left.left === right.left && left.width === right.width && left.height === right.height;
@@ -3262,7 +3304,7 @@
         value && typeof value === "object" && typeof value.nodeType === "number" && typeof value.cloneNode === "function"
       );
     };
-    init2 = init, syncTornThemeVars2 = syncTornThemeVars, ensureHost2 = ensureHost, buildStylesheet2 = buildStylesheet, getVisualConfig2 = getVisualConfig, exposeApi2 = exposeApi, setupGlobalListeners2 = setupGlobalListeners, handleKeydown2 = handleKeydown, scheduleScrollUpdate2 = scheduleScrollUpdate, updateVisibleTooltip2 = updateVisibleTooltip, showTooltip2 = showTooltip, hideTooltip2 = hideTooltip, configure2 = configure, attachTooltip2 = attachTooltip, resolveContent2 = resolveContent, scanAll2 = scanAll, scanElement2 = scanElement, setupMutationObserver2 = setupMutationObserver, scanAddedNode2 = scanAddedNode, cleanupRemovedNode2 = cleanupRemovedNode, cleanupAttachedElement2 = cleanupAttachedElement, refreshElement2 = refreshElement, renderTooltip2 = renderTooltip, setupIntersectionObserver2 = setupIntersectionObserver, cleanupIntersectionObserver2 = cleanupIntersectionObserver, cleanupTooltip2 = cleanupTooltip, destroy2 = destroy, trackTargetPosition2 = trackTargetPosition, updateTooltipPosition2 = updateTooltipPosition, getInitialPosition2 = getInitialPosition, applyFallback2 = applyFallback, clampToViewport2 = clampToViewport, updateArrowOffset2 = updateArrowOffset, calculatePercentageOffset2 = calculatePercentageOffset, sameRect2 = sameRect, normalizePosition2 = normalizePosition, normalizeTheme2 = normalizeTheme, normalizeOptionalTheme2 = normalizeOptionalTheme, getTooltipClassName2 = getTooltipClassName, refreshTooltipClassName2 = refreshTooltipClassName, isConfigKey2 = isConfigKey, isElement2 = isElement, isNode2 = isNode;
+    init2 = init, syncTornThemeVars3 = syncTornThemeVars2, ensureHost2 = ensureHost, buildStylesheet2 = buildStylesheet, getVisualConfig2 = getVisualConfig, exposeApi2 = exposeApi, setupGlobalListeners2 = setupGlobalListeners, handleKeydown2 = handleKeydown, scheduleScrollUpdate2 = scheduleScrollUpdate, updateVisibleTooltip2 = updateVisibleTooltip, showTooltip2 = showTooltip, hideTooltip2 = hideTooltip, configure2 = configure, attachTooltip2 = attachTooltip, resolveContent2 = resolveContent, scanAll2 = scanAll, scanElement2 = scanElement, setupMutationObserver2 = setupMutationObserver, scanAddedNode2 = scanAddedNode, cleanupRemovedNode2 = cleanupRemovedNode, cleanupAttachedElement2 = cleanupAttachedElement, refreshElement2 = refreshElement, renderTooltip2 = renderTooltip, setupIntersectionObserver2 = setupIntersectionObserver, cleanupIntersectionObserver2 = cleanupIntersectionObserver, cleanupTooltip2 = cleanupTooltip, destroy2 = destroy, trackTargetPosition2 = trackTargetPosition, updateTooltipPosition2 = updateTooltipPosition, sameRect2 = sameRect, normalizePosition2 = normalizePosition, normalizeTheme2 = normalizeTheme, normalizeOptionalTheme2 = normalizeOptionalTheme, getTooltipClassName2 = getTooltipClassName, refreshTooltipClassName2 = refreshTooltipClassName, isConfigKey2 = isConfigKey, isElement2 = isElement, isNode2 = isNode;
     const DEFAULT_CONFIG = Object.freeze({
       theme: "dark",
       bgColor: THEME_TOKENS.dark.bgColor,
@@ -3306,14 +3348,6 @@
     const tooltipId = `balaclava-tt-${Math.random().toString(36).slice(2, 11)}`;
     let attachedElements = /* @__PURE__ */ new WeakMap();
     const attachmentDetachers = /* @__PURE__ */ new Set();
-    const TORN_THEME_VARS = [
-      "--crimes-crimeOption-bgColor",
-      "--crimes-outcomeDivider-color",
-      "--crimes-baseText-color",
-      "--tooltip-bg-color",
-      "--mini-profile-border",
-      "--mini-profile-box-shadow"
-    ];
     exposeApi();
     if (document.readyState === "loading") {
       readyController = new AbortController();
@@ -3330,7 +3364,7 @@
     }
   }
   var init2;
-  var syncTornThemeVars2;
+  var syncTornThemeVars3;
   var ensureHost2;
   var buildStylesheet2;
   var getVisualConfig2;
@@ -3358,11 +3392,6 @@
   var destroy2;
   var trackTargetPosition2;
   var updateTooltipPosition2;
-  var getInitialPosition2;
-  var applyFallback2;
-  var clampToViewport2;
-  var updateArrowOffset2;
-  var calculatePercentageOffset2;
   var sameRect2;
   var normalizePosition2;
   var normalizeTheme2;
@@ -3446,7 +3475,7 @@
     unknown: "#666"
   };
 
-  // src/userscripts/arsonists-ledger/dom.ts
+  // src/lib/shared-ui/dom.ts
   function el(tag, className) {
     const e = document.createElement(tag);
     if (className) e.className = className;
@@ -3459,6 +3488,27 @@
     const tmp = document.createElement("div");
     tmp.innerHTML = html;
     return tmp.firstElementChild;
+  }
+  function injectStyleOnce(id, css) {
+    if (document.getElementById(id)) return;
+    const style = document.createElement("style");
+    style.id = id;
+    style.textContent = css;
+    document.head.appendChild(style);
+  }
+
+  // src/userscripts/shared/segment-bar.ts
+  function buildSegmentTrack(trackClassName, segClassName, count, filled, color, filledClassName) {
+    const track = el("div", trackClassName);
+    for (let i = 0; i < count; i++) {
+      const seg = el("span", segClassName);
+      if (i < filled) {
+        if (filledClassName) seg.classList.add(filledClassName);
+        seg.style.background = color;
+      }
+      track.appendChild(seg);
+    }
+    return track;
   }
 
   // src/userscripts/arsonists-ledger/tooltip.ts
@@ -3609,15 +3659,14 @@
     const filled = bar.value - bar.min + 1;
     const ratio = (bar.value - bar.min) / (bar.max - bar.min);
     const color = barColor(ratio, bar.invert);
-    const track = el("div", "pyro-stat-bar-track");
-    for (let i = 0; i < segCount; i++) {
-      const seg = el("span", "pyro-stat-bar-seg");
-      if (i < filled) {
-        seg.classList.add("pyro-stat-bar-seg--filled");
-        seg.style.background = color;
-      }
-      track.appendChild(seg);
-    }
+    const track = buildSegmentTrack(
+      "pyro-stat-bar-track",
+      "pyro-stat-bar-seg",
+      segCount,
+      filled,
+      color,
+      "pyro-stat-bar-seg--filled"
+    );
     wrap.appendChild(track);
     const labels = el("div", "pyro-stat-bar-labels");
     const low = el("span", "pyro-stat-bar-label");
@@ -3700,7 +3749,7 @@
     flex: 1;
     height: 5px;
     border-radius: 2px;
-    background: oklch(40% 0 0);
+    background: color-mix(in srgb, var(--balaclava-tooltip-text) 50%, var(--balaclava-tooltip-bg) 50%);
 }
 .pyro-stat-bar-labels {
     display: flex;
@@ -3933,37 +3982,142 @@
     }
   }
 
+  // src/userscripts/shared/status.ts
+  function setIconStatus(el2, icon, message) {
+    el2.innerHTML = icon;
+    el2.appendChild(txt(message));
+  }
+
+  // src/userscripts/shared/checkbox.ts
+  var CHECK_MASK_PATH = "M9 16.2l-3.5-3.5-1.4 1.4L9 19 20 8l-1.4-1.4z";
+  var CHECKMARK_DATA_URI = `data:image/svg+xml,${encodeURIComponent(
+    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="${CHECK_MASK_PATH}"/></svg>`
+  )}`;
+  function checkboxCss(className, accentColor) {
+    return `
+.${className} {
+    appearance: none;
+    -webkit-appearance: none;
+    box-sizing: border-box;
+    width: 15px;
+    height: 15px;
+    margin: 0;
+    flex-shrink: 0;
+    border: 1px solid var(--shared-surface-border);
+    border-radius: 3px;
+    background: var(--shared-surface);
+    accent-color: ${accentColor};
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+.${className}:checked {
+    background: ${accentColor};
+    border-color: ${accentColor};
+}
+.${className}:checked::after {
+    content: "";
+    width: 9px;
+    height: 9px;
+    background-color: oklch(18% 0 0);
+    -webkit-mask-image: url("${CHECKMARK_DATA_URI}");
+    mask-image: url("${CHECKMARK_DATA_URI}");
+    -webkit-mask-size: contain;
+    mask-size: contain;
+    -webkit-mask-repeat: no-repeat;
+    mask-repeat: no-repeat;
+}
+.${className}:focus-visible { outline: 2px solid ${accentColor}; outline-offset: 1px; }
+`;
+  }
+
+  // src/userscripts/shared/button-group.ts
+  function buildButtonGroup(config, options, getVal, onSelect) {
+    const activeClassName = config.activeClassName ?? "active";
+    const wrap = el("div", config.wrapClassName);
+    if (config.ariaGroup) wrap.setAttribute("role", "group");
+    const buttons = options.map((option) => {
+      const btn = el("button", config.btnClassName);
+      btn.type = "button";
+      btn.textContent = option.label;
+      config.onButtonCreated?.(btn, option);
+      btn.addEventListener("click", () => {
+        onSelect(option.value);
+        sync();
+      });
+      wrap.appendChild(btn);
+      return { value: option.value, btn };
+    });
+    function sync() {
+      const current = getVal();
+      for (const { value, btn } of buttons) {
+        const active = value === current;
+        if (config.ariaGroup) btn.setAttribute("aria-pressed", String(active));
+        btn.classList.toggle(activeClassName, active);
+      }
+    }
+    sync();
+    return { wrap, sync };
+  }
+
+  // src/userscripts/shared/number-input.ts
+  function buildNumberInput(getVal, setVal, options = {}) {
+    const min = options.min ?? 0;
+    const input = el("input", options.className ?? "");
+    input.type = "number";
+    input.min = String(min);
+    input.value = String(getVal());
+    input.addEventListener("blur", () => {
+      const val = Math.round(parseFloat(input.value));
+      if (!isNaN(val) && val >= min) {
+        setVal(val);
+        input.value = String(val);
+      } else {
+        input.value = String(getVal());
+      }
+    });
+    input.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") input.blur();
+    });
+    return input;
+  }
+
+  // src/lib/shared-ui/theme-tokens.ts
+  var FALLBACK = {
+    outcomeDivider: "oklch(30% 0 0)",
+    baseText: "oklch(82% 0.007 285)",
+    subtleSubText: "oklch(58% 0.012 285)",
+    successes: "#6d6",
+    criticalFails: "#c66",
+    tooltipBg: "oklch(24% 0 0)"
+  };
+  var SHARED_THEME_TOKENS_CSS = `
+    --shared-border: color-mix(in oklch, var(--crimes-outcomeDivider-color, ${FALLBACK.outcomeDivider}) 75%, black 25%);
+    --shared-text: var(--crimes-baseText-color, ${FALLBACK.baseText});
+    --shared-text-muted: color-mix(in oklch, var(--crimes-subtleSubText-color, ${FALLBACK.subtleSubText}) 55%, var(--crimes-baseText-color, ${FALLBACK.baseText}) 45%);
+    --shared-success: var(--crimes-stats-successes-color, ${FALLBACK.successes});
+    --shared-danger: var(--crimes-stats-criticalFails-color, ${FALLBACK.criticalFails});
+    --shared-bg: var(--tooltip-bg-color, ${FALLBACK.tooltipBg});
+    --shared-surface: color-mix(in oklch, var(--tooltip-bg-color, ${FALLBACK.tooltipBg}) 85%, black 15%);
+    --shared-surface-hover: color-mix(in oklch, var(--shared-surface) 78%, white 22%);
+    --shared-surface-border: color-mix(in oklch, var(--shared-surface) 55%, white 45%);
+    --shared-danger-bg: color-mix(in oklch, var(--shared-danger) 16%, var(--shared-surface));
+    --shared-danger-border: color-mix(in oklch, var(--shared-danger) 45%, var(--shared-surface));
+    --shared-danger-bg-hover: color-mix(in oklch, var(--shared-danger) 26%, var(--shared-surface));
+`;
+
   // src/userscripts/arsonists-ledger/popover.ts
   var stylesInjected = false;
   function injectPopoverStyles() {
-    if (stylesInjected || document.getElementById("pyro-popover-styles")) {
-      stylesInjected = true;
-      return;
-    }
-    const style = el("style");
-    style.id = "pyro-popover-styles";
-    style.textContent = `
+    if (stylesInjected) return;
+    stylesInjected = true;
+    injectStyleOnce("pyro-popover-styles", `
 .pyro-popover-wrap {
-    /* Thin-divider color only (tab bar, settings divider) -- the panel/button/arrow borders use
-       Torn's own --mini-profile-border shorthand directly instead. */
-    --pyro-tooltip-border: color-mix(in oklch, var(--crimes-outcomeDivider-color, oklch(30% 0 0)) 75%, black 25%);
-    --pyro-tooltip-text: var(--crimes-baseText-color, oklch(82% 0.007 285));
-    /* Pulled partway toward the base text color -- the raw subtleSubText-color is too washed
-       out for inactive tab labels / default button text, especially in light mode. */
-    --pyro-text-muted: color-mix(in oklch, var(--crimes-subtleSubText-color, oklch(58% 0.012 285)) 55%, var(--crimes-baseText-color, oklch(82% 0.007 285)) 45%);
-    --pyro-success: var(--crimes-stats-successes-color, #6d6);
-    --pyro-danger: var(--crimes-stats-criticalFails-color, #c66);
-    --pyro-danger-bg: color-mix(in oklch, var(--pyro-danger) 16%, var(--pyro-surface));
-    --pyro-danger-border: color-mix(in oklch, var(--pyro-danger) 45%, var(--pyro-surface));
-    --pyro-danger-bg-hover: color-mix(in oklch, var(--pyro-danger) 26%, var(--pyro-surface));
+    ${SHARED_THEME_TOKENS_CSS}
     --pyro-tooltip-radius: 8px;
     --pyro-tooltip-arrow-size: 12px;
     --pyro-popover-btn-size: 24px;
-    /* Surface used for dropdowns/inputs/buttons -- kept as a mix off Torn's own tooltip bg
-       so those still read as a distinct "sunken" layer against the panel. */
-    --pyro-surface: color-mix(in oklch, var(--tooltip-bg-color, oklch(24% 0 0)) 85%, black 15%);
-    --pyro-surface-hover: color-mix(in oklch, var(--pyro-surface) 78%, white 22%);
-    --pyro-surface-border: color-mix(in oklch, var(--pyro-surface) 55%, white 45%);
     position: relative;
     display: inline-flex;
     align-items: center;
@@ -3986,7 +4140,7 @@
     transition: transform 100ms ease-out, background 120ms ease-out, color 120ms ease-out;
 }
 @media (hover: hover) and (pointer: fine) {
-    .pyro-popover-btn:hover { background: color-mix(in oklch, var(--tooltip-bg-color, oklch(24% 0 0)) 94%, white 6%); color: var(--pyro-tooltip-text); }
+    .pyro-popover-btn:hover { background: color-mix(in oklch, var(--tooltip-bg-color, oklch(24% 0 0)) 94%, white 6%); color: var(--shared-text); }
 }
 .pyro-popover-btn:active { transform: scale(0.94); }
 .pyro-popover-panel {
@@ -3995,7 +4149,7 @@
     right: 0;
     z-index: 9999;
     background: var(--tooltip-bg-color) 0 0 no-repeat;
-    color: var(--pyro-tooltip-text);
+    color: var(--shared-text);
     border: 1px solid #fff;
     border: var(--mini-profile-border);
     box-shadow: var(--mini-profile-box-shadow);
@@ -4039,9 +4193,7 @@
 .pyro-popover-panel:not(.is-open) {
     transition: transform 100ms ease-out, opacity 100ms ease-out, visibility 0ms linear 100ms;
 }
-`;
-    document.head.appendChild(style);
-    stylesInjected = true;
+`);
   }
   function createPopover(opts) {
     injectPopoverStyles();
@@ -4109,7 +4261,6 @@
   var ICON_TRASH = `<svg ${S} width="12" height="12" style="vertical-align:middle">${BLANK}<path d="M4 7l16 0"/><path d="M10 11l0 6"/><path d="M14 11l0 6"/><path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12"/><path d="M9 7v-3a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v3"/></svg>`;
   var ICON_SEND = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M10 14l11 -11"/><path d="M21 3l-6.5 18a0.55 .55 0 0 1 -1 0l-3.5 -7l-7 -3.5a0.55 .55 0 0 1 0 -1l18 -6.5"/></svg>`;
   var ICON_CHEVRON_DOWN = `<svg ${S} width="16" height="16" aria-hidden="true">${BLANK}<path d="M6 9l6 6l6 -6"/></svg>`;
-  var ICON_CHECK_MASK_PATH = "M9 16.2l-3.5-3.5-1.4 1.4L9 19 20 8l-1.4-1.4z";
   var ICON_RESET = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M3.06 13a9 9 0 1 0 .49 -4.087" /><path d="M3 4.001v5h5" /><path d="M11 12a1 1 0 1 0 2 0a1 1 0 1 0 -2 0" /></svg>`;
   var ICON_REFRESH = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M20 11a8.1 8.1 0 0 0 -15.5 -2m-.5 -4v4h4" /><path d="M4 13a8.1 8.1 0 0 0 15.5 2m.5 4v-4h-4" /></svg>`;
 
@@ -4117,9 +4268,6 @@
   var SUBMIT_URL = "https://balaclava.app/api/arson/recipe-submissions";
   var TIME_PATTERN = /^(early|late|\d+(\.\d+)?(%|s))$/;
   var RATE_LIMIT_WARN_THRESHOLD = 5;
-  var CHECKMARK_DATA_URI = `data:image/svg+xml,${encodeURIComponent(
-    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="${ICON_CHECK_MASK_PATH}"/></svg>`
-  )}`;
   function countRecipeChanges(current, baseline) {
     let count = 0;
     if (current.payoutMin !== baseline.payoutMin || current.payoutMax !== baseline.payoutMax)
@@ -4236,28 +4384,25 @@
     }).catch(() => onDone({ ok: false, error: "Network error" }));
   }
   function injectSubmitTabStyles() {
-    if (document.getElementById("pyro-submit-tab-styles")) return;
-    const style = el("style");
-    style.id = "pyro-submit-tab-styles";
-    style.textContent = `
+    injectStyleOnce("pyro-submit-tab-styles", `
 .pyro-rc-groups { display: flex; flex-direction: column; gap: 16px; }
 .pyro-rc-group { display: flex; flex-direction: column; gap: 8px; }
 .pyro-rc-steps { display: flex; flex-direction: column; gap: 4px; }
-.pyro-rc-group-title { font-size: 12px; text-transform: uppercase; color: var(--pyro-text-muted); display: flex; align-items: center; justify-content: space-between; }
+.pyro-rc-group-title { font-size: 12px; text-transform: uppercase; color: var(--shared-text-muted); display: flex; align-items: center; justify-content: space-between; }
 .pyro-rc-payout-row { display: flex; gap: 6px; align-items: center; }
-.pyro-rc-divider { border: none; height: 1px; background: var(--pyro-tooltip-border); margin: 0; }
+.pyro-rc-divider { border: none; height: 1px; background: var(--shared-border); margin: 0; }
 .pyro-rc-input {
     box-sizing: border-box;
     min-height: 24px;
-    background: var(--pyro-surface);
-    border: 1px solid var(--pyro-surface-border);
-    color: var(--pyro-tooltip-text);
+    background: var(--shared-surface);
+    border: 1px solid var(--shared-surface-border);
+    color: var(--shared-text);
     font-size: 12px;
     padding: 4px 6px;
     border-radius: 5px;
 }
-.pyro-rc-input:focus-visible { outline: none; border-color: var(--pyro-success); }
-.pyro-rc-input.pyro-rc-err { border-color: var(--pyro-danger); }
+.pyro-rc-input:focus-visible { outline: none; border-color: var(--shared-success); }
+.pyro-rc-input.pyro-rc-err { border-color: var(--shared-danger); }
 .pyro-rc-payout-row .pyro-rc-input { width: 100%; text-align: right; }
 .pyro-rc-input[type=number] { -moz-appearance: textfield; }
 .pyro-rc-input[type=number]::-webkit-inner-spin-button,
@@ -4270,15 +4415,15 @@
     box-sizing: border-box;
     min-height: 24px;
     appearance: base-select;
-    background: var(--pyro-surface);
-    border: 1px solid var(--pyro-surface-border);
-    color: var(--pyro-tooltip-text);
+    background: var(--shared-surface);
+    border: 1px solid var(--shared-surface-border);
+    color: var(--shared-text);
     font-size: 12px;
     padding: 4px 6px;
     border-radius: 5px;
     transition: border-color 120ms ease-out;
 }
-.pyro-rc-select:focus-visible { outline: none; border-color: var(--pyro-success); }
+.pyro-rc-select:focus-visible { outline: none; border-color: var(--shared-success); }
 .pyro-rc-select::picker-icon { display: none; }
 .pyro-rc-select button {
     all: unset;
@@ -4290,51 +4435,51 @@
     box-sizing: border-box;
     cursor: pointer;
 }
-.pyro-rc-select-icon { display: flex; color: var(--pyro-text-muted); transition: transform 120ms ease-out; flex-shrink: 0; }
+.pyro-rc-select-icon { display: flex; color: var(--shared-text-muted); transition: transform 120ms ease-out; flex-shrink: 0; }
 .pyro-rc-select:open .pyro-rc-select-icon { transform: rotate(180deg); }
 .pyro-rc-select::picker(select) {
     appearance: base-select;
-    background: var(--pyro-surface);
-    border: 1px solid var(--pyro-surface-border);
+    background: var(--shared-surface);
+    border: 1px solid var(--shared-surface-border);
     border-radius: 6px;
     padding: 4px;
     box-shadow: 0 4px 14px oklch(12% 0.01 260 / 0.5);
     scrollbar-width: thin;
-    scrollbar-color: var(--pyro-text-muted) var(--pyro-surface);
+    scrollbar-color: var(--shared-text-muted) var(--shared-surface);
 }
 .pyro-rc-select::picker(select)::-webkit-scrollbar { width: 6px; }
-.pyro-rc-select::picker(select)::-webkit-scrollbar-track { background: var(--pyro-surface); }
+.pyro-rc-select::picker(select)::-webkit-scrollbar-track { background: var(--shared-surface); }
 .pyro-rc-select::picker(select)::-webkit-scrollbar-thumb {
-    background: var(--pyro-text-muted);
+    background: var(--shared-text-muted);
     border-radius: 3px;
 }
 .pyro-rc-select::picker(select)::-webkit-scrollbar-button {
     display: none;
     width: 0;
     height: 0;
-    background: var(--pyro-surface);
+    background: var(--shared-surface);
 }
-.pyro-rc-select::picker(select)::-webkit-scrollbar-corner { background: var(--pyro-surface); }
+.pyro-rc-select::picker(select)::-webkit-scrollbar-corner { background: var(--shared-surface); }
 .pyro-rc-select option {
     border-radius: 4px;
-    color: var(--pyro-tooltip-text);
+    color: var(--shared-text);
     font-size: 12px;
     display: flex;
     align-items: center;
 }
 @media (hover: hover) and (pointer: fine) {
-    .pyro-rc-select option:hover { background: var(--pyro-surface-hover); }
+    .pyro-rc-select option:hover { background: var(--shared-surface-hover); }
 }
 .pyro-rc-select option:checked {
-    background: color-mix(in oklch, var(--pyro-success) 22%, var(--pyro-surface));
-    color: var(--pyro-tooltip-text);
+    background: color-mix(in oklch, var(--shared-success) 22%, var(--shared-surface));
+    color: var(--shared-text);
 }
 .pyro-rc-select option::checkmark {
     content: "";
     display: inline-block;
     width: 16px;
     height: 16px;
-    background-color: var(--pyro-success);
+    background-color: var(--shared-success);
     -webkit-mask-image: url("${CHECKMARK_DATA_URI}");
     mask-image: url("${CHECKMARK_DATA_URI}");
     -webkit-mask-size: contain;
@@ -4343,7 +4488,7 @@
     mask-repeat: no-repeat;
 }
 .pyro-rc-select optgroup {
-    color: var(--pyro-text-muted);
+    color: var(--shared-text-muted);
     font-size: 11px;
     text-transform: uppercase;
 }
@@ -4358,17 +4503,17 @@
     max-height: 180px;
     overflow-y: auto;
     flex-direction: column;
-    background: var(--pyro-surface);
-    border: 1px solid var(--pyro-surface-border);
+    background: var(--shared-surface);
+    border: 1px solid var(--shared-surface-border);
     border-radius: 6px;
     padding: 4px;
     box-shadow: 0 4px 14px oklch(12% 0.01 260 / 0.5);
     scrollbar-width: thin;
-    scrollbar-color: var(--pyro-text-muted) var(--pyro-surface);
+    scrollbar-color: var(--shared-text-muted) var(--shared-surface);
 }
 .pyro-rc-combobox-list::-webkit-scrollbar { width: 6px; }
-.pyro-rc-combobox-list::-webkit-scrollbar-track { background: var(--pyro-surface); }
-.pyro-rc-combobox-list::-webkit-scrollbar-thumb { background: var(--pyro-text-muted); border-radius: 3px; }
+.pyro-rc-combobox-list::-webkit-scrollbar-track { background: var(--shared-surface); }
+.pyro-rc-combobox-list::-webkit-scrollbar-thumb { background: var(--shared-text-muted); border-radius: 3px; }
 .pyro-rc-combobox-item {
     all: unset;
     box-sizing: border-box;
@@ -4379,30 +4524,30 @@
     padding: 5px 8px;
     border-radius: 4px;
     font-size: 12px;
-    color: var(--pyro-tooltip-text);
+    color: var(--shared-text);
     cursor: pointer;
 }
 .pyro-rc-combobox-item.highlighted,
 .pyro-rc-combobox-item:hover {
-    background: var(--pyro-surface-hover);
+    background: var(--shared-surface-hover);
 }
 .pyro-rc-combobox-item.selected {
-    background: color-mix(in oklch, var(--pyro-success) 22%, var(--pyro-surface));
-    color: var(--pyro-tooltip-text);
+    background: color-mix(in oklch, var(--shared-success) 22%, var(--shared-surface));
+    color: var(--shared-text);
 }
 .pyro-rc-combobox-empty {
     padding: 6px 8px;
     font-size: 12px;
-    color: var(--pyro-text-muted);
+    color: var(--shared-text-muted);
 }
 
 .pyro-rc-icon-btn {
     box-sizing: border-box;
     min-height: 24px;
     min-width: 24px;
-    background: var(--pyro-danger-bg);
-    border: 1px solid var(--pyro-danger-border);
-    color: var(--pyro-danger);
+    background: var(--shared-danger-bg);
+    border: 1px solid var(--shared-danger-border);
+    color: var(--shared-danger);
     cursor: pointer;
     border-radius: 5px;
     padding: 4px 6px;
@@ -4412,7 +4557,7 @@
     flex-shrink: 0;
 }
 @media (hover: hover) and (pointer: fine) {
-    .pyro-rc-icon-btn:hover:not(:disabled) { background: var(--pyro-danger-bg-hover); color: var(--pyro-danger); }
+    .pyro-rc-icon-btn:hover:not(:disabled) { background: var(--shared-danger-bg-hover); color: var(--shared-danger); }
 }
 .pyro-rc-icon-btn:disabled { opacity: 0.28; cursor: default; }
 .pyro-rc-add-btn {
@@ -4420,7 +4565,7 @@
     min-height: 24px;
     background: none;
     border: none;
-    color: var(--pyro-text-muted);
+    color: var(--shared-text-muted);
     font-size: 11px;
     cursor: pointer;
     display: flex;
@@ -4428,53 +4573,20 @@
     gap: 3px;
     padding: 0;
 }
-@media (hover: hover) and (pointer: fine) { .pyro-rc-add-btn:hover { color: var(--pyro-tooltip-text); } }
-.pyro-rc-check-row { box-sizing: border-box; min-height: 24px; display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--pyro-text-muted); cursor: pointer; user-select: none; }
-.pyro-rc-toggle-body { display: flex; flex-direction: column; gap: 8px; padding-left: 4px; border-left: 2px solid var(--pyro-surface-border); }
+@media (hover: hover) and (pointer: fine) { .pyro-rc-add-btn:hover { color: var(--shared-text); } }
+.pyro-rc-check-row { box-sizing: border-box; min-height: 24px; display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--shared-text-muted); cursor: pointer; user-select: none; }
+.pyro-rc-toggle-body { display: flex; flex-direction: column; gap: 8px; padding-left: 4px; border-left: 2px solid var(--shared-surface-border); }
 .pyro-rc-time-row { display: flex; align-items: center; gap: 6px; }
 .pyro-rc-time-row .pyro-rc-input { flex: 1; }
-.pyro-rc-checkbox {
-    appearance: none;
-    -webkit-appearance: none;
-    box-sizing: border-box;
-    width: 15px;
-    height: 15px;
-    margin: 0;
-    flex-shrink: 0;
-    border: 1px solid var(--pyro-surface-border);
-    border-radius: 3px;
-    background: var(--pyro-surface);
-    accent-color: ${BAND_COLOR.excellent};
-    cursor: pointer;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-}
-.pyro-rc-checkbox:checked {
-    background: ${BAND_COLOR.excellent};
-    border-color: ${BAND_COLOR.excellent};
-}
-.pyro-rc-checkbox:checked::after {
-    content: "";
-    width: 9px;
-    height: 9px;
-    background-color: oklch(18% 0 0);
-    -webkit-mask-image: url("${CHECKMARK_DATA_URI}");
-    mask-image: url("${CHECKMARK_DATA_URI}");
-    -webkit-mask-size: contain;
-    mask-size: contain;
-    -webkit-mask-repeat: no-repeat;
-    mask-repeat: no-repeat;
-}
-.pyro-rc-checkbox:focus-visible { outline: 2px solid ${BAND_COLOR.excellent}; outline-offset: 1px; }
+${checkboxCss("pyro-rc-checkbox", BAND_COLOR.excellent)}
 .pyro-rc-actions-row { display: flex; gap: 8px; }
 .pyro-rc-submit-btn {
     box-sizing: border-box;
     min-height: 24px;
     flex: 1;
-    background: var(--pyro-surface);
-    border: 1px solid var(--pyro-surface-border);
-    color: var(--pyro-tooltip-text);
+    background: var(--shared-surface);
+    border: 1px solid var(--shared-surface-border);
+    color: var(--shared-text);
     cursor: pointer;
     border-radius: 5px;
     padding: 6px 10px;
@@ -4484,14 +4596,14 @@
     justify-content: center;
     gap: 6px;
 }
-@media (hover: hover) and (pointer: fine) { .pyro-rc-submit-btn:hover:not(:disabled) { background: var(--pyro-surface-hover); } }
+@media (hover: hover) and (pointer: fine) { .pyro-rc-submit-btn:hover:not(:disabled) { background: var(--shared-surface-hover); } }
 .pyro-rc-submit-btn:disabled { opacity: 0.4; cursor: default; }
 .pyro-rc-reset-btn {
     box-sizing: border-box;
     min-height: 24px;
-    background: var(--pyro-danger-bg);
-    border: 1px solid var(--pyro-danger-border);
-    color: var(--pyro-danger);
+    background: var(--shared-danger-bg);
+    border: 1px solid var(--shared-danger-border);
+    color: var(--shared-danger);
     cursor: pointer;
     border-radius: 5px;
     padding: 6px 10px;
@@ -4501,22 +4613,21 @@
     justify-content: center;
     gap: 5px;
 }
-@media (hover: hover) and (pointer: fine) { .pyro-rc-reset-btn:hover:not(:disabled) { background: var(--pyro-danger-bg-hover); color: var(--pyro-danger); } }
+@media (hover: hover) and (pointer: fine) { .pyro-rc-reset-btn:hover:not(:disabled) { background: var(--shared-danger-bg-hover); color: var(--shared-danger); } }
 .pyro-rc-reset-btn:disabled { opacity: 0.35; cursor: default; }
 .pyro-rc-reset-btn svg { width: 12px; height: 12px; flex-shrink: 0; }
-.pyro-rc-status { font-size: 11px; min-height: 14px; color: var(--pyro-text-muted); display: flex; align-items: center; gap: 2px; }
-.pyro-rc-status.ok { color: var(--pyro-success); }
-.pyro-rc-status.err { color: var(--pyro-danger); }
-.pyro-rc-status.hint { color: var(--pyro-text-muted); }
+.pyro-rc-status { font-size: 11px; min-height: 14px; color: var(--shared-text-muted); display: flex; align-items: center; gap: 2px; }
+.pyro-rc-status.ok { color: var(--shared-success); }
+.pyro-rc-status.err { color: var(--shared-danger); }
+.pyro-rc-status.hint { color: var(--shared-text-muted); }
 .pyro-rc-status-warn { color: #e9a23b; margin-left: 3px; }
 .pyro-rc-external-link { box-sizing: border-box; min-height: 24px; font-size: 12px; color: ${BAND_COLOR.excellent}; text-decoration: none; display: inline-flex; align-items: center; gap: 3px; align-self: flex-start; }
 .pyro-rc-external-link:hover { text-decoration: underline; }
 .pyro-rc-external-link svg { width: 10px; height: 10px; flex-shrink: 0; }
-.pyro-rc-field-err { font-size: 11px; color: var(--pyro-danger); min-height: 13px; margin-top: -4px; }
+.pyro-rc-field-err { font-size: 11px; color: var(--shared-danger); min-height: 13px; margin-top: -4px; }
 .pyro-rc-field-err:empty { display: none; margin-top: 0; }
-.pyro-rc-optional-check { box-sizing: border-box; min-height: 24px; display: flex; align-items: center; gap: 4px; font-size: 11px; color: var(--pyro-text-muted); flex-shrink: 0; cursor: pointer; user-select: none; white-space: nowrap; }
-`;
-    document.head.appendChild(style);
+.pyro-rc-optional-check { box-sizing: border-box; min-height: 24px; display: flex; align-items: center; gap: 4px; font-size: 11px; color: var(--shared-text-muted); flex-shrink: 0; cursor: pointer; user-select: none; white-space: nowrap; }
+`);
   }
   function addSelectChrome(select) {
     const button = document.createElement("button");
@@ -4975,8 +5086,7 @@
         },
         (result) => {
           if (result.ok) {
-            status.innerHTML = ICON_CHECK;
-            status.appendChild(txt("Submitted!"));
+            setIconStatus(status, ICON_CHECK, "Submitted!");
             status.className = "pyro-rc-status ok";
             if (result.remaining !== void 0 && result.remaining <= RATE_LIMIT_WARN_THRESHOLD) {
               const warn = el("span", "pyro-rc-status-warn");
@@ -4984,8 +5094,7 @@
               status.appendChild(warn);
             }
           } else {
-            status.innerHTML = ICON_X;
-            status.appendChild(txt(result.error));
+            setIconStatus(status, ICON_X, result.error);
             status.className = "pyro-rc-status err";
             revalidate();
           }
@@ -5156,37 +5265,29 @@
   }
 
   // src/userscripts/arsonists-ledger/settings.ts
-  var CHECKMARK_DATA_URI2 = `data:image/svg+xml,${encodeURIComponent(
-    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="${ICON_CHECK_MASK_PATH}"/></svg>`
-  )}`;
   function setOkStatus(statusEl, message) {
-    statusEl.innerHTML = ICON_CHECK;
-    statusEl.appendChild(txt(message));
+    setIconStatus(statusEl, ICON_CHECK, message);
   }
   function setErrStatus(statusEl, message) {
-    statusEl.innerHTML = ICON_X;
-    statusEl.appendChild(txt(message));
+    setIconStatus(statusEl, ICON_X, message);
   }
   function injectSettingsStyles() {
-    if (document.getElementById("pyro-settings-styles")) return;
-    const style = el("style");
-    style.id = "pyro-settings-styles";
-    style.textContent = `
+    injectStyleOnce("pyro-settings-styles", `
 .pyro-settings-wrap {
     margin-left: 8px;
 }
 #pyro-settings-panel {
-    --pyro-api-color: var(--pyro-success);
+    --pyro-api-color: var(--shared-success);
     --pyro-manual-color: #7af;
-    --pyro-db-color: var(--pyro-text-muted);
+    --pyro-db-color: var(--shared-text-muted);
 }
-.pyro-tab-bar { display: flex; border-bottom: 1px solid var(--pyro-tooltip-border); }
+.pyro-tab-bar { display: flex; border-bottom: 1px solid var(--shared-border); }
 .pyro-tab {
     flex: 1;
     background: none;
     border: none;
     border-bottom: 1px solid transparent;
-    color: var(--pyro-text-muted);
+    color: var(--shared-text-muted);
     cursor: pointer;
     padding: 8px 16px;
     font: inherit;
@@ -5194,10 +5295,10 @@
     transition: color 120ms ease-out;
 }
 @media (hover: hover) and (pointer: fine) {
-    .pyro-tab:hover { color: var(--pyro-tooltip-text); }
+    .pyro-tab:hover { color: var(--shared-text); }
 }
 .pyro-tab.active {
-    color: var(--pyro-tooltip-text);
+    color: var(--shared-text);
     border-bottom-color: ${BAND_COLOR.excellent};
     background: linear-gradient(0deg, color-mix(in oklch, ${BAND_COLOR.excellent} 20%, transparent 80%), transparent 55%);
 }
@@ -5205,19 +5306,19 @@
 .pyro-tab-content>div { display: flex; flex-direction: column; gap: 14px; }
 .pyro-tab-content::-webkit-scrollbar { width: 3px; }
 .pyro-tab-content::-webkit-scrollbar-track { background: transparent; }
-.pyro-tab-content::-webkit-scrollbar-thumb { background: var(--pyro-text-muted); border-radius: 2px; }
+.pyro-tab-content::-webkit-scrollbar-thumb { background: var(--shared-text-muted); border-radius: 2px; }
 .pyro-s-group { display: flex; flex-direction: column; gap: 8px; }
 .pyro-s-group-title {
     font-size: 14px;
     text-transform: uppercase;
-    color: var(--pyro-text-muted);
+    color: var(--shared-text-muted);
 }
 .pyro-s-rows { display: flex; flex-direction: column; gap: 4px; }
 .pyro-s-row { display: flex; align-items: center; gap: 6px; }
 .pyro-s-label {
     flex: 1;
     font-size: 12px;
-    color: var(--pyro-text-muted);
+    color: var(--shared-text-muted);
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -5225,9 +5326,9 @@
 }
 .pyro-s-input {
     width: 76px;
-    background: var(--pyro-surface);
-    border: 1px solid var(--pyro-surface-border);
-    color: var(--pyro-tooltip-text);
+    background: var(--shared-surface);
+    border: 1px solid var(--shared-surface-border);
+    color: var(--shared-text);
     font-size: 12px;
     padding: 3px 5px;
     border-radius: 5px;
@@ -5238,15 +5339,15 @@
 .pyro-s-input::-webkit-inner-spin-button,
 .pyro-s-input::-webkit-outer-spin-button { -webkit-appearance: none; }
 .pyro-s-input:focus-visible { outline: none; border-color: ${BAND_COLOR.excellent}; }
-.pyro-s-input.from-api   { border-color: var(--pyro-success); color: var(--pyro-success); }
+.pyro-s-input.from-api   { border-color: var(--shared-success); color: var(--shared-success); }
 .pyro-s-input.overridden { border-color: #48a; color: #7af; }
-.pyro-s-divider { border: none; border-top: 1px solid var(--pyro-tooltip-border); margin: 8px 0; }
+.pyro-s-divider { border: none; border-top: 1px solid var(--shared-border); margin: 8px 0; }
 .pyro-s-key-row { display: flex; gap: 6px; margin-bottom: 6px; }
 .pyro-s-key-input {
     flex: 1;
-    background: var(--pyro-surface);
-    border: 1px solid var(--pyro-surface-border);
-    color: var(--pyro-tooltip-text);
+    background: var(--shared-surface);
+    border: 1px solid var(--shared-surface-border);
+    color: var(--shared-text);
     font-size: 12px;
     padding: 4px 6px;
     border-radius: 5px;
@@ -5262,9 +5363,9 @@
     gap: 4px;
     box-sizing: border-box;
     min-height: 24px;
-    background: var(--pyro-surface);
-    border: 1px solid var(--pyro-surface-border);
-    color: var(--pyro-text-muted);
+    background: var(--shared-surface);
+    border: 1px solid var(--shared-surface-border);
+    color: var(--shared-text-muted);
     cursor: pointer;
     border-radius: 5px;
     padding: 4px 9px;
@@ -5274,38 +5375,38 @@
 }
 .pyro-s-btn svg { width: 12px; height: 12px; flex-shrink: 0; }
 @media (hover: hover) and (pointer: fine) {
-    .pyro-s-btn:hover:not(:disabled) { background: var(--pyro-surface-hover); color: var(--pyro-tooltip-text); }
+    .pyro-s-btn:hover:not(:disabled) { background: var(--shared-surface-hover); color: var(--shared-text); }
 }
 .pyro-s-btn:active:not(:disabled) { transform: scale(0.97); }
 .pyro-s-btn:disabled { opacity: 0.28; cursor: default; }
 .pyro-s-btn-danger {
-    background: var(--pyro-danger-bg);
-    border-color: var(--pyro-danger-border);
-    color: var(--pyro-danger);
+    background: var(--shared-danger-bg);
+    border-color: var(--shared-danger-border);
+    color: var(--shared-danger);
 }
 @media (hover: hover) and (pointer: fine) {
-    .pyro-s-btn-danger:hover:not(:disabled) { background: var(--pyro-danger-bg-hover); color: var(--pyro-danger); }
+    .pyro-s-btn-danger:hover:not(:disabled) { background: var(--shared-danger-bg-hover); color: var(--shared-danger); }
 }
 .pyro-s-status {
     font-size: 10px;
     min-height: 13px;
-    color: var(--pyro-text-muted);
+    color: var(--shared-text-muted);
     display: flex;
     align-items: center;
     gap: 2px;
     flex-wrap: nowrap;
 }
 .pyro-s-status.ok  { color: ${BAND_COLOR.good}; }
-.pyro-s-status.err { color: var(--pyro-danger); }
+.pyro-s-status.err { color: var(--shared-danger); }
 .pyro-s-status:empty { display: none; }
 .pyro-s-refresh-row { display: flex; align-items: center; gap: 8px; }
-.pyro-s-timestamp { font-size: 10px; color: var(--pyro-text-muted); }
+.pyro-s-timestamp { font-size: 10px; color: var(--shared-text-muted); }
 .pyro-s-check-row {
     display: flex;
     align-items: center;
     gap: 7px;
     font-size: 12px;
-    color: var(--pyro-text-muted);
+    color: var(--shared-text-muted);
     cursor: pointer;
     user-select: none;
 }
@@ -5313,76 +5414,42 @@
     opacity: 0.4;
     cursor: not-allowed;
 }
-.pyro-s-checkbox {
-    appearance: none;
-    -webkit-appearance: none;
-    box-sizing: border-box;
-    width: 15px;
-    height: 15px;
-    margin: 0;
-    flex-shrink: 0;
-    border: 1px solid var(--pyro-surface-border);
-    border-radius: 3px;
-    background: var(--pyro-surface);
-    accent-color: ${BAND_COLOR.excellent};
-    cursor: pointer;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-}
-.pyro-s-checkbox:checked {
-    background: ${BAND_COLOR.excellent};
-    border-color: ${BAND_COLOR.excellent};
-}
-.pyro-s-checkbox:checked::after {
-    content: "";
-    width: 9px;
-    height: 9px;
-    background-color: oklch(18% 0 0);
-    -webkit-mask-image: url("${CHECKMARK_DATA_URI2}");
-    mask-image: url("${CHECKMARK_DATA_URI2}");
-    -webkit-mask-size: contain;
-    mask-size: contain;
-    -webkit-mask-repeat: no-repeat;
-    mask-repeat: no-repeat;
-}
-.pyro-s-checkbox:focus-visible { outline: 2px solid ${BAND_COLOR.excellent}; outline-offset: 1px; }
+${checkboxCss("pyro-s-checkbox", BAND_COLOR.excellent)}
 .pyro-s-checkbox:disabled, .pyro-s-check-row--disabled .pyro-s-checkbox { cursor: not-allowed; }
 .pyro-s-toggle-group {
     display: inline-flex;
     align-self: flex-start;
-    border: 1px solid var(--pyro-surface-border);
+    border: 1px solid var(--shared-surface-border);
     border-radius: 5px;
     overflow: hidden;
 }
 .pyro-s-toggle-btn {
-    background: var(--pyro-surface);
+    background: var(--shared-surface);
     border: none;
-    color: var(--pyro-text-muted);
+    color: var(--shared-text-muted);
     font: inherit;
     font-size: 12px;
     padding: 4px 12px;
     cursor: pointer;
     transition: background 120ms ease-out, color 120ms ease-out;
 }
-.pyro-s-toggle-btn + .pyro-s-toggle-btn { border-left: 1px solid var(--pyro-surface-border); }
+.pyro-s-toggle-btn + .pyro-s-toggle-btn { border-left: 1px solid var(--shared-surface-border); }
 @media (hover: hover) and (pointer: fine) {
-    .pyro-s-toggle-btn:not(.active):hover { color: var(--pyro-tooltip-text); }
+    .pyro-s-toggle-btn:not(.active):hover { color: var(--shared-text); }
 }
 .pyro-s-toggle-btn.active {
     background: ${BAND_COLOR.excellent};
     color: oklch(18% 0 0);
 }
-.pyro-s-section-note { display: flex; align-items: flex-start; gap: 5px; font-size: 10px; line-height: 1.4; color: var(--pyro-text-muted); margin-bottom: 6px; }
+.pyro-s-section-note { display: flex; align-items: flex-start; gap: 5px; font-size: 10px; line-height: 1.4; color: var(--shared-text-muted); margin-bottom: 6px; }
 .pyro-s-section-note > svg { width: 10px; height: 10px; flex-shrink: 0; margin-top: 1px; }
-.pyro-s-section-note span strong { color: var(--pyro-tooltip-text); font-weight: normal; }
+.pyro-s-section-note span strong { color: var(--shared-text); font-weight: normal; }
 .pyro-s-section-note a { color: ${BAND_COLOR.excellent}; text-decoration: none; display: inline-flex; align-items: center; gap: 3px; }
 .pyro-s-section-note a:hover { text-decoration: underline; }
 .pyro-s-section-note a svg { width: 10px; height: 10px; flex-shrink: 0; }
-.pyro-s-missing-header { font-size: 10px; color: var(--pyro-text-muted); margin: 8px 0 4px; }
-.pyro-s-missing-list { font-size: 10px; color: var(--pyro-text-muted); padding-left: 14px; margin: 0; }
-`;
-    document.head.appendChild(style);
+.pyro-s-missing-header { font-size: 10px; color: var(--shared-text-muted); margin: 8px 0 4px; }
+.pyro-s-missing-list { font-size: 10px; color: var(--shared-text-muted); padding-left: 14px; margin: 0; }
+`);
   }
   function applyPriceStyle(input, source) {
     input.classList.remove("overridden", "from-api");
@@ -5537,22 +5604,7 @@
     lbl.appendChild(txt(before.trim()));
     lbl.appendChild(svgEl(ICON_ARROW_RIGHT));
     lbl.appendChild(txt((after ?? "").trim()));
-    const input = el("input", "pyro-s-input");
-    input.type = "number";
-    input.min = "0";
-    input.value = String(getVal());
-    input.addEventListener("blur", () => {
-      const val = Math.round(parseFloat(input.value));
-      if (!isNaN(val) && val >= 0) {
-        setVal(val);
-        input.value = String(val);
-      } else {
-        input.value = String(getVal());
-      }
-    });
-    input.addEventListener("keydown", (e) => {
-      if (e.key === "Enter") input.blur();
-    });
+    const input = buildNumberInput(getVal, setVal, { className: "pyro-s-input" });
     row2.appendChild(lbl);
     row2.appendChild(input);
     return row2;
@@ -5625,29 +5677,17 @@
   function toggleGroupRow(idSlug, label, options, getVal, setVal) {
     const row2 = el("div", "pyro-s-row");
     const labelId = `pyro-s-toggle-label-${idSlug}`;
-    const wrap = el("div", "pyro-s-toggle-group");
-    wrap.setAttribute("role", "group");
+    const { wrap } = buildButtonGroup(
+      {
+        wrapClassName: "pyro-s-toggle-group",
+        btnClassName: "pyro-s-toggle-btn",
+        ariaGroup: true
+      },
+      options,
+      getVal,
+      setVal
+    );
     wrap.setAttribute("aria-labelledby", labelId);
-    const buttons = options.map(({ value, label: btnLabel }) => {
-      const btn = el("button", "pyro-s-toggle-btn");
-      btn.type = "button";
-      btn.textContent = btnLabel;
-      btn.addEventListener("click", () => {
-        setVal(value);
-        sync();
-      });
-      wrap.appendChild(btn);
-      return { value, btn };
-    });
-    function sync() {
-      const current = getVal();
-      for (const { value, btn } of buttons) {
-        const active = value === current;
-        btn.setAttribute("aria-pressed", String(active));
-        btn.classList.toggle("active", active);
-      }
-    }
-    sync();
     row2.appendChild(wrap);
     const lbl = el("span", "pyro-s-label");
     lbl.textContent = label;
@@ -5858,29 +5898,29 @@
   }
   function buildTabBar(activeId, onSwitch) {
     const tabs = [
-      { id: "prices", label: "Prices" },
-      { id: "thresholds", label: "Thresholds" },
-      { id: "visuals", label: "Visuals" },
-      { id: "api", label: "API" },
-      { id: "submit", label: "Submit" }
+      { value: "prices", label: "Prices" },
+      { value: "thresholds", label: "Thresholds" },
+      { value: "visuals", label: "Visuals" },
+      { value: "api", label: "API" },
+      { value: "submit", label: "Submit" }
     ];
-    const bar = el("div", "pyro-tab-bar");
-    for (const tab of tabs) {
-      const btn = el(
-        "button",
-        tab.id === activeId ? "pyro-tab active" : "pyro-tab"
-      );
-      btn.type = "button";
-      btn.textContent = tab.label;
-      btn.dataset.tab = tab.id;
-      btn.addEventListener("click", () => {
-        bar.querySelectorAll(".pyro-tab").forEach((b) => b.classList.remove("active"));
-        btn.classList.add("active");
-        onSwitch(tab.id);
-      });
-      bar.appendChild(btn);
-    }
-    return bar;
+    let current = activeId;
+    const { wrap } = buildButtonGroup(
+      {
+        wrapClassName: "pyro-tab-bar",
+        btnClassName: "pyro-tab",
+        onButtonCreated(btn, option) {
+          btn.dataset.tab = option.value;
+        }
+      },
+      tabs,
+      () => current,
+      (id) => {
+        current = id;
+        onSwitch(id);
+      }
+    );
+    return wrap;
   }
   function rerenderTab(panel, tabId, ctx) {
     const content = panel.querySelector(".pyro-tab-content");
@@ -6109,7 +6149,7 @@
       suspicion: 3,
       ignitionRisk: 3,
       stokingRisk: 1,
-      advice: "Increases intensity by 25% of current intensity in single area."
+      advice: "Best for stoking, excellent for <3 zone targets. Increases intensity by 25% of current intensity in single area."
     },
     [RESOURCE.MAGNESIUM]: {
       intensity: 8,
@@ -6117,7 +6157,7 @@
       suspicion: 10,
       ignitionRisk: 3,
       stokingRisk: 4,
-      advice: "Halves dampening effectiveness and intensity decay from firefighters. Increases visibility."
+      advice: "Best as starter, useful when low rurality. Halves dampening effectiveness and intensity decay from firefighters. Increases visibility."
     },
     [RESOURCE.THERMITE]: {
       intensity: 7,
@@ -6133,7 +6173,7 @@
       suspicion: 1,
       ignitionRisk: 2,
       stokingRisk: 1,
-      advice: "Terrible starter, excellent for stoking size 4-5. Increases intensity by 25% of current in all areas."
+      advice: "Terrible starter, excellent for stoking 4-5 zone targets. Increases intensity by 25% of current in all areas."
     },
     [RESOURCE.METHANE]: {
       intensity: 4,
@@ -6149,17 +6189,17 @@
       suspicion: 1,
       ignitionRisk: 2,
       stokingRisk: 3,
-      advice: "Averages intensity and momentum across all areas. Best for size 3-5 targets."
+      advice: "Best used for 3-5 zone targets, and when paired with one solid & one liquid. Averages intensity and momentum across all areas."
     }
   };
   var IGNITER_INFO = {
     [RESOURCE.LIGHTER]: {
       suspicion: 1,
-      advice: "Baseline utility tool. Critical failure rates scale strictly with the quantity of fuels pre-placed."
+      advice: "Great for fine-tuning and low suspicion jobs. Provides very small increase in intensity (+2.5%) and momentum. Crit rate depends on accelerants used."
     },
     [RESOURCE.MOLOTOV]: {
       suspicion: 6,
-      advice: "Moderately high intensity/momentum to area with lowest intensity. Fixed crit rate."
+      advice: "Great for spreading fires. Moderately high intensity (+17.5%) and momentum to area with lowest intensity based on the main zone momentum. Fixed crit rate."
     },
     [RESOURCE.FLAMETHROWER]: {
       suspicion: 8,
@@ -6285,12 +6325,13 @@
     const label = el("span", "pyro-mat-bar-label");
     label.textContent = bar.label;
     row2.appendChild(label);
-    const track = el("div", "pyro-mat-bar-track");
-    for (let i = 0; i < SEGMENT_COUNT; i++) {
-      const seg = el("span", "pyro-mat-bar-seg");
-      if (i < filledCount) seg.style.background = color;
-      track.appendChild(seg);
-    }
+    const track = buildSegmentTrack(
+      "pyro-mat-bar-track",
+      "pyro-mat-bar-seg",
+      SEGMENT_COUNT,
+      filledCount,
+      color
+    );
     row2.appendChild(track);
     const value = el("span", "pyro-mat-bar-value");
     value.textContent = String(bar.value);
@@ -6369,10 +6410,7 @@
     });
   }
   function injectMaterialBadgeStyles() {
-    if (document.getElementById("pyro-mat-badge-styles")) return;
-    const style = document.createElement("style");
-    style.id = "pyro-mat-badge-styles";
-    style.textContent = `
+    injectStyleOnce("pyro-mat-badge-styles", `
         .pyro-mat-badges {
             display: flex;
             flex-direction: column;
@@ -6423,8 +6461,7 @@
                 display: block;
             }
         }
-    `;
-    document.head.appendChild(style);
+    `);
   }
 
   // src/userscripts/arsonists-ledger/index.ts
@@ -6774,10 +6811,9 @@
     });
   }
   function injectHighlightStyles() {
-    if (document.getElementById("pyro-highlight-styles")) return;
-    const style = document.createElement("style");
-    style.id = "pyro-highlight-styles";
-    style.textContent = `
+    injectStyleOnce(
+      "pyro-highlight-styles",
+      `
         .pyro-label { display: none; }
 
         :root { --pyro-bar-x: -5px; }
@@ -6874,9 +6910,9 @@
             justify-content: center;
             width: 14px;
             height: 14px;
-            border: 1px solid #444;
+            border: 1px solid var(--crimes-outcomeDivider-color, #444);
             border-radius: 50%;
-            background: #333;
+            background: var(--crimes-crimeOption-bgColor, #222);
             position: absolute;
             right: -3px;
             top: -5px;
@@ -6893,12 +6929,10 @@
             padding: 0;
             box-sizing: border-box;
             border-radius: 50%;
-            background: #333;
             color: #ff8a3d;
-            filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.5));
         }
-    `;
-    document.head.appendChild(style);
+    `
+    );
   }
   function getPillText(ranked) {
     if (!ranked) return "?";

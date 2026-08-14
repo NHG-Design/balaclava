@@ -1,3 +1,6 @@
+import { syncTornThemeVars as bridgeSyncTornThemeVars } from "../../lib/shared-ui/theme-bridge.js";
+import { computeAnchorPosition } from "../../lib/shared-ui/anchor-position.js";
+
 declare const unsafeWindow:
   | (Window & Record<string, BalaclavaTooltipAPI | undefined>)
   | undefined;
@@ -21,11 +24,6 @@ interface TooltipOptions {
   position?: TooltipPosition | string | null;
   theme?: TooltipTheme | string | null;
   showArrow?: boolean;
-}
-
-interface TooltipPoint {
-  top: number;
-  left: number;
 }
 
 interface TooltipThemeTokens {
@@ -177,24 +175,9 @@ if (!rootWindow[API_NAME]?.version) {
    * values from an actual `.crimes-app` element and forward them as inline custom properties on
    * `host` itself, which the shadow tree *does* inherit from directly.
    */
-  const TORN_THEME_VARS = [
-    "--crimes-crimeOption-bgColor",
-    "--crimes-outcomeDivider-color",
-    "--crimes-baseText-color",
-    "--tooltip-bg-color",
-    "--mini-profile-border",
-    "--mini-profile-box-shadow",
-  ];
-
   function syncTornThemeVars(): void {
     if (!host) return;
-    const source = document.querySelector<HTMLElement>(".crimes-app");
-    if (!source) return;
-    const computed = getComputedStyle(source);
-    for (const name of TORN_THEME_VARS) {
-      const value = computed.getPropertyValue(name).trim();
-      if (value) host.style.setProperty(name, value);
-    }
+    bridgeSyncTornThemeVars(host);
   }
 
   function ensureHost(): void {
@@ -868,172 +851,28 @@ if (!rootWindow[API_NAME]?.version) {
   function updateTooltipPosition(): void {
     if (!targetRect || !tooltipEl) return;
 
-    preferredPosition = requestedPosition;
-    arrowOffset = ARROW_OFFSET_DEFAULT;
-
     const rect = tooltipEl.getBoundingClientRect();
-    const tooltipWidth = rect.width;
-    const tooltipHeight = rect.height;
-    const position = getInitialPosition(tooltipWidth, tooltipHeight);
+    const result = computeAnchorPosition(
+      targetRect,
+      rect.width,
+      rect.height,
+      requestedPosition,
+      {
+        offset: config.offset,
+        safezone: SAFEZONE,
+        arrowOffsetMin: ARROW_OFFSET_MIN,
+        arrowOffsetMax: ARROW_OFFSET_MAX,
+        arrowOffsetDefault: ARROW_OFFSET_DEFAULT,
+      },
+    );
 
-    applyFallback(position, tooltipWidth, tooltipHeight);
-    clampToViewport(position, tooltipWidth, tooltipHeight);
+    preferredPosition = result.side;
+    arrowOffset = showArrow ? result.arrowOffsetPercent : ARROW_OFFSET_DEFAULT;
 
-    tooltipEl.style.top = `${Math.round(position.top)}px`;
-    tooltipEl.style.left = `${Math.round(position.left)}px`;
+    tooltipEl.style.top = `${Math.round(result.top)}px`;
+    tooltipEl.style.left = `${Math.round(result.left)}px`;
     tooltipEl.style.setProperty("--arrow-offset", `${arrowOffset}%`);
     refreshTooltipClassName();
-  }
-
-  function getInitialPosition(
-    tooltipWidth: number,
-    tooltipHeight: number,
-  ): TooltipPoint {
-    if (!targetRect) return { top: SAFEZONE, left: SAFEZONE };
-
-    const targetCenterX = targetRect.left + targetRect.width / 2;
-    const targetCenterY = targetRect.top + targetRect.height / 2;
-
-    switch (preferredPosition) {
-      case "top":
-        return {
-          top: targetRect.top - tooltipHeight - config.offset,
-          left: targetCenterX - tooltipWidth / 2,
-        };
-      case "left":
-        return {
-          top: targetCenterY - tooltipHeight / 2,
-          left: targetRect.left - tooltipWidth - config.offset,
-        };
-      case "right":
-        return {
-          top: targetCenterY - tooltipHeight / 2,
-          left: targetRect.right + config.offset,
-        };
-      case "bottom":
-      default:
-        return {
-          top: targetRect.bottom + config.offset,
-          left: targetCenterX - tooltipWidth / 2,
-        };
-    }
-  }
-
-  function applyFallback(
-    position: TooltipPoint,
-    tooltipWidth: number,
-    tooltipHeight: number,
-  ): void {
-    if (!targetRect) return;
-
-    const viewportWidth = window.innerWidth;
-    const viewportHeight = window.innerHeight;
-
-    switch (preferredPosition) {
-      case "bottom": {
-        const alternateTop = targetRect.top - tooltipHeight - config.offset;
-        if (
-          position.top + tooltipHeight > viewportHeight - SAFEZONE &&
-          alternateTop >= SAFEZONE
-        ) {
-          position.top = alternateTop;
-          preferredPosition = "top";
-        }
-        break;
-      }
-      case "top": {
-        const alternateTop = targetRect.bottom + config.offset;
-        if (
-          position.top < SAFEZONE &&
-          alternateTop + tooltipHeight <= viewportHeight - SAFEZONE
-        ) {
-          position.top = alternateTop;
-          preferredPosition = "bottom";
-        }
-        break;
-      }
-      case "left": {
-        const alternateLeft = targetRect.right + config.offset;
-        if (
-          position.left < SAFEZONE &&
-          alternateLeft + tooltipWidth <= viewportWidth - SAFEZONE
-        ) {
-          position.left = alternateLeft;
-          preferredPosition = "right";
-        }
-        break;
-      }
-      case "right": {
-        const alternateLeft = targetRect.left - tooltipWidth - config.offset;
-        if (
-          position.left + tooltipWidth > viewportWidth - SAFEZONE &&
-          alternateLeft >= SAFEZONE
-        ) {
-          position.left = alternateLeft;
-          preferredPosition = "left";
-        }
-        break;
-      }
-    }
-  }
-
-  function clampToViewport(
-    position: TooltipPoint,
-    tooltipWidth: number,
-    tooltipHeight: number,
-  ): void {
-    const original = { top: position.top, left: position.left };
-    const maxTop = Math.max(
-      SAFEZONE,
-      window.innerHeight - tooltipHeight - SAFEZONE,
-    );
-    const maxLeft = Math.max(
-      SAFEZONE,
-      window.innerWidth - tooltipWidth - SAFEZONE,
-    );
-
-    position.top = Math.max(SAFEZONE, Math.min(position.top, maxTop));
-    position.left = Math.max(SAFEZONE, Math.min(position.left, maxLeft));
-
-    if (showArrow) {
-      updateArrowOffset(original, position, tooltipWidth, tooltipHeight);
-    }
-  }
-
-  function updateArrowOffset(
-    original: TooltipPoint,
-    clamped: TooltipPoint,
-    tooltipWidth: number,
-    tooltipHeight: number,
-  ): void {
-    if (!targetRect) return;
-
-    arrowOffset = ARROW_OFFSET_DEFAULT;
-
-    if (preferredPosition === "top" || preferredPosition === "bottom") {
-      if (original.left !== clamped.left) {
-        const targetCenterX = targetRect.left + targetRect.width / 2;
-        const offset = targetCenterX - clamped.left;
-        arrowOffset = calculatePercentageOffset(offset, tooltipWidth);
-      }
-      return;
-    }
-
-    if (original.top !== clamped.top) {
-      const targetCenterY = targetRect.top + targetRect.height / 2;
-      const offset = targetCenterY - clamped.top;
-      arrowOffset = calculatePercentageOffset(offset, tooltipHeight);
-    }
-  }
-
-  function calculatePercentageOffset(
-    offset: number,
-    dimension: number,
-  ): number {
-    if (!dimension) return ARROW_OFFSET_DEFAULT;
-
-    const percentage = (offset / dimension) * 100;
-    return Math.max(ARROW_OFFSET_MIN, Math.min(ARROW_OFFSET_MAX, percentage));
   }
 
   function sameRect(left: DOMRect | null, right: DOMRect | null): boolean {

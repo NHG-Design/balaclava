@@ -1,4 +1,5 @@
-import { el } from "./dom.js";
+import { el, injectStyleOnce } from "../../lib/shared-ui/dom.js";
+import { SHARED_THEME_TOKENS_CSS } from "../../lib/shared-ui/theme-tokens.js";
 
 export interface PopoverHandle {
   wrap: HTMLElement;
@@ -13,34 +14,14 @@ let stylesInjected = false;
 
 /** Shared chrome (trigger button + positioned panel with arrow, open/close transitions) for all pyro-* popovers. */
 export function injectPopoverStyles(): void {
-  if (stylesInjected || document.getElementById("pyro-popover-styles")) {
-    stylesInjected = true;
-    return;
-  }
-  const style = el("style");
-  style.id = "pyro-popover-styles";
-  style.textContent = `
+  if (stylesInjected) return;
+  stylesInjected = true;
+  injectStyleOnce("pyro-popover-styles", `
 .pyro-popover-wrap {
-    /* Thin-divider color only (tab bar, settings divider) -- the panel/button/arrow borders use
-       Torn's own --mini-profile-border shorthand directly instead. */
-    --pyro-tooltip-border: color-mix(in oklch, var(--crimes-outcomeDivider-color, oklch(30% 0 0)) 75%, black 25%);
-    --pyro-tooltip-text: var(--crimes-baseText-color, oklch(82% 0.007 285));
-    /* Pulled partway toward the base text color -- the raw subtleSubText-color is too washed
-       out for inactive tab labels / default button text, especially in light mode. */
-    --pyro-text-muted: color-mix(in oklch, var(--crimes-subtleSubText-color, oklch(58% 0.012 285)) 55%, var(--crimes-baseText-color, oklch(82% 0.007 285)) 45%);
-    --pyro-success: var(--crimes-stats-successes-color, #6d6);
-    --pyro-danger: var(--crimes-stats-criticalFails-color, #c66);
-    --pyro-danger-bg: color-mix(in oklch, var(--pyro-danger) 16%, var(--pyro-surface));
-    --pyro-danger-border: color-mix(in oklch, var(--pyro-danger) 45%, var(--pyro-surface));
-    --pyro-danger-bg-hover: color-mix(in oklch, var(--pyro-danger) 26%, var(--pyro-surface));
+    ${SHARED_THEME_TOKENS_CSS}
     --pyro-tooltip-radius: 8px;
     --pyro-tooltip-arrow-size: 12px;
     --pyro-popover-btn-size: 24px;
-    /* Surface used for dropdowns/inputs/buttons -- kept as a mix off Torn's own tooltip bg
-       so those still read as a distinct "sunken" layer against the panel. */
-    --pyro-surface: color-mix(in oklch, var(--tooltip-bg-color, oklch(24% 0 0)) 85%, black 15%);
-    --pyro-surface-hover: color-mix(in oklch, var(--pyro-surface) 78%, white 22%);
-    --pyro-surface-border: color-mix(in oklch, var(--pyro-surface) 55%, white 45%);
     position: relative;
     display: inline-flex;
     align-items: center;
@@ -63,7 +44,7 @@ export function injectPopoverStyles(): void {
     transition: transform 100ms ease-out, background 120ms ease-out, color 120ms ease-out;
 }
 @media (hover: hover) and (pointer: fine) {
-    .pyro-popover-btn:hover { background: color-mix(in oklch, var(--tooltip-bg-color, oklch(24% 0 0)) 94%, white 6%); color: var(--pyro-tooltip-text); }
+    .pyro-popover-btn:hover { background: color-mix(in oklch, var(--tooltip-bg-color, oklch(24% 0 0)) 94%, white 6%); color: var(--shared-text); }
 }
 .pyro-popover-btn:active { transform: scale(0.94); }
 .pyro-popover-panel {
@@ -72,7 +53,7 @@ export function injectPopoverStyles(): void {
     right: 0;
     z-index: 9999;
     background: var(--tooltip-bg-color) 0 0 no-repeat;
-    color: var(--pyro-tooltip-text);
+    color: var(--shared-text);
     border: 1px solid #fff;
     border: var(--mini-profile-border);
     box-shadow: var(--mini-profile-box-shadow);
@@ -116,9 +97,7 @@ export function injectPopoverStyles(): void {
 .pyro-popover-panel:not(.is-open) {
     transition: transform 100ms ease-out, opacity 100ms ease-out, visibility 0ms linear 100ms;
 }
-`;
-  document.head.appendChild(style);
-  stylesInjected = true;
+`);
 }
 
 /**

@@ -1,5 +1,145 @@
 "use strict";
 (() => {
+  // src/lib/shared-ui/theme-bridge.ts
+  var TORN_THEME_VAR_NAMES = [
+    "--crimes-crimeOption-bgColor",
+    "--crimes-outcomeDivider-color",
+    "--crimes-baseText-color",
+    "--crimes-subtleSubText-color",
+    "--crimes-stats-successes-color",
+    "--crimes-stats-criticalFails-color",
+    "--tooltip-bg-color",
+    "--mini-profile-border",
+    "--mini-profile-box-shadow"
+  ];
+  function syncTornThemeVars(target, sourceSelector = ".crimes-app") {
+    const source = document.querySelector(sourceSelector);
+    if (!source) return;
+    const computed = getComputedStyle(source);
+    for (const name of TORN_THEME_VAR_NAMES) {
+      const value = computed.getPropertyValue(name).trim();
+      if (value) target.style.setProperty(name, value);
+    }
+  }
+
+  // src/lib/shared-ui/anchor-position.ts
+  var DEFAULTS = {
+    offset: 8,
+    safezone: 8,
+    arrowOffsetMin: 10,
+    arrowOffsetMax: 90,
+    arrowOffsetDefault: 50,
+    viewportWidth: 0,
+    viewportHeight: 0
+  };
+  function initialPosition(targetRect, side, panelWidth, panelHeight, offset) {
+    const targetCenterX = targetRect.left + targetRect.width / 2;
+    const targetCenterY = targetRect.top + targetRect.height / 2;
+    switch (side) {
+      case "top":
+        return { top: targetRect.top - panelHeight - offset, left: targetCenterX - panelWidth / 2 };
+      case "left":
+        return { top: targetCenterY - panelHeight / 2, left: targetRect.left - panelWidth - offset };
+      case "right":
+        return { top: targetCenterY - panelHeight / 2, left: targetRect.right + offset };
+      case "bottom":
+      default:
+        return { top: targetRect.bottom + offset, left: targetCenterX - panelWidth / 2 };
+    }
+  }
+  function applyFallback(position, side, targetRect, panelWidth, panelHeight, offset, safezone, viewportWidth, viewportHeight) {
+    switch (side) {
+      case "bottom": {
+        const alternateTop = targetRect.top - panelHeight - offset;
+        if (position.top + panelHeight > viewportHeight - safezone && alternateTop >= safezone) {
+          position.top = alternateTop;
+          return "top";
+        }
+        break;
+      }
+      case "top": {
+        const alternateTop = targetRect.bottom + offset;
+        if (position.top < safezone && alternateTop + panelHeight <= viewportHeight - safezone) {
+          position.top = alternateTop;
+          return "bottom";
+        }
+        break;
+      }
+      case "left": {
+        const alternateLeft = targetRect.right + offset;
+        if (position.left < safezone && alternateLeft + panelWidth <= viewportWidth - safezone) {
+          position.left = alternateLeft;
+          return "right";
+        }
+        break;
+      }
+      case "right": {
+        const alternateLeft = targetRect.left - panelWidth - offset;
+        if (position.left + panelWidth > viewportWidth - safezone && alternateLeft >= safezone) {
+          position.left = alternateLeft;
+          return "left";
+        }
+        break;
+      }
+    }
+    return side;
+  }
+  function clampToViewport(position, panelWidth, panelHeight, safezone, viewportWidth, viewportHeight) {
+    const maxTop = Math.max(safezone, viewportHeight - panelHeight - safezone);
+    const maxLeft = Math.max(safezone, viewportWidth - panelWidth - safezone);
+    return {
+      top: Math.max(safezone, Math.min(position.top, maxTop)),
+      left: Math.max(safezone, Math.min(position.left, maxLeft))
+    };
+  }
+  function percentageOffset(offset, dimension, min, max, fallback) {
+    if (!dimension) return fallback;
+    const percentage = offset / dimension * 100;
+    return Math.max(min, Math.min(max, percentage));
+  }
+  function computeAnchorPosition(targetRect, panelWidth, panelHeight, requestedSide, options = {}) {
+    const opts = { ...DEFAULTS, ...options };
+    const viewportWidth = opts.viewportWidth || window.innerWidth;
+    const viewportHeight = opts.viewportHeight || window.innerHeight;
+    const position = initialPosition(targetRect, requestedSide, panelWidth, panelHeight, opts.offset);
+    const side = applyFallback(
+      position,
+      requestedSide,
+      targetRect,
+      panelWidth,
+      panelHeight,
+      opts.offset,
+      opts.safezone,
+      viewportWidth,
+      viewportHeight
+    );
+    const original = { ...position };
+    const clamped = clampToViewport(position, panelWidth, panelHeight, opts.safezone, viewportWidth, viewportHeight);
+    let arrowOffsetPercent = opts.arrowOffsetDefault;
+    if (side === "top" || side === "bottom") {
+      if (original.left !== clamped.left) {
+        const targetCenterX = targetRect.left + targetRect.width / 2;
+        arrowOffsetPercent = percentageOffset(
+          targetCenterX - clamped.left,
+          panelWidth,
+          opts.arrowOffsetMin,
+          opts.arrowOffsetMax,
+          opts.arrowOffsetDefault
+        );
+      }
+    } else if (original.top !== clamped.top) {
+      const targetCenterY = targetRect.top + targetRect.height / 2;
+      arrowOffsetPercent = percentageOffset(
+        targetCenterY - clamped.top,
+        panelHeight,
+        opts.arrowOffsetMin,
+        opts.arrowOffsetMax,
+        opts.arrowOffsetDefault
+      );
+    }
+    return { top: clamped.top, left: clamped.left, side, arrowOffsetPercent };
+  }
+
   // src/userscripts/balaclava-tooltip/index.ts
   var API_NAME = "BalaclavaTooltip";
   var HOST_ID = "balaclava-tooltip-host";
@@ -47,18 +187,12 @@
       setupGlobalListeners();
       scanAll();
       setupMutationObserver();
-    }, syncTornThemeVars = function() {
+    }, syncTornThemeVars2 = function() {
       if (!host) return;
-      const source = document.querySelector(".crimes-app");
-      if (!source) return;
-      const computed = getComputedStyle(source);
-      for (const name of TORN_THEME_VARS) {
-        const value = computed.getPropertyValue(name).trim();
-        if (value) host.style.setProperty(name, value);
-      }
+      syncTornThemeVars(host);
     }, ensureHost = function() {
       if (host) {
-        syncTornThemeVars();
+        syncTornThemeVars2();
         return;
       }
       host = document.createElement("div");
@@ -78,7 +212,7 @@
       styleEl = document.createElement("style");
       styleEl.textContent = buildStylesheet();
       shadow.appendChild(styleEl);
-      syncTornThemeVars();
+      syncTornThemeVars2();
     }, buildStylesheet = function() {
       const visualConfig = getVisualConfig();
       return `
@@ -566,118 +700,26 @@
       positionTrackingId = requestAnimationFrame(trackTargetPosition);
     }, updateTooltipPosition = function() {
       if (!targetRect || !tooltipEl) return;
-      preferredPosition = requestedPosition;
-      arrowOffset = ARROW_OFFSET_DEFAULT;
       const rect = tooltipEl.getBoundingClientRect();
-      const tooltipWidth = rect.width;
-      const tooltipHeight = rect.height;
-      const position = getInitialPosition(tooltipWidth, tooltipHeight);
-      applyFallback(position, tooltipWidth, tooltipHeight);
-      clampToViewport(position, tooltipWidth, tooltipHeight);
-      tooltipEl.style.top = `${Math.round(position.top)}px`;
-      tooltipEl.style.left = `${Math.round(position.left)}px`;
+      const result = computeAnchorPosition(
+        targetRect,
+        rect.width,
+        rect.height,
+        requestedPosition,
+        {
+          offset: config.offset,
+          safezone: SAFEZONE,
+          arrowOffsetMin: ARROW_OFFSET_MIN,
+          arrowOffsetMax: ARROW_OFFSET_MAX,
+          arrowOffsetDefault: ARROW_OFFSET_DEFAULT
+        }
+      );
+      preferredPosition = result.side;
+      arrowOffset = showArrow ? result.arrowOffsetPercent : ARROW_OFFSET_DEFAULT;
+      tooltipEl.style.top = `${Math.round(result.top)}px`;
+      tooltipEl.style.left = `${Math.round(result.left)}px`;
       tooltipEl.style.setProperty("--arrow-offset", `${arrowOffset}%`);
       refreshTooltipClassName();
-    }, getInitialPosition = function(tooltipWidth, tooltipHeight) {
-      if (!targetRect) return { top: SAFEZONE, left: SAFEZONE };
-      const targetCenterX = targetRect.left + targetRect.width / 2;
-      const targetCenterY = targetRect.top + targetRect.height / 2;
-      switch (preferredPosition) {
-        case "top":
-          return {
-            top: targetRect.top - tooltipHeight - config.offset,
-            left: targetCenterX - tooltipWidth / 2
-          };
-        case "left":
-          return {
-            top: targetCenterY - tooltipHeight / 2,
-            left: targetRect.left - tooltipWidth - config.offset
-          };
-        case "right":
-          return {
-            top: targetCenterY - tooltipHeight / 2,
-            left: targetRect.right + config.offset
-          };
-        case "bottom":
-        default:
-          return {
-            top: targetRect.bottom + config.offset,
-            left: targetCenterX - tooltipWidth / 2
-          };
-      }
-    }, applyFallback = function(position, tooltipWidth, tooltipHeight) {
-      if (!targetRect) return;
-      const viewportWidth = window.innerWidth;
-      const viewportHeight = window.innerHeight;
-      switch (preferredPosition) {
-        case "bottom": {
-          const alternateTop = targetRect.top - tooltipHeight - config.offset;
-          if (position.top + tooltipHeight > viewportHeight - SAFEZONE && alternateTop >= SAFEZONE) {
-            position.top = alternateTop;
-            preferredPosition = "top";
-          }
-          break;
-        }
-        case "top": {
-          const alternateTop = targetRect.bottom + config.offset;
-          if (position.top < SAFEZONE && alternateTop + tooltipHeight <= viewportHeight - SAFEZONE) {
-            position.top = alternateTop;
-            preferredPosition = "bottom";
-          }
-          break;
-        }
-        case "left": {
-          const alternateLeft = targetRect.right + config.offset;
-          if (position.left < SAFEZONE && alternateLeft + tooltipWidth <= viewportWidth - SAFEZONE) {
-            position.left = alternateLeft;
-            preferredPosition = "right";
-          }
-          break;
-        }
-        case "right": {
-          const alternateLeft = targetRect.left - tooltipWidth - config.offset;
-          if (position.left + tooltipWidth > viewportWidth - SAFEZONE && alternateLeft >= SAFEZONE) {
-            position.left = alternateLeft;
-            preferredPosition = "left";
-          }
-          break;
-        }
-      }
-    }, clampToViewport = function(position, tooltipWidth, tooltipHeight) {
-      const original = { top: position.top, left: position.left };
-      const maxTop = Math.max(
-        SAFEZONE,
-        window.innerHeight - tooltipHeight - SAFEZONE
-      );
-      const maxLeft = Math.max(
-        SAFEZONE,
-        window.innerWidth - tooltipWidth - SAFEZONE
-      );
-      position.top = Math.max(SAFEZONE, Math.min(position.top, maxTop));
-      position.left = Math.max(SAFEZONE, Math.min(position.left, maxLeft));
-      if (showArrow) {
-        updateArrowOffset(original, position, tooltipWidth, tooltipHeight);
-      }
-    }, updateArrowOffset = function(original, clamped, tooltipWidth, tooltipHeight) {
-      if (!targetRect) return;
-      arrowOffset = ARROW_OFFSET_DEFAULT;
-      if (preferredPosition === "top" || preferredPosition === "bottom") {
-        if (original.left !== clamped.left) {
-          const targetCenterX = targetRect.left + targetRect.width / 2;
-          const offset = targetCenterX - clamped.left;
-          arrowOffset = calculatePercentageOffset(offset, tooltipWidth);
-        }
-        return;
-      }
-      if (original.top !== clamped.top) {
-        const targetCenterY = targetRect.top + targetRect.height / 2;
-        const offset = targetCenterY - clamped.top;
-        arrowOffset = calculatePercentageOffset(offset, tooltipHeight);
-      }
-    }, calculatePercentageOffset = function(offset, dimension) {
-      if (!dimension) return ARROW_OFFSET_DEFAULT;
-      const percentage = offset / dimension * 100;
-      return Math.max(ARROW_OFFSET_MIN, Math.min(ARROW_OFFSET_MAX, percentage));
     }, sameRect = function(left, right) {
       if (!left || !right) return false;
       return left.top === right.top && left.right === right.right && left.bottom === right.bottom && left.left === right.left && left.width === right.width && left.height === right.height;
@@ -705,7 +747,7 @@
         value && typeof value === "object" && typeof value.nodeType === "number" && typeof value.cloneNode === "function"
       );
     };
-    init2 = init, syncTornThemeVars2 = syncTornThemeVars, ensureHost2 = ensureHost, buildStylesheet2 = buildStylesheet, getVisualConfig2 = getVisualConfig, exposeApi2 = exposeApi, setupGlobalListeners2 = setupGlobalListeners, handleKeydown2 = handleKeydown, scheduleScrollUpdate2 = scheduleScrollUpdate, updateVisibleTooltip2 = updateVisibleTooltip, showTooltip2 = showTooltip, hideTooltip2 = hideTooltip, configure2 = configure, attachTooltip2 = attachTooltip, resolveContent2 = resolveContent, scanAll2 = scanAll, scanElement2 = scanElement, setupMutationObserver2 = setupMutationObserver, scanAddedNode2 = scanAddedNode, cleanupRemovedNode2 = cleanupRemovedNode, cleanupAttachedElement2 = cleanupAttachedElement, refreshElement2 = refreshElement, renderTooltip2 = renderTooltip, setupIntersectionObserver2 = setupIntersectionObserver, cleanupIntersectionObserver2 = cleanupIntersectionObserver, cleanupTooltip2 = cleanupTooltip, destroy2 = destroy, trackTargetPosition2 = trackTargetPosition, updateTooltipPosition2 = updateTooltipPosition, getInitialPosition2 = getInitialPosition, applyFallback2 = applyFallback, clampToViewport2 = clampToViewport, updateArrowOffset2 = updateArrowOffset, calculatePercentageOffset2 = calculatePercentageOffset, sameRect2 = sameRect, normalizePosition2 = normalizePosition, normalizeTheme2 = normalizeTheme, normalizeOptionalTheme2 = normalizeOptionalTheme, getTooltipClassName2 = getTooltipClassName, refreshTooltipClassName2 = refreshTooltipClassName, isConfigKey2 = isConfigKey, isElement2 = isElement, isNode2 = isNode;
+    init2 = init, syncTornThemeVars3 = syncTornThemeVars2, ensureHost2 = ensureHost, buildStylesheet2 = buildStylesheet, getVisualConfig2 = getVisualConfig, exposeApi2 = exposeApi, setupGlobalListeners2 = setupGlobalListeners, handleKeydown2 = handleKeydown, scheduleScrollUpdate2 = scheduleScrollUpdate, updateVisibleTooltip2 = updateVisibleTooltip, showTooltip2 = showTooltip, hideTooltip2 = hideTooltip, configure2 = configure, attachTooltip2 = attachTooltip, resolveContent2 = resolveContent, scanAll2 = scanAll, scanElement2 = scanElement, setupMutationObserver2 = setupMutationObserver, scanAddedNode2 = scanAddedNode, cleanupRemovedNode2 = cleanupRemovedNode, cleanupAttachedElement2 = cleanupAttachedElement, refreshElement2 = refreshElement, renderTooltip2 = renderTooltip, setupIntersectionObserver2 = setupIntersectionObserver, cleanupIntersectionObserver2 = cleanupIntersectionObserver, cleanupTooltip2 = cleanupTooltip, destroy2 = destroy, trackTargetPosition2 = trackTargetPosition, updateTooltipPosition2 = updateTooltipPosition, sameRect2 = sameRect, normalizePosition2 = normalizePosition, normalizeTheme2 = normalizeTheme, normalizeOptionalTheme2 = normalizeOptionalTheme, getTooltipClassName2 = getTooltipClassName, refreshTooltipClassName2 = refreshTooltipClassName, isConfigKey2 = isConfigKey, isElement2 = isElement, isNode2 = isNode;
     const DEFAULT_CONFIG = Object.freeze({
       theme: "dark",
       bgColor: THEME_TOKENS.dark.bgColor,
@@ -749,14 +791,6 @@
     const tooltipId = `balaclava-tt-${Math.random().toString(36).slice(2, 11)}`;
     let attachedElements = /* @__PURE__ */ new WeakMap();
     const attachmentDetachers = /* @__PURE__ */ new Set();
-    const TORN_THEME_VARS = [
-      "--crimes-crimeOption-bgColor",
-      "--crimes-outcomeDivider-color",
-      "--crimes-baseText-color",
-      "--tooltip-bg-color",
-      "--mini-profile-border",
-      "--mini-profile-box-shadow"
-    ];
     exposeApi();
     if (document.readyState === "loading") {
       readyController = new AbortController();
@@ -773,7 +807,7 @@
     }
   }
   var init2;
-  var syncTornThemeVars2;
+  var syncTornThemeVars3;
   var ensureHost2;
   var buildStylesheet2;
   var getVisualConfig2;
@@ -801,11 +835,6 @@
   var destroy2;
   var trackTargetPosition2;
   var updateTooltipPosition2;
-  var getInitialPosition2;
-  var applyFallback2;
-  var clampToViewport2;
-  var updateArrowOffset2;
-  var calculatePercentageOffset2;
   var sameRect2;
   var normalizePosition2;
   var normalizeTheme2;

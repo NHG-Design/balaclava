@@ -52,7 +52,8 @@ export const ACCELERANT_INFO: Readonly<
     suspicion: 3,
     ignitionRisk: 3,
     stokingRisk: 1,
-    advice: "Increases intensity by 25% of current intensity in single area.",
+    advice:
+      "Best for stoking, excellent for <3 zone targets. Increases intensity by 25% of current intensity in single area.",
   },
   [RESOURCE.MAGNESIUM]: {
     intensity: 8,
@@ -61,7 +62,7 @@ export const ACCELERANT_INFO: Readonly<
     ignitionRisk: 3,
     stokingRisk: 4,
     advice:
-      "Halves dampening effectiveness and intensity decay from firefighters. Increases visibility.",
+      "Best as starter, useful when low rurality. Halves dampening effectiveness and intensity decay from firefighters. Increases visibility.",
   },
   [RESOURCE.THERMITE]: {
     intensity: 7,
@@ -79,7 +80,7 @@ export const ACCELERANT_INFO: Readonly<
     ignitionRisk: 2,
     stokingRisk: 1,
     advice:
-      "Terrible starter, excellent for stoking size 4-5. Increases intensity by 25% of current in all areas.",
+      "Terrible starter, excellent for stoking 4-5 zone targets. Increases intensity by 25% of current in all areas.",
   },
   [RESOURCE.METHANE]: {
     intensity: 4,
@@ -96,7 +97,7 @@ export const ACCELERANT_INFO: Readonly<
     ignitionRisk: 2,
     stokingRisk: 3,
     advice:
-      "Averages intensity and momentum across all areas. Best for size 3-5 targets.",
+      "Best used for 3-5 zone targets, and when paired with one solid & one liquid. Averages intensity and momentum across all areas.",
   },
 };
 
@@ -105,12 +106,12 @@ export const IGNITER_INFO: Readonly<Partial<Record<ResourceId, IgniterInfo>>> =
     [RESOURCE.LIGHTER]: {
       suspicion: 1,
       advice:
-        "Baseline utility tool. Critical failure rates scale strictly with the quantity of fuels pre-placed.",
+        "Great for fine-tuning and low suspicion jobs. Provides very small increase in intensity (+2.5%) and momentum. Crit rate depends on accelerants used.",
     },
     [RESOURCE.MOLOTOV]: {
       suspicion: 6,
       advice:
-        "Moderately high intensity/momentum to area with lowest intensity. Fixed crit rate.",
+        "Great for spreading fires. Moderately high intensity (+17.5%) and momentum to area with lowest intensity based on the main zone momentum. Fixed crit rate.",
     },
     [RESOURCE.FLAMETHROWER]: {
       suspicion: 8,
