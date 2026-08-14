@@ -38,7 +38,8 @@
       "workerd"
     ],
     "overrides": {
-      "cookie": ">=0.7.0"
+      "cookie": ">=0.7.0",
+      "ws": ">=8.21.0"
     }
   },
   "dependencies": {
