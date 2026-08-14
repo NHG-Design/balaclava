@@ -1,5 +1,5 @@
 import type { RequestHandler } from './$types'
-import { signSession, sha256Hex, timingSafeEqual, ADMIN_SESSION_COOKIE } from '$lib/server/session'
+import { signSession, verifyPassword, timingSafeEqual, ADMIN_SESSION_COOKIE } from '$lib/server/session'
 
 const SESSION_MAX_AGE_SECONDS = 12 * 60 * 60 // 12 hours
 
@@ -33,8 +33,8 @@ export const POST: RequestHandler = async ({ request, platform, cookies }) => {
       })
     }
 
-    const inputHash = await sha256Hex(password)
-    if (!timingSafeEqual(inputUsername, username) || !timingSafeEqual(inputHash, passwordHash)) {
+    const passwordOk = await verifyPassword(password, passwordHash)
+    if (!timingSafeEqual(inputUsername, username) || !passwordOk) {
       return new Response(JSON.stringify({ error: 'Invalid credentials' }), {
         status: 401,
         headers: { 'Content-Type': 'application/json' },

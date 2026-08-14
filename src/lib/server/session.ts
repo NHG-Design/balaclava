@@ -1,12 +1,42 @@
 export const ADMIN_SESSION_COOKIE = 'pyro_admin_session'
+const PBKDF2_ITERATIONS = 210_000
 
-/** Unsalted SHA-256 hex digest — matches the convention implied by SCENARIO_ADMIN_PASSWORD_HASH's
- *  existing 64-hex-char value. */
-export async function sha256Hex(input: string): Promise<string> {
-  const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(input))
-  return Array.from(new Uint8Array(digest))
+function bytesToHex(bytes: Uint8Array): string {
+  return Array.from(bytes)
     .map((b) => b.toString(16).padStart(2, '0'))
     .join('')
+}
+
+function hexToBytes(hex: string): Uint8Array {
+  return new Uint8Array(hex.match(/.{2}/g)!.map((b) => parseInt(b, 16)))
+}
+
+/** Hashes a password with PBKDF2-SHA256 (210k iterations, OWASP 2023 minimum). Returns a
+ *  self-contained `saltHex:hashHex` string — pass an existing saltHex to verify against a
+ *  known hash, omit it to generate a fresh salt when hashing a new password. */
+export async function hashPassword(password: string, saltHex?: string): Promise<string> {
+  const salt = saltHex ? hexToBytes(saltHex) : crypto.getRandomValues(new Uint8Array(16))
+  const keyMaterial = await crypto.subtle.importKey(
+    'raw',
+    new TextEncoder().encode(password),
+    'PBKDF2',
+    false,
+    ['deriveBits'],
+  )
+  const bits = await crypto.subtle.deriveBits(
+    { name: 'PBKDF2', salt: salt as BufferSource, iterations: PBKDF2_ITERATIONS, hash: 'SHA-256' },
+    keyMaterial,
+    256,
+  )
+  return `${bytesToHex(salt)}:${bytesToHex(new Uint8Array(bits))}`
+}
+
+/** Verifies a password against a `saltHex:hashHex` string produced by hashPassword(). */
+export async function verifyPassword(password: string, stored: string): Promise<boolean> {
+  const [saltHex, hashHex] = stored.split(':')
+  if (!saltHex || !hashHex) return false
+  const candidate = await hashPassword(password, saltHex)
+  return timingSafeEqual(candidate, `${saltHex}:${hashHex}`)
 }
 
 /** Constant-time string comparison — avoids leaking match-length via early-exit timing on `!==`. */
