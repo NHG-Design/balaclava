@@ -9,6 +9,14 @@ export async function sha256Hex(input: string): Promise<string> {
     .join('')
 }
 
+/** Constant-time string comparison — avoids leaking match-length via early-exit timing on `!==`. */
+export function timingSafeEqual(a: string, b: string): boolean {
+  if (a.length !== b.length) return false
+  let diff = 0
+  for (let i = 0; i < a.length; i++) diff |= a.charCodeAt(i) ^ b.charCodeAt(i)
+  return diff === 0
+}
+
 async function hmacKey(secret: string): Promise<CryptoKey> {
   return crypto.subtle.importKey(
     'raw',
