@@ -10,6 +10,7 @@ import {
   ICON_CHEVRON_DOWN,
   ICON_CHECK_MASK_PATH,
   ICON_EXTERNAL_LINK,
+  ICON_RESET,
 } from "./icons.js";
 import { BAND_COLOR } from "./colors.js";
 import type { SettingsCtx } from "./settings.js";
@@ -40,11 +41,13 @@ const CHECKMARK_DATA_URI = `data:image/svg+xml,${encodeURIComponent(
 interface ActionItemDraft {
   resourceId: ResourceId | "";
   qty: number;
+  optional?: boolean;
 }
 
 interface NormalizedItem {
   resourceId: string;
   qty: number;
+  optional?: boolean;
 }
 
 interface NormalizedRecipe {
@@ -58,6 +61,38 @@ interface NormalizedRecipe {
   dampenEnabled: boolean;
   dampen: NormalizedItem[];
   dampenTime: string;
+}
+
+/** Counts field-level differences between the current draft and the known baseline, for the
+ *  "N changes ready to submit" status message. */
+function countRecipeChanges(
+  current: NormalizedRecipe,
+  baseline: NormalizedRecipe,
+): number {
+  let count = 0;
+  if (
+    current.payoutMin !== baseline.payoutMin ||
+    current.payoutMax !== baseline.payoutMax
+  )
+    count++;
+  if (JSON.stringify(current.place) !== JSON.stringify(baseline.place)) count++;
+  if (JSON.stringify(current.ignite) !== JSON.stringify(baseline.ignite))
+    count++;
+  if (
+    current.stokeEnabled !== baseline.stokeEnabled ||
+    JSON.stringify(current.stoke) !== JSON.stringify(baseline.stoke)
+  ) {
+    count++;
+  }
+  if (current.stokeTime !== baseline.stokeTime) count++;
+  if (
+    current.dampenEnabled !== baseline.dampenEnabled ||
+    JSON.stringify(current.dampen) !== JSON.stringify(baseline.dampen)
+  ) {
+    count++;
+  }
+  if (current.dampenTime !== baseline.dampenTime) count++;
+  return count;
 }
 
 const scenarioByName = new Map(SCENARIOS.map((s) => [s.scenarioName, s]));
@@ -215,11 +250,15 @@ function injectSubmitTabStyles(): void {
   const style = el("style");
   style.id = "pyro-submit-tab-styles";
   style.textContent = `
-.pyro-rc-group { display: flex; flex-direction: column; gap: 6px; }
-.pyro-rc-place-group > .pyro-rc-group-title { margin-bottom: 4px; }
-.pyro-rc-group-title { font-size: 11px; text-transform: uppercase; color: oklch(58% 0.012 285); display: flex; align-items: center; justify-content: space-between; }
+.pyro-rc-groups { display: flex; flex-direction: column; gap: 16px; }
+.pyro-rc-group { display: flex; flex-direction: column; gap: 8px; }
+.pyro-rc-steps { display: flex; flex-direction: column; gap: 4px; }
+.pyro-rc-group-title { font-size: 12px; text-transform: uppercase; color: oklch(58% 0.012 285); display: flex; align-items: center; justify-content: space-between; }
 .pyro-rc-payout-row { display: flex; gap: 6px; align-items: center; }
+.pyro-rc-divider { border: none; height: 1px; background: oklch(100% 0 0 / 0.14); margin: 0; }
 .pyro-rc-input {
+    box-sizing: border-box;
+    min-height: 24px;
     background: oklch(14.5% 0.011 285);
     border: 1px solid oklch(27% 0.017 285);
     color: oklch(82% 0.007 285);
@@ -233,11 +272,13 @@ function injectSubmitTabStyles(): void {
 .pyro-rc-input[type=number] { -moz-appearance: textfield; }
 .pyro-rc-input[type=number]::-webkit-inner-spin-button,
 .pyro-rc-input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
-.pyro-rc-row { display: flex; gap: 4px; align-items: center; }
+.pyro-rc-row { display: flex; gap: 6px; align-items: center; }
 .pyro-rc-row select { flex: 1; min-width: 0; }
 .pyro-rc-row .pyro-rc-input[type=number] { width: 48px; text-align: right; }
 
 .pyro-rc-select {
+    box-sizing: border-box;
+    min-height: 24px;
     appearance: base-select;
     background: oklch(14.5% 0.011 285);
     border: 1px solid oklch(27% 0.017 285);
@@ -313,7 +354,7 @@ function injectSubmitTabStyles(): void {
 }
 .pyro-rc-select optgroup {
     color: oklch(50% 0.01 285);
-    font-size: 10px;
+    font-size: 11px;
     text-transform: uppercase;
 }
 .pyro-rc-combobox { position: relative; width: 100%; }
@@ -342,9 +383,12 @@ function injectSubmitTabStyles(): void {
     all: unset;
     box-sizing: border-box;
     width: 100%;
+    min-height: 24px;
+    display: flex;
+    align-items: center;
     padding: 5px 8px;
     border-radius: 4px;
-    font-size: 11px;
+    font-size: 12px;
     color: oklch(82% 0.007 285);
     cursor: pointer;
 }
@@ -358,14 +402,17 @@ function injectSubmitTabStyles(): void {
 }
 .pyro-rc-combobox-empty {
     padding: 6px 8px;
-    font-size: 11px;
+    font-size: 12px;
     color: oklch(50% 0.008 285);
 }
 
 .pyro-rc-icon-btn {
-    background: oklch(15% 0.012 285);
-    border: 1px solid oklch(28% 0.018 285);
-    color: oklch(60% 0.009 285);
+    box-sizing: border-box;
+    min-height: 24px;
+    min-width: 24px;
+    background: oklch(19% 0.03 25);
+    border: 1px solid oklch(32% 0.06 25);
+    color: oklch(68% 0.09 25);
     cursor: pointer;
     border-radius: 5px;
     padding: 4px 6px;
@@ -375,14 +422,16 @@ function injectSubmitTabStyles(): void {
     flex-shrink: 0;
 }
 @media (hover: hover) and (pointer: fine) {
-    .pyro-rc-icon-btn:hover:not(:disabled) { background: oklch(21% 0.016 285); color: oklch(85% 0.006 285); }
+    .pyro-rc-icon-btn:hover:not(:disabled) { background: oklch(24% 0.07 25); color: oklch(80% 0.1 25); }
 }
 .pyro-rc-icon-btn:disabled { opacity: 0.28; cursor: default; }
 .pyro-rc-add-btn {
+    box-sizing: border-box;
+    min-height: 24px;
     background: none;
     border: none;
     color: oklch(58% 0.012 285);
-    font-size: 10px;
+    font-size: 11px;
     cursor: pointer;
     display: flex;
     align-items: center;
@@ -390,11 +439,49 @@ function injectSubmitTabStyles(): void {
     padding: 0;
 }
 @media (hover: hover) and (pointer: fine) { .pyro-rc-add-btn:hover { color: oklch(85% 0.006 285); } }
-.pyro-rc-check-row { display: flex; align-items: center; gap: 6px; font-size: 12px; color: oklch(62% 0.009 285); cursor: pointer; user-select: none; }
-.pyro-rc-toggle-body { display: flex; flex-direction: column; gap: 6px; padding-left: 4px; border-left: 2px solid oklch(27% 0.017 285); }
+.pyro-rc-check-row { box-sizing: border-box; min-height: 24px; display: flex; align-items: center; gap: 6px; font-size: 12px; color: oklch(62% 0.009 285); cursor: pointer; user-select: none; }
+.pyro-rc-toggle-body { display: flex; flex-direction: column; gap: 8px; padding-left: 4px; border-left: 2px solid oklch(27% 0.017 285); }
 .pyro-rc-time-row { display: flex; align-items: center; gap: 6px; }
 .pyro-rc-time-row .pyro-rc-input { flex: 1; }
+.pyro-rc-checkbox {
+    appearance: none;
+    -webkit-appearance: none;
+    box-sizing: border-box;
+    width: 15px;
+    height: 15px;
+    margin: 0;
+    flex-shrink: 0;
+    border: 1px solid oklch(42% 0.02 285);
+    border-radius: 3px;
+    background: oklch(14.5% 0.011 285);
+    accent-color: ${BAND_COLOR.excellent};
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+.pyro-rc-checkbox:checked {
+    background: ${BAND_COLOR.excellent};
+    border-color: ${BAND_COLOR.excellent};
+}
+.pyro-rc-checkbox:checked::after {
+    content: "";
+    width: 9px;
+    height: 9px;
+    background-color: oklch(18% 0 0);
+    -webkit-mask-image: url("${CHECKMARK_DATA_URI}");
+    mask-image: url("${CHECKMARK_DATA_URI}");
+    -webkit-mask-size: contain;
+    mask-size: contain;
+    -webkit-mask-repeat: no-repeat;
+    mask-repeat: no-repeat;
+}
+.pyro-rc-checkbox:focus-visible { outline: 2px solid ${BAND_COLOR.excellent}; outline-offset: 1px; }
+.pyro-rc-actions-row { display: flex; gap: 8px; }
 .pyro-rc-submit-btn {
+    box-sizing: border-box;
+    min-height: 24px;
+    flex: 1;
     background: oklch(15% 0.012 285);
     border: 1px solid oklch(28% 0.018 285);
     color: oklch(85% 0.006 285);
@@ -409,15 +496,35 @@ function injectSubmitTabStyles(): void {
 }
 @media (hover: hover) and (pointer: fine) { .pyro-rc-submit-btn:hover:not(:disabled) { background: oklch(21% 0.016 285); } }
 .pyro-rc-submit-btn:disabled { opacity: 0.4; cursor: default; }
-.pyro-rc-status { font-size: 10px; min-height: 13px; color: oklch(38% 0.008 285); display: flex; align-items: center; gap: 2px; }
+.pyro-rc-reset-btn {
+    box-sizing: border-box;
+    min-height: 24px;
+    background: oklch(19% 0.03 25);
+    border: 1px solid oklch(32% 0.06 25);
+    color: oklch(72% 0.09 25);
+    cursor: pointer;
+    border-radius: 5px;
+    padding: 6px 10px;
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+}
+@media (hover: hover) and (pointer: fine) { .pyro-rc-reset-btn:hover:not(:disabled) { background: oklch(24% 0.07 25); color: oklch(82% 0.1 25); } }
+.pyro-rc-reset-btn:disabled { opacity: 0.35; cursor: default; }
+.pyro-rc-reset-btn svg { width: 12px; height: 12px; flex-shrink: 0; }
+.pyro-rc-status { font-size: 11px; min-height: 14px; color: oklch(38% 0.008 285); display: flex; align-items: center; gap: 2px; }
 .pyro-rc-status.ok { color: #6d6; }
 .pyro-rc-status.err { color: #c66; }
 .pyro-rc-status.hint { color: oklch(45% 0.008 285); }
 .pyro-rc-status-warn { color: #e9a23b; margin-left: 3px; }
-.pyro-rc-external-link { font-size: 11px; color: ${BAND_COLOR.excellent}; text-decoration: none; display: inline-flex; align-items: center; gap: 3px; align-self: flex-start; }
+.pyro-rc-external-link { box-sizing: border-box; min-height: 24px; font-size: 12px; color: ${BAND_COLOR.excellent}; text-decoration: none; display: inline-flex; align-items: center; gap: 3px; align-self: flex-start; }
 .pyro-rc-external-link:hover { text-decoration: underline; }
 .pyro-rc-external-link svg { width: 10px; height: 10px; flex-shrink: 0; }
-.pyro-rc-field-err { font-size: 10px; color: #c66; min-height: 12px; }
+.pyro-rc-field-err { font-size: 11px; color: #c66; min-height: 13px; margin-top: -4px; }
+.pyro-rc-field-err:empty { display: none; margin-top: 0; }
+.pyro-rc-optional-check { box-sizing: border-box; min-height: 24px; display: flex; align-items: center; gap: 4px; font-size: 11px; color: oklch(55% 0.009 285); flex-shrink: 0; cursor: pointer; user-select: none; white-space: nowrap; }
 `;
   document.head.appendChild(style);
 }
@@ -485,6 +592,7 @@ function materialRow(
   canRemove: () => boolean,
   onChange: () => void,
   options: Array<{ label: string; ids: ResourceId[] }>,
+  allowOptional: boolean,
 ): HTMLElement {
   const row = el("div", "pyro-rc-row");
   row.appendChild(materialSelect(draft, onChange, options));
@@ -499,6 +607,23 @@ function materialRow(
     onChange();
   });
   row.appendChild(qty);
+
+  if (allowOptional) {
+    const optionalLbl = el("label", "pyro-rc-optional-check");
+    const optionalCheckbox = el(
+      "input",
+      "pyro-rc-checkbox",
+    ) as HTMLInputElement;
+    optionalCheckbox.type = "checkbox";
+    optionalCheckbox.checked = !!draft.optional;
+    optionalCheckbox.addEventListener("change", () => {
+      draft.optional = optionalCheckbox.checked;
+      onChange();
+    });
+    optionalLbl.appendChild(optionalCheckbox);
+    optionalLbl.appendChild(txt("Optional"));
+    row.appendChild(optionalLbl);
+  }
 
   const removeBtn = el("button", "pyro-rc-icon-btn") as HTMLButtonElement;
   removeBtn.type = "button";
@@ -515,9 +640,10 @@ function materialRowsGroup(
   drafts: ActionItemDraft[],
   onChange: () => void,
   options: Array<{ label: string; ids: ResourceId[] }> = RESOURCE_OPTIONS,
-): HTMLElement {
-  const rowsWrap = el("div", "pyro-rc-group");
-  const rowsContainer = el("div", "pyro-rc-group");
+  allowOptional = false,
+): { root: HTMLElement; setItems: (items: ActionItemDraft[]) => void } {
+  const rowsWrap = el("div", "pyro-rc-steps");
+  const rowsContainer = el("div", "pyro-rc-steps");
 
   function render(): void {
     rowsContainer.innerHTML = "";
@@ -533,6 +659,7 @@ function materialRowsGroup(
           () => drafts.length > 1,
           onChange,
           options,
+          allowOptional,
         ),
       );
     });
@@ -550,14 +677,27 @@ function materialRowsGroup(
 
   rowsWrap.appendChild(rowsContainer);
   rowsWrap.appendChild(addBtn);
-  return rowsWrap;
+
+  function setItems(items: ActionItemDraft[]): void {
+    drafts.length = 0;
+    drafts.push(...items);
+    render();
+  }
+
+  return { root: rowsWrap, setItems };
 }
 
 function draftsFromItems(
-  items: { resourceId: ResourceId; qty: number }[] | undefined,
+  items:
+    | { resourceId: ResourceId; qty: number; optional?: boolean }[]
+    | undefined,
 ): ActionItemDraft[] {
   if (!items || items.length === 0) return [{ resourceId: "", qty: 1 }];
-  return items.map((i) => ({ resourceId: i.resourceId, qty: i.qty }));
+  return items.map((i) => ({
+    resourceId: i.resourceId,
+    qty: i.qty,
+    optional: i.optional,
+  }));
 }
 
 // ---------------------------------------------------------------------------
@@ -577,11 +717,12 @@ function toggleSection(
   isEnabled: () => boolean;
   itemsErr: HTMLElement;
   timeErr: HTMLElement;
+  reset: (enabled: boolean, items: ActionItemDraft[], time: string) => void;
 } {
   const root = el("div", "pyro-rc-group");
 
   const checkRow = el("label", "pyro-rc-check-row");
-  const checkbox = document.createElement("input");
+  const checkbox = el("input", "pyro-rc-checkbox") as HTMLInputElement;
   checkbox.type = "checkbox";
   checkbox.checked = enabledInitially;
   const lbl = el("span");
@@ -592,7 +733,8 @@ function toggleSection(
 
   const body = el("div", "pyro-rc-toggle-body");
   body.style.display = enabledInitially ? "flex" : "none";
-  body.appendChild(materialRowsGroup(drafts, onChange, options));
+  const rows = materialRowsGroup(drafts, onChange, options, true);
+  body.appendChild(rows.root);
   const itemsErr = el("div", "pyro-rc-field-err");
   body.appendChild(itemsErr);
 
@@ -621,7 +763,19 @@ function toggleSection(
     onChange();
   });
 
-  return { root, isEnabled: () => checkbox.checked, itemsErr, timeErr };
+  function reset(
+    enabled: boolean,
+    items: ActionItemDraft[],
+    time: string,
+  ): void {
+    checkbox.checked = enabled;
+    body.style.display = enabled ? "flex" : "none";
+    rows.setItems(items);
+    timeState.value = time;
+    timeInput.value = time;
+  }
+
+  return { root, isEnabled: () => checkbox.checked, itemsErr, timeErr, reset };
 }
 
 // ---------------------------------------------------------------------------
@@ -629,7 +783,7 @@ function toggleSection(
 // ---------------------------------------------------------------------------
 
 function buildForm(scenarioName: string): HTMLElement {
-  const form = el("div", "pyro-rc-group");
+  const form = el("div", "pyro-rc-groups");
   const knownScenario = scenarioByName.get(scenarioName);
   const known: ScenarioActions | undefined = knownScenario?.actions;
 
@@ -661,20 +815,24 @@ function buildForm(scenarioName: string): HTMLElement {
   payoutMinInput.addEventListener("input", onChange);
   payoutMaxInput.addEventListener("input", onChange);
 
-  // Place materials
+  // Materials + igniter
+  const materialsIgniterGroup = el("div", "pyro-rc-group");
+
   const placeDrafts = draftsFromItems(known?.place);
   const placeGroup = el("div", "pyro-rc-group pyro-rc-place-group");
   const placeTitle = el("div", "pyro-rc-group-title");
   placeTitle.textContent = "Materials to place";
   placeGroup.appendChild(placeTitle);
-  placeGroup.appendChild(
-    materialRowsGroup(placeDrafts, onChange, PLACE_RESOURCE_OPTIONS),
+  const placeRows = materialRowsGroup(
+    placeDrafts,
+    onChange,
+    PLACE_RESOURCE_OPTIONS,
   );
+  placeGroup.appendChild(placeRows.root);
   const placeErr = el("div", "pyro-rc-field-err");
   placeGroup.appendChild(placeErr);
-  form.appendChild(placeGroup);
+  materialsIgniterGroup.appendChild(placeGroup);
 
-  // Igniter
   const igniterGroup = el("div", "pyro-rc-group");
   const igniterTitle = el("div", "pyro-rc-group-title");
   igniterTitle.textContent = "Igniter";
@@ -696,44 +854,64 @@ function buildForm(scenarioName: string): HTMLElement {
   igniterGroup.appendChild(igniterSelect);
   const igniterErr = el("div", "pyro-rc-field-err");
   igniterGroup.appendChild(igniterErr);
-  form.appendChild(igniterGroup);
+  materialsIgniterGroup.appendChild(igniterGroup);
   igniterSelect.addEventListener("change", onChange);
 
+  form.appendChild(materialsIgniterGroup);
+
   // Stoke / dampen
+  const stokeDampenGroup = el("div", "pyro-rc-group");
+  const stokeDampenTitle = el("div", "pyro-rc-group-title");
+  stokeDampenTitle.textContent = "Stoke/Dampen";
+  stokeDampenGroup.appendChild(stokeDampenTitle);
+
   const stokeDrafts = draftsFromItems(known?.stoke);
   const stokeTime = { value: known?.stokeTime ?? "" };
   const stoke = toggleSection(
     "Stoke",
-    "Stoke time (optional)",
+    "Stoke time",
     stokeDrafts,
     stokeTime,
     !!known?.stoke,
     onChange,
     STOKE_RESOURCE_OPTIONS,
   );
-  form.appendChild(stoke.root);
+  stokeDampenGroup.appendChild(stoke.root);
 
   const dampenDrafts = draftsFromItems(known?.dampen);
   const dampenTime = { value: known?.dampenTime ?? "" };
   const dampen = toggleSection(
     "Dampen",
-    "Dampen time (optional)",
+    "Dampen time",
     dampenDrafts,
     dampenTime,
     !!known?.dampen,
     onChange,
     DAMPEN_RESOURCE_OPTIONS,
   );
-  form.appendChild(dampen.root);
+  stokeDampenGroup.appendChild(dampen.root);
 
-  // Submit
+  form.appendChild(stokeDampenGroup);
+
+  // Divider
+  form.appendChild(el("hr", "pyro-rc-divider"));
+
+  // Submit + reset + feedback
+  const actionsGroup = el("div", "pyro-rc-group");
+  const actionsRow = el("div", "pyro-rc-actions-row");
+  const resetBtn = el("button", "pyro-rc-reset-btn") as HTMLButtonElement;
+  resetBtn.type = "button";
+  resetBtn.innerHTML = `${ICON_RESET}<span>Reset changes</span>`;
+  actionsRow.appendChild(resetBtn);
   const submitBtn = el("button", "pyro-rc-submit-btn") as HTMLButtonElement;
   submitBtn.type = "button";
   submitBtn.innerHTML = `${ICON_SEND}<span>Submit</span>`;
-  form.appendChild(submitBtn);
+  actionsRow.appendChild(submitBtn);
+  actionsGroup.appendChild(actionsRow);
 
   const status = el("div", "pyro-rc-status");
-  form.appendChild(status);
+  actionsGroup.appendChild(status);
+  form.appendChild(actionsGroup);
 
   function clearFieldErrors(): void {
     payoutErr.textContent = "";
@@ -753,6 +931,7 @@ function buildForm(scenarioName: string): HTMLElement {
     return items.map((d) => ({
       resourceId: d.resourceId as ResourceId,
       qty: d.qty,
+      ...(d.optional ? { optional: true } : {}),
     }));
   }
 
@@ -771,12 +950,14 @@ function buildForm(scenarioName: string): HTMLElement {
     stoke: (known?.stoke ?? []).map((i) => ({
       resourceId: i.resourceId,
       qty: i.qty,
+      ...(i.optional ? { optional: true } : {}),
     })),
     stokeTime: known?.stokeTime ?? "",
     dampenEnabled: !!known?.dampen,
     dampen: (known?.dampen ?? []).map((i) => ({
       resourceId: i.resourceId,
       qty: i.qty,
+      ...(i.optional ? { optional: true } : {}),
     })),
     dampenTime: known?.dampenTime ?? "",
   };
@@ -866,11 +1047,16 @@ function buildForm(scenarioName: string): HTMLElement {
       dampen: dampen.isEnabled() ? (dampenItems ?? []) : [],
       dampenTime: dampen.isEnabled() ? dampenTime.value.trim() : "",
     };
-    const changed = JSON.stringify(current) !== JSON.stringify(baseline);
+    const changeCount = countRecipeChanges(current, baseline);
+    const changed = changeCount > 0;
 
     submitBtn.disabled = !isValid || !changed;
+    resetBtn.disabled = !changed;
     if (isValid && !changed) {
       status.textContent = "No changes to submit yet.";
+      status.className = "pyro-rc-status hint";
+    } else if (isValid && changed) {
+      status.textContent = `${changeCount} change${changeCount === 1 ? "" : "s"} ready to submit.`;
       status.className = "pyro-rc-status hint";
     } else if (status.className === "pyro-rc-status hint") {
       status.textContent = "";
@@ -878,6 +1064,24 @@ function buildForm(scenarioName: string): HTMLElement {
     }
   };
   revalidate();
+
+  resetBtn.addEventListener("click", () => {
+    payoutMinInput.value = knownScenario ? String(knownScenario.payoutMin) : "";
+    payoutMaxInput.value = knownScenario ? String(knownScenario.payoutMax) : "";
+    placeRows.setItems(draftsFromItems(known?.place));
+    igniterSelect.value = knownIgniter ?? "";
+    stoke.reset(
+      !!known?.stoke,
+      draftsFromItems(known?.stoke),
+      known?.stokeTime ?? "",
+    );
+    dampen.reset(
+      !!known?.dampen,
+      draftsFromItems(known?.dampen),
+      known?.dampenTime ?? "",
+    );
+    revalidate();
+  });
 
   submitBtn.addEventListener("click", () => {
     revalidate();
@@ -946,20 +1150,34 @@ function buildForm(scenarioName: string): HTMLElement {
 }
 
 /**
- * Best-effort extraction of the logged-in player's Torn ID + display name from the
- * top-nav user-information block (`<a href="/profiles.php?XID=<id>">Name</a>`, confirmed
- * live: `.user-information___* a.menu-value___*`). Returns nulls (not thrown) if the
- * pattern can't be found — submission still succeeds without them.
+ * Best-effort extraction of the logged-in player's Torn ID + display name.
+ * Tries the desktop-only user-information block first (`.user-information___* a.menu-value___*`,
+ * has both id + name), then falls back to the top header's profile link
+ * (`#topHeaderBanner a[href*="profiles.php?XID="]`, present on both desktop and mobile —
+ * confirmed live via plans/arson/references/torn-header-markup.html) which yields the id but
+ * has no name text. Returns nulls (not thrown) if neither pattern is found — submission still
+ * succeeds without them.
  */
 function getPlayerInfoSafe(): { id: string | null; name: string | null } {
   try {
-    const link = document.querySelector<HTMLAnchorElement>(
+    const desktopLink = document.querySelector<HTMLAnchorElement>(
       '[class*="user-information"] a[href*="profiles.php?XID="]',
     );
-    if (!link) return { id: null, name: null };
-    const match = /XID=(\d+)/.exec(link.href);
-    const name = link.textContent?.trim() || null;
-    return { id: match ? match[1] : null, name };
+    if (desktopLink) {
+      const match = /XID=(\d+)/.exec(desktopLink.href);
+      const name = desktopLink.textContent?.trim() || null;
+      if (match) return { id: match[1], name };
+    }
+
+    const headerLink = document.querySelector<HTMLAnchorElement>(
+      '#topHeaderBanner a[href*="profiles.php?XID="]',
+    );
+    if (headerLink) {
+      const match = /XID=(\d+)/.exec(headerLink.href);
+      if (match) return { id: match[1], name: null };
+    }
+
+    return { id: null, name: null };
   } catch {
     return { id: null, name: null };
   }
@@ -972,7 +1190,7 @@ function getPlayerInfoSafe(): { id: string | null; name: string | null } {
 export function buildSubmitTab(_ctx: SettingsCtx): HTMLElement {
   injectSubmitTabStyles();
 
-  const root = el("div", "pyro-rc-group");
+  const root = el("div", "pyro-rc-groups");
 
   const submissionsLink = el("a", "pyro-rc-external-link") as HTMLAnchorElement;
   submissionsLink.href = "https://balaclava.app/arson/submissions";

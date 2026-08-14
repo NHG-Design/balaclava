@@ -21,7 +21,14 @@ import {
   ICON_ARROW_RIGHT,
   ICON_FLAME,
   ICON_EXTERNAL_LINK,
+  ICON_CHECK_MASK_PATH,
+  ICON_RESET,
+  ICON_REFRESH,
 } from "./icons.js";
+
+const CHECKMARK_DATA_URI = `data:image/svg+xml,${encodeURIComponent(
+  `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="${ICON_CHECK_MASK_PATH}"/></svg>`,
+)}`;
 
 // ---------------------------------------------------------------------------
 // Context
@@ -160,7 +167,7 @@ export function injectSettingsStyles(): void {
     background: oklch(14.5% 0.011 285);
     border: 1px solid oklch(27% 0.017 285);
     color: oklch(82% 0.007 285);
-    font-size: 11px;
+    font-size: 12px;
     padding: 3px 5px;
     border-radius: 5px;
     text-align: right;
@@ -179,7 +186,7 @@ export function injectSettingsStyles(): void {
     background: oklch(14.5% 0.011 285);
     border: 1px solid oklch(27% 0.017 285);
     color: oklch(82% 0.007 285);
-    font-size: 11px;
+    font-size: 12px;
     padding: 4px 6px;
     border-radius: 5px;
     min-width: 0;
@@ -188,21 +195,36 @@ export function injectSettingsStyles(): void {
 }
 .pyro-s-key-input:focus-visible { outline: none; border-color: ${BAND_COLOR.excellent}; }
 .pyro-s-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    box-sizing: border-box;
+    min-height: 24px;
     background: oklch(15% 0.012 285);
     border: 1px solid oklch(28% 0.018 285);
     color: oklch(60% 0.009 285);
     cursor: pointer;
     border-radius: 5px;
     padding: 4px 9px;
-    font-size: 11px;
+    font-size: 12px;
     white-space: nowrap;
     transition: transform 100ms ease-out, background 120ms ease-out, color 120ms ease-out;
 }
+.pyro-s-btn svg { width: 12px; height: 12px; flex-shrink: 0; }
 @media (hover: hover) and (pointer: fine) {
     .pyro-s-btn:hover:not(:disabled) { background: oklch(21% 0.016 285); color: oklch(85% 0.006 285); }
 }
 .pyro-s-btn:active:not(:disabled) { transform: scale(0.97); }
 .pyro-s-btn:disabled { opacity: 0.28; cursor: default; }
+.pyro-s-btn-danger {
+    background: oklch(19% 0.03 25);
+    border-color: oklch(32% 0.06 25);
+    color: oklch(72% 0.09 25);
+}
+@media (hover: hover) and (pointer: fine) {
+    .pyro-s-btn-danger:hover:not(:disabled) { background: oklch(24% 0.07 25); color: oklch(82% 0.1 25); }
+}
 .pyro-s-status {
     font-size: 10px;
     min-height: 13px;
@@ -226,12 +248,45 @@ export function injectSettingsStyles(): void {
     cursor: pointer;
     user-select: none;
 }
-.pyro-s-check-row input[type=checkbox] { cursor: pointer; }
 .pyro-s-check-row--disabled {
     opacity: 0.4;
     cursor: not-allowed;
 }
-.pyro-s-check-row--disabled input[type=checkbox] { cursor: not-allowed; }
+.pyro-s-checkbox {
+    appearance: none;
+    -webkit-appearance: none;
+    box-sizing: border-box;
+    width: 15px;
+    height: 15px;
+    margin: 0;
+    flex-shrink: 0;
+    border: 1px solid oklch(42% 0.02 285);
+    border-radius: 3px;
+    background: oklch(14.5% 0.011 285);
+    accent-color: ${BAND_COLOR.excellent};
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+.pyro-s-checkbox:checked {
+    background: ${BAND_COLOR.excellent};
+    border-color: ${BAND_COLOR.excellent};
+}
+.pyro-s-checkbox:checked::after {
+    content: "";
+    width: 9px;
+    height: 9px;
+    background-color: oklch(18% 0 0);
+    -webkit-mask-image: url("${CHECKMARK_DATA_URI}");
+    mask-image: url("${CHECKMARK_DATA_URI}");
+    -webkit-mask-size: contain;
+    mask-size: contain;
+    -webkit-mask-repeat: no-repeat;
+    mask-repeat: no-repeat;
+}
+.pyro-s-checkbox:focus-visible { outline: 2px solid ${BAND_COLOR.excellent}; outline-offset: 1px; }
+.pyro-s-checkbox:disabled, .pyro-s-check-row--disabled .pyro-s-checkbox { cursor: not-allowed; }
 .pyro-s-toggle-group {
     display: inline-flex;
     align-self: flex-start;
@@ -244,7 +299,7 @@ export function injectSettingsStyles(): void {
     border: none;
     color: oklch(62% 0.009 285);
     font: inherit;
-    font-size: 11px;
+    font-size: 12px;
     padding: 4px 12px;
     cursor: pointer;
     transition: background 120ms ease-out, color 120ms ease-out;
@@ -254,8 +309,8 @@ export function injectSettingsStyles(): void {
     .pyro-s-toggle-btn:not(.active):hover { color: oklch(82% 0.007 285); }
 }
 .pyro-s-toggle-btn.active {
-    background: color-mix(in oklch, ${BAND_COLOR.excellent} 22%, oklch(14.5% 0.011 285));
-    color: oklch(96% 0.012 95);
+    background: ${BAND_COLOR.excellent};
+    color: oklch(18% 0 0);
 }
 .pyro-s-section-note { display: flex; align-items: flex-start; gap: 5px; font-size: 10px; line-height: 1.4; color: oklch(57% 0.008 285); margin-bottom: 6px; }
 .pyro-s-section-note > svg { width: 10px; height: 10px; flex-shrink: 0; margin-top: 1px; }
@@ -363,15 +418,15 @@ function buildPricesTab(ctx: SettingsCtx, panel: HTMLElement): HTMLElement {
   const actionGroup = el("div", "pyro-s-group");
   const actionRow = el("div", "pyro-s-refresh-row");
 
-  const refreshBtn = el("button", "pyro-s-btn");
-  refreshBtn.type = "button";
-  refreshBtn.textContent = "Refresh";
-  if (!ctx.getApiKey()) refreshBtn.disabled = true;
-
-  const resetBtn = el("button", "pyro-s-btn");
+  const resetBtn = el("button", "pyro-s-btn pyro-s-btn-danger") as HTMLButtonElement;
   resetBtn.type = "button";
-  resetBtn.textContent = "Reset";
+  resetBtn.innerHTML = `${ICON_RESET}<span>Reset</span>`;
   if (!hasManualOverrides && !hasApiPrices) resetBtn.disabled = true;
+
+  const refreshBtn = el("button", "pyro-s-btn") as HTMLButtonElement;
+  refreshBtn.type = "button";
+  refreshBtn.innerHTML = `${ICON_REFRESH}<span>Refresh</span>`;
+  if (!ctx.getApiKey()) refreshBtn.disabled = true;
 
   const tsEl = el("span", "pyro-s-timestamp");
   const ts = ctx.getApiLastRefresh();
@@ -379,8 +434,8 @@ function buildPricesTab(ctx: SettingsCtx, panel: HTMLElement): HTMLElement {
     ? `Fetched: ${formatTimestamp(ts)}`
     : `DB: ${CATALOG_UPDATED}`;
 
-  actionRow.appendChild(refreshBtn);
   actionRow.appendChild(resetBtn);
+  actionRow.appendChild(refreshBtn);
   actionRow.appendChild(tsEl);
   actionGroup.appendChild(actionRow);
 
@@ -555,7 +610,7 @@ function checkboxRow(
   setVal: (v: boolean) => void,
 ): HTMLElement {
   const toggle = el("label", "pyro-s-check-row");
-  const checkbox = document.createElement("input");
+  const checkbox = el("input", "pyro-s-checkbox") as HTMLInputElement;
   checkbox.type = "checkbox";
   checkbox.checked = getVal();
   checkbox.addEventListener("change", () => {
@@ -577,11 +632,7 @@ function toggleGroupRow<T extends string>(
 ): HTMLElement {
   const row = el("div", "pyro-s-row");
 
-  const lbl = el("span", "pyro-s-label");
-  lbl.textContent = label;
   const labelId = `pyro-s-toggle-label-${idSlug}`;
-  lbl.id = labelId;
-  row.appendChild(lbl);
 
   const wrap = el("div", "pyro-s-toggle-group");
   wrap.setAttribute("role", "group");
@@ -610,6 +661,12 @@ function toggleGroupRow<T extends string>(
 
   sync();
   row.appendChild(wrap);
+
+  const lbl = el("span", "pyro-s-label");
+  lbl.textContent = label;
+  lbl.id = labelId;
+  row.appendChild(lbl);
+
   return row;
 }
 

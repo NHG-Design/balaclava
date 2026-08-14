@@ -873,7 +873,7 @@ function buildUnknownTooltip(): HTMLElement {
   wrap.appendChild(style);
   const msg = el("div");
   msg.style.cssText =
-    "padding:10px 12px;font-size:11px;color:#888;line-height:1.5;max-width:220px;";
+    "padding:10px 12px;font-size:12px;color:#888;line-height:1.5;max-width:220px;";
   msg.textContent =
     "This scenario isn't covered by Arsonist's Ledger yet — no scenario data available.";
   wrap.appendChild(msg);

@@ -6,6 +6,36 @@
       "sourceType": "github",
       "skillPath": "skills/meridian/SKILL.md",
       "computedHash": "2947c3c00d8aba616f87154ec6c6c92cc64e8e95e6621b6330fd064d5de13ac9"
+    },
+    "sentinel": {
+      "source": "robcsaszar/sentinel",
+      "sourceType": "github",
+      "skillPath": "skills/sentinel/SKILL.md",
+      "computedHash": "6b68812bebd6d5ce146a0f90afa76190a4a8ca40a75b19cd36f2dcc710106b72"
+    },
+    "with-canvas": {
+      "source": "robcsaszar/frontend-kit",
+      "sourceType": "github",
+      "skillPath": "skills/with-canvas/SKILL.md",
+      "computedHash": "51303491a5be6833471d1afdf0479a028d6fd8d225c64c4e9a75c677bcffe3c4"
+    },
+    "with-drag-drop": {
+      "source": "robcsaszar/frontend-kit",
+      "sourceType": "github",
+      "skillPath": "skills/with-drag-drop/SKILL.md",
+      "computedHash": "1150ca4d097b8a46b2216d03ee83c6209b8621eb7ccd380079c4fb61d13d46c4"
+    },
+    "with-svelte": {
+      "source": "robcsaszar/frontend-kit",
+      "sourceType": "github",
+      "skillPath": "skills/with-svelte/SKILL.md",
+      "computedHash": "9bcae74b587d274bb09ae745a87a8e398e92a0348a0bead14fa2bf6df282d1eb"
+    },
+    "with-svg-animation": {
+      "source": "robcsaszar/frontend-kit",
+      "sourceType": "github",
+      "skillPath": "skills/with-svg-animation/SKILL.md",
+      "computedHash": "daf4565ad4f59bc31bc87faa1488e94d7ed5c3ea7d7c3c0816eda40ae67ad496"
     }
   }
 }

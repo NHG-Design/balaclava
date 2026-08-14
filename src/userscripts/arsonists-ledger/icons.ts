@@ -40,3 +40,7 @@ export const ICON_CHEVRON_DOWN = `<svg ${S} width="16" height="16" aria-hidden="
 /** Bare filled path (no viewBox wrapper) — used as a mask-image source for CSS ::checkmark, not injected via innerHTML. */
 export const ICON_CHECK_MASK_PATH =
   "M9 16.2l-3.5-3.5-1.4 1.4L9 19 20 8l-1.4-1.4z";
+
+export const ICON_RESET = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M3.06 13a9 9 0 1 0 .49 -4.087" /><path d="M3 4.001v5h5" /><path d="M11 12a1 1 0 1 0 2 0a1 1 0 1 0 -2 0" /></svg>`;
+
+export const ICON_REFRESH = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M20 11a8.1 8.1 0 0 0 -15.5 -2m-.5 -4v4h4" /><path d="M4 13a8.1 8.1 0 0 0 15.5 2m.5 4v-4h-4" /></svg>`;

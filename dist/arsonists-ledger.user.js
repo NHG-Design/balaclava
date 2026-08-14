@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        Torn Arsonist's Ledger
 // @namespace   https://greasyfork.org/en/users/942572-yukio-mizsima
-// @version     1.2.1
+// @version     1.2.8
 // @description Arson profit-per-nerve calculator and scenario guide for Torn's Crimes page
 // @icon        https://www.google.com/s2/favicons?sz=64&domain=torn.com
 // @author      Yukio [906148]
@@ -18,7 +18,7 @@
 "use strict";
 (() => {
   // src/data/scenarios-version.ts
-  var SCENARIOS_VERSION = "a857a5929ddf";
+  var SCENARIOS_VERSION = "0871885907ec";
 
   // src/data/catalog.ts
   var CATALOG_UPDATED = "2026-08-08";
@@ -302,8 +302,8 @@
       payoutMin: 1e5,
       payoutMax: 13e4,
       actions: {
-        ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
-        place: [{ resourceId: RESOURCE.GASOLINE, qty: 3 }]
+        place: [{ resourceId: RESOURCE.GASOLINE, qty: 3 }],
+        ignite: [{ resourceId: RESOURCE.LIGHTER, qty: 1 }]
       }
     },
     {
@@ -924,8 +924,10 @@
       payoutMin: 33e4,
       payoutMax: 38e4,
       actions: {
+        place: [{ resourceId: RESOURCE.KEROSENE, qty: 3 }],
         ignite: [{ resourceId: RESOURCE.LIGHTER, qty: 1 }],
-        place: [{ resourceId: RESOURCE.KEROSENE, qty: 3 }]
+        stoke: [{ resourceId: RESOURCE.METHANE, qty: 2 }],
+        stokeTime: "early"
       }
     },
     {
@@ -1553,30 +1555,30 @@
     {
       scenarioName: "Low Rent",
       payoutMin: 42e3,
-      payoutMax: 2e5,
+      payoutMax: 21e4,
       actions: {
-        ignite: [{ resourceId: RESOURCE.LIGHTER, qty: 1 }],
         place: [{ resourceId: RESOURCE.GASOLINE, qty: 2 }],
+        ignite: [{ resourceId: RESOURCE.LIGHTER, qty: 1 }],
         stoke: [{ resourceId: RESOURCE.METHANE, qty: 2 }],
         stokeTime: "early"
       }
     },
     {
       scenarioName: "Make a Killing",
-      payoutMin: 39e4,
+      payoutMin: 34e4,
       payoutMax: 48e4,
       actions: {
-        ignite: [{ resourceId: RESOURCE.LIGHTER, qty: 1 }],
-        place: [{ resourceId: RESOURCE.KEROSENE, qty: 3 }]
+        place: [{ resourceId: RESOURCE.KEROSENE, qty: 3 }],
+        ignite: [{ resourceId: RESOURCE.LIGHTER, qty: 1 }]
       }
     },
     {
       scenarioName: "Mallrats",
       payoutMin: 41e4,
-      payoutMax: 41e4,
+      payoutMax: 44e4,
       actions: {
-        ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
         place: [{ resourceId: RESOURCE.GASOLINE, qty: 4 }],
+        ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
         stoke: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }]
       }
     },
@@ -1842,11 +1844,11 @@
     },
     {
       scenarioName: "Second Hand Smoke",
-      payoutMin: 18e4,
+      payoutMin: 15e4,
       payoutMax: 21e4,
       actions: {
-        ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
         place: [{ resourceId: RESOURCE.GASOLINE, qty: 2 }],
+        ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
         stoke: [{ resourceId: RESOURCE.METHANE, qty: 2 }],
         stokeTime: "early"
       }
@@ -1922,11 +1924,11 @@
     },
     {
       scenarioName: "Smoke Signals",
-      payoutMin: 12e4,
+      payoutMin: 11e4,
       payoutMax: 12e4,
       actions: {
-        ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
-        place: [{ resourceId: RESOURCE.DIESEL, qty: 3 }]
+        place: [{ resourceId: RESOURCE.DIESEL, qty: 3 }],
+        ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }]
       }
     },
     {
@@ -2216,8 +2218,8 @@
       payoutMin: 75500,
       payoutMax: 1e5,
       actions: {
-        ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
-        place: [{ resourceId: RESOURCE.GASOLINE, qty: 4 }]
+        place: [{ resourceId: RESOURCE.GASOLINE, qty: 4 }],
+        ignite: [{ resourceId: RESOURCE.LIGHTER, qty: 1 }]
       }
     },
     {
@@ -3771,7 +3773,7 @@
 .pyro-tt-row {
     display: flex;
     flex-direction: column;
-    font-size: 11px;
+    font-size: 12px;
 }
 .pyro-tt-label {
     color: oklch(66% 0 0);
@@ -3793,7 +3795,7 @@
 .pyro-tt-action-label {
     min-width: 56px;
     color: oklch(66% 0 0);
-    font-size: 11px;
+    font-size: 12px;
 }
 .pyro-tt-timing {
     font-size: 9px;
@@ -3804,7 +3806,7 @@
     border-radius: 2px;
 }
 .pyro-tt-action-value {
-    font-size: 11px;
+    font-size: 12px;
 }
 .pyro-tt-item-cost {
     color: oklch(66% 0 0);
@@ -3827,7 +3829,7 @@
 .pyro-tt-notes {
     margin-top: 5px;
     opacity: 0.7;
-    font-size: 11px;
+    font-size: 12px;
     font-style: italic;
 }
 .pyro-tt-req {
@@ -4101,6 +4103,8 @@
   var ICON_SEND = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M10 14l11 -11"/><path d="M21 3l-6.5 18a0.55 .55 0 0 1 -1 0l-3.5 -7l-7 -3.5a0.55 .55 0 0 1 0 -1l18 -6.5"/></svg>`;
   var ICON_CHEVRON_DOWN = `<svg ${S} width="16" height="16" aria-hidden="true">${BLANK}<path d="M6 9l6 6l6 -6"/></svg>`;
   var ICON_CHECK_MASK_PATH = "M9 16.2l-3.5-3.5-1.4 1.4L9 19 20 8l-1.4-1.4z";
+  var ICON_RESET = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M3.06 13a9 9 0 1 0 .49 -4.087" /><path d="M3 4.001v5h5" /><path d="M11 12a1 1 0 1 0 2 0a1 1 0 1 0 -2 0" /></svg>`;
+  var ICON_REFRESH = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M20 11a8.1 8.1 0 0 0 -15.5 -2m-.5 -4v4h4" /><path d="M4 13a8.1 8.1 0 0 0 15.5 2m.5 4v-4h-4" /></svg>`;
 
   // src/userscripts/arsonists-ledger/submit-tab.ts
   var SUBMIT_URL = "https://balaclava.app/api/arson/recipe-submissions";
@@ -4109,6 +4113,23 @@
   var CHECKMARK_DATA_URI = `data:image/svg+xml,${encodeURIComponent(
     `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="${ICON_CHECK_MASK_PATH}"/></svg>`
   )}`;
+  function countRecipeChanges(current, baseline) {
+    let count = 0;
+    if (current.payoutMin !== baseline.payoutMin || current.payoutMax !== baseline.payoutMax)
+      count++;
+    if (JSON.stringify(current.place) !== JSON.stringify(baseline.place)) count++;
+    if (JSON.stringify(current.ignite) !== JSON.stringify(baseline.ignite))
+      count++;
+    if (current.stokeEnabled !== baseline.stokeEnabled || JSON.stringify(current.stoke) !== JSON.stringify(baseline.stoke)) {
+      count++;
+    }
+    if (current.stokeTime !== baseline.stokeTime) count++;
+    if (current.dampenEnabled !== baseline.dampenEnabled || JSON.stringify(current.dampen) !== JSON.stringify(baseline.dampen)) {
+      count++;
+    }
+    if (current.dampenTime !== baseline.dampenTime) count++;
+    return count;
+  }
   var scenarioByName = new Map(SCENARIOS.map((s) => [s.scenarioName, s]));
   var preselectedScenario = null;
   function setPreselectedScenario(name) {
@@ -4212,11 +4233,15 @@
     const style = el("style");
     style.id = "pyro-submit-tab-styles";
     style.textContent = `
-.pyro-rc-group { display: flex; flex-direction: column; gap: 6px; }
-.pyro-rc-place-group > .pyro-rc-group-title { margin-bottom: 4px; }
-.pyro-rc-group-title { font-size: 11px; text-transform: uppercase; color: oklch(58% 0.012 285); display: flex; align-items: center; justify-content: space-between; }
+.pyro-rc-groups { display: flex; flex-direction: column; gap: 16px; }
+.pyro-rc-group { display: flex; flex-direction: column; gap: 8px; }
+.pyro-rc-steps { display: flex; flex-direction: column; gap: 4px; }
+.pyro-rc-group-title { font-size: 12px; text-transform: uppercase; color: oklch(58% 0.012 285); display: flex; align-items: center; justify-content: space-between; }
 .pyro-rc-payout-row { display: flex; gap: 6px; align-items: center; }
+.pyro-rc-divider { border: none; height: 1px; background: oklch(100% 0 0 / 0.14); margin: 0; }
 .pyro-rc-input {
+    box-sizing: border-box;
+    min-height: 24px;
     background: oklch(14.5% 0.011 285);
     border: 1px solid oklch(27% 0.017 285);
     color: oklch(82% 0.007 285);
@@ -4230,11 +4255,13 @@
 .pyro-rc-input[type=number] { -moz-appearance: textfield; }
 .pyro-rc-input[type=number]::-webkit-inner-spin-button,
 .pyro-rc-input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
-.pyro-rc-row { display: flex; gap: 4px; align-items: center; }
+.pyro-rc-row { display: flex; gap: 6px; align-items: center; }
 .pyro-rc-row select { flex: 1; min-width: 0; }
 .pyro-rc-row .pyro-rc-input[type=number] { width: 48px; text-align: right; }
 
 .pyro-rc-select {
+    box-sizing: border-box;
+    min-height: 24px;
     appearance: base-select;
     background: oklch(14.5% 0.011 285);
     border: 1px solid oklch(27% 0.017 285);
@@ -4310,7 +4337,7 @@
 }
 .pyro-rc-select optgroup {
     color: oklch(50% 0.01 285);
-    font-size: 10px;
+    font-size: 11px;
     text-transform: uppercase;
 }
 .pyro-rc-combobox { position: relative; width: 100%; }
@@ -4339,9 +4366,12 @@
     all: unset;
     box-sizing: border-box;
     width: 100%;
+    min-height: 24px;
+    display: flex;
+    align-items: center;
     padding: 5px 8px;
     border-radius: 4px;
-    font-size: 11px;
+    font-size: 12px;
     color: oklch(82% 0.007 285);
     cursor: pointer;
 }
@@ -4355,14 +4385,17 @@
 }
 .pyro-rc-combobox-empty {
     padding: 6px 8px;
-    font-size: 11px;
+    font-size: 12px;
     color: oklch(50% 0.008 285);
 }
 
 .pyro-rc-icon-btn {
-    background: oklch(15% 0.012 285);
-    border: 1px solid oklch(28% 0.018 285);
-    color: oklch(60% 0.009 285);
+    box-sizing: border-box;
+    min-height: 24px;
+    min-width: 24px;
+    background: oklch(19% 0.03 25);
+    border: 1px solid oklch(32% 0.06 25);
+    color: oklch(68% 0.09 25);
     cursor: pointer;
     border-radius: 5px;
     padding: 4px 6px;
@@ -4372,14 +4405,16 @@
     flex-shrink: 0;
 }
 @media (hover: hover) and (pointer: fine) {
-    .pyro-rc-icon-btn:hover:not(:disabled) { background: oklch(21% 0.016 285); color: oklch(85% 0.006 285); }
+    .pyro-rc-icon-btn:hover:not(:disabled) { background: oklch(24% 0.07 25); color: oklch(80% 0.1 25); }
 }
 .pyro-rc-icon-btn:disabled { opacity: 0.28; cursor: default; }
 .pyro-rc-add-btn {
+    box-sizing: border-box;
+    min-height: 24px;
     background: none;
     border: none;
     color: oklch(58% 0.012 285);
-    font-size: 10px;
+    font-size: 11px;
     cursor: pointer;
     display: flex;
     align-items: center;
@@ -4387,11 +4422,49 @@
     padding: 0;
 }
 @media (hover: hover) and (pointer: fine) { .pyro-rc-add-btn:hover { color: oklch(85% 0.006 285); } }
-.pyro-rc-check-row { display: flex; align-items: center; gap: 6px; font-size: 12px; color: oklch(62% 0.009 285); cursor: pointer; user-select: none; }
-.pyro-rc-toggle-body { display: flex; flex-direction: column; gap: 6px; padding-left: 4px; border-left: 2px solid oklch(27% 0.017 285); }
+.pyro-rc-check-row { box-sizing: border-box; min-height: 24px; display: flex; align-items: center; gap: 6px; font-size: 12px; color: oklch(62% 0.009 285); cursor: pointer; user-select: none; }
+.pyro-rc-toggle-body { display: flex; flex-direction: column; gap: 8px; padding-left: 4px; border-left: 2px solid oklch(27% 0.017 285); }
 .pyro-rc-time-row { display: flex; align-items: center; gap: 6px; }
 .pyro-rc-time-row .pyro-rc-input { flex: 1; }
+.pyro-rc-checkbox {
+    appearance: none;
+    -webkit-appearance: none;
+    box-sizing: border-box;
+    width: 15px;
+    height: 15px;
+    margin: 0;
+    flex-shrink: 0;
+    border: 1px solid oklch(42% 0.02 285);
+    border-radius: 3px;
+    background: oklch(14.5% 0.011 285);
+    accent-color: ${BAND_COLOR.excellent};
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+.pyro-rc-checkbox:checked {
+    background: ${BAND_COLOR.excellent};
+    border-color: ${BAND_COLOR.excellent};
+}
+.pyro-rc-checkbox:checked::after {
+    content: "";
+    width: 9px;
+    height: 9px;
+    background-color: oklch(18% 0 0);
+    -webkit-mask-image: url("${CHECKMARK_DATA_URI}");
+    mask-image: url("${CHECKMARK_DATA_URI}");
+    -webkit-mask-size: contain;
+    mask-size: contain;
+    -webkit-mask-repeat: no-repeat;
+    mask-repeat: no-repeat;
+}
+.pyro-rc-checkbox:focus-visible { outline: 2px solid ${BAND_COLOR.excellent}; outline-offset: 1px; }
+.pyro-rc-actions-row { display: flex; gap: 8px; }
 .pyro-rc-submit-btn {
+    box-sizing: border-box;
+    min-height: 24px;
+    flex: 1;
     background: oklch(15% 0.012 285);
     border: 1px solid oklch(28% 0.018 285);
     color: oklch(85% 0.006 285);
@@ -4406,15 +4479,35 @@
 }
 @media (hover: hover) and (pointer: fine) { .pyro-rc-submit-btn:hover:not(:disabled) { background: oklch(21% 0.016 285); } }
 .pyro-rc-submit-btn:disabled { opacity: 0.4; cursor: default; }
-.pyro-rc-status { font-size: 10px; min-height: 13px; color: oklch(38% 0.008 285); display: flex; align-items: center; gap: 2px; }
+.pyro-rc-reset-btn {
+    box-sizing: border-box;
+    min-height: 24px;
+    background: oklch(19% 0.03 25);
+    border: 1px solid oklch(32% 0.06 25);
+    color: oklch(72% 0.09 25);
+    cursor: pointer;
+    border-radius: 5px;
+    padding: 6px 10px;
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+}
+@media (hover: hover) and (pointer: fine) { .pyro-rc-reset-btn:hover:not(:disabled) { background: oklch(24% 0.07 25); color: oklch(82% 0.1 25); } }
+.pyro-rc-reset-btn:disabled { opacity: 0.35; cursor: default; }
+.pyro-rc-reset-btn svg { width: 12px; height: 12px; flex-shrink: 0; }
+.pyro-rc-status { font-size: 11px; min-height: 14px; color: oklch(38% 0.008 285); display: flex; align-items: center; gap: 2px; }
 .pyro-rc-status.ok { color: #6d6; }
 .pyro-rc-status.err { color: #c66; }
 .pyro-rc-status.hint { color: oklch(45% 0.008 285); }
 .pyro-rc-status-warn { color: #e9a23b; margin-left: 3px; }
-.pyro-rc-external-link { font-size: 11px; color: ${BAND_COLOR.excellent}; text-decoration: none; display: inline-flex; align-items: center; gap: 3px; align-self: flex-start; }
+.pyro-rc-external-link { box-sizing: border-box; min-height: 24px; font-size: 12px; color: ${BAND_COLOR.excellent}; text-decoration: none; display: inline-flex; align-items: center; gap: 3px; align-self: flex-start; }
 .pyro-rc-external-link:hover { text-decoration: underline; }
 .pyro-rc-external-link svg { width: 10px; height: 10px; flex-shrink: 0; }
-.pyro-rc-field-err { font-size: 10px; color: #c66; min-height: 12px; }
+.pyro-rc-field-err { font-size: 11px; color: #c66; min-height: 13px; margin-top: -4px; }
+.pyro-rc-field-err:empty { display: none; margin-top: 0; }
+.pyro-rc-optional-check { box-sizing: border-box; min-height: 24px; display: flex; align-items: center; gap: 4px; font-size: 11px; color: oklch(55% 0.009 285); flex-shrink: 0; cursor: pointer; user-select: none; white-space: nowrap; }
 `;
     document.head.appendChild(style);
   }
@@ -4455,7 +4548,7 @@
     addSelectChrome(select);
     return select;
   }
-  function materialRow(draft, onRemove, canRemove, onChange, options) {
+  function materialRow(draft, onRemove, canRemove, onChange, options, allowOptional) {
     const row2 = el("div", "pyro-rc-row");
     row2.appendChild(materialSelect(draft, onChange, options));
     const qty = el("input", "pyro-rc-input");
@@ -4468,6 +4561,22 @@
       onChange();
     });
     row2.appendChild(qty);
+    if (allowOptional) {
+      const optionalLbl = el("label", "pyro-rc-optional-check");
+      const optionalCheckbox = el(
+        "input",
+        "pyro-rc-checkbox"
+      );
+      optionalCheckbox.type = "checkbox";
+      optionalCheckbox.checked = !!draft.optional;
+      optionalCheckbox.addEventListener("change", () => {
+        draft.optional = optionalCheckbox.checked;
+        onChange();
+      });
+      optionalLbl.appendChild(optionalCheckbox);
+      optionalLbl.appendChild(txt("Optional"));
+      row2.appendChild(optionalLbl);
+    }
     const removeBtn = el("button", "pyro-rc-icon-btn");
     removeBtn.type = "button";
     removeBtn.innerHTML = ICON_TRASH;
@@ -4477,9 +4586,9 @@
     row2.appendChild(removeBtn);
     return row2;
   }
-  function materialRowsGroup(drafts, onChange, options = RESOURCE_OPTIONS) {
-    const rowsWrap = el("div", "pyro-rc-group");
-    const rowsContainer = el("div", "pyro-rc-group");
+  function materialRowsGroup(drafts, onChange, options = RESOURCE_OPTIONS, allowOptional = false) {
+    const rowsWrap = el("div", "pyro-rc-steps");
+    const rowsContainer = el("div", "pyro-rc-steps");
     function render() {
       rowsContainer.innerHTML = "";
       drafts.forEach((draft, i) => {
@@ -4493,7 +4602,8 @@
             },
             () => drafts.length > 1,
             onChange,
-            options
+            options,
+            allowOptional
           )
         );
       });
@@ -4509,16 +4619,25 @@
     });
     rowsWrap.appendChild(rowsContainer);
     rowsWrap.appendChild(addBtn);
-    return rowsWrap;
+    function setItems(items) {
+      drafts.length = 0;
+      drafts.push(...items);
+      render();
+    }
+    return { root: rowsWrap, setItems };
   }
   function draftsFromItems(items) {
     if (!items || items.length === 0) return [{ resourceId: "", qty: 1 }];
-    return items.map((i) => ({ resourceId: i.resourceId, qty: i.qty }));
+    return items.map((i) => ({
+      resourceId: i.resourceId,
+      qty: i.qty,
+      optional: i.optional
+    }));
   }
   function toggleSection(label, timeLabel, drafts, timeState, enabledInitially, onChange, options) {
     const root = el("div", "pyro-rc-group");
     const checkRow = el("label", "pyro-rc-check-row");
-    const checkbox = document.createElement("input");
+    const checkbox = el("input", "pyro-rc-checkbox");
     checkbox.type = "checkbox";
     checkbox.checked = enabledInitially;
     const lbl = el("span");
@@ -4528,7 +4647,8 @@
     root.appendChild(checkRow);
     const body = el("div", "pyro-rc-toggle-body");
     body.style.display = enabledInitially ? "flex" : "none";
-    body.appendChild(materialRowsGroup(drafts, onChange, options));
+    const rows = materialRowsGroup(drafts, onChange, options, true);
+    body.appendChild(rows.root);
     const itemsErr = el("div", "pyro-rc-field-err");
     body.appendChild(itemsErr);
     const timeRow = el("div", "pyro-rc-time-row");
@@ -4552,10 +4672,17 @@
       body.style.display = checkbox.checked ? "flex" : "none";
       onChange();
     });
-    return { root, isEnabled: () => checkbox.checked, itemsErr, timeErr };
+    function reset(enabled, items, time) {
+      checkbox.checked = enabled;
+      body.style.display = enabled ? "flex" : "none";
+      rows.setItems(items);
+      timeState.value = time;
+      timeInput.value = time;
+    }
+    return { root, isEnabled: () => checkbox.checked, itemsErr, timeErr, reset };
   }
   function buildForm(scenarioName) {
-    const form = el("div", "pyro-rc-group");
+    const form = el("div", "pyro-rc-groups");
     const knownScenario = scenarioByName.get(scenarioName);
     const known = knownScenario?.actions;
     let revalidate = () => {
@@ -4584,17 +4711,21 @@
     form.appendChild(payoutGroup);
     payoutMinInput.addEventListener("input", onChange);
     payoutMaxInput.addEventListener("input", onChange);
+    const materialsIgniterGroup = el("div", "pyro-rc-group");
     const placeDrafts = draftsFromItems(known?.place);
     const placeGroup = el("div", "pyro-rc-group pyro-rc-place-group");
     const placeTitle = el("div", "pyro-rc-group-title");
     placeTitle.textContent = "Materials to place";
     placeGroup.appendChild(placeTitle);
-    placeGroup.appendChild(
-      materialRowsGroup(placeDrafts, onChange, PLACE_RESOURCE_OPTIONS)
+    const placeRows = materialRowsGroup(
+      placeDrafts,
+      onChange,
+      PLACE_RESOURCE_OPTIONS
     );
+    placeGroup.appendChild(placeRows.root);
     const placeErr = el("div", "pyro-rc-field-err");
     placeGroup.appendChild(placeErr);
-    form.appendChild(placeGroup);
+    materialsIgniterGroup.appendChild(placeGroup);
     const igniterGroup = el("div", "pyro-rc-group");
     const igniterTitle = el("div", "pyro-rc-group-title");
     igniterTitle.textContent = "Igniter";
@@ -4616,38 +4747,53 @@
     igniterGroup.appendChild(igniterSelect);
     const igniterErr = el("div", "pyro-rc-field-err");
     igniterGroup.appendChild(igniterErr);
-    form.appendChild(igniterGroup);
+    materialsIgniterGroup.appendChild(igniterGroup);
     igniterSelect.addEventListener("change", onChange);
+    form.appendChild(materialsIgniterGroup);
+    const stokeDampenGroup = el("div", "pyro-rc-group");
+    const stokeDampenTitle = el("div", "pyro-rc-group-title");
+    stokeDampenTitle.textContent = "Stoke/Dampen";
+    stokeDampenGroup.appendChild(stokeDampenTitle);
     const stokeDrafts = draftsFromItems(known?.stoke);
     const stokeTime = { value: known?.stokeTime ?? "" };
     const stoke = toggleSection(
       "Stoke",
-      "Stoke time (optional)",
+      "Stoke time",
       stokeDrafts,
       stokeTime,
       !!known?.stoke,
       onChange,
       STOKE_RESOURCE_OPTIONS
     );
-    form.appendChild(stoke.root);
+    stokeDampenGroup.appendChild(stoke.root);
     const dampenDrafts = draftsFromItems(known?.dampen);
     const dampenTime = { value: known?.dampenTime ?? "" };
     const dampen = toggleSection(
       "Dampen",
-      "Dampen time (optional)",
+      "Dampen time",
       dampenDrafts,
       dampenTime,
       !!known?.dampen,
       onChange,
       DAMPEN_RESOURCE_OPTIONS
     );
-    form.appendChild(dampen.root);
+    stokeDampenGroup.appendChild(dampen.root);
+    form.appendChild(stokeDampenGroup);
+    form.appendChild(el("hr", "pyro-rc-divider"));
+    const actionsGroup = el("div", "pyro-rc-group");
+    const actionsRow = el("div", "pyro-rc-actions-row");
+    const resetBtn = el("button", "pyro-rc-reset-btn");
+    resetBtn.type = "button";
+    resetBtn.innerHTML = `${ICON_RESET}<span>Reset changes</span>`;
+    actionsRow.appendChild(resetBtn);
     const submitBtn = el("button", "pyro-rc-submit-btn");
     submitBtn.type = "button";
     submitBtn.innerHTML = `${ICON_SEND}<span>Submit</span>`;
-    form.appendChild(submitBtn);
+    actionsRow.appendChild(submitBtn);
+    actionsGroup.appendChild(actionsRow);
     const status = el("div", "pyro-rc-status");
-    form.appendChild(status);
+    actionsGroup.appendChild(status);
+    form.appendChild(actionsGroup);
     function clearFieldErrors() {
       payoutErr.textContent = "";
       placeErr.textContent = "";
@@ -4664,7 +4810,8 @@
       if (items.length === 0) return null;
       return items.map((d) => ({
         resourceId: d.resourceId,
-        qty: d.qty
+        qty: d.qty,
+        ...d.optional ? { optional: true } : {}
       }));
     }
     const baseline = {
@@ -4681,13 +4828,15 @@
       stokeEnabled: !!known?.stoke,
       stoke: (known?.stoke ?? []).map((i) => ({
         resourceId: i.resourceId,
-        qty: i.qty
+        qty: i.qty,
+        ...i.optional ? { optional: true } : {}
       })),
       stokeTime: known?.stokeTime ?? "",
       dampenEnabled: !!known?.dampen,
       dampen: (known?.dampen ?? []).map((i) => ({
         resourceId: i.resourceId,
-        qty: i.qty
+        qty: i.qty,
+        ...i.optional ? { optional: true } : {}
       })),
       dampenTime: known?.dampenTime ?? ""
     };
@@ -4751,10 +4900,15 @@
         dampen: dampen.isEnabled() ? dampenItems ?? [] : [],
         dampenTime: dampen.isEnabled() ? dampenTime.value.trim() : ""
       };
-      const changed = JSON.stringify(current) !== JSON.stringify(baseline);
+      const changeCount = countRecipeChanges(current, baseline);
+      const changed = changeCount > 0;
       submitBtn.disabled = !isValid || !changed;
+      resetBtn.disabled = !changed;
       if (isValid && !changed) {
         status.textContent = "No changes to submit yet.";
+        status.className = "pyro-rc-status hint";
+      } else if (isValid && changed) {
+        status.textContent = `${changeCount} change${changeCount === 1 ? "" : "s"} ready to submit.`;
         status.className = "pyro-rc-status hint";
       } else if (status.className === "pyro-rc-status hint") {
         status.textContent = "";
@@ -4762,6 +4916,23 @@
       }
     };
     revalidate();
+    resetBtn.addEventListener("click", () => {
+      payoutMinInput.value = knownScenario ? String(knownScenario.payoutMin) : "";
+      payoutMaxInput.value = knownScenario ? String(knownScenario.payoutMax) : "";
+      placeRows.setItems(draftsFromItems(known?.place));
+      igniterSelect.value = knownIgniter ?? "";
+      stoke.reset(
+        !!known?.stoke,
+        draftsFromItems(known?.stoke),
+        known?.stokeTime ?? ""
+      );
+      dampen.reset(
+        !!known?.dampen,
+        draftsFromItems(known?.dampen),
+        known?.dampenTime ?? ""
+      );
+      revalidate();
+    });
     submitBtn.addEventListener("click", () => {
       revalidate();
       if (submitBtn.disabled) return;
@@ -4818,20 +4989,29 @@
   }
   function getPlayerInfoSafe() {
     try {
-      const link = document.querySelector(
+      const desktopLink = document.querySelector(
         '[class*="user-information"] a[href*="profiles.php?XID="]'
       );
-      if (!link) return { id: null, name: null };
-      const match = /XID=(\d+)/.exec(link.href);
-      const name = link.textContent?.trim() || null;
-      return { id: match ? match[1] : null, name };
+      if (desktopLink) {
+        const match = /XID=(\d+)/.exec(desktopLink.href);
+        const name = desktopLink.textContent?.trim() || null;
+        if (match) return { id: match[1], name };
+      }
+      const headerLink = document.querySelector(
+        '#topHeaderBanner a[href*="profiles.php?XID="]'
+      );
+      if (headerLink) {
+        const match = /XID=(\d+)/.exec(headerLink.href);
+        if (match) return { id: match[1], name: null };
+      }
+      return { id: null, name: null };
     } catch {
       return { id: null, name: null };
     }
   }
   function buildSubmitTab(_ctx) {
     injectSubmitTabStyles();
-    const root = el("div", "pyro-rc-group");
+    const root = el("div", "pyro-rc-groups");
     const submissionsLink = el("a", "pyro-rc-external-link");
     submissionsLink.href = "https://balaclava.app/arson/submissions";
     submissionsLink.target = "_blank";
@@ -4969,6 +5149,9 @@
   }
 
   // src/userscripts/arsonists-ledger/settings.ts
+  var CHECKMARK_DATA_URI2 = `data:image/svg+xml,${encodeURIComponent(
+    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="${ICON_CHECK_MASK_PATH}"/></svg>`
+  )}`;
   function setOkStatus(statusEl, message) {
     statusEl.innerHTML = ICON_CHECK;
     statusEl.appendChild(txt(message));
@@ -5038,7 +5221,7 @@
     background: oklch(14.5% 0.011 285);
     border: 1px solid oklch(27% 0.017 285);
     color: oklch(82% 0.007 285);
-    font-size: 11px;
+    font-size: 12px;
     padding: 3px 5px;
     border-radius: 5px;
     text-align: right;
@@ -5057,7 +5240,7 @@
     background: oklch(14.5% 0.011 285);
     border: 1px solid oklch(27% 0.017 285);
     color: oklch(82% 0.007 285);
-    font-size: 11px;
+    font-size: 12px;
     padding: 4px 6px;
     border-radius: 5px;
     min-width: 0;
@@ -5066,21 +5249,36 @@
 }
 .pyro-s-key-input:focus-visible { outline: none; border-color: ${BAND_COLOR.excellent}; }
 .pyro-s-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    box-sizing: border-box;
+    min-height: 24px;
     background: oklch(15% 0.012 285);
     border: 1px solid oklch(28% 0.018 285);
     color: oklch(60% 0.009 285);
     cursor: pointer;
     border-radius: 5px;
     padding: 4px 9px;
-    font-size: 11px;
+    font-size: 12px;
     white-space: nowrap;
     transition: transform 100ms ease-out, background 120ms ease-out, color 120ms ease-out;
 }
+.pyro-s-btn svg { width: 12px; height: 12px; flex-shrink: 0; }
 @media (hover: hover) and (pointer: fine) {
     .pyro-s-btn:hover:not(:disabled) { background: oklch(21% 0.016 285); color: oklch(85% 0.006 285); }
 }
 .pyro-s-btn:active:not(:disabled) { transform: scale(0.97); }
 .pyro-s-btn:disabled { opacity: 0.28; cursor: default; }
+.pyro-s-btn-danger {
+    background: oklch(19% 0.03 25);
+    border-color: oklch(32% 0.06 25);
+    color: oklch(72% 0.09 25);
+}
+@media (hover: hover) and (pointer: fine) {
+    .pyro-s-btn-danger:hover:not(:disabled) { background: oklch(24% 0.07 25); color: oklch(82% 0.1 25); }
+}
 .pyro-s-status {
     font-size: 10px;
     min-height: 13px;
@@ -5104,12 +5302,45 @@
     cursor: pointer;
     user-select: none;
 }
-.pyro-s-check-row input[type=checkbox] { cursor: pointer; }
 .pyro-s-check-row--disabled {
     opacity: 0.4;
     cursor: not-allowed;
 }
-.pyro-s-check-row--disabled input[type=checkbox] { cursor: not-allowed; }
+.pyro-s-checkbox {
+    appearance: none;
+    -webkit-appearance: none;
+    box-sizing: border-box;
+    width: 15px;
+    height: 15px;
+    margin: 0;
+    flex-shrink: 0;
+    border: 1px solid oklch(42% 0.02 285);
+    border-radius: 3px;
+    background: oklch(14.5% 0.011 285);
+    accent-color: ${BAND_COLOR.excellent};
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+.pyro-s-checkbox:checked {
+    background: ${BAND_COLOR.excellent};
+    border-color: ${BAND_COLOR.excellent};
+}
+.pyro-s-checkbox:checked::after {
+    content: "";
+    width: 9px;
+    height: 9px;
+    background-color: oklch(18% 0 0);
+    -webkit-mask-image: url("${CHECKMARK_DATA_URI2}");
+    mask-image: url("${CHECKMARK_DATA_URI2}");
+    -webkit-mask-size: contain;
+    mask-size: contain;
+    -webkit-mask-repeat: no-repeat;
+    mask-repeat: no-repeat;
+}
+.pyro-s-checkbox:focus-visible { outline: 2px solid ${BAND_COLOR.excellent}; outline-offset: 1px; }
+.pyro-s-checkbox:disabled, .pyro-s-check-row--disabled .pyro-s-checkbox { cursor: not-allowed; }
 .pyro-s-toggle-group {
     display: inline-flex;
     align-self: flex-start;
@@ -5122,7 +5353,7 @@
     border: none;
     color: oklch(62% 0.009 285);
     font: inherit;
-    font-size: 11px;
+    font-size: 12px;
     padding: 4px 12px;
     cursor: pointer;
     transition: background 120ms ease-out, color 120ms ease-out;
@@ -5132,8 +5363,8 @@
     .pyro-s-toggle-btn:not(.active):hover { color: oklch(82% 0.007 285); }
 }
 .pyro-s-toggle-btn.active {
-    background: color-mix(in oklch, ${BAND_COLOR.excellent} 22%, oklch(14.5% 0.011 285));
-    color: oklch(96% 0.012 95);
+    background: ${BAND_COLOR.excellent};
+    color: oklch(18% 0 0);
 }
 .pyro-s-section-note { display: flex; align-items: flex-start; gap: 5px; font-size: 10px; line-height: 1.4; color: oklch(57% 0.008 285); margin-bottom: 6px; }
 .pyro-s-section-note > svg { width: 10px; height: 10px; flex-shrink: 0; margin-top: 1px; }
@@ -5218,19 +5449,19 @@
     const hasApiPrices = ctx.getApiLastRefresh() > 0 || Object.keys(ctx.getApiPrices()).length > 0;
     const actionGroup = el("div", "pyro-s-group");
     const actionRow = el("div", "pyro-s-refresh-row");
+    const resetBtn = el("button", "pyro-s-btn pyro-s-btn-danger");
+    resetBtn.type = "button";
+    resetBtn.innerHTML = `${ICON_RESET}<span>Reset</span>`;
+    if (!hasManualOverrides && !hasApiPrices) resetBtn.disabled = true;
     const refreshBtn = el("button", "pyro-s-btn");
     refreshBtn.type = "button";
-    refreshBtn.textContent = "Refresh";
+    refreshBtn.innerHTML = `${ICON_REFRESH}<span>Refresh</span>`;
     if (!ctx.getApiKey()) refreshBtn.disabled = true;
-    const resetBtn = el("button", "pyro-s-btn");
-    resetBtn.type = "button";
-    resetBtn.textContent = "Reset";
-    if (!hasManualOverrides && !hasApiPrices) resetBtn.disabled = true;
     const tsEl = el("span", "pyro-s-timestamp");
     const ts = ctx.getApiLastRefresh();
     tsEl.textContent = ts ? `Fetched: ${formatTimestamp(ts)}` : `DB: ${CATALOG_UPDATED}`;
-    actionRow.appendChild(refreshBtn);
     actionRow.appendChild(resetBtn);
+    actionRow.appendChild(refreshBtn);
     actionRow.appendChild(tsEl);
     actionGroup.appendChild(actionRow);
     const actionStatus = el("div", "pyro-s-status");
@@ -5369,7 +5600,7 @@
   }
   function checkboxRow(label, getVal, setVal) {
     const toggle = el("label", "pyro-s-check-row");
-    const checkbox = document.createElement("input");
+    const checkbox = el("input", "pyro-s-checkbox");
     checkbox.type = "checkbox";
     checkbox.checked = getVal();
     checkbox.addEventListener("change", () => {
@@ -5383,11 +5614,7 @@
   }
   function toggleGroupRow(idSlug, label, options, getVal, setVal) {
     const row2 = el("div", "pyro-s-row");
-    const lbl = el("span", "pyro-s-label");
-    lbl.textContent = label;
     const labelId = `pyro-s-toggle-label-${idSlug}`;
-    lbl.id = labelId;
-    row2.appendChild(lbl);
     const wrap = el("div", "pyro-s-toggle-group");
     wrap.setAttribute("role", "group");
     wrap.setAttribute("aria-labelledby", labelId);
@@ -5412,6 +5639,10 @@
     }
     sync();
     row2.appendChild(wrap);
+    const lbl = el("span", "pyro-s-label");
+    lbl.textContent = label;
+    lbl.id = labelId;
+    row2.appendChild(lbl);
     return row2;
   }
   function buildVisualsTab(ctx) {
@@ -6857,7 +7088,7 @@
     style.textContent = buildTooltipStyles();
     wrap.appendChild(style);
     const msg = el("div");
-    msg.style.cssText = "padding:10px 12px;font-size:11px;color:#888;line-height:1.5;max-width:220px;";
+    msg.style.cssText = "padding:10px 12px;font-size:12px;color:#888;line-height:1.5;max-width:220px;";
     msg.textContent = "This scenario isn't covered by Arsonist's Ledger yet \u2014 no scenario data available.";
     wrap.appendChild(msg);
     return wrap;

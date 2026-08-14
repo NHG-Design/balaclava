@@ -390,7 +390,7 @@ export function buildTooltipStyles(): string {
 .pyro-tt-row {
     display: flex;
     flex-direction: column;
-    font-size: 11px;
+    font-size: 12px;
 }
 .pyro-tt-label {
     color: oklch(66% 0 0);
@@ -412,7 +412,7 @@ export function buildTooltipStyles(): string {
 .pyro-tt-action-label {
     min-width: 56px;
     color: oklch(66% 0 0);
-    font-size: 11px;
+    font-size: 12px;
 }
 .pyro-tt-timing {
     font-size: 9px;
@@ -423,7 +423,7 @@ export function buildTooltipStyles(): string {
     border-radius: 2px;
 }
 .pyro-tt-action-value {
-    font-size: 11px;
+    font-size: 12px;
 }
 .pyro-tt-item-cost {
     color: oklch(66% 0 0);
@@ -446,7 +446,7 @@ export function buildTooltipStyles(): string {
 .pyro-tt-notes {
     margin-top: 5px;
     opacity: 0.7;
-    font-size: 11px;
+    font-size: 12px;
     font-style: italic;
 }
 .pyro-tt-req {
