@@ -659,11 +659,11 @@ export const SCENARIOS: Scenario[] = [
 
   {
     scenarioName: "Boxing Clever",
-    payoutMin: 325_000,
+    payoutMin: 300_000,
     payoutMax: 360_000,
     actions: {
-      ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
       place: [{ resourceId: RESOURCE.GASOLINE, qty: 2 }],
+      ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
     },
   },
 
