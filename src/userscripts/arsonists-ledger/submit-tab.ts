@@ -951,6 +951,10 @@ function buildForm(scenarioName: string): HTMLElement {
     if (!place) {
       placeErr.textContent = "Add at least one material.";
       isValid = false;
+    } else if (placeDrafts.some((d) => d.resourceId === "")) {
+      placeErr.textContent =
+        "Select a material for every added row, or remove the empty one.";
+      isValid = false;
     }
 
     if (!igniterSelect.value) {
@@ -964,6 +968,10 @@ function buildForm(scenarioName: string): HTMLElement {
       if (!stokeItems) {
         stoke.itemsErr.textContent =
           "Add at least one material, or disable Stoke.";
+        isValid = false;
+      } else if (stokeDrafts.some((d) => d.resourceId === "")) {
+        stoke.itemsErr.textContent =
+          "Select a material for every added row, or remove the empty one.";
         isValid = false;
       }
       if (
@@ -981,6 +989,10 @@ function buildForm(scenarioName: string): HTMLElement {
       if (!dampenItems) {
         dampen.itemsErr.textContent =
           "Add at least one material, or disable Dampen.";
+        isValid = false;
+      } else if (dampenDrafts.some((d) => d.resourceId === "")) {
+        dampen.itemsErr.textContent =
+          "Select a material for every added row, or remove the empty one.";
         isValid = false;
       }
       if (

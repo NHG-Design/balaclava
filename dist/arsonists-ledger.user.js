@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        Torn Arsonist's Ledger
 // @namespace   https://greasyfork.org/en/users/942572-yukio-mizsima
-// @version     1.2.14
+// @version     1.2.15
 // @description Arson profit-per-nerve calculator and scenario guide for Torn's Crimes page
 // @icon        https://www.google.com/s2/favicons?sz=64&domain=torn.com
 // @author      Yukio [906148]
@@ -4977,6 +4977,9 @@ ${checkboxCss("pyro-rc-checkbox", BAND_COLOR.excellent)}
       if (!place) {
         placeErr.textContent = "Add at least one material.";
         isValid = false;
+      } else if (placeDrafts.some((d) => d.resourceId === "")) {
+        placeErr.textContent = "Select a material for every added row, or remove the empty one.";
+        isValid = false;
       }
       if (!igniterSelect.value) {
         igniterErr.textContent = "Select an igniter.";
@@ -4987,6 +4990,9 @@ ${checkboxCss("pyro-rc-checkbox", BAND_COLOR.excellent)}
         stokeItems = validItems(stokeDrafts);
         if (!stokeItems) {
           stoke.itemsErr.textContent = "Add at least one material, or disable Stoke.";
+          isValid = false;
+        } else if (stokeDrafts.some((d) => d.resourceId === "")) {
+          stoke.itemsErr.textContent = "Select a material for every added row, or remove the empty one.";
           isValid = false;
         }
         if (stokeTime.value.trim() && !TIME_PATTERN.test(stokeTime.value.trim())) {
@@ -4999,6 +5005,9 @@ ${checkboxCss("pyro-rc-checkbox", BAND_COLOR.excellent)}
         dampenItems = validItems(dampenDrafts);
         if (!dampenItems) {
           dampen.itemsErr.textContent = "Add at least one material, or disable Dampen.";
+          isValid = false;
+        } else if (dampenDrafts.some((d) => d.resourceId === "")) {
+          dampen.itemsErr.textContent = "Select a material for every added row, or remove the empty one.";
           isValid = false;
         }
         if (dampenTime.value.trim() && !TIME_PATTERN.test(dampenTime.value.trim())) {
