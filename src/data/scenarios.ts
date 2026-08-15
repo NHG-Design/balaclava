@@ -129,11 +129,11 @@ export const SCENARIOS: Scenario[] = [
 
   {
     scenarioName: "Going Viral",
-    payoutMin: 190_000,
+    payoutMin: 160_000,
     payoutMax: 190_000,
     actions: {
-      ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
       place: [{ resourceId: RESOURCE.GASOLINE, qty: 3 }],
+      ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
     },
   },
 
@@ -355,11 +355,11 @@ export const SCENARIOS: Scenario[] = [
 
   {
     scenarioName: "Flame and Fortune",
-    payoutMin: 680_000,
+    payoutMin: 580_000,
     payoutMax: 700_000,
     actions: {
-      ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
       place: [{ resourceId: RESOURCE.KEROSENE, qty: 3 }],
+      ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
     },
   },
 
@@ -409,11 +409,11 @@ export const SCENARIOS: Scenario[] = [
   },
   {
     scenarioName: "A Burnt Child Dreads the Fire",
-    payoutMin: 235_000,
+    payoutMin: 200_000,
     payoutMax: 290_000,
     actions: {
-      ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
       place: [{ resourceId: RESOURCE.HYDROGEN, qty: 1 }],
+      ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
       stoke: [{ resourceId: RESOURCE.HYDROGEN, qty: 1 }],
       stokeTime: "late",
     },
@@ -832,11 +832,11 @@ export const SCENARIOS: Scenario[] = [
 
   {
     scenarioName: "Checking Out",
-    payoutMin: 280_000,
+    payoutMin: 230_000,
     payoutMax: 360_000,
     actions: {
-      ignite: [{ resourceId: RESOURCE.LIGHTER, qty: 1 }],
       place: [{ resourceId: RESOURCE.HYDROGEN, qty: 1 }],
+      ignite: [{ resourceId: RESOURCE.LIGHTER, qty: 1 }],
       stoke: [{ resourceId: RESOURCE.HYDROGEN, qty: 1 }],
       stokeTime: "early",
     },
@@ -2312,8 +2312,8 @@ export const SCENARIOS: Scenario[] = [
     payoutMin: 430_000,
     payoutMax: 490_000,
     actions: {
+      place: [{ resourceId: RESOURCE.KEROSENE, qty: 5 }],
       ignite: [{ resourceId: RESOURCE.LIGHTER, qty: 1 }],
-      place: [{ resourceId: RESOURCE.KEROSENE, qty: 4 }],
     },
   },
 
