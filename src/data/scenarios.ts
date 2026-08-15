@@ -409,11 +409,11 @@ export const SCENARIOS: Scenario[] = [
   },
   {
     scenarioName: "A Burnt Child Dreads the Fire",
-    payoutMin: 235_000,
+    payoutMin: 200_000,
     payoutMax: 290_000,
     actions: {
-      ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
       place: [{ resourceId: RESOURCE.HYDROGEN, qty: 1 }],
+      ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
       stoke: [{ resourceId: RESOURCE.HYDROGEN, qty: 1 }],
       stokeTime: "late",
     },
