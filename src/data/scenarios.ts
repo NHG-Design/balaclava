@@ -355,11 +355,11 @@ export const SCENARIOS: Scenario[] = [
 
   {
     scenarioName: "Flame and Fortune",
-    payoutMin: 680_000,
+    payoutMin: 580_000,
     payoutMax: 700_000,
     actions: {
-      ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
       place: [{ resourceId: RESOURCE.KEROSENE, qty: 3 }],
+      ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
     },
   },
 
