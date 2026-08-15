@@ -1,7 +1,9 @@
 <script lang="ts">
   import {
+    calcSubmissionPpn,
     computeDiff,
     computeLineDiffs,
+    mergeDecisions,
     parseFieldDecisions,
     parseRecipe,
     summarizeRecipe,
@@ -10,6 +12,7 @@
     type LineDecision,
     type RecipeSubmission,
   } from '$lib/recipe-diff'
+  import { formatPpn } from '../../userscripts/arsonists-ledger/engine'
 
   interface Props {
     submission: RecipeSubmission
@@ -43,6 +46,13 @@
     denied: 'bg-rose-500/15 text-rose-300',
   }
 
+  const PPN_BAND_CLASSES: Record<ReturnType<typeof calcSubmissionPpn>['band'], string> = {
+    negative: 'text-rose-400',
+    low: 'text-amber-400',
+    good: 'text-sky-400',
+    excellent: 'text-emerald-400',
+  }
+
   const STATUS_LABELS: Record<RecipeSubmission['status'], string> = {
     pending: 'pending',
     approved: 'approved',
@@ -64,6 +74,21 @@
   let storedDecisions = $derived(parseFieldDecisions(s.field_decisions))
 
   let decisions = $state<FieldDecisions>({})
+
+  /** Which decisions map reflects "the recipe as currently decided", per variant/status:
+   *  live toggles while an admin is reviewing a pending submission, the stored per-line
+   *  verdicts once decided as partial/approved, otherwise the full submission (nothing to
+   *  toggle). */
+  let effectiveDecisions = $derived(
+    variant === 'admin' && s.status === 'pending'
+      ? decisions
+      : s.status === 'partial' || (s.status === 'approved' && s.field_decisions)
+        ? storedDecisions
+        : {},
+  )
+  let ppn = $derived(
+    recipe ? calcSubmissionPpn(mergeDecisions(s, recipe, current, effectiveDecisions)) : null,
+  )
 
   function decisionFor(key: string): LineDecision {
     return decisions[key] ?? 'approve'
@@ -128,6 +153,13 @@
       </span>
     </div>
   </div>
+
+  {#if ppn}
+    <p class="text-xs text-ink-400">
+      Expected <span class="font-medium {PPN_BAND_CLASSES[ppn.band]}">{formatPpn(ppn.ppn)}/nerve</span
+      >
+    </p>
+  {/if}
 
   {#if !recipe}
     <p class="text-sm text-rose-400">Recipe data couldn't be parsed.</p>

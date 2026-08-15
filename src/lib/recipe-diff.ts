@@ -1,3 +1,12 @@
+import type { ResourceId } from '../data/catalog'
+import type { Scenario } from '../data/scenarios'
+import {
+  calcProfitPerNerve,
+  profitBand,
+  DEFAULT_THRESHOLDS,
+  type ProfitBand,
+} from '../userscripts/arsonists-ledger/engine'
+
 export interface ActionItem {
   resourceId: string
   qty: number
@@ -377,4 +386,29 @@ export function hasAnyDenial(rows: LineRow[], decisions: FieldDecisions): boolea
  *  deny endpoint instead of being recorded as an empty 'partial' approval. */
 export function isAllDenied(rows: LineRow[], decisions: FieldDecisions): boolean {
   return rows.length > 0 && rows.every((r) => (decisions[r.key] ?? 'approve') === 'deny')
+}
+
+export interface SubmissionPpn {
+  ppn: number
+  band: ProfitBand
+}
+
+/** Expected $/nerve for a merged (payout, recipe) pair, using the same PPN math the
+ *  userscript uses to rank live scenarios — static catalog prices, 'average' payout basis. */
+export function calcSubmissionPpn(merged: MergedRecipe): SubmissionPpn {
+  const scenario = {
+    scenarioName: '',
+    payoutMin: merged.payoutMin,
+    payoutMax: merged.payoutMax,
+    actions: {
+      place: merged.recipe.place.map((i) => ({ ...i, resourceId: i.resourceId as ResourceId })),
+      ignite: merged.recipe.ignite?.map((i) => ({ ...i, resourceId: i.resourceId as ResourceId })),
+      stoke: merged.recipe.stoke?.map((i) => ({ ...i, resourceId: i.resourceId as ResourceId })),
+      stokeTime: merged.recipe.stokeTime,
+      dampen: merged.recipe.dampen?.map((i) => ({ ...i, resourceId: i.resourceId as ResourceId })),
+      dampenTime: merged.recipe.dampenTime,
+    },
+  }
+  const ppn = calcProfitPerNerve(scenario as unknown as Scenario, {}, 'average')
+  return { ppn, band: profitBand(ppn, DEFAULT_THRESHOLDS) }
 }
