@@ -45,7 +45,7 @@
 | C2 | Token expiry | Tokens have a bounded `exp` / `maxAge`; checked on every request |
 | C3 | Session revocation | Logout invalidates the token server-side (not just client-side cookie deletion); token blacklist or `logged_out_at` timestamp |
 | C4 | Account enumeration | Login and password-reset responses are identical regardless of whether the email exists; timing is equalised with a dummy hash |
-| C5 | Password hashing | Passwords stored with bcrypt / scrypt / argon2; no MD5, SHA-1, or plain SHA-256; parameters meet current OWASP minimums |
+| C5 | Password hashing | Passwords stored with bcrypt / scrypt / argon2, or PBKDF2-HMAC-SHA256 where the runtime forces it; no MD5, SHA-1, or plain SHA-256; parameters meet current OWASP minimums, subject to the platform ceiling below |
 | C6 | Password policy | Minimum length enforced (≥8 chars); maximum length enforced to prevent DoS (≤1000 chars) |
 | C7 | Password reset flow | Tokens are cryptographically random (≥128 bits); hashed before storage; single-use enforced atomically; expire in ≤1 hour |
 | C8 | Brute-force protection | Login, signup, and password-reset endpoints rate-limited per IP; lockout or throttle after N failures |
@@ -53,6 +53,23 @@
 | C10 | Session fixation | New session token issued on privilege change (login, role grant); old token invalidated |
 | C11 | JWT / token weaknesses | If JWT: algorithm explicitly set and not `none`; `alg` header not trusted from the token itself; HS256 secret is long and random |
 | C12 | OAuth / SSO misconfig | If using OAuth: `state` parameter used and validated; `redirect_uri` strictly allowlisted; `code` exchanged server-side |
+
+### C5 platform ceiling — PBKDF2 on Cloudflare Workers and Pages
+
+**Apply only when Phase 1 identified the deploy target as Cloudflare Workers or Pages.** On any other runtime, hold C5 to the OWASP figure and ignore this note.
+
+OWASP recommends 210,000 PBKDF2-HMAC-SHA256 iterations. As of 2026-08-15, Cloudflare's Web Crypto implementation caps client-supplied `iterations` at **100,000** on Workers and Pages, and the cap is not configurable. Code asking for 210,000 does not silently downgrade — it fails — so a repo on this platform will legitimately show 100,000.
+
+Before writing this up, **check whether the cap still stands** — it is a vendor limit that can change, and this note is only as fresh as its date. If you cannot check, say the figure is unverified as of the date above rather than asserting it.
+
+Verdicts:
+
+- 100,000 iterations on Cloudflare, cap still in force → **PASS**, with a one-line note that the platform ceiling, not the application, sets the figure. Do not file a FAIL whose only remedy is leaving the platform.
+- Below 100,000 on Cloudflare → **FAIL**. The ceiling explains 100,000, not 40,000; raise it to the cap.
+- 100,000 on Cloudflare, cap since lifted → **FAIL**, and the fix is now simply the higher iteration count.
+- Cloudflare, and the codebase could reasonably run argon2id via WASM instead → **MANUAL-REVIEW**, since that is an architecture decision rather than a one-line fix.
+
+Where the ceiling binds, check that the compensating controls are actually present — C8 brute-force protection on the login path, and a password policy (C6) that does not lean on the hash to carry weak passwords. A capped work factor with no rate limiting is the finding worth writing.
 
 ---
 

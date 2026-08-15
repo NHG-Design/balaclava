@@ -25,7 +25,7 @@ Show the full board once, upfront — every FAIL with a `[ ]` marker:
 
 Symbols: `[ ]` pending, `[✓]` fixed, `[→]` in progress, `[–]` dismissed, `[!]` blocked (needs infra/decision).
 
-Then offer: `(s)tart per-item / (A)pply all / (q)uit`.
+Then offer: `(s)tart per-item / (A)pply all / (Q)uit`.
 
 Per item, in order:
 
@@ -33,9 +33,12 @@ Per item, in order:
 2. **Flag prerequisites first.** If the fix needs a new env var, DB table, dependency, or breaks an existing deployment, say so *before* applying — those are the items where "approve" means something different than "edit a file."
 3. **Apply** the smallest change that makes the finding false.
 4. **Verify** — run the verification gate below.
-5. **Commit** — one commit, this finding only.
-6. **Ask** — `(a)pprove / (r)evise / (s)kip / (A)pply-all / (q)uit`.
-7. **Update the board** and write back to the report file.
+5. **Show the diff** for this finding alone, so the answer is given against what actually changed.
+6. **Ask** — `(a)pprove / (r)evise / (s)kip / (A)pply-all / (Q)uit`.
+7. **Commit on approval only** — one commit, this finding only. `(r)evise` re-applies and re-asks; `(s)kip` reverts the working-tree change. Neither leaves a commit behind.
+8. **Update the board** and write back to the report file.
+
+Verify before asking, commit after answering. Verification tells the human whether the fix holds, so it has to precede their decision; the commit records a decision that has already been made, so it has to follow it.
 
 Uppercase `Q`/`A` only for quit/apply-all; lowercase `q` is adjacent to `a` on the keyboard and should fall through to a stop-and-confirm.
 
