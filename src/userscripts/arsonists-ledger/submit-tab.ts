@@ -3,6 +3,7 @@ import { SCENARIOS, type ScenarioActions } from "../../data/scenarios.js";
 import { el, txt, injectStyleOnce } from "../../lib/shared-ui/dom.js";
 import { setIconStatus } from "../shared/status.js";
 import { checkboxCss, CHECKMARK_DATA_URI } from "../shared/checkbox.js";
+import { buildToggleRow, toggleRowCss } from "../shared/toggle-row.js";
 import {
   ICON_SEND,
   ICON_PLUS,
@@ -433,11 +434,9 @@ function injectSubmitTabStyles(): void {
     padding: 0;
 }
 @media (hover: hover) and (pointer: fine) { .pyro-rc-add-btn:hover { color: var(--shared-text); } }
-.pyro-rc-check-row { box-sizing: border-box; min-height: 24px; display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--shared-text-muted); cursor: pointer; user-select: none; }
-.pyro-rc-toggle-body { display: flex; flex-direction: column; gap: 8px; padding-left: 4px; border-left: 2px solid var(--shared-surface-border); }
 .pyro-rc-time-row { display: flex; align-items: center; gap: 6px; }
 .pyro-rc-time-row .pyro-rc-input { flex: 1; }
-${checkboxCss("pyro-rc-checkbox", BAND_COLOR.excellent)}
+${toggleRowCss(BAND_COLOR.excellent)}
 .pyro-rc-actions-row { display: flex; gap: 8px; }
 .pyro-rc-submit-btn {
     box-sizing: border-box;
@@ -681,18 +680,10 @@ function toggleSection(
 } {
   const root = el("div", "pyro-rc-group");
 
-  const checkRow = el("label", "pyro-rc-check-row");
-  const checkbox = el("input", "pyro-rc-checkbox") as HTMLInputElement;
-  checkbox.type = "checkbox";
-  checkbox.checked = enabledInitially;
-  const lbl = el("span");
-  lbl.textContent = label;
-  checkRow.appendChild(checkbox);
-  checkRow.appendChild(lbl);
-  root.appendChild(checkRow);
+  const toggle = buildToggleRow(label, enabledInitially, onChange);
+  root.appendChild(toggle.root);
 
-  const body = el("div", "pyro-rc-toggle-body");
-  body.style.display = enabledInitially ? "flex" : "none";
+  const body = toggle.body;
   const rows = materialRowsGroup(drafts, onChange, options, true);
   body.appendChild(rows.root);
   const itemsErr = el("div", "pyro-rc-field-err");
@@ -716,26 +707,18 @@ function toggleSection(
   const timeErr = el("div", "pyro-rc-field-err");
   body.appendChild(timeErr);
 
-  root.appendChild(body);
-
-  checkbox.addEventListener("change", () => {
-    body.style.display = checkbox.checked ? "flex" : "none";
-    onChange();
-  });
-
   function reset(
     enabled: boolean,
     items: ActionItemDraft[],
     time: string,
   ): void {
-    checkbox.checked = enabled;
-    body.style.display = enabled ? "flex" : "none";
+    toggle.setChecked(enabled);
     rows.setItems(items);
     timeState.value = time;
     timeInput.value = time;
   }
 
-  return { root, isEnabled: () => checkbox.checked, itemsErr, timeErr, reset };
+  return { root, isEnabled: () => toggle.isChecked(), itemsErr, timeErr, reset };
 }
 
 // ---------------------------------------------------------------------------

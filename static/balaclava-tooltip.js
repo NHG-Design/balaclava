@@ -182,17 +182,17 @@
   });
   var rootWindow = typeof unsafeWindow !== "undefined" ? unsafeWindow : window;
   if (!rootWindow[API_NAME]?.version) {
-    let init = function() {
-      ensureHost();
-      setupGlobalListeners();
-      scanAll();
-      setupMutationObserver();
-    }, syncTornThemeVars2 = function() {
+    let init2 = function() {
+      ensureHost2();
+      setupGlobalListeners2();
+      scanAll2();
+      setupMutationObserver2();
+    }, syncTornThemeVars3 = function() {
       if (!host) return;
       syncTornThemeVars(host);
-    }, ensureHost = function() {
+    }, ensureHost2 = function() {
       if (host) {
-        syncTornThemeVars2();
+        syncTornThemeVars3();
         return;
       }
       host = document.createElement("div");
@@ -210,11 +210,11 @@
       }
       shadow = host.attachShadow({ mode: "closed" });
       styleEl = document.createElement("style");
-      styleEl.textContent = buildStylesheet();
+      styleEl.textContent = buildStylesheet2();
       shadow.appendChild(styleEl);
-      syncTornThemeVars2();
-    }, buildStylesheet = function() {
-      const visualConfig = getVisualConfig();
+      syncTornThemeVars3();
+    }, buildStylesheet2 = function() {
+      const visualConfig = getVisualConfig2();
       return `
       .balaclava-tooltip {
         --balaclava-tooltip-bg: var(--tooltip-bg-color, ${THEME_TOKENS.dark.bgColor});
@@ -330,96 +330,96 @@
         }
       }
     `;
-    }, getVisualConfig = function() {
+    }, getVisualConfig2 = function() {
       return {
         ...config,
         arrowBorderSize: config.arrowBorderSize ?? config.borderSize,
         arrowBorderColor: config.arrowBorderColor ?? "var(--balaclava-tooltip-border)",
         arrowBorderRadius: config.arrowBorderRadius ?? "3px"
       };
-    }, exposeApi = function() {
+    }, exposeApi2 = function() {
       const api = {
         version: VERSION,
-        show: showTooltip,
-        hide: hideTooltip,
-        configure,
-        attach: attachTooltip,
-        rescan: scanAll,
-        destroy
+        show: showTooltip2,
+        hide: hideTooltip2,
+        configure: configure2,
+        attach: attachTooltip2,
+        rescan: scanAll2,
+        destroy: destroy2
       };
       rootWindow[API_NAME] = api;
       if (window !== rootWindow) {
         window[API_NAME] = api;
       }
-    }, setupGlobalListeners = function() {
+    }, setupGlobalListeners2 = function() {
       if (globalListenersController) return;
       globalListenersController = new AbortController();
       const { signal } = globalListenersController;
-      window.addEventListener("resize", updateVisibleTooltip, {
+      window.addEventListener("resize", updateVisibleTooltip2, {
         passive: true,
         signal
       });
-      window.addEventListener("scroll", scheduleScrollUpdate, {
+      window.addEventListener("scroll", scheduleScrollUpdate2, {
         capture: true,
         passive: true,
         signal
       });
-      window.addEventListener("keydown", handleKeydown, {
+      window.addEventListener("keydown", handleKeydown2, {
         passive: true,
         signal
       });
-    }, handleKeydown = function(event) {
+    }, handleKeydown2 = function(event) {
       if (event.key === "Escape" && isVisible) {
-        hideTooltip();
+        hideTooltip2();
       }
-    }, scheduleScrollUpdate = function() {
+    }, scheduleScrollUpdate2 = function() {
       if (!isVisible) return;
-      updateVisibleTooltip();
-    }, updateVisibleTooltip = function() {
+      updateVisibleTooltip2();
+    }, updateVisibleTooltip2 = function() {
       if (!isVisible || !targetElement) return;
       if (!targetElement.isConnected) {
-        hideTooltip();
+        hideTooltip2();
         return;
       }
       targetRect = targetElement.getBoundingClientRect();
-      updateTooltipPosition();
-    }, showTooltip = function(target, content, options = {}) {
-      if (!isElement(target)) {
+      updateTooltipPosition2();
+    }, showTooltip2 = function(target, content, options = {}) {
+      if (!isElement2(target)) {
         throw new TypeError(
           "BalaclavaTooltip.show target must be an HTMLElement."
         );
       }
-      ensureHost();
-      cleanupTooltip();
+      ensureHost2();
+      cleanupTooltip2();
       targetElement = target;
       targetRect = target.getBoundingClientRect();
-      requestedPosition = normalizePosition(options.position);
+      requestedPosition = normalizePosition2(options.position);
       preferredPosition = requestedPosition;
-      tooltipThemeOverride = normalizeOptionalTheme(options.theme);
+      tooltipThemeOverride = normalizeOptionalTheme2(options.theme);
       activeTheme = tooltipThemeOverride || config.theme;
       showArrow = options.showArrow !== false;
       arrowOffset = ARROW_OFFSET_DEFAULT;
       isVisible = true;
       target.setAttribute("aria-describedby", tooltipId);
-      renderTooltip(content);
-      setupIntersectionObserver();
+      renderTooltip2(content);
+      setupIntersectionObserver2();
       requestAnimationFrame(() => {
-        updateVisibleTooltip();
-        trackTargetPosition();
+        updateVisibleTooltip2();
+        trackTargetPosition2();
       });
-    }, hideTooltip = function() {
+    }, hideTooltip2 = function() {
       tooltipCooldownEnd = Date.now() + 600;
-      cleanupTooltip();
-    }, configure = function(userConfig = {}) {
+      cleanupTooltip2();
+    }, configure2 = function(userConfig = {}) {
       const nextConfig = { ...config };
       let hasCustomThemeOverride = false;
       for (const [key, value] of Object.entries(userConfig)) {
         if (value === void 0 || value === null) continue;
         if (key === "theme") {
-          nextConfig.theme = normalizeTheme(value, nextConfig.theme);
+          nextConfig.theme = normalizeTheme2(value, nextConfig.theme);
           continue;
         }
-        if (isConfigKey(key)) {
+        if (isConfigKey2(key)) {
           nextConfig[key] = value;
           hasCustomThemeOverride = hasCustomThemeOverride || CUSTOM_THEME_KEYS.has(key);
         }
@@ -429,18 +429,18 @@
       }
       config = nextConfig;
       if (styleEl) {
-        styleEl.textContent = buildStylesheet();
+        styleEl.textContent = buildStylesheet2();
       }
       if (host) {
         host.style.zIndex = String(config.zIndex);
       }
       if (isVisible && !tooltipThemeOverride) {
         activeTheme = config.theme;
-        refreshTooltipClassName();
+        refreshTooltipClassName2();
       }
-      updateVisibleTooltip();
-    }, attachTooltip = function(element, content, options = {}) {
-      if (!isElement(element)) {
+      updateVisibleTooltip2();
+    }, attachTooltip2 = function(element, content, options = {}) {
+      if (!isElement2(element)) {
         throw new TypeError(
           "BalaclavaTooltip.attach element must be an HTMLElement."
         );
@@ -449,7 +449,7 @@
       const { signal } = controller;
       let detached = false;
       let hoverTimer = null;
-      const doShow = () => showTooltip(element, resolveContent(content, element), options);
+      const doShow = () => showTooltip2(element, resolveContent2(content, element), options);
       const onMouseEnter = () => {
         if (Date.now() < tooltipCooldownEnd) {
           nextShowInstant = true;
@@ -467,7 +467,7 @@
           clearTimeout(hoverTimer);
           hoverTimer = null;
         }
-        if (targetElement === element) hideTooltip();
+        if (targetElement === element) hideTooltip2();
       };
       element.addEventListener("mouseenter", onMouseEnter, { signal });
       element.addEventListener("mouseleave", onMouseLeave, { signal });
@@ -475,7 +475,7 @@
       element.addEventListener(
         "blur",
         () => {
-          if (targetElement === element) hideTooltip();
+          if (targetElement === element) hideTooltip2();
         },
         { signal }
       );
@@ -489,43 +489,43 @@
         controller.abort();
         attachmentDetachers.delete(detach2);
         if (targetElement === element) {
-          hideTooltip();
+          hideTooltip2();
         }
       };
       attachmentDetachers.add(detach);
       return detach;
-    }, resolveContent = function(content, element) {
+    }, resolveContent2 = function(content, element) {
       return typeof content === "function" ? content(element) : content;
-    }, scanAll = function(root = document) {
-      root.querySelectorAll?.("[data-balaclava-tooltip]").forEach(scanElement);
-    }, scanElement = function(element) {
-      if (!isElement(element) || attachedElements.has(element)) return;
+    }, scanAll2 = function(root = document) {
+      root.querySelectorAll?.("[data-balaclava-tooltip]").forEach(scanElement2);
+    }, scanElement2 = function(element) {
+      if (!isElement2(element) || attachedElements.has(element)) return;
       const text = element.getAttribute("data-balaclava-tooltip");
       if (!text) return;
-      const position = normalizePosition(
+      const position = normalizePosition2(
         element.getAttribute("data-balaclava-tooltip-position")
       );
       const arrow = element.getAttribute("data-balaclava-tooltip-arrow") !== "false";
-      const theme = normalizeOptionalTheme(
+      const theme = normalizeOptionalTheme2(
         element.getAttribute("data-balaclava-tooltip-theme")
       );
       const options = { position, showArrow: arrow };
       if (theme) {
         options.theme = theme;
       }
-      const detach = attachTooltip(element, text, options);
+      const detach = attachTooltip2(element, text, options);
       attachedElements.set(element, detach);
-    }, setupMutationObserver = function() {
+    }, setupMutationObserver2 = function() {
       const observerRoot = document.body || document.documentElement;
       if (mutationObserver || !observerRoot) return;
       mutationObserver = new MutationObserver((mutations) => {
         for (const mutation of mutations) {
           if (mutation.type === "childList") {
-            mutation.addedNodes.forEach(scanAddedNode);
-            mutation.removedNodes.forEach(cleanupRemovedNode);
+            mutation.addedNodes.forEach(scanAddedNode2);
+            mutation.removedNodes.forEach(cleanupRemovedNode2);
           }
           if (mutation.type === "attributes") {
-            refreshElement(mutation.target);
+            refreshElement2(mutation.target);
           }
         }
       });
@@ -540,47 +540,47 @@
           "data-balaclava-tooltip-theme"
         ]
       });
-    }, scanAddedNode = function(node) {
-      if (!isElement(node)) return;
+    }, scanAddedNode2 = function(node) {
+      if (!isElement2(node)) return;
       if (node.hasAttribute("data-balaclava-tooltip")) {
-        scanElement(node);
+        scanElement2(node);
       }
-      scanAll(node);
-    }, cleanupRemovedNode = function(node) {
-      if (!isElement(node)) return;
-      cleanupAttachedElement(node);
-      node.querySelectorAll?.("[data-balaclava-tooltip]").forEach(cleanupAttachedElement);
+      scanAll2(node);
+    }, cleanupRemovedNode2 = function(node) {
+      if (!isElement2(node)) return;
+      cleanupAttachedElement2(node);
+      node.querySelectorAll?.("[data-balaclava-tooltip]").forEach(cleanupAttachedElement2);
       if (targetElement && (node === targetElement || node.contains(targetElement))) {
-        hideTooltip();
+        hideTooltip2();
       }
-    }, cleanupAttachedElement = function(element) {
-      if (!isElement(element)) return;
+    }, cleanupAttachedElement2 = function(element) {
+      if (!isElement2(element)) return;
       const detach = attachedElements.get(element);
       if (detach) {
         detach();
         attachedElements.delete(element);
       }
-    }, refreshElement = function(target) {
-      if (!isElement(target)) return;
-      cleanupAttachedElement(target);
+    }, refreshElement2 = function(target) {
+      if (!isElement2(target)) return;
+      cleanupAttachedElement2(target);
       if (target.hasAttribute("data-balaclava-tooltip")) {
-        scanElement(target);
+        scanElement2(target);
       }
-    }, renderTooltip = function(content) {
+    }, renderTooltip2 = function(content) {
       if (!shadow) return;
       if (tooltipEl) {
         tooltipEl.remove();
       }
       tooltipEl = document.createElement("div");
       tooltipEl.id = tooltipId;
-      tooltipEl.className = nextShowInstant ? getTooltipClassName() : `${getTooltipClassName()} is-entering`;
+      tooltipEl.className = nextShowInstant ? getTooltipClassName2() : `${getTooltipClassName2()} is-entering`;
       if (nextShowInstant) tooltipEl.setAttribute("data-instant", "");
       tooltipEl.setAttribute("role", "tooltip");
       tooltipEl.setAttribute("aria-live", "polite");
       tooltipEl.style.setProperty("--arrow-offset", `${arrowOffset}%`);
       const contentEl = document.createElement("div");
       contentEl.className = "balaclava-tooltip-content";
-      if (isNode(content)) {
+      if (isNode2(content)) {
         const clone = content.cloneNode(true);
         contentEl.appendChild(clone);
         tooltipEl.setAttribute(
@@ -607,21 +607,21 @@
           }
         });
       }
-    }, setupIntersectionObserver = function() {
-      cleanupIntersectionObserver();
+    }, setupIntersectionObserver2 = function() {
+      cleanupIntersectionObserver2();
       if (!targetElement || typeof IntersectionObserver === "undefined") return;
       intersectionObserver = new IntersectionObserver((entries) => {
         if (entries.some((entry) => !entry.isIntersecting)) {
-          hideTooltip();
+          hideTooltip2();
         }
       });
       intersectionObserver.observe(targetElement);
-    }, cleanupIntersectionObserver = function() {
+    }, cleanupIntersectionObserver2 = function() {
       if (intersectionObserver) {
         intersectionObserver.disconnect();
         intersectionObserver = null;
       }
-    }, cleanupTooltip = function() {
+    }, cleanupTooltip2 = function() {
       if (targetElement) {
         targetElement.removeAttribute("aria-describedby");
       }
@@ -640,7 +640,7 @@
         exiting.addEventListener("transitionend", remove, { once: true });
         setTimeout(remove, 200);
       }
-      cleanupIntersectionObserver();
+      cleanupIntersectionObserver2();
       isVisible = false;
       targetElement = null;
       targetRect = null;
@@ -648,7 +648,7 @@
       tooltipThemeOverride = null;
       activeTheme = config.theme;
       arrowOffset = ARROW_OFFSET_DEFAULT;
-    }, destroy = function() {
+    }, destroy2 = function() {
       if (readyController) {
         readyController.abort();
         readyController = null;
@@ -660,7 +660,7 @@
       Array.from(attachmentDetachers).forEach((detach) => detach());
       attachmentDetachers.clear();
       attachedElements = /* @__PURE__ */ new WeakMap();
-      cleanupTooltip();
+      cleanupTooltip2();
       if (mutationObserver) {
         mutationObserver.disconnect();
         mutationObserver = null;
@@ -686,19 +686,19 @@
           pageWindow[API_NAME] = void 0;
         }
       }
-    }, trackTargetPosition = function() {
+    }, trackTargetPosition2 = function() {
       if (!isVisible || !targetElement) return;
       if (!targetElement.isConnected) {
-        hideTooltip();
+        hideTooltip2();
         return;
       }
       const newRect = targetElement.getBoundingClientRect();
-      if (!sameRect(targetRect, newRect)) {
+      if (!sameRect2(targetRect, newRect)) {
         targetRect = newRect;
-        updateTooltipPosition();
+        updateTooltipPosition2();
       }
-      positionTrackingId = requestAnimationFrame(trackTargetPosition);
-    }, updateTooltipPosition = function() {
+      positionTrackingId = requestAnimationFrame(trackTargetPosition2);
+    }, updateTooltipPosition2 = function() {
       if (!targetRect || !tooltipEl) return;
       const rect = tooltipEl.getBoundingClientRect();
       const result = computeAnchorPosition(
@@ -719,35 +719,35 @@
       tooltipEl.style.top = `${Math.round(result.top)}px`;
       tooltipEl.style.left = `${Math.round(result.left)}px`;
       tooltipEl.style.setProperty("--arrow-offset", `${arrowOffset}%`);
-      refreshTooltipClassName();
-    }, sameRect = function(left, right) {
+      refreshTooltipClassName2();
+    }, sameRect2 = function(left, right) {
       if (!left || !right) return false;
       return left.top === right.top && left.right === right.right && left.bottom === right.bottom && left.left === right.left && left.width === right.width && left.height === right.height;
-    }, normalizePosition = function(value) {
+    }, normalizePosition2 = function(value) {
       return typeof value === "string" && VALID_POSITIONS.has(value) ? value : "bottom";
-    }, normalizeTheme = function(value, fallback = "system") {
-      return normalizeOptionalTheme(value) || fallback;
-    }, normalizeOptionalTheme = function(value) {
+    }, normalizeTheme2 = function(value, fallback = "system") {
+      return normalizeOptionalTheme2(value) || fallback;
+    }, normalizeOptionalTheme2 = function(value) {
       const theme = typeof value === "string" ? value.toLowerCase() : value;
       return VALID_THEMES.has(theme) ? theme : null;
-    }, getTooltipClassName = function() {
+    }, getTooltipClassName2 = function() {
       return `balaclava-tooltip is-${preferredPosition} is-theme-${activeTheme}`;
-    }, refreshTooltipClassName = function() {
+    }, refreshTooltipClassName2 = function() {
       if (!tooltipEl) return;
       const isEntering = tooltipEl.classList.contains("is-entering");
-      tooltipEl.className = `${getTooltipClassName()}${isEntering ? " is-entering" : ""}`;
-    }, isConfigKey = function(value) {
+      tooltipEl.className = `${getTooltipClassName2()}${isEntering ? " is-entering" : ""}`;
+    }, isConfigKey2 = function(value) {
       return Object.prototype.hasOwnProperty.call(DEFAULT_CONFIG, value);
-    }, isElement = function(value) {
+    }, isElement2 = function(value) {
       return Boolean(
         value && typeof value === "object" && value.nodeType === Node.ELEMENT_NODE && typeof value.getBoundingClientRect === "function"
       );
-    }, isNode = function(value) {
+    }, isNode2 = function(value) {
       return Boolean(
         value && typeof value === "object" && typeof value.nodeType === "number" && typeof value.cloneNode === "function"
       );
     };
-    init2 = init, syncTornThemeVars3 = syncTornThemeVars2, ensureHost2 = ensureHost, buildStylesheet2 = buildStylesheet, getVisualConfig2 = getVisualConfig, exposeApi2 = exposeApi, setupGlobalListeners2 = setupGlobalListeners, handleKeydown2 = handleKeydown, scheduleScrollUpdate2 = scheduleScrollUpdate, updateVisibleTooltip2 = updateVisibleTooltip, showTooltip2 = showTooltip, hideTooltip2 = hideTooltip, configure2 = configure, attachTooltip2 = attachTooltip, resolveContent2 = resolveContent, scanAll2 = scanAll, scanElement2 = scanElement, setupMutationObserver2 = setupMutationObserver, scanAddedNode2 = scanAddedNode, cleanupRemovedNode2 = cleanupRemovedNode, cleanupAttachedElement2 = cleanupAttachedElement, refreshElement2 = refreshElement, renderTooltip2 = renderTooltip, setupIntersectionObserver2 = setupIntersectionObserver, cleanupIntersectionObserver2 = cleanupIntersectionObserver, cleanupTooltip2 = cleanupTooltip, destroy2 = destroy, trackTargetPosition2 = trackTargetPosition, updateTooltipPosition2 = updateTooltipPosition, sameRect2 = sameRect, normalizePosition2 = normalizePosition, normalizeTheme2 = normalizeTheme, normalizeOptionalTheme2 = normalizeOptionalTheme, getTooltipClassName2 = getTooltipClassName, refreshTooltipClassName2 = refreshTooltipClassName, isConfigKey2 = isConfigKey, isElement2 = isElement, isNode2 = isNode;
+    init = init2, syncTornThemeVars2 = syncTornThemeVars3, ensureHost = ensureHost2, buildStylesheet = buildStylesheet2, getVisualConfig = getVisualConfig2, exposeApi = exposeApi2, setupGlobalListeners = setupGlobalListeners2, handleKeydown = handleKeydown2, scheduleScrollUpdate = scheduleScrollUpdate2, updateVisibleTooltip = updateVisibleTooltip2, showTooltip = showTooltip2, hideTooltip = hideTooltip2, configure = configure2, attachTooltip = attachTooltip2, resolveContent = resolveContent2, scanAll = scanAll2, scanElement = scanElement2, setupMutationObserver = setupMutationObserver2, scanAddedNode = scanAddedNode2, cleanupRemovedNode = cleanupRemovedNode2, cleanupAttachedElement = cleanupAttachedElement2, refreshElement = refreshElement2, renderTooltip = renderTooltip2, setupIntersectionObserver = setupIntersectionObserver2, cleanupIntersectionObserver = cleanupIntersectionObserver2, cleanupTooltip = cleanupTooltip2, destroy = destroy2, trackTargetPosition = trackTargetPosition2, updateTooltipPosition = updateTooltipPosition2, sameRect = sameRect2, normalizePosition = normalizePosition2, normalizeTheme = normalizeTheme2, normalizeOptionalTheme = normalizeOptionalTheme2, getTooltipClassName = getTooltipClassName2, refreshTooltipClassName = refreshTooltipClassName2, isConfigKey = isConfigKey2, isElement = isElement2, isNode = isNode2;
     const DEFAULT_CONFIG = Object.freeze({
       theme: "dark",
       bgColor: THEME_TOKENS.dark.bgColor,
@@ -791,57 +791,57 @@
     const tooltipId = `balaclava-tt-${Math.random().toString(36).slice(2, 11)}`;
     let attachedElements = /* @__PURE__ */ new WeakMap();
     const attachmentDetachers = /* @__PURE__ */ new Set();
-    exposeApi();
+    exposeApi2();
     if (document.readyState === "loading") {
       readyController = new AbortController();
       document.addEventListener(
         "DOMContentLoaded",
         () => {
           readyController = null;
-          init();
+          init2();
         },
         { once: true, signal: readyController.signal }
       );
     } else {
-      init();
+      init2();
     }
   }
-  var init2;
-  var syncTornThemeVars3;
-  var ensureHost2;
-  var buildStylesheet2;
-  var getVisualConfig2;
-  var exposeApi2;
-  var setupGlobalListeners2;
-  var handleKeydown2;
-  var scheduleScrollUpdate2;
-  var updateVisibleTooltip2;
-  var showTooltip2;
-  var hideTooltip2;
-  var configure2;
-  var attachTooltip2;
-  var resolveContent2;
-  var scanAll2;
-  var scanElement2;
-  var setupMutationObserver2;
-  var scanAddedNode2;
-  var cleanupRemovedNode2;
-  var cleanupAttachedElement2;
-  var refreshElement2;
-  var renderTooltip2;
-  var setupIntersectionObserver2;
-  var cleanupIntersectionObserver2;
-  var cleanupTooltip2;
-  var destroy2;
-  var trackTargetPosition2;
-  var updateTooltipPosition2;
-  var sameRect2;
-  var normalizePosition2;
-  var normalizeTheme2;
-  var normalizeOptionalTheme2;
-  var getTooltipClassName2;
-  var refreshTooltipClassName2;
-  var isConfigKey2;
-  var isElement2;
-  var isNode2;
+  var init;
+  var syncTornThemeVars2;
+  var ensureHost;
+  var buildStylesheet;
+  var getVisualConfig;
+  var exposeApi;
+  var setupGlobalListeners;
+  var handleKeydown;
+  var scheduleScrollUpdate;
+  var updateVisibleTooltip;
+  var showTooltip;
+  var hideTooltip;
+  var configure;
+  var attachTooltip;
+  var resolveContent;
+  var scanAll;
+  var scanElement;
+  var setupMutationObserver;
+  var scanAddedNode;
+  var cleanupRemovedNode;
+  var cleanupAttachedElement;
+  var refreshElement;
+  var renderTooltip;
+  var setupIntersectionObserver;
+  var cleanupIntersectionObserver;
+  var cleanupTooltip;
+  var destroy;
+  var trackTargetPosition;
+  var updateTooltipPosition;
+  var sameRect;
+  var normalizePosition;
+  var normalizeTheme;
+  var normalizeOptionalTheme;
+  var getTooltipClassName;
+  var refreshTooltipClassName;
+  var isConfigKey;
+  var isElement;
+  var isNode;
 })();

@@ -16,6 +16,11 @@ export interface IgniterInfo {
   readonly advice: string;
 }
 
+/** Per-dampener info shown in the materials popover tooltip. No numeric stats — dampeners are differentiated by safety, not by comparable bar-worthy stats (see plans/arson/material-badges.md decision #1). */
+export interface DampenerInfo {
+  readonly advice: string;
+}
+
 export const ACCELERANT_INFO: Readonly<
   Partial<Record<ResourceId, AccelerantInfo>>
 > = {
@@ -119,3 +124,19 @@ export const IGNITER_INFO: Readonly<Partial<Record<ResourceId, IgniterInfo>>> =
         "High intensity/momentum randomly across areas with high visibility.",
     },
   };
+
+export const DAMPENER_INFO: Readonly<
+  Partial<Record<ResourceId, DampenerInfo>>
+> = {
+  [RESOURCE.BLANKET]: {
+    advice:
+      "Lowers intensity and momentum by ~25%. Has high crit rate (~20% with low skill). May be lost on fail.",
+  },
+  [RESOURCE.SAND]: {
+    advice:
+      "Twice as effective and half as risky as a Blanket. Effective for controlled burns. Is consumed on use.",
+  },
+  [RESOURCE.FIRE_EXTINGUISHER]: {
+    advice: "As effective as Sand, but safer to use. Is consumed on use.",
+  },
+};

@@ -111,6 +111,8 @@ function createUserscriptHeader(metadata) {
 }
 
 execSync('pnpm exec tsx scripts/dump-scenarios.ts', { stdio: 'inherit' });
+execSync('pnpm exec tsx scripts/dump-materials.ts', { stdio: 'inherit' });
+execSync('pnpm exec tsx scripts/dump-buildings.ts', { stdio: 'inherit' });
 
 for (const mod of STATIC_MODULES) {
     await build({

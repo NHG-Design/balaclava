@@ -351,7 +351,11 @@ function materialBadgeConfig(): MaterialBadgeConfig {
 
 function resetMaterialScans(): void {
   resetMaterialBadges();
-  scanMaterialPopover(materialBadgeTooltipCtx, materialBadgeConfig());
+  scanMaterialPopover(
+    materialBadgeTooltipCtx,
+    materialBadgeConfig(),
+    effectivePrices(),
+  );
 }
 
 function setShowMaterialDataEnabled(show: boolean): void {
@@ -1165,7 +1169,11 @@ const materialBadgeTooltipCtx: TooltipCtx = {
 
 const observer = new MutationObserver(() => {
   scanPage();
-  scanMaterialPopover(materialBadgeTooltipCtx, materialBadgeConfig());
+  scanMaterialPopover(
+    materialBadgeTooltipCtx,
+    materialBadgeConfig(),
+    effectivePrices(),
+  );
   scheduleInjectSettings();
 });
 

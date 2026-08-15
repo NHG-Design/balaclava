@@ -35,7 +35,7 @@ const ACCELERANTS = {
     "suspicion": 3,
     "advice": "Great as starter, insurance jobs, and small fires. Increases momentum in single area."
   },
-  "Magnesium Shavings": {
+  "Potassium Nitrate": {
     "type": "Solid",
     "intensity": "31.25%",
     "intensity_abs": 10,
@@ -47,7 +47,7 @@ const ACCELERANTS = {
     "suspicion": 3,
     "advice": "Increases intensity by 25% of current intensity in single area."
   },
-  "Magnesium": {
+  "Magnesium Shavings": {
     "type": "Solid",
     "intensity": "27.5%",
     "intensity_abs": 8,
@@ -126,16 +126,13 @@ const IGNITERS = {
 
 const DAMPENERS = {
   "Blanket": {
-    "effect": "-25% Intensity",
-    "advice": "High crit rate (approx 1 in 5). dangerous at low skill."
+    "advice": "Lowers intensity and momentum by ~25%. Has high crit rate (~20% with low skill). May be lost on fail."
   },
   "Sand": {
-    "effect": "Negative momentum",
-    "advice": "Unlocked at CS60. Effective for controlled burns."
+    "effect": "Twice as effective and half as risky as a Blanket. Effective for controlled burns. Is consumed on use.",
   },
   "Fire Extinguisher": {
-    "effect": "Negative momentum",
-    "advice": "Unlocked at CS90. Safer and as effective as sand."
+    "effect": "As effective as Sand, but safer to use. Is consumed on use.",
   }
 };
 

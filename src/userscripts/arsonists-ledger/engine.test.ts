@@ -41,15 +41,15 @@ describe('catalog', () => {
     });
 
     it('permanent reusable items have isTool=true (excluded from market cost)', () => {
-        const permanent = [RESOURCE.FLAMETHROWER, RESOURCE.BLANKET, RESOURCE.FIRE_EXTINGUISHER];
+        const permanent = [RESOURCE.FLAMETHROWER, RESOURCE.BLANKET];
         for (const id of permanent) {
             assert.equal(CATALOG[id].isTool, true, `Expected isTool=true for ${id}`);
         }
     });
 
     it('consumable igniters/dampeners have isTool=false (included in market cost)', () => {
-        // Molotov and sand are physically consumed per crime
-        const consumable = [RESOURCE.MOLOTOV, RESOURCE.SAND];
+        // Molotov, Sand, and Fire Extinguisher are physically consumed per crime
+        const consumable = [RESOURCE.MOLOTOV, RESOURCE.SAND, RESOURCE.FIRE_EXTINGUISHER];
         for (const id of consumable) {
             assert.equal(CATALOG[id].isTool, false, `Expected isTool=false for ${id}`);
         }
@@ -86,10 +86,16 @@ describe('catalog', () => {
         }
     });
 
-    it('permanent tools have defaultPrice of 0', () => {
-        const permanent = [RESOURCE.FLAMETHROWER, RESOURCE.BLANKET, RESOURCE.FIRE_EXTINGUISHER];
+    it('permanent tools may carry a nonzero defaultPrice for display, but are excluded from material cost', () => {
+        const permanent = [RESOURCE.FLAMETHROWER, RESOURCE.BLANKET];
         for (const id of permanent) {
-            assert.equal(CATALOG[id].defaultPrice, 0, `Expected defaultPrice=0 for permanent tool ${id}`);
+            const s = Scenario({
+                actions: {
+                    place: [{ resourceId: RESOURCE.GASOLINE, qty: 0 }],
+                    dampen: [{ resourceId: id, qty: 3 }],
+                },
+            });
+            assert.equal(calcMaterialCost(s, {}), 0, `Expected ${id} to be excluded from material cost regardless of its defaultPrice`);
         }
     });
 });

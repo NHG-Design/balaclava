@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        Torn Arsonist's Ledger
 // @namespace   https://greasyfork.org/en/users/942572-yukio-mizsima
-// @version     1.2.15
+// @version     1.2.17
 // @description Arson profit-per-nerve calculator and scenario guide for Torn's Crimes page
 // @icon        https://www.google.com/s2/favicons?sz=64&domain=torn.com
 // @author      Yukio [906148]
@@ -18,10 +18,10 @@
 "use strict";
 (() => {
   // src/data/scenarios-version.ts
-  var SCENARIOS_VERSION = "0871885907ec";
+  var SCENARIOS_VERSION = "5f483aa57326";
 
   // src/data/catalog.ts
-  var CATALOG_UPDATED = "2026-08-08";
+  var CATALOG_UPDATED = "2026-08-15";
   var RESOURCE = {
     // Liquids
     GASOLINE: "gasoline",
@@ -71,48 +71,48 @@
   var CATALOG = {
     // Liquids
     [RESOURCE.GASOLINE]: { id: RESOURCE.GASOLINE, name: "Gasoline", kind: "fuel", category: "liquid", isTool: false, defaultPrice: 495, tornId: 172 },
-    [RESOURCE.DIESEL]: { id: RESOURCE.DIESEL, name: "Diesel", kind: "fuel", category: "liquid", isTool: false, defaultPrice: 4849, tornId: 1458 },
-    [RESOURCE.KEROSENE]: { id: RESOURCE.KEROSENE, name: "Kerosene", kind: "fuel", category: "liquid", isTool: false, defaultPrice: 19497, tornId: 1457 },
+    [RESOURCE.DIESEL]: { id: RESOURCE.DIESEL, name: "Diesel", kind: "fuel", category: "liquid", isTool: false, defaultPrice: 4972, tornId: 1458 },
+    [RESOURCE.KEROSENE]: { id: RESOURCE.KEROSENE, name: "Kerosene", kind: "fuel", category: "liquid", isTool: false, defaultPrice: 20874, tornId: 1457 },
     // Solids
-    [RESOURCE.MAGNESIUM]: { id: RESOURCE.MAGNESIUM, name: "Magnesium Shavings", kind: "fuel", category: "solid", isTool: false, defaultPrice: 63370, tornId: 1462 },
-    [RESOURCE.THERMITE]: { id: RESOURCE.THERMITE, name: "Thermite", kind: "fuel", category: "solid", isTool: false, defaultPrice: 110360, tornId: 1461 },
-    [RESOURCE.POTASSIUM_NITRATE]: { id: RESOURCE.POTASSIUM_NITRATE, name: "Potassium Nitrate", kind: "fuel", category: "solid", isTool: false, defaultPrice: 51684, tornId: 1264 },
+    [RESOURCE.MAGNESIUM]: { id: RESOURCE.MAGNESIUM, name: "Magnesium Shavings", kind: "fuel", category: "solid", isTool: false, defaultPrice: 64323, tornId: 1462 },
+    [RESOURCE.THERMITE]: { id: RESOURCE.THERMITE, name: "Thermite", kind: "fuel", category: "solid", isTool: false, defaultPrice: 103992, tornId: 1461 },
+    [RESOURCE.POTASSIUM_NITRATE]: { id: RESOURCE.POTASSIUM_NITRATE, name: "Potassium Nitrate", kind: "fuel", category: "solid", isTool: false, defaultPrice: 52647, tornId: 1264 },
     // Gases
-    [RESOURCE.OXYGEN]: { id: RESOURCE.OXYGEN, name: "Oxygen Tank", kind: "fuel", category: "gaseous", isTool: false, defaultPrice: 26975, tornId: 1219 },
-    [RESOURCE.METHANE]: { id: RESOURCE.METHANE, name: "Methane Tank", kind: "fuel", category: "gaseous", isTool: false, defaultPrice: 19761, tornId: 1460 },
-    [RESOURCE.HYDROGEN]: { id: RESOURCE.HYDROGEN, name: "Hydrogen Tank", kind: "fuel", category: "gaseous", isTool: false, defaultPrice: 19956, tornId: 1459 },
+    [RESOURCE.OXYGEN]: { id: RESOURCE.OXYGEN, name: "Oxygen Tank", kind: "fuel", category: "gaseous", isTool: false, defaultPrice: 29374, tornId: 1219 },
+    [RESOURCE.METHANE]: { id: RESOURCE.METHANE, name: "Methane Tank", kind: "fuel", category: "gaseous", isTool: false, defaultPrice: 21308, tornId: 1460 },
+    [RESOURCE.HYDROGEN]: { id: RESOURCE.HYDROGEN, name: "Hydrogen Tank", kind: "fuel", category: "gaseous", isTool: false, defaultPrice: 20950, tornId: 1459 },
     // Igniters
-    [RESOURCE.LIGHTER]: { id: RESOURCE.LIGHTER, name: "Windproof Lighter", kind: "tool", category: "igniter", isTool: true, defaultPrice: 0, tornId: 544 },
-    [RESOURCE.MOLOTOV]: { id: RESOURCE.MOLOTOV, name: "Molotov Cocktail", kind: "tool", category: "igniter", isTool: false, defaultPrice: 76922, tornId: 742 },
-    [RESOURCE.FLAMETHROWER]: { id: RESOURCE.FLAMETHROWER, name: "Flamethrower", kind: "tool", category: "igniter", isTool: true, defaultPrice: 0, tornId: 255 },
+    [RESOURCE.LIGHTER]: { id: RESOURCE.LIGHTER, name: "Windproof Lighter", kind: "tool", category: "igniter", isTool: true, defaultPrice: 2650, tornId: 544 },
+    [RESOURCE.MOLOTOV]: { id: RESOURCE.MOLOTOV, name: "Molotov Cocktail", kind: "tool", category: "igniter", isTool: false, defaultPrice: 77768, tornId: 742 },
+    [RESOURCE.FLAMETHROWER]: { id: RESOURCE.FLAMETHROWER, name: "Flamethrower", kind: "tool", category: "igniter", isTool: true, defaultPrice: 2543736, tornId: 255 },
     // Dampeners
-    [RESOURCE.BLANKET]: { id: RESOURCE.BLANKET, name: "Blanket", kind: "tool", category: "dampener", isTool: true, defaultPrice: 0 },
-    [RESOURCE.SAND]: { id: RESOURCE.SAND, name: "Sand", kind: "tool", category: "dampener", isTool: false, defaultPrice: 27302, tornId: 833 },
-    [RESOURCE.FIRE_EXTINGUISHER]: { id: RESOURCE.FIRE_EXTINGUISHER, name: "Fire Extinguisher", kind: "tool", category: "dampener", isTool: true, defaultPrice: 0, tornId: 1463 },
+    [RESOURCE.BLANKET]: { id: RESOURCE.BLANKET, name: "Blanket", kind: "tool", category: "dampener", isTool: true, defaultPrice: 6776, tornId: 1235 },
+    [RESOURCE.SAND]: { id: RESOURCE.SAND, name: "Sand", kind: "tool", category: "dampener", isTool: false, defaultPrice: 25189, tornId: 833 },
+    [RESOURCE.FIRE_EXTINGUISHER]: { id: RESOURCE.FIRE_EXTINGUISHER, name: "Fire Extinguisher", kind: "tool", category: "dampener", isTool: false, defaultPrice: 92129, tornId: 1463 },
     // Evidence
-    [RESOURCE.AMMONIA]: { id: RESOURCE.AMMONIA, name: "Ammonia", kind: "evidence", category: "misc", isTool: false, defaultPrice: 2101, tornId: 1248 },
-    [RESOURCE.CANNABIS]: { id: RESOURCE.CANNABIS, name: "Cannabis", kind: "evidence", category: "misc", isTool: false, defaultPrice: 6134, tornId: 196 },
-    [RESOURCE.COMPASS]: { id: RESOURCE.COMPASS, name: "Compass", kind: "evidence", category: "misc", isTool: false, defaultPrice: 15297, tornId: 407 },
+    [RESOURCE.AMMONIA]: { id: RESOURCE.AMMONIA, name: "Ammonia", kind: "evidence", category: "misc", isTool: false, defaultPrice: 2416, tornId: 1248 },
+    [RESOURCE.CANNABIS]: { id: RESOURCE.CANNABIS, name: "Cannabis", kind: "evidence", category: "misc", isTool: false, defaultPrice: 6120, tornId: 196 },
+    [RESOURCE.COMPASS]: { id: RESOURCE.COMPASS, name: "Compass", kind: "evidence", category: "misc", isTool: false, defaultPrice: 14140, tornId: 407 },
     [RESOURCE.DIAMOND_RING]: { id: RESOURCE.DIAMOND_RING, name: "Diamond Ring", kind: "evidence", category: "misc", isTool: false, defaultPrice: 2648, tornId: 54 },
-    [RESOURCE.ELEPHANT_STATUE]: { id: RESOURCE.ELEPHANT_STATUE, name: "Elephant Statue", kind: "evidence", category: "misc", isTool: false, defaultPrice: 4099, tornId: 280 },
-    [RESOURCE.FAMILY_PHOTO]: { id: RESOURCE.FAMILY_PHOTO, name: "Family Photo", kind: "evidence", category: "misc", isTool: false, defaultPrice: 602, tornId: 1089 },
-    [RESOURCE.GLITTER_BOMB]: { id: RESOURCE.GLITTER_BOMB, name: "Glitter Bomb", kind: "evidence", category: "misc", isTool: false, defaultPrice: 363182, tornId: 1294 },
-    [RESOURCE.GOLD_TOOTH]: { id: RESOURCE.GOLD_TOOTH, name: "Gold Tooth", kind: "evidence", category: "misc", isTool: false, defaultPrice: 14015, tornId: 1282 },
-    [RESOURCE.GRENADE]: { id: RESOURCE.GRENADE, name: "Grenade", kind: "evidence", category: "misc", isTool: false, defaultPrice: 6983, tornId: 220 },
+    [RESOURCE.ELEPHANT_STATUE]: { id: RESOURCE.ELEPHANT_STATUE, name: "Elephant Statue", kind: "evidence", category: "misc", isTool: false, defaultPrice: 3881, tornId: 280 },
+    [RESOURCE.FAMILY_PHOTO]: { id: RESOURCE.FAMILY_PHOTO, name: "Family Photo", kind: "evidence", category: "misc", isTool: false, defaultPrice: 594, tornId: 1089 },
+    [RESOURCE.GLITTER_BOMB]: { id: RESOURCE.GLITTER_BOMB, name: "Glitter Bomb", kind: "evidence", category: "misc", isTool: false, defaultPrice: 384907, tornId: 1294 },
+    [RESOURCE.GOLD_TOOTH]: { id: RESOURCE.GOLD_TOOTH, name: "Gold Tooth", kind: "evidence", category: "misc", isTool: false, defaultPrice: 13853, tornId: 1282 },
+    [RESOURCE.GRENADE]: { id: RESOURCE.GRENADE, name: "Grenade", kind: "evidence", category: "misc", isTool: false, defaultPrice: 6964, tornId: 220 },
     [RESOURCE.HARD_DRIVE]: { id: RESOURCE.HARD_DRIVE, name: "Hard Drive", kind: "evidence", category: "misc", isTool: false, defaultPrice: 303, tornId: 45 },
-    [RESOURCE.JADE_BUDDHA]: { id: RESOURCE.JADE_BUDDHA, name: "Jade Buddha", kind: "evidence", category: "misc", isTool: false, defaultPrice: 10383, tornId: 275 },
-    [RESOURCE.KABUKI_MASK]: { id: RESOURCE.KABUKI_MASK, name: "Kabuki Mask", kind: "evidence", category: "misc", isTool: false, defaultPrice: 28127, tornId: 278 },
+    [RESOURCE.JADE_BUDDHA]: { id: RESOURCE.JADE_BUDDHA, name: "Jade Buddha", kind: "evidence", category: "misc", isTool: false, defaultPrice: 11038, tornId: 275 },
+    [RESOURCE.KABUKI_MASK]: { id: RESOURCE.KABUKI_MASK, name: "Kabuki Mask", kind: "evidence", category: "misc", isTool: false, defaultPrice: 29182, tornId: 278 },
     [RESOURCE.LIPSTICK]: { id: RESOURCE.LIPSTICK, name: "Lipstick", kind: "evidence", category: "misc", isTool: false, defaultPrice: 205, tornId: 1085 },
-    [RESOURCE.MAYAN_STATUE]: { id: RESOURCE.MAYAN_STATUE, name: "Mayan Statue", kind: "evidence", category: "misc", isTool: false, defaultPrice: 2726, tornId: 259 },
-    [RESOURCE.OPIUM]: { id: RESOURCE.OPIUM, name: "Opium", kind: "evidence", category: "misc", isTool: false, defaultPrice: 25242, tornId: 200 },
-    [RESOURCE.PCP]: { id: RESOURCE.PCP, name: "PCP", kind: "evidence", category: "misc", isTool: false, defaultPrice: 2507, tornId: 201 },
-    [RESOURCE.PELE_CHARM]: { id: RESOURCE.PELE_CHARM, name: "Pele Charm", kind: "evidence", category: "misc", isTool: false, defaultPrice: 3031, tornId: 265 },
-    [RESOURCE.RAW_IVORY]: { id: RESOURCE.RAW_IVORY, name: "Raw Ivory", kind: "evidence", category: "misc", isTool: false, defaultPrice: 69699, tornId: 358 },
-    [RESOURCE.STAPLER]: { id: RESOURCE.STAPLER, name: "Stapler", kind: "evidence", category: "misc", isTool: false, defaultPrice: 6583, tornId: 1286 },
+    [RESOURCE.MAYAN_STATUE]: { id: RESOURCE.MAYAN_STATUE, name: "Mayan Statue", kind: "evidence", category: "misc", isTool: false, defaultPrice: 2771, tornId: 259 },
+    [RESOURCE.OPIUM]: { id: RESOURCE.OPIUM, name: "Opium", kind: "evidence", category: "misc", isTool: false, defaultPrice: 24836, tornId: 200 },
+    [RESOURCE.PCP]: { id: RESOURCE.PCP, name: "PCP", kind: "evidence", category: "misc", isTool: false, defaultPrice: 2598, tornId: 201 },
+    [RESOURCE.PELE_CHARM]: { id: RESOURCE.PELE_CHARM, name: "Pele Charm", kind: "evidence", category: "misc", isTool: false, defaultPrice: 2953, tornId: 265 },
+    [RESOURCE.RAW_IVORY]: { id: RESOURCE.RAW_IVORY, name: "Raw Ivory", kind: "evidence", category: "misc", isTool: false, defaultPrice: 69639, tornId: 358 },
+    [RESOURCE.STAPLER]: { id: RESOURCE.STAPLER, name: "Stapler", kind: "evidence", category: "misc", isTool: false, defaultPrice: 7149, tornId: 1286 },
     [RESOURCE.STICK_GRENADE]: { id: RESOURCE.STICK_GRENADE, name: "Stick Grenade", kind: "evidence", category: "misc", isTool: false, defaultPrice: 13605, tornId: 221 },
-    [RESOURCE.SUMO_DOLL]: { id: RESOURCE.SUMO_DOLL, name: "Sumo Doll", kind: "evidence", category: "misc", isTool: false, defaultPrice: 13498, tornId: 427 },
-    [RESOURCE.SYRINGE]: { id: RESOURCE.SYRINGE, name: "Syringe", kind: "evidence", category: "misc", isTool: false, defaultPrice: 484, tornId: 1094 },
-    [RESOURCE.TOOTHBRUSH]: { id: RESOURCE.TOOTHBRUSH, name: "Toothbrush", kind: "evidence", category: "misc", isTool: false, defaultPrice: 3472, tornId: 1272 }
+    [RESOURCE.SUMO_DOLL]: { id: RESOURCE.SUMO_DOLL, name: "Sumo Doll", kind: "evidence", category: "misc", isTool: false, defaultPrice: 11149, tornId: 427 },
+    [RESOURCE.SYRINGE]: { id: RESOURCE.SYRINGE, name: "Syringe", kind: "evidence", category: "misc", isTool: false, defaultPrice: 476, tornId: 1094 },
+    [RESOURCE.TOOTHBRUSH]: { id: RESOURCE.TOOTHBRUSH, name: "Toothbrush", kind: "evidence", category: "misc", isTool: false, defaultPrice: 3436, tornId: 1272 }
   };
 
   // src/data/scenarios.ts
@@ -680,11 +680,11 @@
     },
     {
       scenarioName: "Boxing Clever",
-      payoutMin: 325e3,
+      payoutMin: 3e5,
       payoutMax: 36e4,
       actions: {
-        ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
-        place: [{ resourceId: RESOURCE.GASOLINE, qty: 2 }]
+        place: [{ resourceId: RESOURCE.GASOLINE, qty: 2 }],
+        ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }]
       }
     },
     {
@@ -877,11 +877,8 @@
       payoutMin: 46e3,
       payoutMax: 23e4,
       actions: {
-        ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
-        place: [
-          { resourceId: RESOURCE.DIESEL, qty: 2 },
-          { resourceId: RESOURCE.MAGNESIUM, qty: 1 }
-        ]
+        place: [{ resourceId: RESOURCE.DIESEL, qty: 1 }, { resourceId: RESOURCE.KEROSENE, qty: 1 }],
+        ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }]
       }
     },
     {
@@ -896,13 +893,13 @@
     },
     {
       scenarioName: "Cold Brew Reality",
-      payoutMin: 15e4,
-      payoutMax: 15e4,
+      payoutMin: 14e4,
+      payoutMax: 17e4,
       actions: {
+        place: [{ resourceId: RESOURCE.KEROSENE, qty: 2 }],
         ignite: [{ resourceId: RESOURCE.LIGHTER, qty: 1 }],
-        place: [{ resourceId: RESOURCE.HYDROGEN, qty: 1 }],
-        stoke: [{ resourceId: RESOURCE.HYDROGEN, qty: 2 }],
-        stokeTime: "late"
+        stoke: [{ resourceId: RESOURCE.METHANE, qty: 1 }],
+        stokeTime: "early"
       }
     },
     {
@@ -1389,11 +1386,13 @@
     },
     {
       scenarioName: "Hot Trend",
-      payoutMin: 54e3,
-      payoutMax: 66e3,
+      payoutMin: 57e3,
+      payoutMax: 21e4,
       actions: {
-        ignite: [{ resourceId: RESOURCE.LIGHTER, qty: 1 }],
-        place: [{ resourceId: RESOURCE.HYDROGEN, qty: 1 }]
+        place: [{ resourceId: RESOURCE.GASOLINE, qty: 1 }],
+        ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
+        stoke: [{ resourceId: RESOURCE.METHANE, qty: 2 }],
+        stokeTime: "early"
       }
     },
     {
@@ -1554,11 +1553,11 @@
     },
     {
       scenarioName: "Low Rent",
-      payoutMin: 42e3,
+      payoutMin: 41e3,
       payoutMax: 21e4,
       actions: {
-        place: [{ resourceId: RESOURCE.GASOLINE, qty: 2 }],
-        ignite: [{ resourceId: RESOURCE.LIGHTER, qty: 1 }],
+        place: [{ resourceId: RESOURCE.GASOLINE, qty: 1 }],
+        ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
         stoke: [{ resourceId: RESOURCE.METHANE, qty: 2 }],
         stokeTime: "early"
       }
@@ -1844,8 +1843,8 @@
     },
     {
       scenarioName: "Second Hand Smoke",
-      payoutMin: 15e4,
-      payoutMax: 21e4,
+      payoutMin: 12e4,
+      payoutMax: 22e4,
       actions: {
         place: [{ resourceId: RESOURCE.GASOLINE, qty: 2 }],
         ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
@@ -2507,15 +2506,14 @@
     {
       scenarioName: "Doxing Clever",
       payoutMin: 14e4,
-      payoutMax: 14e4,
+      payoutMax: 19e4,
       actions: {
         ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
         place: [
-          { resourceId: RESOURCE.GASOLINE, qty: 4 },
-          { resourceId: RESOURCE.MAGNESIUM, qty: 1 }
-        ],
-        stoke: [{ resourceId: RESOURCE.DIESEL, qty: 5 }],
-        stokeTime: "late"
+          { resourceId: RESOURCE.GASOLINE, qty: 3 },
+          { resourceId: RESOURCE.THERMITE, qty: 1 },
+          { resourceId: RESOURCE.GASOLINE, qty: 2 }
+        ]
       }
     },
     {
@@ -2739,17 +2737,17 @@
   });
   var rootWindow = typeof unsafeWindow !== "undefined" ? unsafeWindow : window;
   if (!rootWindow[API_NAME]?.version) {
-    let init = function() {
-      ensureHost();
-      setupGlobalListeners();
-      scanAll();
-      setupMutationObserver();
-    }, syncTornThemeVars2 = function() {
+    let init2 = function() {
+      ensureHost2();
+      setupGlobalListeners2();
+      scanAll2();
+      setupMutationObserver2();
+    }, syncTornThemeVars3 = function() {
       if (!host) return;
       syncTornThemeVars(host);
-    }, ensureHost = function() {
+    }, ensureHost2 = function() {
       if (host) {
-        syncTornThemeVars2();
+        syncTornThemeVars3();
         return;
       }
       host = document.createElement("div");
@@ -2767,11 +2765,11 @@
       }
       shadow = host.attachShadow({ mode: "closed" });
       styleEl = document.createElement("style");
-      styleEl.textContent = buildStylesheet();
+      styleEl.textContent = buildStylesheet2();
       shadow.appendChild(styleEl);
-      syncTornThemeVars2();
-    }, buildStylesheet = function() {
-      const visualConfig = getVisualConfig();
+      syncTornThemeVars3();
+    }, buildStylesheet2 = function() {
+      const visualConfig = getVisualConfig2();
       return `
       .balaclava-tooltip {
         --balaclava-tooltip-bg: var(--tooltip-bg-color, ${THEME_TOKENS.dark.bgColor});
@@ -2887,96 +2885,96 @@
         }
       }
     `;
-    }, getVisualConfig = function() {
+    }, getVisualConfig2 = function() {
       return {
         ...config,
         arrowBorderSize: config.arrowBorderSize ?? config.borderSize,
         arrowBorderColor: config.arrowBorderColor ?? "var(--balaclava-tooltip-border)",
         arrowBorderRadius: config.arrowBorderRadius ?? "3px"
       };
-    }, exposeApi = function() {
+    }, exposeApi2 = function() {
       const api = {
         version: VERSION,
-        show: showTooltip,
-        hide: hideTooltip,
-        configure,
-        attach: attachTooltip,
-        rescan: scanAll,
-        destroy
+        show: showTooltip2,
+        hide: hideTooltip2,
+        configure: configure2,
+        attach: attachTooltip2,
+        rescan: scanAll2,
+        destroy: destroy2
       };
       rootWindow[API_NAME] = api;
       if (window !== rootWindow) {
         window[API_NAME] = api;
       }
-    }, setupGlobalListeners = function() {
+    }, setupGlobalListeners2 = function() {
       if (globalListenersController) return;
       globalListenersController = new AbortController();
       const { signal } = globalListenersController;
-      window.addEventListener("resize", updateVisibleTooltip, {
+      window.addEventListener("resize", updateVisibleTooltip2, {
         passive: true,
         signal
       });
-      window.addEventListener("scroll", scheduleScrollUpdate, {
+      window.addEventListener("scroll", scheduleScrollUpdate2, {
         capture: true,
         passive: true,
         signal
       });
-      window.addEventListener("keydown", handleKeydown, {
+      window.addEventListener("keydown", handleKeydown2, {
         passive: true,
         signal
       });
-    }, handleKeydown = function(event) {
+    }, handleKeydown2 = function(event) {
       if (event.key === "Escape" && isVisible) {
-        hideTooltip();
+        hideTooltip2();
       }
-    }, scheduleScrollUpdate = function() {
+    }, scheduleScrollUpdate2 = function() {
       if (!isVisible) return;
-      updateVisibleTooltip();
-    }, updateVisibleTooltip = function() {
+      updateVisibleTooltip2();
+    }, updateVisibleTooltip2 = function() {
       if (!isVisible || !targetElement) return;
       if (!targetElement.isConnected) {
-        hideTooltip();
+        hideTooltip2();
         return;
       }
       targetRect = targetElement.getBoundingClientRect();
-      updateTooltipPosition();
-    }, showTooltip = function(target, content, options = {}) {
-      if (!isElement(target)) {
+      updateTooltipPosition2();
+    }, showTooltip2 = function(target, content, options = {}) {
+      if (!isElement2(target)) {
         throw new TypeError(
           "BalaclavaTooltip.show target must be an HTMLElement."
         );
       }
-      ensureHost();
-      cleanupTooltip();
+      ensureHost2();
+      cleanupTooltip2();
       targetElement = target;
       targetRect = target.getBoundingClientRect();
-      requestedPosition = normalizePosition(options.position);
+      requestedPosition = normalizePosition2(options.position);
       preferredPosition = requestedPosition;
-      tooltipThemeOverride = normalizeOptionalTheme(options.theme);
+      tooltipThemeOverride = normalizeOptionalTheme2(options.theme);
       activeTheme = tooltipThemeOverride || config.theme;
       showArrow = options.showArrow !== false;
       arrowOffset = ARROW_OFFSET_DEFAULT;
       isVisible = true;
       target.setAttribute("aria-describedby", tooltipId);
-      renderTooltip(content);
-      setupIntersectionObserver();
+      renderTooltip2(content);
+      setupIntersectionObserver2();
       requestAnimationFrame(() => {
-        updateVisibleTooltip();
-        trackTargetPosition();
+        updateVisibleTooltip2();
+        trackTargetPosition2();
       });
-    }, hideTooltip = function() {
+    }, hideTooltip2 = function() {
       tooltipCooldownEnd = Date.now() + 600;
-      cleanupTooltip();
-    }, configure = function(userConfig = {}) {
+      cleanupTooltip2();
+    }, configure2 = function(userConfig = {}) {
       const nextConfig = { ...config };
       let hasCustomThemeOverride = false;
       for (const [key, value] of Object.entries(userConfig)) {
         if (value === void 0 || value === null) continue;
         if (key === "theme") {
-          nextConfig.theme = normalizeTheme(value, nextConfig.theme);
+          nextConfig.theme = normalizeTheme2(value, nextConfig.theme);
           continue;
         }
-        if (isConfigKey(key)) {
+        if (isConfigKey2(key)) {
           nextConfig[key] = value;
           hasCustomThemeOverride = hasCustomThemeOverride || CUSTOM_THEME_KEYS.has(key);
         }
@@ -2986,18 +2984,18 @@
       }
       config = nextConfig;
       if (styleEl) {
-        styleEl.textContent = buildStylesheet();
+        styleEl.textContent = buildStylesheet2();
       }
       if (host) {
         host.style.zIndex = String(config.zIndex);
       }
       if (isVisible && !tooltipThemeOverride) {
         activeTheme = config.theme;
-        refreshTooltipClassName();
+        refreshTooltipClassName2();
       }
-      updateVisibleTooltip();
-    }, attachTooltip = function(element, content, options = {}) {
-      if (!isElement(element)) {
+      updateVisibleTooltip2();
+    }, attachTooltip2 = function(element, content, options = {}) {
+      if (!isElement2(element)) {
         throw new TypeError(
           "BalaclavaTooltip.attach element must be an HTMLElement."
         );
@@ -3006,7 +3004,7 @@
       const { signal } = controller;
       let detached = false;
       let hoverTimer = null;
-      const doShow = () => showTooltip(element, resolveContent(content, element), options);
+      const doShow = () => showTooltip2(element, resolveContent2(content, element), options);
       const onMouseEnter = () => {
         if (Date.now() < tooltipCooldownEnd) {
           nextShowInstant = true;
@@ -3024,7 +3022,7 @@
           clearTimeout(hoverTimer);
           hoverTimer = null;
         }
-        if (targetElement === element) hideTooltip();
+        if (targetElement === element) hideTooltip2();
       };
       element.addEventListener("mouseenter", onMouseEnter, { signal });
       element.addEventListener("mouseleave", onMouseLeave, { signal });
@@ -3032,7 +3030,7 @@
       element.addEventListener(
         "blur",
         () => {
-          if (targetElement === element) hideTooltip();
+          if (targetElement === element) hideTooltip2();
         },
         { signal }
       );
@@ -3046,43 +3044,43 @@
         controller.abort();
         attachmentDetachers.delete(detach2);
         if (targetElement === element) {
-          hideTooltip();
+          hideTooltip2();
         }
       };
       attachmentDetachers.add(detach);
       return detach;
-    }, resolveContent = function(content, element) {
+    }, resolveContent2 = function(content, element) {
       return typeof content === "function" ? content(element) : content;
-    }, scanAll = function(root = document) {
-      root.querySelectorAll?.("[data-balaclava-tooltip]").forEach(scanElement);
-    }, scanElement = function(element) {
-      if (!isElement(element) || attachedElements.has(element)) return;
+    }, scanAll2 = function(root = document) {
+      root.querySelectorAll?.("[data-balaclava-tooltip]").forEach(scanElement2);
+    }, scanElement2 = function(element) {
+      if (!isElement2(element) || attachedElements.has(element)) return;
       const text = element.getAttribute("data-balaclava-tooltip");
       if (!text) return;
-      const position = normalizePosition(
+      const position = normalizePosition2(
         element.getAttribute("data-balaclava-tooltip-position")
       );
       const arrow = element.getAttribute("data-balaclava-tooltip-arrow") !== "false";
-      const theme = normalizeOptionalTheme(
+      const theme = normalizeOptionalTheme2(
         element.getAttribute("data-balaclava-tooltip-theme")
       );
       const options = { position, showArrow: arrow };
       if (theme) {
         options.theme = theme;
       }
-      const detach = attachTooltip(element, text, options);
+      const detach = attachTooltip2(element, text, options);
       attachedElements.set(element, detach);
-    }, setupMutationObserver = function() {
+    }, setupMutationObserver2 = function() {
       const observerRoot = document.body || document.documentElement;
       if (mutationObserver || !observerRoot) return;
       mutationObserver = new MutationObserver((mutations) => {
         for (const mutation of mutations) {
           if (mutation.type === "childList") {
-            mutation.addedNodes.forEach(scanAddedNode);
-            mutation.removedNodes.forEach(cleanupRemovedNode);
+            mutation.addedNodes.forEach(scanAddedNode2);
+            mutation.removedNodes.forEach(cleanupRemovedNode2);
           }
           if (mutation.type === "attributes") {
-            refreshElement(mutation.target);
+            refreshElement2(mutation.target);
           }
         }
       });
@@ -3097,47 +3095,47 @@
           "data-balaclava-tooltip-theme"
         ]
       });
-    }, scanAddedNode = function(node) {
-      if (!isElement(node)) return;
+    }, scanAddedNode2 = function(node) {
+      if (!isElement2(node)) return;
       if (node.hasAttribute("data-balaclava-tooltip")) {
-        scanElement(node);
+        scanElement2(node);
       }
-      scanAll(node);
-    }, cleanupRemovedNode = function(node) {
-      if (!isElement(node)) return;
-      cleanupAttachedElement(node);
-      node.querySelectorAll?.("[data-balaclava-tooltip]").forEach(cleanupAttachedElement);
+      scanAll2(node);
+    }, cleanupRemovedNode2 = function(node) {
+      if (!isElement2(node)) return;
+      cleanupAttachedElement2(node);
+      node.querySelectorAll?.("[data-balaclava-tooltip]").forEach(cleanupAttachedElement2);
       if (targetElement && (node === targetElement || node.contains(targetElement))) {
-        hideTooltip();
+        hideTooltip2();
       }
-    }, cleanupAttachedElement = function(element) {
-      if (!isElement(element)) return;
+    }, cleanupAttachedElement2 = function(element) {
+      if (!isElement2(element)) return;
       const detach = attachedElements.get(element);
       if (detach) {
         detach();
         attachedElements.delete(element);
       }
-    }, refreshElement = function(target) {
-      if (!isElement(target)) return;
-      cleanupAttachedElement(target);
+    }, refreshElement2 = function(target) {
+      if (!isElement2(target)) return;
+      cleanupAttachedElement2(target);
       if (target.hasAttribute("data-balaclava-tooltip")) {
-        scanElement(target);
+        scanElement2(target);
       }
-    }, renderTooltip = function(content) {
+    }, renderTooltip2 = function(content) {
       if (!shadow) return;
       if (tooltipEl) {
         tooltipEl.remove();
       }
       tooltipEl = document.createElement("div");
       tooltipEl.id = tooltipId;
-      tooltipEl.className = nextShowInstant ? getTooltipClassName() : `${getTooltipClassName()} is-entering`;
+      tooltipEl.className = nextShowInstant ? getTooltipClassName2() : `${getTooltipClassName2()} is-entering`;
       if (nextShowInstant) tooltipEl.setAttribute("data-instant", "");
       tooltipEl.setAttribute("role", "tooltip");
       tooltipEl.setAttribute("aria-live", "polite");
       tooltipEl.style.setProperty("--arrow-offset", `${arrowOffset}%`);
       const contentEl = document.createElement("div");
       contentEl.className = "balaclava-tooltip-content";
-      if (isNode(content)) {
+      if (isNode2(content)) {
         const clone = content.cloneNode(true);
         contentEl.appendChild(clone);
         tooltipEl.setAttribute(
@@ -3164,21 +3162,21 @@
           }
         });
       }
-    }, setupIntersectionObserver = function() {
-      cleanupIntersectionObserver();
+    }, setupIntersectionObserver2 = function() {
+      cleanupIntersectionObserver2();
       if (!targetElement || typeof IntersectionObserver === "undefined") return;
       intersectionObserver = new IntersectionObserver((entries) => {
         if (entries.some((entry) => !entry.isIntersecting)) {
-          hideTooltip();
+          hideTooltip2();
         }
       });
       intersectionObserver.observe(targetElement);
-    }, cleanupIntersectionObserver = function() {
+    }, cleanupIntersectionObserver2 = function() {
       if (intersectionObserver) {
         intersectionObserver.disconnect();
         intersectionObserver = null;
       }
-    }, cleanupTooltip = function() {
+    }, cleanupTooltip2 = function() {
       if (targetElement) {
         targetElement.removeAttribute("aria-describedby");
       }
@@ -3197,7 +3195,7 @@
         exiting.addEventListener("transitionend", remove, { once: true });
         setTimeout(remove, 200);
       }
-      cleanupIntersectionObserver();
+      cleanupIntersectionObserver2();
       isVisible = false;
       targetElement = null;
       targetRect = null;
@@ -3205,7 +3203,7 @@
       tooltipThemeOverride = null;
       activeTheme = config.theme;
       arrowOffset = ARROW_OFFSET_DEFAULT;
-    }, destroy = function() {
+    }, destroy2 = function() {
       if (readyController) {
         readyController.abort();
         readyController = null;
@@ -3217,7 +3215,7 @@
       Array.from(attachmentDetachers).forEach((detach) => detach());
       attachmentDetachers.clear();
       attachedElements = /* @__PURE__ */ new WeakMap();
-      cleanupTooltip();
+      cleanupTooltip2();
       if (mutationObserver) {
         mutationObserver.disconnect();
         mutationObserver = null;
@@ -3243,19 +3241,19 @@
           pageWindow[API_NAME] = void 0;
         }
       }
-    }, trackTargetPosition = function() {
+    }, trackTargetPosition2 = function() {
       if (!isVisible || !targetElement) return;
       if (!targetElement.isConnected) {
-        hideTooltip();
+        hideTooltip2();
         return;
       }
       const newRect = targetElement.getBoundingClientRect();
-      if (!sameRect(targetRect, newRect)) {
+      if (!sameRect2(targetRect, newRect)) {
         targetRect = newRect;
-        updateTooltipPosition();
+        updateTooltipPosition2();
       }
-      positionTrackingId = requestAnimationFrame(trackTargetPosition);
-    }, updateTooltipPosition = function() {
+      positionTrackingId = requestAnimationFrame(trackTargetPosition2);
+    }, updateTooltipPosition2 = function() {
       if (!targetRect || !tooltipEl) return;
       const rect = tooltipEl.getBoundingClientRect();
       const result = computeAnchorPosition(
@@ -3276,35 +3274,35 @@
       tooltipEl.style.top = `${Math.round(result.top)}px`;
       tooltipEl.style.left = `${Math.round(result.left)}px`;
       tooltipEl.style.setProperty("--arrow-offset", `${arrowOffset}%`);
-      refreshTooltipClassName();
-    }, sameRect = function(left, right) {
+      refreshTooltipClassName2();
+    }, sameRect2 = function(left, right) {
       if (!left || !right) return false;
       return left.top === right.top && left.right === right.right && left.bottom === right.bottom && left.left === right.left && left.width === right.width && left.height === right.height;
-    }, normalizePosition = function(value) {
+    }, normalizePosition2 = function(value) {
       return typeof value === "string" && VALID_POSITIONS.has(value) ? value : "bottom";
-    }, normalizeTheme = function(value, fallback = "system") {
-      return normalizeOptionalTheme(value) || fallback;
-    }, normalizeOptionalTheme = function(value) {
+    }, normalizeTheme2 = function(value, fallback = "system") {
+      return normalizeOptionalTheme2(value) || fallback;
+    }, normalizeOptionalTheme2 = function(value) {
       const theme = typeof value === "string" ? value.toLowerCase() : value;
       return VALID_THEMES.has(theme) ? theme : null;
-    }, getTooltipClassName = function() {
+    }, getTooltipClassName2 = function() {
       return `balaclava-tooltip is-${preferredPosition} is-theme-${activeTheme}`;
-    }, refreshTooltipClassName = function() {
+    }, refreshTooltipClassName2 = function() {
       if (!tooltipEl) return;
       const isEntering = tooltipEl.classList.contains("is-entering");
-      tooltipEl.className = `${getTooltipClassName()}${isEntering ? " is-entering" : ""}`;
-    }, isConfigKey = function(value) {
+      tooltipEl.className = `${getTooltipClassName2()}${isEntering ? " is-entering" : ""}`;
+    }, isConfigKey2 = function(value) {
       return Object.prototype.hasOwnProperty.call(DEFAULT_CONFIG, value);
-    }, isElement = function(value) {
+    }, isElement2 = function(value) {
       return Boolean(
         value && typeof value === "object" && value.nodeType === Node.ELEMENT_NODE && typeof value.getBoundingClientRect === "function"
       );
-    }, isNode = function(value) {
+    }, isNode2 = function(value) {
       return Boolean(
         value && typeof value === "object" && typeof value.nodeType === "number" && typeof value.cloneNode === "function"
       );
     };
-    init2 = init, syncTornThemeVars3 = syncTornThemeVars2, ensureHost2 = ensureHost, buildStylesheet2 = buildStylesheet, getVisualConfig2 = getVisualConfig, exposeApi2 = exposeApi, setupGlobalListeners2 = setupGlobalListeners, handleKeydown2 = handleKeydown, scheduleScrollUpdate2 = scheduleScrollUpdate, updateVisibleTooltip2 = updateVisibleTooltip, showTooltip2 = showTooltip, hideTooltip2 = hideTooltip, configure2 = configure, attachTooltip2 = attachTooltip, resolveContent2 = resolveContent, scanAll2 = scanAll, scanElement2 = scanElement, setupMutationObserver2 = setupMutationObserver, scanAddedNode2 = scanAddedNode, cleanupRemovedNode2 = cleanupRemovedNode, cleanupAttachedElement2 = cleanupAttachedElement, refreshElement2 = refreshElement, renderTooltip2 = renderTooltip, setupIntersectionObserver2 = setupIntersectionObserver, cleanupIntersectionObserver2 = cleanupIntersectionObserver, cleanupTooltip2 = cleanupTooltip, destroy2 = destroy, trackTargetPosition2 = trackTargetPosition, updateTooltipPosition2 = updateTooltipPosition, sameRect2 = sameRect, normalizePosition2 = normalizePosition, normalizeTheme2 = normalizeTheme, normalizeOptionalTheme2 = normalizeOptionalTheme, getTooltipClassName2 = getTooltipClassName, refreshTooltipClassName2 = refreshTooltipClassName, isConfigKey2 = isConfigKey, isElement2 = isElement, isNode2 = isNode;
+    init = init2, syncTornThemeVars2 = syncTornThemeVars3, ensureHost = ensureHost2, buildStylesheet = buildStylesheet2, getVisualConfig = getVisualConfig2, exposeApi = exposeApi2, setupGlobalListeners = setupGlobalListeners2, handleKeydown = handleKeydown2, scheduleScrollUpdate = scheduleScrollUpdate2, updateVisibleTooltip = updateVisibleTooltip2, showTooltip = showTooltip2, hideTooltip = hideTooltip2, configure = configure2, attachTooltip = attachTooltip2, resolveContent = resolveContent2, scanAll = scanAll2, scanElement = scanElement2, setupMutationObserver = setupMutationObserver2, scanAddedNode = scanAddedNode2, cleanupRemovedNode = cleanupRemovedNode2, cleanupAttachedElement = cleanupAttachedElement2, refreshElement = refreshElement2, renderTooltip = renderTooltip2, setupIntersectionObserver = setupIntersectionObserver2, cleanupIntersectionObserver = cleanupIntersectionObserver2, cleanupTooltip = cleanupTooltip2, destroy = destroy2, trackTargetPosition = trackTargetPosition2, updateTooltipPosition = updateTooltipPosition2, sameRect = sameRect2, normalizePosition = normalizePosition2, normalizeTheme = normalizeTheme2, normalizeOptionalTheme = normalizeOptionalTheme2, getTooltipClassName = getTooltipClassName2, refreshTooltipClassName = refreshTooltipClassName2, isConfigKey = isConfigKey2, isElement = isElement2, isNode = isNode2;
     const DEFAULT_CONFIG = Object.freeze({
       theme: "dark",
       bgColor: THEME_TOKENS.dark.bgColor,
@@ -3348,59 +3346,59 @@
     const tooltipId = `balaclava-tt-${Math.random().toString(36).slice(2, 11)}`;
     let attachedElements = /* @__PURE__ */ new WeakMap();
     const attachmentDetachers = /* @__PURE__ */ new Set();
-    exposeApi();
+    exposeApi2();
     if (document.readyState === "loading") {
       readyController = new AbortController();
       document.addEventListener(
         "DOMContentLoaded",
         () => {
           readyController = null;
-          init();
+          init2();
         },
         { once: true, signal: readyController.signal }
       );
     } else {
-      init();
+      init2();
     }
   }
-  var init2;
-  var syncTornThemeVars3;
-  var ensureHost2;
-  var buildStylesheet2;
-  var getVisualConfig2;
-  var exposeApi2;
-  var setupGlobalListeners2;
-  var handleKeydown2;
-  var scheduleScrollUpdate2;
-  var updateVisibleTooltip2;
-  var showTooltip2;
-  var hideTooltip2;
-  var configure2;
-  var attachTooltip2;
-  var resolveContent2;
-  var scanAll2;
-  var scanElement2;
-  var setupMutationObserver2;
-  var scanAddedNode2;
-  var cleanupRemovedNode2;
-  var cleanupAttachedElement2;
-  var refreshElement2;
-  var renderTooltip2;
-  var setupIntersectionObserver2;
-  var cleanupIntersectionObserver2;
-  var cleanupTooltip2;
-  var destroy2;
-  var trackTargetPosition2;
-  var updateTooltipPosition2;
-  var sameRect2;
-  var normalizePosition2;
-  var normalizeTheme2;
-  var normalizeOptionalTheme2;
-  var getTooltipClassName2;
-  var refreshTooltipClassName2;
-  var isConfigKey2;
-  var isElement2;
-  var isNode2;
+  var init;
+  var syncTornThemeVars2;
+  var ensureHost;
+  var buildStylesheet;
+  var getVisualConfig;
+  var exposeApi;
+  var setupGlobalListeners;
+  var handleKeydown;
+  var scheduleScrollUpdate;
+  var updateVisibleTooltip;
+  var showTooltip;
+  var hideTooltip;
+  var configure;
+  var attachTooltip;
+  var resolveContent;
+  var scanAll;
+  var scanElement;
+  var setupMutationObserver;
+  var scanAddedNode;
+  var cleanupRemovedNode;
+  var cleanupAttachedElement;
+  var refreshElement;
+  var renderTooltip;
+  var setupIntersectionObserver;
+  var cleanupIntersectionObserver;
+  var cleanupTooltip;
+  var destroy;
+  var trackTargetPosition;
+  var updateTooltipPosition;
+  var sameRect;
+  var normalizePosition;
+  var normalizeTheme;
+  var normalizeOptionalTheme;
+  var getTooltipClassName;
+  var refreshTooltipClassName;
+  var isConfigKey;
+  var isElement;
+  var isNode;
 
   // src/userscripts/arsonists-ledger/engine.ts
   var DEFAULT_THRESHOLDS = { low: 5e3, good: 1e4 };
@@ -3533,6 +3531,8 @@
     return total > 0 ? total : null;
   }
   function formatCost(total) {
+    if (total >= 1e9) return `$${(total / 1e9).toFixed(1)}B`;
+    if (total >= 1e6) return `$${(total / 1e6).toFixed(1)}M`;
     if (total >= 1e3) return `$${(total / 1e3).toFixed(1)}k`;
     return `$${total}`;
   }
@@ -4083,6 +4083,42 @@
     return input;
   }
 
+  // src/userscripts/shared/toggle-row.ts
+  var ROW_CLASS = "pyro-toggle-row";
+  var BODY_CLASS = "pyro-toggle-body";
+  var CHECKBOX_CLASS = "pyro-toggle-checkbox";
+  function toggleRowCss(accentColor) {
+    return `
+.${ROW_CLASS} { box-sizing: border-box; min-height: 24px; display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--shared-text-muted); cursor: pointer; user-select: none; }
+.${BODY_CLASS} { display: flex; flex-direction: column; gap: 8px; padding-left: 4px; margin-top: 8px; border-left: 2px solid var(--shared-surface-border); }
+${checkboxCss(CHECKBOX_CLASS, accentColor)}
+`;
+  }
+  function buildToggleRow(label, checkedInitially, onToggle) {
+    const root = el("div");
+    const checkRow = el("label", ROW_CLASS);
+    const checkbox = el("input", CHECKBOX_CLASS);
+    checkbox.type = "checkbox";
+    checkbox.checked = checkedInitially;
+    const lbl = el("span");
+    lbl.textContent = label;
+    checkRow.appendChild(checkbox);
+    checkRow.appendChild(lbl);
+    root.appendChild(checkRow);
+    const body = el("div", BODY_CLASS);
+    body.style.display = checkedInitially ? "flex" : "none";
+    root.appendChild(body);
+    function setChecked(checked) {
+      checkbox.checked = checked;
+      body.style.display = checked ? "flex" : "none";
+    }
+    checkbox.addEventListener("change", () => {
+      body.style.display = checkbox.checked ? "flex" : "none";
+      onToggle(checkbox.checked);
+    });
+    return { root, body, checkbox, isChecked: () => checkbox.checked, setChecked };
+  }
+
   // src/lib/shared-ui/theme-tokens.ts
   var FALLBACK = {
     outcomeDivider: "oklch(30% 0 0)",
@@ -4574,11 +4610,9 @@
     padding: 0;
 }
 @media (hover: hover) and (pointer: fine) { .pyro-rc-add-btn:hover { color: var(--shared-text); } }
-.pyro-rc-check-row { box-sizing: border-box; min-height: 24px; display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--shared-text-muted); cursor: pointer; user-select: none; }
-.pyro-rc-toggle-body { display: flex; flex-direction: column; gap: 8px; padding-left: 4px; border-left: 2px solid var(--shared-surface-border); }
 .pyro-rc-time-row { display: flex; align-items: center; gap: 6px; }
 .pyro-rc-time-row .pyro-rc-input { flex: 1; }
-${checkboxCss("pyro-rc-checkbox", BAND_COLOR.excellent)}
+${toggleRowCss(BAND_COLOR.excellent)}
 .pyro-rc-actions-row { display: flex; gap: 8px; }
 .pyro-rc-submit-btn {
     box-sizing: border-box;
@@ -4754,17 +4788,9 @@ ${checkboxCss("pyro-rc-checkbox", BAND_COLOR.excellent)}
   }
   function toggleSection(label, timeLabel, drafts, timeState, enabledInitially, onChange, options) {
     const root = el("div", "pyro-rc-group");
-    const checkRow = el("label", "pyro-rc-check-row");
-    const checkbox = el("input", "pyro-rc-checkbox");
-    checkbox.type = "checkbox";
-    checkbox.checked = enabledInitially;
-    const lbl = el("span");
-    lbl.textContent = label;
-    checkRow.appendChild(checkbox);
-    checkRow.appendChild(lbl);
-    root.appendChild(checkRow);
-    const body = el("div", "pyro-rc-toggle-body");
-    body.style.display = enabledInitially ? "flex" : "none";
+    const toggle = buildToggleRow(label, enabledInitially, onChange);
+    root.appendChild(toggle.root);
+    const body = toggle.body;
     const rows = materialRowsGroup(drafts, onChange, options, true);
     body.appendChild(rows.root);
     const itemsErr = el("div", "pyro-rc-field-err");
@@ -4785,19 +4811,13 @@ ${checkboxCss("pyro-rc-checkbox", BAND_COLOR.excellent)}
     body.appendChild(timeRow);
     const timeErr = el("div", "pyro-rc-field-err");
     body.appendChild(timeErr);
-    root.appendChild(body);
-    checkbox.addEventListener("change", () => {
-      body.style.display = checkbox.checked ? "flex" : "none";
-      onChange();
-    });
     function reset(enabled, items, time) {
-      checkbox.checked = enabled;
-      body.style.display = enabled ? "flex" : "none";
+      toggle.setChecked(enabled);
       rows.setItems(items);
       timeState.value = time;
       timeInput.value = time;
     }
-    return { root, isEnabled: () => checkbox.checked, itemsErr, timeErr, reset };
+    return { root, isEnabled: () => toggle.isChecked(), itemsErr, timeErr, reset };
   }
   function buildForm(scenarioName) {
     const form = el("div", "pyro-rc-groups");
@@ -5419,12 +5439,8 @@ ${checkboxCss("pyro-rc-checkbox", BAND_COLOR.excellent)}
     cursor: pointer;
     user-select: none;
 }
-.pyro-s-check-row--disabled {
-    opacity: 0.4;
-    cursor: not-allowed;
-}
 ${checkboxCss("pyro-s-checkbox", BAND_COLOR.excellent)}
-.pyro-s-checkbox:disabled, .pyro-s-check-row--disabled .pyro-s-checkbox { cursor: not-allowed; }
+${toggleRowCss(BAND_COLOR.excellent)}
 .pyro-s-toggle-group {
     display: inline-flex;
     align-self: flex-start;
@@ -5757,90 +5773,78 @@ ${checkboxCss("pyro-s-checkbox", BAND_COLOR.excellent)}
         ctx.setPpnBarPosition
       )
     );
-    const buildingInfoRow = checkboxRow(
+    const buildingToggle = buildToggleRow(
       "Show building data",
-      ctx.getShowBuildingStats,
+      ctx.getShowBuildingStats(),
       ctx.setShowBuildingStats
     );
-    barGroup.appendChild(buildingInfoRow);
-    const buildingStatRows = [
+    barGroup.appendChild(buildingToggle.root);
+    buildingToggle.body.appendChild(
       checkboxRow(
         "Show response time",
         ctx.getShowResponseTime,
         ctx.setShowResponseTime
-      ),
+      )
+    );
+    buildingToggle.body.appendChild(
       checkboxRow(
         "Show flammability",
         ctx.getShowFlammability,
         ctx.setShowFlammability
-      ),
-      checkboxRow("Show rurality", ctx.getShowRurality, ctx.setShowRurality),
-      checkboxRow("Show urgency", ctx.getShowUrgency, ctx.setShowUrgency)
-    ];
-    const buildingStatCheckboxes = buildingStatRows.map(
-      (row2) => row2.querySelector("input")
+      )
     );
-    function syncBuildingStatRows() {
-      const enabled = ctx.getShowBuildingStats();
-      buildingStatRows.forEach((row2, i) => {
-        buildingStatCheckboxes[i].disabled = !enabled;
-        row2.classList.toggle("pyro-s-check-row--disabled", !enabled);
-      });
-    }
-    buildingInfoRow.querySelector("input").addEventListener("change", syncBuildingStatRows);
-    syncBuildingStatRows();
-    buildingStatRows.forEach((row2) => barGroup.appendChild(row2));
+    buildingToggle.body.appendChild(
+      checkboxRow("Show rurality", ctx.getShowRurality, ctx.setShowRurality)
+    );
+    buildingToggle.body.appendChild(
+      checkboxRow("Show urgency", ctx.getShowUrgency, ctx.setShowUrgency)
+    );
     root.appendChild(barGroup);
     const materialsGroup = el("div", "pyro-s-group");
     const materialsTitle = el("div", "pyro-s-group-title");
     materialsTitle.textContent = "Materials";
     materialsGroup.appendChild(materialsTitle);
-    const materialDataRow = checkboxRow(
+    const materialToggle = buildToggleRow(
       "Show material data",
-      ctx.getShowMaterialData,
+      ctx.getShowMaterialData(),
       ctx.setShowMaterialData
     );
-    materialsGroup.appendChild(materialDataRow);
-    const materialStatRows = [
+    materialsGroup.appendChild(materialToggle.root);
+    materialToggle.body.appendChild(
       checkboxRow(
         "Show intensity",
         ctx.getShowMaterialIntensity,
         ctx.setShowMaterialIntensity
-      ),
+      )
+    );
+    materialToggle.body.appendChild(
       checkboxRow(
         "Show momentum",
         ctx.getShowMaterialMomentum,
         ctx.setShowMaterialMomentum
-      ),
+      )
+    );
+    materialToggle.body.appendChild(
       checkboxRow(
         "Show suspicion",
         ctx.getShowMaterialSuspicion,
         ctx.setShowMaterialSuspicion
-      ),
+      )
+    );
+    materialToggle.body.appendChild(
       checkboxRow(
         "Show ignition risk",
         ctx.getShowMaterialIgnitionRisk,
         ctx.setShowMaterialIgnitionRisk
-      ),
+      )
+    );
+    materialToggle.body.appendChild(
       checkboxRow(
         "Show stoking risk",
         ctx.getShowMaterialStokingRisk,
         ctx.setShowMaterialStokingRisk
       )
-    ];
-    const materialStatCheckboxes = materialStatRows.map(
-      (row2) => row2.querySelector("input")
     );
-    function syncMaterialStatRows() {
-      const enabled = ctx.getShowMaterialData();
-      materialStatRows.forEach((row2, i) => {
-        materialStatCheckboxes[i].disabled = !enabled;
-        row2.classList.toggle("pyro-s-check-row--disabled", !enabled);
-      });
-    }
-    materialDataRow.querySelector("input").addEventListener("change", syncMaterialStatRows);
-    syncMaterialStatRows();
-    materialStatRows.forEach((row2) => materialsGroup.appendChild(row2));
     root.appendChild(materialsGroup);
     return root;
   }
@@ -6215,6 +6219,17 @@ ${checkboxCss("pyro-s-checkbox", BAND_COLOR.excellent)}
       advice: "High intensity/momentum randomly across areas with high visibility."
     }
   };
+  var DAMPENER_INFO = {
+    [RESOURCE.BLANKET]: {
+      advice: "Lowers intensity and momentum by ~25%. Has high crit rate (~20% with low skill). May be lost on fail."
+    },
+    [RESOURCE.SAND]: {
+      advice: "Twice as effective and half as risky as a Blanket. Effective for controlled burns. Is consumed on use."
+    },
+    [RESOURCE.FIRE_EXTINGUISHER]: {
+      advice: "As effective as Sand, but safer to use. Is consumed on use."
+    }
+  };
 
   // src/userscripts/arsonists-ledger/material-badges.ts
   var SCALE_MAX = 10;
@@ -6362,10 +6377,16 @@ ${checkboxCss("pyro-s-checkbox", BAND_COLOR.excellent)}
     bindTapToggle(row2, buildContent, tooltip);
     return row2;
   }
-  function bindMaterialTooltip(wrap, name, advice, tooltip) {
+  function unitCost(resourceId, prices) {
+    const resource = CATALOG[resourceId];
+    if (!resource) return null;
+    const price = prices[resourceId] ?? resource.defaultPrice;
+    return price > 0 ? `${formatCost(price)}` : null;
+  }
+  function bindMaterialTooltip(wrap, name, advice, cost, tooltip) {
     wrap.addEventListener("mouseenter", () => {
       const content = buildStatTooltipGroup([
-        { title: name, description: advice }
+        { title: name, description: advice, value: cost ?? void 0 }
       ]);
       tooltip.show(wrap, content, { position: "top" });
     });
@@ -6380,7 +6401,7 @@ ${checkboxCss("pyro-s-checkbox", BAND_COLOR.excellent)}
     }
     return strip;
   }
-  function scanMaterialPopover(tooltip, config) {
+  function scanMaterialPopover(tooltip, config, prices) {
     document.querySelectorAll(SEL.ITEM_SELECTOR).forEach((popover) => {
       popover.querySelectorAll(SEL.ITEM_CELL_WRAP).forEach((wrap) => {
         if (wrap.dataset.pyroBadged) return;
@@ -6390,7 +6411,8 @@ ${checkboxCss("pyro-s-checkbox", BAND_COLOR.excellent)}
         if (!resourceId) return;
         const accelerant = ACCELERANT_INFO[resourceId];
         const igniter = IGNITER_INFO[resourceId];
-        if (!accelerant && !igniter) {
+        const dampener = DAMPENER_INFO[resourceId];
+        if (!accelerant && !igniter && !dampener) {
           wrap.dataset.pyroBadged = "true";
           return;
         }
@@ -6398,9 +6420,19 @@ ${checkboxCss("pyro-s-checkbox", BAND_COLOR.excellent)}
           wrap.dataset.pyroBadged = "true";
           return;
         }
-        const info = accelerant ?? igniter;
+        const info = accelerant ?? igniter ?? dampener;
         const name = CATALOG[resourceId]?.name ?? resourceId;
-        bindMaterialTooltip(wrap, name, info.advice, tooltip);
+        bindMaterialTooltip(
+          wrap,
+          name,
+          info.advice,
+          unitCost(resourceId, prices),
+          tooltip
+        );
+        if (dampener) {
+          wrap.dataset.pyroBadged = "true";
+          return;
+        }
         const bars = (accelerant ? ACCELERANT_BARS(accelerant) : IGNITER_BARS(igniter)).filter((bar) => config[bar.key]);
         if (bars.length > 0) {
           wrap.after(buildBarStrip(bars, tooltip));
@@ -6419,7 +6451,9 @@ ${checkboxCss("pyro-s-checkbox", BAND_COLOR.excellent)}
     });
   }
   function injectMaterialBadgeStyles() {
-    injectStyleOnce("pyro-mat-badge-styles", `
+    injectStyleOnce(
+      "pyro-mat-badge-styles",
+      `
         .pyro-mat-badges {
             display: flex;
             flex-direction: column;
@@ -6470,7 +6504,8 @@ ${checkboxCss("pyro-s-checkbox", BAND_COLOR.excellent)}
                 display: block;
             }
         }
-    `);
+    `
+    );
   }
 
   // src/userscripts/arsonists-ledger/index.ts
@@ -6701,7 +6736,11 @@ ${checkboxCss("pyro-s-checkbox", BAND_COLOR.excellent)}
   }
   function resetMaterialScans() {
     resetMaterialBadges();
-    scanMaterialPopover(materialBadgeTooltipCtx, materialBadgeConfig());
+    scanMaterialPopover(
+      materialBadgeTooltipCtx,
+      materialBadgeConfig(),
+      effectivePrices()
+    );
   }
   function setShowMaterialDataEnabled(show) {
     showMaterialData = show;
@@ -7357,7 +7396,11 @@ ${checkboxCss("pyro-s-checkbox", BAND_COLOR.excellent)}
   };
   var observer = new MutationObserver(() => {
     scanPage();
-    scanMaterialPopover(materialBadgeTooltipCtx, materialBadgeConfig());
+    scanMaterialPopover(
+      materialBadgeTooltipCtx,
+      materialBadgeConfig(),
+      effectivePrices()
+    );
     scheduleInjectSettings();
   });
   function start() {

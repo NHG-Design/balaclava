@@ -27,7 +27,9 @@ function itemCost(item: ActionItem, prices: PriceMap): number | null {
   return total > 0 ? total : null;
 }
 
-function formatCost(total: number): string {
+export function formatCost(total: number): string {
+  if (total >= 1_000_000_000) return `$${(total / 1_000_000_000).toFixed(1)}B`;
+  if (total >= 1_000_000) return `$${(total / 1_000_000).toFixed(1)}M`;
   if (total >= 1_000) return `$${(total / 1_000).toFixed(1)}k`;
   return `$${total}`;
 }
