@@ -168,7 +168,7 @@
     {:else}
       <div class="flex flex-col gap-12">
         <section>
-          <h2 class="mb-4 text-lg font-semibold text-ink-100">Pending</h2>
+          <h2 class="mb-4 text-2xl font-semibold text-ink-100">Pending</h2>
           {#if groupedPending.size === 0}
             <p class="text-sm text-ink-400">No pending submissions.</p>
           {:else}
@@ -177,7 +177,7 @@
         </section>
 
         <section>
-          <h2 class="mb-4 text-lg font-semibold text-ink-100">Approved</h2>
+          <h2 class="mb-4 text-2xl font-semibold text-ink-100">Approved</h2>
           {#if groupedAccepted.size === 0}
             <p class="text-sm text-ink-400">No approved submissions yet.</p>
           {:else}

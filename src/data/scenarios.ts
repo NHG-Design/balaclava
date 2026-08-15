@@ -896,13 +896,13 @@ export const SCENARIOS: Scenario[] = [
 
   {
     scenarioName: "Cold Brew Reality",
-    payoutMin: 150_000,
-    payoutMax: 150_000,
+    payoutMin: 140_000,
+    payoutMax: 170_000,
     actions: {
+      place: [{ resourceId: RESOURCE.KEROSENE, qty: 2 }],
       ignite: [{ resourceId: RESOURCE.LIGHTER, qty: 1 }],
-      place: [{ resourceId: RESOURCE.HYDROGEN, qty: 1 }],
-      stoke: [{ resourceId: RESOURCE.HYDROGEN, qty: 2 }],
-      stokeTime: "late",
+      stoke: [{ resourceId: RESOURCE.METHANE, qty: 1 }],
+      stokeTime: "early",
     },
   },
 
@@ -1429,11 +1429,13 @@ export const SCENARIOS: Scenario[] = [
 
   {
     scenarioName: "Hot Trend",
-    payoutMin: 54_000,
-    payoutMax: 66_000,
+    payoutMin: 57_000,
+    payoutMax: 210_000,
     actions: {
-      ignite: [{ resourceId: RESOURCE.LIGHTER, qty: 1 }],
-      place: [{ resourceId: RESOURCE.HYDROGEN, qty: 1 }],
+      place: [{ resourceId: RESOURCE.GASOLINE, qty: 1 }],
+      ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
+      stoke: [{ resourceId: RESOURCE.METHANE, qty: 2 }],
+      stokeTime: "early",
     },
   },
 
@@ -1611,11 +1613,11 @@ export const SCENARIOS: Scenario[] = [
 
   {
     scenarioName: "Low Rent",
-    payoutMin: 42_000,
+    payoutMin: 41_000,
     payoutMax: 210_000,
     actions: {
-      place: [{ resourceId: RESOURCE.GASOLINE, qty: 2 }],
-      ignite: [{ resourceId: RESOURCE.LIGHTER, qty: 1 }],
+      place: [{ resourceId: RESOURCE.GASOLINE, qty: 1 }],
+      ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
       stoke: [{ resourceId: RESOURCE.METHANE, qty: 2 }],
       stokeTime: "early",
     },
@@ -1931,8 +1933,8 @@ export const SCENARIOS: Scenario[] = [
 
   {
     scenarioName: "Second Hand Smoke",
-    payoutMin: 150_000,
-    payoutMax: 210_000,
+    payoutMin: 120_000,
+    payoutMax: 220_000,
     actions: {
       place: [{ resourceId: RESOURCE.GASOLINE, qty: 2 }],
       ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
@@ -2648,15 +2650,14 @@ export const SCENARIOS: Scenario[] = [
   {
     scenarioName: "Doxing Clever",
     payoutMin: 140_000,
-    payoutMax: 140_000,
+    payoutMax: 190_000,
     actions: {
       ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
       place: [
-        { resourceId: RESOURCE.GASOLINE, qty: 4 },
-        { resourceId: RESOURCE.MAGNESIUM, qty: 1 },
+        { resourceId: RESOURCE.GASOLINE, qty: 3 },
+        { resourceId: RESOURCE.THERMITE, qty: 1 },
+        { resourceId: RESOURCE.GASOLINE, qty: 2 },
       ],
-      stoke: [{ resourceId: RESOURCE.DIESEL, qty: 5 }],
-      stokeTime: "late",
     },
   },
   {
