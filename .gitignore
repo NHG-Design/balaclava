@@ -43,3 +43,6 @@ yarn-error.log*
 
 # sveltekit
 .svelte-kit/
+
+# cloudflare / wrangler local state
+.wrangler/

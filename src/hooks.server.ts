@@ -6,9 +6,7 @@ export const handle: Handle = async ({ event, resolve }) => {
   response.headers.set('X-Content-Type-Options', 'nosniff')
   response.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin')
   response.headers.set('Permissions-Policy', 'geolocation=(), microphone=(), camera=()')
-  response.headers.set(
-    'Content-Security-Policy',
-    "default-src 'self'; img-src 'self' data: https:; style-src 'self' 'unsafe-inline'; frame-ancestors 'none'; base-uri 'self'",
-  )
+  // Content-Security-Policy is set by SvelteKit itself via kit.csp in svelte.config.js — it
+  // needs to nonce its own inline hydration scripts. Setting it here instead breaks hydration.
   return response
 }
