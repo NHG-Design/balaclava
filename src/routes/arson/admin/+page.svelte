@@ -1,7 +1,7 @@
 <script lang="ts">
   import { onMount } from 'svelte'
   import type { PageData } from './$types'
-  import type { RecipeSubmission } from '$lib/recipe-diff'
+  import type { FieldDecisions, RecipeSubmission } from '$lib/recipe-diff'
   import RecipeSubmissionCard from '$lib/components/RecipeSubmissionCard.svelte'
   import Button from '$lib/components/Button.svelte'
 
@@ -14,8 +14,6 @@
   let loadError = $state('')
   let actionError = $state<Record<number, string>>({})
   let actionBusy = $state<Record<number, boolean>>({})
-  let denyPrompt = $state<{ scenarioName: string; ids: number[] } | null>(null)
-  let denyPromptBusy = $state(false)
 
   async function load() {
     loading = true
@@ -42,46 +40,29 @@
 
   onMount(load)
 
-  async function act(id: number, action: 'approve' | 'deny', scenarioName?: string) {
+  async function act(id: number, action: 'approve' | 'deny', decisions?: FieldDecisions) {
     actionBusy = { ...actionBusy, [id]: true }
     actionError = { ...actionError, [id]: '' }
     try {
       const res = await fetch(`/api/arson/admin/recipe-submissions/${id}/${action}`, {
         method: 'POST',
+        ...(action === 'approve'
+          ? {
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ decisions: decisions ?? {} }),
+            }
+          : {}),
       })
-      const json = (await res.json()) as {
-        ok?: boolean
-        error?: string
-        siblingsToDeny?: number[]
-      }
+      const json = (await res.json()) as { ok?: boolean; error?: string }
       if (!res.ok || !json.ok) {
         actionError = { ...actionError, [id]: json.error ?? `HTTP ${res.status}` }
         return
-      }
-      if (action === 'approve' && json.siblingsToDeny?.length && scenarioName) {
-        denyPrompt = { scenarioName, ids: json.siblingsToDeny }
       }
       await load()
     } catch {
       actionError = { ...actionError, [id]: 'Network error' }
     } finally {
       actionBusy = { ...actionBusy, [id]: false }
-    }
-  }
-
-  async function denyAllSiblings() {
-    if (!denyPrompt) return
-    denyPromptBusy = true
-    try {
-      await Promise.all(
-        denyPrompt.ids.map((id) =>
-          fetch(`/api/arson/admin/recipe-submissions/${id}/deny`, { method: 'POST' }),
-        ),
-      )
-      denyPrompt = null
-      await load()
-    } finally {
-      denyPromptBusy = false
     }
   }
 
@@ -104,6 +85,7 @@
   const STATUS_CLASSES: Record<Submission['status'], string> = {
     pending: 'bg-amber-500/15 text-amber-300',
     approved: 'bg-sky-500/15 text-sky-300',
+    partial: 'bg-violet-500/15 text-violet-300',
     merged: 'bg-emerald-500/15 text-emerald-300',
     denied: 'bg-rose-500/15 text-rose-300',
   }
@@ -137,32 +119,6 @@
   </header>
 
   <main class="mx-auto max-w-6xl px-6 py-10">
-    {#if denyPrompt}
-      <div
-        class="mb-6 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-amber-400/40 bg-amber-500/10 px-4 py-3 text-sm text-amber-200"
-      >
-        <span>
-          {denyPrompt.ids.length} other pending submission{denyPrompt.ids.length === 1 ? '' : 's'} for
-          <strong>{denyPrompt.scenarioName}</strong>.
-        </span>
-        <div class="flex gap-2">
-          <button
-            disabled={denyPromptBusy}
-            onclick={denyAllSiblings}
-            class="rounded-md bg-rose-500/20 px-3 py-1.5 text-xs font-medium text-rose-200 transition-colors hover:bg-rose-500/30 active:scale-[0.97] disabled:pointer-events-none disabled:opacity-40"
-          >
-            {denyPromptBusy ? 'Working…' : 'Deny all'}
-          </button>
-          <button
-            onclick={() => (denyPrompt = null)}
-            class="rounded-md px-3 py-1.5 text-xs text-amber-300 transition-colors hover:text-amber-100"
-          >
-            Dismiss
-          </button>
-        </div>
-      </div>
-    {/if}
-
     {#if loading}
       <p class="text-sm text-ink-400">Loading…</p>
     {:else if loadError}
@@ -181,9 +137,9 @@
               <h2 class="text-base font-semibold text-ink-100">{scenarioName}</h2>
               {#if group.length > 1}
                 <span
-                  class="rounded-full border border-amber-400/40 px-2 py-0.5 text-[10px] font-medium tracking-wide text-amber-300 uppercase"
+                  class="rounded-full border border-ink-700 px-2 py-0.5 text-[10px] font-medium tracking-wide text-ink-400 uppercase"
                 >
-                  {group.length} competing
+                  {group.length} submissions
                 </span>
               {/if}
             </div>
@@ -194,10 +150,9 @@
                   submission={s}
                   currentScenarios={data.currentScenarios}
                   variant="admin"
-                  siblings={group.filter((other) => other.id !== s.id)}
                   actionBusy={actionBusy[s.id]}
                   actionError={actionError[s.id]}
-                  onApprove={() => act(s.id, 'approve', s.scenario_name)}
+                  onSubmit={(decisions) => act(s.id, 'approve', decisions)}
                   onDeny={() => act(s.id, 'deny')}
                 />
               {/each}

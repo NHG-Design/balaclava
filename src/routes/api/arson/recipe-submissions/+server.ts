@@ -274,7 +274,7 @@ async function handler(
   }
 
   const existing = await client.execute({
-    sql: `SELECT payout_min, payout_max, recipe FROM recipe_submissions WHERE scenario_name = ? AND status IN ('pending', 'approved', 'merged')`,
+    sql: `SELECT payout_min, payout_max, recipe FROM recipe_submissions WHERE scenario_name = ? AND status IN ('pending', 'approved', 'partial', 'merged')`,
     args: [payload.scenarioName],
   });
   const isDuplicate = existing.rows.some((row) => {
@@ -337,9 +337,11 @@ export const GET: RequestHandler = async ({ url, platform }) => {
     const statusFilter = url.searchParams.get("status");
     const statuses =
       statusFilter &&
-      ["pending", "approved", "merged", "denied"].includes(statusFilter)
+      ["pending", "approved", "partial", "merged", "denied"].includes(
+        statusFilter,
+      )
         ? [statusFilter]
-        : ["pending", "approved", "merged"];
+        : ["pending", "approved", "partial", "merged"];
 
     const limit = Math.min(
       Math.max(Number(url.searchParams.get("limit")) || 100, 1),
@@ -351,7 +353,7 @@ export const GET: RequestHandler = async ({ url, platform }) => {
     const placeholders = statuses.map(() => "?").join(", ");
     const rows = await client.execute({
       sql: `
-        SELECT id, scenario_name, payout_min, payout_max, submitter_id, submitter_name, recipe, status, pr_number, created_at
+        SELECT id, scenario_name, payout_min, payout_max, submitter_id, submitter_name, recipe, status, pr_number, created_at, field_decisions
         FROM recipe_submissions
         WHERE status IN (${placeholders})
         ORDER BY scenario_name ASC, created_at DESC

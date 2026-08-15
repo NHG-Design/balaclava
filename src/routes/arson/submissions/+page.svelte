@@ -113,7 +113,11 @@
 
   let groupedPending = $derived(groupByScenario(submissions.filter((s) => s.status === 'pending')))
   let groupedAccepted = $derived(
-    groupByScenario(submissions.filter((s) => s.status === 'approved' || s.status === 'merged')),
+    groupByScenario(
+      submissions.filter(
+        (s) => s.status === 'approved' || s.status === 'partial' || s.status === 'merged',
+      ),
+    ),
   )
   let groupedDenied = $derived(groupByScenario(submissions.filter((s) => s.status === 'denied')))
 </script>
