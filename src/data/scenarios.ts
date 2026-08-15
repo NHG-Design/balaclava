@@ -2309,10 +2309,10 @@ export const SCENARIOS: Scenario[] = [
 
   {
     scenarioName: "The Smoking Gun",
-    payoutMin: 410_000,
+    payoutMin: 430_000,
     payoutMax: 490_000,
     actions: {
-      place: [{ resourceId: RESOURCE.KEROSENE, qty: 4 }],
+      place: [{ resourceId: RESOURCE.KEROSENE, qty: 5 }],
       ignite: [{ resourceId: RESOURCE.LIGHTER, qty: 1 }],
     },
   },
