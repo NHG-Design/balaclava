@@ -1,7 +1,11 @@
 # Recipe Submission Review, Voting & Promotion
 
-> Meridian map · Status: superseded (destination), reopened for decision #15 (2026-08-14) · Started: 2026-08-12
+> Meridian map · Status: superseded (destination), reopened for decision #28 (2026-08-15) · Started: 2026-08-12
 > Superseded 2026-08-14 by [recipe-submission-backlog.md](recipe-submission-backlog.md) — the voting/login half of this Destination was dropped as too much to ask of users. The review/promotion pipeline (admin approve/deny → GitHub PR → merge webhook) stands as-is and is still actively amended here.
+
+## Reopened: diff-card cleanup & UI/component debt (2026-08-15)
+
+Triggered by the user hitting three UI papercuts in the same session (`(unchanged)` label noise, `#123` fallback for anonymous submitters, and — again — divergent submissions/admin cards) plus confusion over what an "Already approved" badge meant on a fresh submission. Investigated and answered inline (not a decision): the badge is `isStale` from decision #24 working as designed (scenario "To the Manor Scorned" already has an approved/merged submission from PR #25); the deployed data is current — commit `66ef1c3` regenerated the derived `scenarios.json`/hash after PR #25, and Cloudflare's build always rebuilds fresh from source on deploy — so the confusion was two known client-side lag paths (TornPDA bakes in only on a version bump; Tampermonkey caches 24h), not a bug.
 
 ## Reopened: competing-submission handling (2026-08-14)
 
@@ -57,7 +61,21 @@ Community-submitted arson recipes are publicly visible on balaclava.app, players
 |---|----------|------------|-----|
 | 22 | Deny-rest prompt | Inline confirm banner shown after a successful approve, only when pending siblings remain for that scenario — one "Deny all" button plus each sibling still individually denyable below. Not a blocking native `confirm()`, not force-bundled. | J |
 | 23 | Sibling diff | Keep the existing vs-live diff table on every submission (still the "does this change anything" view); add one compact extra line per submission when siblings exist, e.g. "vs. submission #3: + stokeTime" — reuses `computeDiff` pointed at a sibling's recipe instead of `currentScenarios`, no new comparison UI | J |
-| 24 | Staleness flag | Small badge ("scenario already has an approved recipe") on a pending submission whose scenario has an approved/merged entry from another submission; that submission also sorts to the bottom of its scenario group. Still requires an explicit admin Deny — no auto-deny. | J |
+| 24 | Staleness flag | Small badge ("scenario already has an approved recipe") on a pending submission whose scenario has an approved/merged entry from another submission; that submission also sorts to the bottom of its scenario group. Still requires an explicit admin Deny — no auto-deny. **Amended 2026-08-15 (#29): implementation bug** — the "another submission" check had no time/relation bound, so it matched *any* approved/merged submission ever, for the life of the scenario, permanently mislabeling every future unrelated submission for that scenario as stale. | J |
+
+## Decision log (2026-08-15 reopen)
+
+| # | Decision | Resolution | Via |
+|---|----------|------------|-----|
+| 25 | `(unchanged)` label | Removed from the diff card — an unchanged row is already visually distinct (grey text, no strike-through/arrow), the label was redundant | J |
+| 26 | `#123` fallback for anonymous submitters | Drop the `#` — render the bare numeric Torn ID as the link text when `submitter_name` is null | J |
+| 27 | "Already approved" badge clarity | Superseded by #29 — the badge itself was mislabeling unrelated submissions, not just under-explained; a tooltip would have papered over a real bug rather than fixing it | J |
+| 28 | Shared diff-card component split | New `RecipeSubmissionCard.svelte` (or `.ts` component) renders: status badge, submitter link, created-at, diff/summary body, PR link — used by both pages unchanged. Admin-only extras (submission `#id`, "New scenario" badge, sibling-delta lines, Approve/Deny buttons) passed in via props/snippet, not duplicated. Public-only extra (copy-link button) same treatment. Public is a strict subset of admin's fields. | J |
+| 29 | `isStale` fix — real bug, not a UX gap | `scenariosWithApproved` (admin `+server.ts`) matched any scenario with an ever-approved/merged submission, with no time bound or relation to the *currently pending* submissions being reviewed — flagging every future unrelated submission for that scenario as "already approved," forever, regardless of how different its content is. **User confirmed a full production bug, not a copy/tooltip issue.** | J |
+| 30 | Staleness scope after the fix | `isStale` now means only "another submission for the same scenario is *currently pending*" — i.e. exactly the existing concurrent-siblings case (`group.length > 1`), with no time window for past approved/merged submissions. This makes the standalone "Already approved" badge and the "N competing" badge redundant with each other — collapse to one badge/grouping instead of two. Ruled out: a 24h-review-window variant (arbitrary cutoff, adds complexity for a case the user didn't want covered). | J |
+| 31 | Stale-userscript submission rejection | New check in `POST /api/arson/recipe-submissions`: compare the incoming `recipeSignature` against the *currently live* scenario data (`SCENARIOS`/`currentScenarios`), not just other submissions. If it matches live data exactly → reject 409 with a distinct message ("This recipe is already live — your userscript's local data is out of date, refresh it") so a userscript user whose local copy is stale (e.g. missed PR #25) gets told the real reason instantly instead of quietly inserting a no-op row or, worse, tripping the unrelated "already approved" staleness badge for an admin to puzzle over later. Kept as a separate message/branch from the existing "someone already submitted this exact recipe" 409 (that one means: matches another *submission*, not live data) so the two causes aren't conflated. | J |
+| 32 | Genuinely-different submission, live data unaffected | If the new submission's signature differs from both live data and all pending/approved/merged submission signatures, it's accepted normally (unchanged from today) — this is the actually-new-content case, e.g. the user's local recipe genuinely differs from both their stale copy's assumption and reality. | J |
+| 33 | Competing outcome when another user already has a different submission pending | Falls into the existing sibling/competing flow (decisions #22–#24, #29–#30) unchanged — both submissions accepted, admin sees "N competing" + sibling-delta lines, picks one. No new auto-reject or auto-merge behavior. | J |
 
 ## Fog
 
@@ -76,6 +94,8 @@ Community-submitted arson recipes are publicly visible on balaclava.app, players
 - **Reusing `SCENARIO_ADMIN_SESSION_SECRET` for player sessions** — killed because: couples two different trust boundaries (low-stakes voting, high-stakes admin approval) to one signing key.
 - **Marking a submission 'approved' even if the PR-open call fails** — killed because: risks a silently stuck submission that looks approved but has no actual PR.
 - **Deleting denied submissions outright** — killed because: loses the audit trail and gives the submitter no visible feedback that their submission was reviewed.
+- **Tooltip-only fix for the "Already approved" badge (original #27)** — killed because: the badge was substantively wrong (matched unrelated history, not just unclear), a tooltip would have explained a bug rather than fixed it.
+- **24h review-window for approved/merged siblings (#30 alternative)** — killed because: arbitrary cutoff, adds complexity for a same-day-approve-then-forget case the user explicitly didn't want covered; simpler to only flag truly concurrent `pending` siblings, already surfaced by the existing "N competing" grouping.
 
 ## Route
 
@@ -101,5 +121,17 @@ Community-submitted arson recipes are publicly visible on balaclava.app, players
 15. [x] Admin UI: render a "scenario already has an approved recipe" badge on stale submissions, and sort stale entries to the bottom within their scenario group — from decision #24. Done. `pnpm check` + `pnpm build` pass for the full reopened route.
 
 **First move (reopened route):** #11 — the approve endpoint needs to report siblings before the UI (#12) has anything to render.
+
+**Status: reopened route complete.**
+
+### Reopened route (2026-08-15): production bug fixes + diff-card cleanup & shared component
+
+16. [x] **Bug fix**: `src/routes/api/arson/admin/recipe-submissions/+server.ts` — replace the unbounded `scenariosWithApproved` query with a same-group check: a pending submission is `isStale` only if another submission for the same `scenario_name` also has `status = 'pending'` — from decisions #29, #30. Done: query dropped entirely, `isStale` field removed (fully redundant with `group.length > 1`, already computed client-side).
+17. [x] Admin UI: remove the separate "Already approved" badge/sort-to-bottom treatment — from decision #30. Done: badge, sort, and dimmed-opacity styling removed from `admin/+page.svelte`.
+18. [x] **Bug fix**: `src/routes/api/arson/recipe-submissions/+server.ts` POST handler — compare `recipeSignature(payload)` against the live scenario's data (`SCENARIOS`) before the existing duplicate-vs-submissions check; exact match → reject 409 with a distinct "already live, your userscript is out of date" message — from decisions #31, #32, #33. Done.
+19. [x] Extract `src/lib/components/RecipeSubmissionCard.svelte` — from decisions #25, #26, #28. Done: shared `RecipeSubmission` type added to `recipe-diff.ts`; component takes `variant: 'public' | 'admin'`, renders status badge, submitter link (no `#` fallback), created-at, diff/summary body (no `(unchanged)` label), PR link for both variants.
+20. [x] Admin-only props on the component: `#id`, "New scenario" badge, `siblings` → sibling-delta lines, `onApprove`/`onDeny` + busy/error state — from decision #28. Done.
+21. [x] Public-only props: `onCopyLink`, `highlighted`/`copied` state driving the anchor/highlight ring — from decision #28. Done.
+22. [x] Swapped `submissions/+page.svelte` and `admin/+page.svelte` to render `<RecipeSubmissionCard>`; deleted the duplicated inline `<article>` markup and now-dead helpers (`siblingDelta`, unused `STATUS_CLASSES`/imports) in both. `pnpm check` (369 files, 0 errors/warnings) + `pnpm build` pass.
 
 **Status: reopened route complete.**

@@ -1,22 +1,12 @@
 <script lang="ts">
   import { onMount, tick } from 'svelte'
   import type { PageData } from './$types'
-  import { computeDiff, parseRecipe, summarizeRecipe } from '$lib/recipe-diff'
+  import type { RecipeSubmission } from '$lib/recipe-diff'
+  import RecipeSubmissionCard from '$lib/components/RecipeSubmissionCard.svelte'
 
   let { data }: { data: PageData } = $props()
 
-  interface Submission {
-    id: number
-    scenario_name: string
-    payout_min: number
-    payout_max: number
-    submitter_id: string | null
-    submitter_name: string | null
-    recipe: string
-    status: 'pending' | 'approved' | 'merged' | 'denied'
-    pr_number: number | null
-    created_at: string
-  }
+  type Submission = RecipeSubmission
 
   type StatusFilter = 'default' | 'denied'
 
@@ -101,13 +91,6 @@
     groupByScenario(submissions.filter((s) => s.status === 'approved' || s.status === 'merged')),
   )
   let groupedDenied = $derived(groupByScenario(submissions.filter((s) => s.status === 'denied')))
-
-  const STATUS_CLASSES: Record<Submission['status'], string> = {
-    pending: 'bg-amber-500/15 text-amber-300',
-    approved: 'bg-sky-500/15 text-sky-300',
-    merged: 'bg-emerald-500/15 text-emerald-300',
-    denied: 'bg-rose-500/15 text-rose-300',
-  }
 </script>
 
 <svelte:head>
@@ -155,132 +138,14 @@
 
             <div class="grid grid-cols-1 gap-4 lg:grid-cols-2">
               {#each group as s (s.id)}
-                {@const recipe = parseRecipe(s.recipe)}
-                {@const diff =
-                  s.status === 'merged' ? null : computeDiff(s, recipe, data.currentScenarios)}
-                {@const hasChanges = diff ? diff.some((f) => f.changed) : false}
-                {@const summary = s.status === 'merged' ? summarizeRecipe(s, recipe) : null}
-                <article
-                  id={`submission-${s.id}`}
-                  class="flex scroll-mt-6 flex-col gap-3 rounded-xl border border-ink-700 bg-ink-900 p-4 transition-shadow duration-500 {highlightedId ===
-                  s.id
-                    ? 'border-accent-400 shadow-[0_0_0_2px_var(--color-accent-400)]'
-                    : ''}"
-                >
-                  <div class="flex items-center justify-between gap-2">
-                    <span
-                      class="rounded px-1.5 py-0.5 text-[10px] font-medium tracking-wide uppercase {STATUS_CLASSES[
-                        s.status
-                      ]}"
-                    >
-                      {s.status}
-                    </span>
-                    <div class="flex items-center gap-3">
-                      <span class="text-xs text-ink-400">
-                        {new Date(s.created_at).toLocaleString()}
-                      </span>
-                      <button
-                        onclick={() => copyLink(s.id)}
-                        aria-label="Copy share link"
-                        class="inline-flex items-center gap-1 rounded px-1 py-0.5 text-xs text-ink-400 transition-colors hover:text-accent-400"
-                      >
-                        {#if copiedId === s.id}
-                          Copied!
-                        {:else}
-                          <svg
-                            width="12"
-                            height="12"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            stroke-width="2"
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            aria-hidden="true"
-                          >
-                            <path d="M9 15l6 -6" />
-                            <path d="M11 6l.463 -.536a5 5 0 0 1 7.071 7.072l-.534 .464" />
-                            <path
-                              d="M13 18l-.397 .534a5.068 5.068 0 0 1 -7.127 0a4.972 4.972 0 0 1 0 -7.071l.524 -.463"
-                            />
-                          </svg>
-                          Copy link
-                        {/if}
-                      </button>
-                    </div>
-                  </div>
-
-                  {#if !recipe}
-                    <p class="text-sm text-rose-400">Recipe data couldn't be parsed.</p>
-                  {:else if summary}
-                    <div class="flex flex-col gap-1 text-[13px]">
-                      {#each summary as f (f.label)}
-                        <p>
-                          <span class="text-ink-400">{f.label}:</span>
-                          <span class="font-medium text-ink-200">{f.text}</span>
-                        </p>
-                      {/each}
-                    </div>
-                  {:else if diff && !hasChanges}
-                    <p class="text-sm text-ink-400">No changes from current data.</p>
-                  {:else if diff}
-                    <div class="flex flex-col gap-1 text-[13px]">
-                      {#each diff as f (f.label)}
-                        <p>
-                          <span class="text-ink-400">{f.label}:</span>
-                          {#if f.changed}
-                            <span class="text-rose-400 line-through">{f.oldText}</span>
-                            <span class="text-ink-600">→</span>
-                            <span class="font-medium text-emerald-400">{f.newText}</span>
-                          {:else}
-                            <span class="text-ink-300">{f.newText}</span>
-                            <span class="text-ink-600">(unchanged)</span>
-                          {/if}
-                        </p>
-                      {/each}
-                    </div>
-                  {/if}
-
-                  {#if s.submitter_id}
-                    <p class="text-xs text-ink-400">
-                      Submitted by
-                      <a
-                        href={`https://www.torn.com/profiles.php?XID=${s.submitter_id}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        class="text-accent-400 hover:underline"
-                      >
-                        {s.submitter_name ?? `#${s.submitter_id}`}
-                      </a>
-                    </p>
-                  {/if}
-
-                  {#if s.status === 'approved' && s.pr_number}
-                    <p class="text-xs text-ink-400">
-                      Final review in
-                      <a
-                        href={`https://github.com/NHG-Design/balaclava/pull/${s.pr_number}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        class="text-accent-400 hover:underline"
-                      >
-                        PR #{s.pr_number}
-                      </a>
-                    </p>
-                  {:else if s.status === 'merged' && s.pr_number}
-                    <p class="text-xs text-ink-400">
-                      Shipped via
-                      <a
-                        href={`https://github.com/NHG-Design/balaclava/pull/${s.pr_number}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        class="text-accent-400 hover:underline"
-                      >
-                        PR #{s.pr_number}
-                      </a>
-                    </p>
-                  {/if}
-                </article>
+                <RecipeSubmissionCard
+                  submission={s}
+                  currentScenarios={data.currentScenarios}
+                  variant="public"
+                  highlighted={highlightedId === s.id}
+                  copied={copiedId === s.id}
+                  onCopyLink={() => copyLink(s.id)}
+                />
               {/each}
             </div>
           </section>

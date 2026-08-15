@@ -27,17 +27,7 @@ export const GET: RequestHandler = async ({ url, platform, cookies }) => {
       args: [limit, offset],
     })
 
-    const decided = await client.execute(
-      `SELECT DISTINCT scenario_name FROM recipe_submissions WHERE status IN ('approved', 'merged')`,
-    )
-    const scenariosWithApproved = new Set(decided.rows.map((r) => String(r.scenario_name)))
-
-    const submissions = result.rows.map((row) => ({
-      ...row,
-      isStale: row.status === 'pending' && scenariosWithApproved.has(String(row.scenario_name)),
-    }))
-
-    return new Response(JSON.stringify({ submissions }), {
+    return new Response(JSON.stringify({ submissions: result.rows }), {
       status: 200,
       headers: { 'Content-Type': 'application/json' },
     })

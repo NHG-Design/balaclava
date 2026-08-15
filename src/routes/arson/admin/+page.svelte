@@ -1,23 +1,12 @@
 <script lang="ts">
   import { onMount } from 'svelte'
   import type { PageData } from './$types'
-  import { computeDiff, parseRecipe } from '$lib/recipe-diff'
+  import type { RecipeSubmission } from '$lib/recipe-diff'
+  import RecipeSubmissionCard from '$lib/components/RecipeSubmissionCard.svelte'
 
   let { data }: { data: PageData } = $props()
 
-  interface Submission {
-    id: number
-    scenario_name: string
-    payout_min: number
-    payout_max: number
-    submitter_id: string | null
-    submitter_name: string | null
-    recipe: string
-    status: 'pending' | 'approved' | 'merged' | 'denied'
-    pr_number: number | null
-    created_at: string
-    isStale: boolean
-  }
+  type Submission = RecipeSubmission
 
   let submissions = $state<Submission[]>([])
   let loading = $state(true)
@@ -102,29 +91,9 @@
       list.push(s)
       map.set(s.scenario_name, list)
     }
-    for (const list of map.values()) {
-      list.sort((a, b) => Number(a.isStale) - Number(b.isStale))
-    }
     return map
   })
   let others = $derived(submissions.filter((s) => s.status !== 'pending'))
-
-  function siblingDelta(s: Submission, sibling: Submission): string {
-    const recipe = parseRecipe(s.recipe)
-    const siblingRecipe = parseRecipe(sibling.recipe)
-    if (!recipe || !siblingRecipe) return ''
-    const asCurrentScenario = {
-      [s.scenario_name]: {
-        payoutMin: sibling.payout_min,
-        payoutMax: sibling.payout_max,
-        actions: siblingRecipe,
-      },
-    }
-    const changed = computeDiff(s, recipe, asCurrentScenario)
-      .filter((f) => f.changed)
-      .map((f) => f.label)
-    return changed.length > 0 ? changed.join(', ') : 'identical'
-  }
 
   const STATUS_CLASSES: Record<Submission['status'], string> = {
     pending: 'bg-amber-500/15 text-amber-300',
@@ -215,93 +184,16 @@
 
             <div class="grid grid-cols-1 gap-4 lg:grid-cols-2">
               {#each group as s (s.id)}
-                {@const recipe = parseRecipe(s.recipe)}
-                {@const diff = computeDiff(s, recipe, data.currentScenarios).filter((f) => f.changed)}
-                {@const isNew = !data.currentScenarios[s.scenario_name]}
-                <article
-                  class="flex flex-col gap-2.5 rounded-xl border p-4 {s.isStale
-                    ? 'border-ink-800 bg-ink-900/50 opacity-60'
-                    : 'border-ink-700 bg-ink-900'}"
-                >
-                  <div class="flex flex-wrap items-center justify-between gap-x-3 gap-y-1 text-xs text-ink-400">
-                    <span class="flex flex-wrap items-center gap-x-2 gap-y-1">
-                      <span class="font-medium text-ink-200">#{s.id}</span>
-                      {#if s.submitter_id}
-                        <a
-                          href={`https://www.torn.com/profiles.php?XID=${s.submitter_id}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          class="text-accent-400 hover:underline"
-                        >
-                          {s.submitter_name ?? `#${s.submitter_id}`}
-                        </a>
-                      {/if}
-                      {#if isNew}
-                        <span
-                          class="rounded-full border border-accent-400/40 px-1.5 py-px text-[10px] font-medium tracking-wide text-accent-400 uppercase"
-                        >
-                          New scenario
-                        </span>
-                      {/if}
-                      {#if s.isStale}
-                        <span
-                          class="rounded-full border border-ink-600 px-1.5 py-px text-[10px] font-medium tracking-wide text-ink-400 uppercase"
-                        >
-                          Already approved
-                        </span>
-                      {/if}
-                    </span>
-                    <span>{new Date(s.created_at).toLocaleString()}</span>
-                  </div>
-
-                  {#if !recipe}
-                    <p class="text-sm text-rose-400">Recipe data couldn't be parsed.</p>
-                  {:else if diff.length === 0}
-                    <p class="text-sm text-ink-400">No changes from current data.</p>
-                  {:else}
-                    <div class="flex flex-col gap-1 text-[13px]">
-                      {#each diff as f (f.label)}
-                        <p>
-                          <span class="text-ink-400">{f.label}:</span>
-                          <span class="text-rose-400 line-through">{f.oldText}</span>
-                          <span class="text-ink-600">→</span>
-                          <span class="font-medium text-emerald-400">{f.newText}</span>
-                        </p>
-                      {/each}
-                    </div>
-                  {/if}
-
-                  {#if group.length > 1}
-                    <div class="flex flex-col gap-0.5">
-                      {#each group.filter((other) => other.id !== s.id) as sibling (sibling.id)}
-                        <p class="text-xs text-ink-400">
-                          vs #{sibling.id}: {siblingDelta(s, sibling)}
-                        </p>
-                      {/each}
-                    </div>
-                  {/if}
-
-                  {#if actionError[s.id]}
-                    <p class="text-xs text-rose-400">{actionError[s.id]}</p>
-                  {/if}
-
-                  <div class="flex gap-2">
-                    <button
-                      disabled={actionBusy[s.id]}
-                      onclick={() => act(s.id, 'approve', s.scenario_name)}
-                      class="rounded-md bg-emerald-500/15 px-3 py-1.5 text-xs font-medium text-emerald-300 transition-colors hover:bg-emerald-500/25 active:scale-[0.97] disabled:pointer-events-none disabled:opacity-40"
-                    >
-                      {actionBusy[s.id] ? 'Working…' : 'Approve'}
-                    </button>
-                    <button
-                      disabled={actionBusy[s.id]}
-                      onclick={() => act(s.id, 'deny')}
-                      class="rounded-md bg-rose-500/15 px-3 py-1.5 text-xs font-medium text-rose-300 transition-colors hover:bg-rose-500/25 active:scale-[0.97] disabled:pointer-events-none disabled:opacity-40"
-                    >
-                      {actionBusy[s.id] ? 'Working…' : 'Deny'}
-                    </button>
-                  </div>
-                </article>
+                <RecipeSubmissionCard
+                  submission={s}
+                  currentScenarios={data.currentScenarios}
+                  variant="admin"
+                  siblings={group.filter((other) => other.id !== s.id)}
+                  actionBusy={actionBusy[s.id]}
+                  actionError={actionError[s.id]}
+                  onApprove={() => act(s.id, 'approve', s.scenario_name)}
+                  onDeny={() => act(s.id, 'deny')}
+                />
               {/each}
             </div>
           </section>

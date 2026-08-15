@@ -25,6 +25,19 @@ export interface SubmissionLike {
   payout_max: number
 }
 
+export interface RecipeSubmission {
+  id: number
+  scenario_name: string
+  payout_min: number
+  payout_max: number
+  submitter_id: string | null
+  submitter_name: string | null
+  recipe: string
+  status: 'pending' | 'approved' | 'merged' | 'denied'
+  pr_number: number | null
+  created_at: string
+}
+
 export interface FieldDiff {
   label: string
   changed: boolean
