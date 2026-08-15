@@ -157,9 +157,8 @@
               {#each group as s (s.id)}
                 {@const recipe = parseRecipe(s.recipe)}
                 {@const diff =
-                  s.status === 'merged'
-                    ? null
-                    : computeDiff(s, recipe, data.currentScenarios).filter((f) => f.changed)}
+                  s.status === 'merged' ? null : computeDiff(s, recipe, data.currentScenarios)}
+                {@const hasChanges = diff ? diff.some((f) => f.changed) : false}
                 {@const summary = s.status === 'merged' ? summarizeRecipe(s, recipe) : null}
                 <article
                   id={`submission-${s.id}`}
@@ -222,16 +221,21 @@
                         </p>
                       {/each}
                     </div>
-                  {:else if diff && diff.length === 0}
+                  {:else if diff && !hasChanges}
                     <p class="text-sm text-ink-400">No changes from current data.</p>
                   {:else if diff}
                     <div class="flex flex-col gap-1 text-[13px]">
                       {#each diff as f (f.label)}
                         <p>
                           <span class="text-ink-400">{f.label}:</span>
-                          <span class="text-rose-400 line-through">{f.oldText}</span>
-                          <span class="text-ink-600">→</span>
-                          <span class="font-medium text-emerald-400">{f.newText}</span>
+                          {#if f.changed}
+                            <span class="text-rose-400 line-through">{f.oldText}</span>
+                            <span class="text-ink-600">→</span>
+                            <span class="font-medium text-emerald-400">{f.newText}</span>
+                          {:else}
+                            <span class="text-ink-300">{f.newText}</span>
+                            <span class="text-ink-600">(unchanged)</span>
+                          {/if}
                         </p>
                       {/each}
                     </div>
