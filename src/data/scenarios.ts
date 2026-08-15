@@ -129,11 +129,11 @@ export const SCENARIOS: Scenario[] = [
 
   {
     scenarioName: "Going Viral",
-    payoutMin: 190_000,
+    payoutMin: 160_000,
     payoutMax: 190_000,
     actions: {
-      ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
       place: [{ resourceId: RESOURCE.GASOLINE, qty: 3 }],
+      ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
     },
   },
 
