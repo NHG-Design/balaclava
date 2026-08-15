@@ -3,6 +3,7 @@
   import type { PageData } from './$types'
   import type { RecipeSubmission } from '$lib/recipe-diff'
   import RecipeSubmissionCard from '$lib/components/RecipeSubmissionCard.svelte'
+  import Button from '$lib/components/Button.svelte'
 
   let { data }: { data: PageData } = $props()
 
@@ -10,29 +11,53 @@
 
   type StatusFilter = 'default' | 'denied'
 
+  const PAGE_SIZE = 40
+
   let submissions = $state<Submission[]>([])
   let loading = $state(true)
+  let loadingMore = $state(false)
   let loadError = $state('')
   let statusFilter = $state<StatusFilter>('default')
+  let offset = $state(0)
+  let hasMore = $state(false)
   let copiedId = $state<number | null>(null)
   let highlightedId = $state<number | null>(null)
+
+  async function fetchPage(nextOffset: number) {
+    const qs = new URLSearchParams({ limit: String(PAGE_SIZE), offset: String(nextOffset) })
+    if (statusFilter === 'denied') qs.set('status', 'denied')
+    const res = await fetch(`/api/arson/recipe-submissions?${qs}`)
+    const json = (await res.json()) as { submissions?: Submission[]; error?: string }
+    if (!res.ok) throw new Error(json.error ?? `HTTP ${res.status}`)
+    return json.submissions ?? []
+  }
 
   async function loadSubmissions() {
     loading = true
     loadError = ''
     try {
-      const qs = statusFilter === 'denied' ? '?status=denied' : ''
-      const res = await fetch(`/api/arson/recipe-submissions${qs}`)
-      const json = (await res.json()) as { submissions?: Submission[]; error?: string }
-      if (!res.ok) {
-        loadError = json.error ?? `HTTP ${res.status}`
-        return
-      }
-      submissions = json.submissions ?? []
+      const page = await fetchPage(0)
+      submissions = page
+      offset = page.length
+      hasMore = page.length === PAGE_SIZE
     } catch {
       loadError = 'Network error'
     } finally {
       loading = false
+    }
+  }
+
+  async function loadMore() {
+    loadingMore = true
+    try {
+      const page = await fetchPage(offset)
+      submissions = [...submissions, ...page]
+      offset += page.length
+      hasMore = page.length === PAGE_SIZE
+    } catch {
+      loadError = 'Network error'
+    } finally {
+      loadingMore = false
     }
   }
 
@@ -184,6 +209,14 @@
             {@render scenarioGroups(groupedAccepted)}
           {/if}
         </section>
+      </div>
+    {/if}
+
+    {#if !loading && !loadError && hasMore}
+      <div class="mt-8 flex justify-center">
+        <Button onclick={loadMore} disabled={loadingMore}>
+          {loadingMore ? 'Loading…' : 'Load more'}
+        </Button>
       </div>
     {/if}
   </main>

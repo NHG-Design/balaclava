@@ -3,6 +3,7 @@
   import type { PageData } from './$types'
   import type { RecipeSubmission } from '$lib/recipe-diff'
   import RecipeSubmissionCard from '$lib/components/RecipeSubmissionCard.svelte'
+  import Button from '$lib/components/Button.svelte'
 
   let { data }: { data: PageData } = $props()
 
@@ -31,6 +32,7 @@
         return
       }
       submissions = json.submissions ?? []
+      historyShown = HISTORY_PAGE_SIZE
     } catch {
       loadError = 'Network error'
     } finally {
@@ -94,6 +96,10 @@
     return map
   })
   let others = $derived(submissions.filter((s) => s.status !== 'pending'))
+
+  const HISTORY_PAGE_SIZE = 40
+  let historyShown = $state(HISTORY_PAGE_SIZE)
+  let visibleHistory = $derived(others.slice(0, historyShown))
 
   const STATUS_CLASSES: Record<Submission['status'], string> = {
     pending: 'bg-amber-500/15 text-amber-300',
@@ -213,7 +219,7 @@
                   </tr>
                 </thead>
                 <tbody>
-                  {#each others as s (s.id)}
+                  {#each visibleHistory as s (s.id)}
                     <tr class="border-b border-ink-800 last:border-0">
                       <td class="px-4 py-2.5 text-ink-100">{s.scenario_name}</td>
                       <td class="px-4 py-2.5">
@@ -247,6 +253,11 @@
                 </tbody>
               </table>
             </div>
+            {#if historyShown < others.length}
+              <div class="mt-4 flex justify-center">
+                <Button onclick={() => (historyShown += HISTORY_PAGE_SIZE)}>Load more</Button>
+              </div>
+            {/if}
           </section>
         {/if}
       </div>
