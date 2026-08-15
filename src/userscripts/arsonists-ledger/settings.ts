@@ -16,6 +16,7 @@ import { setIconStatus } from "../shared/status.js";
 import { checkboxCss } from "../shared/checkbox.js";
 import { buildButtonGroup } from "../shared/button-group.js";
 import { buildNumberInput } from "../shared/number-input.js";
+import { buildToggleRow, toggleRowCss } from "../shared/toggle-row.js";
 import { createPopover } from "./popover.js";
 import { buildSubmitTab, setPreselectedScenario } from "./submit-tab.js";
 import {
@@ -242,12 +243,8 @@ export function injectSettingsStyles(): void {
     cursor: pointer;
     user-select: none;
 }
-.pyro-s-check-row--disabled {
-    opacity: 0.4;
-    cursor: not-allowed;
-}
 ${checkboxCss("pyro-s-checkbox", BAND_COLOR.excellent)}
-.pyro-s-checkbox:disabled, .pyro-s-check-row--disabled .pyro-s-checkbox { cursor: not-allowed; }
+${toggleRowCss(BAND_COLOR.excellent)}
 .pyro-s-toggle-group {
     display: inline-flex;
     align-self: flex-start;
@@ -658,45 +655,34 @@ function buildVisualsTab(ctx: SettingsCtx): HTMLElement {
       ctx.setPpnBarPosition,
     ),
   );
-  const buildingInfoRow = checkboxRow(
+  const buildingToggle = buildToggleRow(
     "Show building data",
-    ctx.getShowBuildingStats,
+    ctx.getShowBuildingStats(),
     ctx.setShowBuildingStats,
   );
-  barGroup.appendChild(buildingInfoRow);
+  barGroup.appendChild(buildingToggle.root);
 
-  const buildingStatRows = [
+  buildingToggle.body.appendChild(
     checkboxRow(
       "Show response time",
       ctx.getShowResponseTime,
       ctx.setShowResponseTime,
     ),
+  );
+  buildingToggle.body.appendChild(
     checkboxRow(
       "Show flammability",
       ctx.getShowFlammability,
       ctx.setShowFlammability,
     ),
+  );
+  buildingToggle.body.appendChild(
     checkboxRow("Show rurality", ctx.getShowRurality, ctx.setShowRurality),
+  );
+  buildingToggle.body.appendChild(
     checkboxRow("Show urgency", ctx.getShowUrgency, ctx.setShowUrgency),
-  ];
-  const buildingStatCheckboxes = buildingStatRows.map(
-    (row) => row.querySelector("input") as HTMLInputElement,
   );
 
-  function syncBuildingStatRows(): void {
-    const enabled = ctx.getShowBuildingStats();
-    buildingStatRows.forEach((row, i) => {
-      buildingStatCheckboxes[i].disabled = !enabled;
-      row.classList.toggle("pyro-s-check-row--disabled", !enabled);
-    });
-  }
-
-  buildingInfoRow
-    .querySelector("input")!
-    .addEventListener("change", syncBuildingStatRows);
-  syncBuildingStatRows();
-
-  buildingStatRows.forEach((row) => barGroup.appendChild(row));
   root.appendChild(barGroup);
 
   const materialsGroup = el("div", "pyro-s-group");
@@ -704,58 +690,49 @@ function buildVisualsTab(ctx: SettingsCtx): HTMLElement {
   materialsTitle.textContent = "Materials";
   materialsGroup.appendChild(materialsTitle);
 
-  const materialDataRow = checkboxRow(
+  const materialToggle = buildToggleRow(
     "Show material data",
-    ctx.getShowMaterialData,
+    ctx.getShowMaterialData(),
     ctx.setShowMaterialData,
   );
-  materialsGroup.appendChild(materialDataRow);
+  materialsGroup.appendChild(materialToggle.root);
 
-  const materialStatRows = [
+  materialToggle.body.appendChild(
     checkboxRow(
       "Show intensity",
       ctx.getShowMaterialIntensity,
       ctx.setShowMaterialIntensity,
     ),
+  );
+  materialToggle.body.appendChild(
     checkboxRow(
       "Show momentum",
       ctx.getShowMaterialMomentum,
       ctx.setShowMaterialMomentum,
     ),
+  );
+  materialToggle.body.appendChild(
     checkboxRow(
       "Show suspicion",
       ctx.getShowMaterialSuspicion,
       ctx.setShowMaterialSuspicion,
     ),
+  );
+  materialToggle.body.appendChild(
     checkboxRow(
       "Show ignition risk",
       ctx.getShowMaterialIgnitionRisk,
       ctx.setShowMaterialIgnitionRisk,
     ),
+  );
+  materialToggle.body.appendChild(
     checkboxRow(
       "Show stoking risk",
       ctx.getShowMaterialStokingRisk,
       ctx.setShowMaterialStokingRisk,
     ),
-  ];
-  const materialStatCheckboxes = materialStatRows.map(
-    (row) => row.querySelector("input") as HTMLInputElement,
   );
 
-  function syncMaterialStatRows(): void {
-    const enabled = ctx.getShowMaterialData();
-    materialStatRows.forEach((row, i) => {
-      materialStatCheckboxes[i].disabled = !enabled;
-      row.classList.toggle("pyro-s-check-row--disabled", !enabled);
-    });
-  }
-
-  materialDataRow
-    .querySelector("input")!
-    .addEventListener("change", syncMaterialStatRows);
-  syncMaterialStatRows();
-
-  materialStatRows.forEach((row) => materialsGroup.appendChild(row));
   root.appendChild(materialsGroup);
 
   return root;

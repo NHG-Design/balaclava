@@ -1,9 +1,13 @@
 <script lang="ts">
   import {
     computeDiff,
+    computeLineDiffs,
+    parseFieldDecisions,
     parseRecipe,
     summarizeRecipe,
     type CurrentScenario,
+    type FieldDecisions,
+    type LineDecision,
     type RecipeSubmission,
   } from '$lib/recipe-diff'
 
@@ -13,13 +17,10 @@
     variant: 'public' | 'admin'
     /** public only */
     highlighted?: boolean
-    copied?: boolean
-    onCopyLink?: () => void
     /** admin only */
-    siblings?: RecipeSubmission[]
     actionBusy?: boolean
     actionError?: string
-    onApprove?: () => void
+    onSubmit?: (decisions: FieldDecisions) => void
     onDeny?: () => void
   }
 
@@ -28,42 +29,59 @@
     currentScenarios,
     variant,
     highlighted = false,
-    copied = false,
-    onCopyLink,
-    siblings = [],
     actionBusy = false,
     actionError = '',
-    onApprove,
+    onSubmit,
     onDeny,
   }: Props = $props()
 
   const STATUS_CLASSES: Record<RecipeSubmission['status'], string> = {
     pending: 'bg-amber-500/15 text-amber-300',
     approved: 'bg-sky-500/15 text-sky-300',
+    partial: 'bg-violet-500/15 text-violet-300',
     merged: 'bg-emerald-500/15 text-emerald-300',
     denied: 'bg-rose-500/15 text-rose-300',
   }
 
+  const STATUS_LABELS: Record<RecipeSubmission['status'], string> = {
+    pending: 'pending',
+    approved: 'approved',
+    partial: 'partially approved',
+    merged: 'merged',
+    denied: 'denied',
+  }
+
   let recipe = $derived(parseRecipe(s.recipe))
+  let current = $derived(currentScenarios[s.scenario_name])
   let diff = $derived(s.status === 'merged' ? null : computeDiff(s, recipe, currentScenarios))
   let hasChanges = $derived(diff ? diff.some((f) => f.changed) : false)
   let summary = $derived(s.status === 'merged' ? summarizeRecipe(s, recipe) : null)
-  let isNew = $derived(!currentScenarios[s.scenario_name])
+  let isNew = $derived(!current)
 
-  function siblingDelta(sibling: RecipeSubmission): string {
-    const siblingRecipe = parseRecipe(sibling.recipe)
-    if (!recipe || !siblingRecipe) return ''
-    const asCurrentScenario = {
-      [s.scenario_name]: {
-        payoutMin: sibling.payout_min,
-        payoutMax: sibling.payout_max,
-        actions: siblingRecipe,
-      },
-    }
-    const changed = computeDiff(s, recipe, asCurrentScenario)
-      .filter((f) => f.changed)
-      .map((f) => f.label)
-    return changed.length > 0 ? changed.join(', ') : 'identical'
+  /** Per-line diff against current scenario data, used for the admin toggle list (while
+   *  pending) and for the "which lines got in" breakdown once decided as partial. */
+  let lineDiffs = $derived(recipe ? computeLineDiffs(s, recipe, current) : [])
+  let storedDecisions = $derived(parseFieldDecisions(s.field_decisions))
+
+  let decisions = $state<FieldDecisions>({})
+
+  function decisionFor(key: string): LineDecision {
+    return decisions[key] ?? 'approve'
+  }
+
+  function toggle(key: string, value: LineDecision) {
+    decisions = { ...decisions, [key]: value }
+  }
+
+  function submit() {
+    onSubmit?.(decisions)
+  }
+
+  function rowOldText(row: (typeof lineDiffs)[number]): string {
+    return row.kind === 'added' ? '' : row.oldText
+  }
+  function rowNewText(row: (typeof lineDiffs)[number]): string {
+    return row.kind === 'removed' ? '' : row.newText
   }
 </script>
 
@@ -83,11 +101,9 @@
           s.status
         ]}"
       >
-        {s.status}
+        {STATUS_LABELS[s.status]}
       </span>
-      {#if variant === 'admin'}
-        <span class="font-medium text-ink-200">#{s.id}</span>
-      {/if}
+      <span class="font-medium text-ink-200">#{s.id}</span>
       {#if s.submitter_id}
         <a
           href={`https://www.torn.com/profiles.php?XID=${s.submitter_id}`}
@@ -110,36 +126,6 @@
       <span class="text-xs text-ink-400">
         {new Date(s.created_at).toLocaleString()}
       </span>
-      {#if variant === 'public' && onCopyLink}
-        <button
-          onclick={onCopyLink}
-          aria-label="Copy share link"
-          class="inline-flex items-center gap-1 rounded px-1 py-0.5 text-xs text-ink-400 transition-colors hover:text-accent-400"
-        >
-          {#if copied}
-            Copied!
-          {:else}
-            <svg
-              width="12"
-              height="12"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              aria-hidden="true"
-            >
-              <path d="M9 15l6 -6" />
-              <path d="M11 6l.463 -.536a5 5 0 0 1 7.071 7.072l-.534 .464" />
-              <path
-                d="M13 18l-.397 .534a5.068 5.068 0 0 1 -7.127 0a4.972 4.972 0 0 1 0 -7.071l.524 -.463"
-              />
-            </svg>
-            Copy link
-          {/if}
-        </button>
-      {/if}
     </div>
   </div>
 
@@ -154,8 +140,79 @@
         </p>
       {/each}
     </div>
+  {:else if s.status === 'partial' || (s.status === 'approved' && s.field_decisions)}
+    <!-- Decided outcome: show what was actually accepted vs. rejected, line by line. -->
+    <div class="flex flex-col gap-1 text-[13px]">
+      {#each lineDiffs as row (row.key)}
+        {@const approved = (storedDecisions[row.key] ?? 'approve') === 'approve'}
+        <p class="flex items-center gap-1.5">
+          <span class={approved ? 'text-emerald-400' : 'text-rose-400'}>
+            {approved ? '✓' : '✗'}
+          </span>
+          <span class="text-ink-400">{row.label}:</span>
+          {#if rowOldText(row)}
+            <span class="text-ink-500 line-through">{rowOldText(row)}</span>
+          {/if}
+          {#if rowOldText(row) && rowNewText(row)}
+            <span class="text-ink-600">→</span>
+          {/if}
+          {#if rowNewText(row)}
+            <span class="font-medium {approved ? 'text-ink-200' : 'text-ink-500 line-through'}"
+              >{rowNewText(row)}</span
+            >
+          {/if}
+        </p>
+      {/each}
+    </div>
   {:else if diff && !hasChanges}
     <p class="text-sm text-ink-400">No changes from current data.</p>
+  {:else if variant === 'admin' && s.status === 'pending'}
+    <!-- Pending: per-line Approve/Deny toggles feeding the Submit action below. -->
+    <div class="flex flex-col gap-1.5 text-[13px]">
+      {#each lineDiffs as row (row.key)}
+        <div class="flex flex-wrap items-center justify-between gap-x-3 gap-y-1">
+          <p>
+            <span class="text-ink-400">{row.label}:</span>
+            {#if rowOldText(row)}
+              <span class="text-rose-400 line-through">{rowOldText(row)}</span>
+            {/if}
+            {#if rowOldText(row) && rowNewText(row)}
+              <span class="text-ink-600">→</span>
+            {/if}
+            {#if rowNewText(row)}
+              <span class="font-medium text-emerald-400">{rowNewText(row)}</span>
+            {/if}
+          </p>
+          <div class="inline-flex overflow-hidden rounded-md border border-ink-700 text-[11px]">
+            <button
+              disabled={actionBusy}
+              onclick={() => toggle(row.key, 'approve')}
+              class="px-2 py-1 font-medium transition-colors disabled:pointer-events-none disabled:opacity-40 {decisionFor(
+                row.key,
+              ) === 'approve'
+                ? 'bg-emerald-500/25 text-emerald-300'
+                : 'text-ink-400 hover:text-ink-200'}"
+            >
+              Approve
+            </button>
+            <button
+              disabled={actionBusy}
+              onclick={() => toggle(row.key, 'deny')}
+              class="px-2 py-1 font-medium transition-colors disabled:pointer-events-none disabled:opacity-40 {decisionFor(
+                row.key,
+              ) === 'deny'
+                ? 'bg-rose-500/25 text-rose-300'
+                : 'text-ink-400 hover:text-ink-200'}"
+            >
+              Deny
+            </button>
+          </div>
+        </div>
+      {/each}
+      {#if lineDiffs.length === 0}
+        <p class="text-sm text-ink-400">No changes from current data.</p>
+      {/if}
+    </div>
   {:else if diff}
     <div class="flex flex-col gap-1 text-[13px]">
       {#each diff as f (f.label)}
@@ -173,17 +230,21 @@
     </div>
   {/if}
 
-  {#if variant === 'admin' && siblings.length > 0}
-    <div class="flex flex-col gap-0.5">
-      {#each siblings as sibling (sibling.id)}
-        <p class="text-xs text-ink-400">vs #{sibling.id}: {siblingDelta(sibling)}</p>
-      {/each}
-    </div>
-  {/if}
-
   {#if s.status === 'approved' && s.pr_number}
     <p class="text-xs text-ink-400">
-      Final review in
+      Under final review in
+      <a
+        href={`https://github.com/NHG-Design/balaclava/pull/${s.pr_number}`}
+        target="_blank"
+        rel="noopener noreferrer"
+        class="text-accent-400 hover:underline"
+      >
+        PR #{s.pr_number}
+      </a>
+    </p>
+  {:else if s.status === 'partial' && s.pr_number}
+    <p class="text-xs text-ink-400">
+      Under final review in
       <a
         href={`https://github.com/NHG-Design/balaclava/pull/${s.pr_number}`}
         target="_blank"
@@ -207,7 +268,7 @@
     </p>
   {/if}
 
-  {#if variant === 'admin'}
+  {#if variant === 'admin' && s.status === 'pending'}
     {#if actionError}
       <p class="text-xs text-rose-400">{actionError}</p>
     {/if}
@@ -215,17 +276,17 @@
     <div class="flex gap-2">
       <button
         disabled={actionBusy}
-        onclick={onApprove}
-        class="rounded-md bg-emerald-500/15 px-3 py-1.5 text-xs font-medium text-emerald-300 transition-colors hover:bg-emerald-500/25 active:scale-[0.97] disabled:pointer-events-none disabled:opacity-40"
-      >
-        {actionBusy ? 'Working…' : 'Approve'}
-      </button>
-      <button
-        disabled={actionBusy}
         onclick={onDeny}
         class="rounded-md bg-rose-500/15 px-3 py-1.5 text-xs font-medium text-rose-300 transition-colors hover:bg-rose-500/25 active:scale-[0.97] disabled:pointer-events-none disabled:opacity-40"
       >
-        {actionBusy ? 'Working…' : 'Deny'}
+        Deny
+      </button>
+      <button
+        disabled={actionBusy}
+        onclick={submit}
+        class="rounded-md bg-emerald-500/15 px-3 py-1.5 text-xs font-medium text-emerald-300 transition-colors hover:bg-emerald-500/25 active:scale-[0.97] disabled:pointer-events-none disabled:opacity-40"
+      >
+        Submit
       </button>
     </div>
   {/if}

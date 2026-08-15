@@ -8,7 +8,7 @@ function printHelp(): void {
     console.log([
         'Usage: pnpm exec tsx scripts/update-arson-prices.ts',
         '',
-        'Refreshes default consumable prices in src/data/catalog.ts from the Torn items endpoint',
+        'Refreshes default item prices in src/data/catalog.ts from the Torn items endpoint',
         'using TORN_PUBLIC_API_KEY from the environment or .dev.vars.',
     ].join('\n'));
 }
@@ -68,12 +68,12 @@ async function main(): Promise<void> {
     );
 
     for (const resource of Object.values(CATALOG)) {
-        if (resource.isTool || resource.tornId === undefined) continue;
+        if (resource.tornId === undefined) continue;
         const nextPrice = priceByTornId.get(resource.tornId);
         if (!nextPrice) continue;
 
         const escapedId = resource.id.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-        const pattern = new RegExp(`(\\[RESOURCE\\.[^\\]]+\\]:\\s*\\{[^\\n]*id:\\s*RESOURCE\\.[^,]+,[^\\n]*defaultPrice:\\s*)([\\d_]+)(,\\s*tornId:\\s*${resource.tornId}\\s*\\})`);
+        const pattern = new RegExp(`(\\[RESOURCE\\.[^\\]]+\\]:\\s*\\{[\\s\\S]*?id:\\s*RESOURCE\\.[^,]+,[\\s\\S]*?defaultPrice:\\s*)([\\d_]+)(,\\s*tornId:\\s*${resource.tornId}\\s*)`);
         const next = source.replace(pattern, `$1${formatNumberLiteral(nextPrice)}$3`);
         if (next !== source) {
             source = next;

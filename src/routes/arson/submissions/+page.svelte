@@ -3,13 +3,21 @@
   import type { PageData } from './$types'
   import type { RecipeSubmission } from '$lib/recipe-diff'
   import RecipeSubmissionCard from '$lib/components/RecipeSubmissionCard.svelte'
+  import ScenarioCombobox from '$lib/components/ScenarioCombobox.svelte'
   import Button from '$lib/components/Button.svelte'
 
   let { data }: { data: PageData } = $props()
 
   type Submission = RecipeSubmission
 
-  type StatusFilter = 'default' | 'denied'
+  type StatusFilter = 'pending' | 'approved' | 'shipped' | 'denied'
+
+  const TABS: { key: StatusFilter; label: string; statuses: string }[] = [
+    { key: 'pending', label: 'Pending', statuses: 'pending' },
+    { key: 'approved', label: 'Approved', statuses: 'approved,partial' },
+    { key: 'shipped', label: 'Shipped', statuses: 'merged' },
+    { key: 'denied', label: 'Denied', statuses: 'denied' },
+  ]
 
   const PAGE_SIZE = 40
 
@@ -17,16 +25,27 @@
   let loading = $state(true)
   let loadingMore = $state(false)
   let loadError = $state('')
-  let statusFilter = $state<StatusFilter>('default')
+  let statusFilter = $state<StatusFilter>('pending')
+  let scenarioQuery = $state('')
+  let idQuery = $state('')
   let offset = $state(0)
   let hasMore = $state(false)
-  let copiedId = $state<number | null>(null)
   let highlightedId = $state<number | null>(null)
+
+  let idSearchActive = $derived(idQuery.trim().length > 0)
 
   async function fetchPage(nextOffset: number) {
     const qs = new URLSearchParams({ limit: String(PAGE_SIZE), offset: String(nextOffset) })
-    if (statusFilter === 'denied') qs.set('status', 'denied')
+    const tab = TABS.find((t) => t.key === statusFilter)
+    if (tab) qs.set('status', tab.statuses)
     const res = await fetch(`/api/arson/recipe-submissions?${qs}`)
+    const json = (await res.json()) as { submissions?: Submission[]; error?: string }
+    if (!res.ok) throw new Error(json.error ?? `HTTP ${res.status}`)
+    return json.submissions ?? []
+  }
+
+  async function fetchById(id: string) {
+    const res = await fetch(`/api/arson/recipe-submissions?id=${encodeURIComponent(id)}`)
     const json = (await res.json()) as { submissions?: Submission[]; error?: string }
     if (!res.ok) throw new Error(json.error ?? `HTTP ${res.status}`)
     return json.submissions ?? []
@@ -36,6 +55,12 @@
     loading = true
     loadError = ''
     try {
+      if (idSearchActive) {
+        submissions = await fetchById(idQuery.trim())
+        offset = 0
+        hasMore = false
+        return
+      }
       const page = await fetchPage(0)
       submissions = page
       offset = page.length
@@ -82,21 +107,9 @@
 
   $effect(() => {
     statusFilter
+    idQuery
     void loadSubmissions()
   })
-
-  async function copyLink(id: number) {
-    const url = `${window.location.origin}${window.location.pathname}#submission-${id}`
-    try {
-      await navigator.clipboard.writeText(url)
-      copiedId = id
-      setTimeout(() => {
-        if (copiedId === id) copiedId = null
-      }, 1500)
-    } catch {
-      /* clipboard unavailable — link is still visible in the URL bar after a manual click */
-    }
-  }
 
   function groupByScenario(list: Submission[]): Map<string, Submission[]> {
     const map = new Map<string, Submission[]>()
@@ -111,11 +124,15 @@
     return new Map([...map.entries()].sort(([a], [b]) => a.localeCompare(b)))
   }
 
-  let groupedPending = $derived(groupByScenario(submissions.filter((s) => s.status === 'pending')))
-  let groupedAccepted = $derived(
-    groupByScenario(submissions.filter((s) => s.status === 'approved' || s.status === 'merged')),
+  let filteredSubmissions = $derived(
+    scenarioQuery.trim()
+      ? submissions.filter((s) =>
+          s.scenario_name.toLowerCase().includes(scenarioQuery.trim().toLowerCase()),
+        )
+      : submissions,
   )
-  let groupedDenied = $derived(groupByScenario(submissions.filter((s) => s.status === 'denied')))
+  let groupedCurrent = $derived(groupByScenario(filteredSubmissions))
+  let scenarioNames = $derived(Object.keys(data.currentScenarios).sort((a, b) => a.localeCompare(b)))
 </script>
 
 <svelte:head>
@@ -134,25 +151,49 @@
   </header>
 
   <main class="mx-auto max-w-6xl px-6 py-8">
-    <div class="mb-6 inline-flex rounded-full border border-ink-700 bg-ink-900 p-1">
-      <button
-        onclick={() => (statusFilter = 'default')}
-        class="rounded-full px-3.5 py-1.5 text-xs font-medium transition-colors {statusFilter ===
-        'default'
-          ? 'bg-accent-500 text-ink-950'
-          : 'text-ink-400 hover:text-ink-100'}"
+    <div class="mb-6 flex flex-wrap items-center justify-between gap-4">
+      <div
+        class="inline-flex rounded-full border border-ink-700 bg-ink-900 p-1 {idSearchActive
+          ? 'pointer-events-none opacity-40'
+          : ''}"
       >
-        Pending &amp; approved
-      </button>
-      <button
-        onclick={() => (statusFilter = 'denied')}
-        class="rounded-full px-3.5 py-1.5 text-xs font-medium transition-colors {statusFilter ===
-        'denied'
-          ? 'bg-accent-500 text-ink-950'
-          : 'text-ink-400 hover:text-ink-100'}"
-      >
-        Denied
-      </button>
+        {#each TABS as tab (tab.key)}
+          <button
+            onclick={() => (statusFilter = tab.key)}
+            class="rounded-full px-3.5 py-1.5 text-xs font-medium transition-colors {statusFilter ===
+            tab.key
+              ? 'bg-accent-500 text-ink-950'
+              : 'text-ink-400 hover:text-ink-100'}"
+          >
+            {tab.label}
+          </button>
+        {/each}
+      </div>
+
+      <div class="flex flex-wrap items-center gap-3">
+        <div class="relative w-32">
+          <input
+            type="text"
+            inputmode="numeric"
+            bind:value={idQuery}
+            placeholder="Submission #"
+            class="w-full rounded-lg border border-ink-700 bg-ink-900 px-3 py-1.5 text-sm text-ink-100 placeholder:text-ink-500 focus:border-accent-500 focus:outline-none"
+          />
+          {#if idQuery}
+            <button
+              type="button"
+              onclick={() => (idQuery = '')}
+              aria-label="Clear ID search"
+              class="absolute top-1/2 right-2 -translate-y-1/2 text-ink-500 hover:text-ink-200"
+            >
+              &times;
+            </button>
+          {/if}
+        </div>
+        <div class={idSearchActive ? 'pointer-events-none opacity-40' : ''}>
+          <ScenarioCombobox {scenarioNames} bind:value={scenarioQuery} />
+        </div>
+      </div>
     </div>
 
     {#snippet scenarioGroups(groups: Map<string, Submission[]>)}
@@ -168,8 +209,6 @@
                   currentScenarios={data.currentScenarios}
                   variant="public"
                   highlighted={highlightedId === s.id}
-                  copied={copiedId === s.id}
-                  onCopyLink={() => copyLink(s.id)}
                 />
               {/each}
             </div>
@@ -182,34 +221,18 @@
       <p class="text-sm text-ink-400">Loading…</p>
     {:else if loadError}
       <p class="text-sm text-rose-400">{loadError}</p>
-    {:else if submissions.length === 0}
-      <p class="text-sm text-ink-400">No submissions here yet.</p>
-    {:else if statusFilter === 'denied'}
-      {#if groupedDenied.size === 0}
-        <p class="text-sm text-ink-400">No denied submissions.</p>
-      {:else}
-        {@render scenarioGroups(groupedDenied)}
-      {/if}
+    {:else if groupedCurrent.size === 0}
+      <p class="text-sm text-ink-400">
+        {#if idSearchActive}
+          No submission with that ID.
+        {:else if scenarioQuery}
+          No submissions match that search.
+        {:else}
+          No submissions here yet.
+        {/if}
+      </p>
     {:else}
-      <div class="flex flex-col gap-12">
-        <section>
-          <h2 class="mb-4 text-2xl font-semibold text-ink-100">Pending</h2>
-          {#if groupedPending.size === 0}
-            <p class="text-sm text-ink-400">No pending submissions.</p>
-          {:else}
-            {@render scenarioGroups(groupedPending)}
-          {/if}
-        </section>
-
-        <section>
-          <h2 class="mb-4 text-2xl font-semibold text-ink-100">Approved</h2>
-          {#if groupedAccepted.size === 0}
-            <p class="text-sm text-ink-400">No approved submissions yet.</p>
-          {:else}
-            {@render scenarioGroups(groupedAccepted)}
-          {/if}
-        </section>
-      </div>
+      {@render scenarioGroups(groupedCurrent)}
     {/if}
 
     {#if !loading && !loadError && hasMore}

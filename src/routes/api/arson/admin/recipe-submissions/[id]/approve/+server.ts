@@ -14,6 +14,15 @@ import {
   findOpenPullRequest,
   updatePullRequestBody,
 } from '$lib/server/github'
+import { SCENARIOS } from '../../../../../../../data/scenarios'
+import {
+  computeLineDiffs,
+  hasAnyDenial,
+  isAllDenied,
+  mergeDecisions,
+  type FieldDecisions,
+  type Recipe,
+} from '$lib/recipe-diff'
 
 const SCENARIOS_PATH = 'src/data/scenarios.ts'
 const VERSIONS_PATH = 'versions.json'
@@ -75,7 +84,7 @@ async function refreshVersionBump(githubToken: string, branch: string): Promise<
   )
 }
 
-export const POST: RequestHandler = async ({ params, platform, cookies, getClientAddress }) => {
+export const POST: RequestHandler = async ({ params, request, platform, cookies, getClientAddress }) => {
   try {
     if (!(await isAdminRequest(platform?.env?.SCENARIO_ADMIN_SESSION_SECRET, cookies))) {
       return new Response(JSON.stringify({ error: 'Not authorized' }), {
@@ -99,6 +108,16 @@ export const POST: RequestHandler = async ({ params, platform, cookies, getClien
       })
     }
 
+    // Per-line approve/deny verdicts from the admin card; a key missing here defaults to
+    // 'approve', so an empty body reproduces the old whole-submission approve behavior.
+    let decisions: FieldDecisions = {}
+    try {
+      const body = (await request.json()) as { decisions?: FieldDecisions }
+      decisions = body?.decisions ?? {}
+    } catch {
+      /* no body — full approve */
+    }
+
     const client = createClient({ url: dbUrl, authToken })
     const rows = await client.execute({
       sql: 'SELECT id, scenario_name, payout_min, payout_max, recipe, status FROM recipe_submissions WHERE id = ?',
@@ -118,7 +137,26 @@ export const POST: RequestHandler = async ({ params, platform, cookies, getClien
       })
     }
 
-    const recipe = JSON.parse(row.recipe) as RecipePayload
+    const submittedRecipe = JSON.parse(row.recipe) as Recipe
+    const currentScenario = SCENARIOS.find((sc) => sc.scenarioName === row.scenario_name)
+    const current = currentScenario
+      ? {
+          payoutMin: currentScenario.payoutMin,
+          payoutMax: currentScenario.payoutMax,
+          actions: currentScenario.actions,
+        }
+      : undefined
+
+    const lineDiffs = computeLineDiffs(row, submittedRecipe, current)
+    if (isAllDenied(lineDiffs, decisions)) {
+      return new Response(
+        JSON.stringify({ error: 'All lines denied — use the deny endpoint instead' }),
+        { status: 400, headers: { 'Content-Type': 'application/json' } },
+      )
+    }
+    const partial = hasAnyDenial(lineDiffs, decisions)
+    const merged = mergeDecisions(row, submittedRecipe, current, decisions)
+    const recipe = merged.recipe as RecipePayload
 
     let prNumber: number
     let prUrl: string
@@ -132,8 +170,8 @@ export const POST: RequestHandler = async ({ params, platform, cookies, getClien
         const patched = patchScenarioSource(
           file.content,
           row.scenario_name,
-          row.payout_min,
-          row.payout_max,
+          merged.payoutMin,
+          merged.payoutMax,
           recipe,
         )
         await updateFile(
@@ -164,8 +202,8 @@ export const POST: RequestHandler = async ({ params, platform, cookies, getClien
         const patched = patchScenarioSource(
           file.content,
           row.scenario_name,
-          row.payout_min,
-          row.payout_max,
+          merged.payoutMin,
+          merged.payoutMax,
           recipe,
         )
         await updateFile(
@@ -204,17 +242,22 @@ export const POST: RequestHandler = async ({ params, platform, cookies, getClien
     }
 
     await client.execute({
-      sql: `UPDATE recipe_submissions SET status = 'approved', pr_number = ? WHERE id = ?`,
-      args: [prNumber, submissionId],
+      sql: `UPDATE recipe_submissions SET status = ?, pr_number = ?, field_decisions = ? WHERE id = ?`,
+      args: [
+        partial ? 'partial' : 'approved',
+        prNumber,
+        Object.keys(decisions).length > 0 ? JSON.stringify(decisions) : null,
+        submissionId,
+      ],
     })
 
-    await logAdminAction(client, 'approve', submissionId, getClientAddress())
+    await logAdminAction(client, partial ? 'partial-approve' : 'approve', submissionId, getClientAddress())
 
     // Best-effort: refresh the PR body with the full pooled list. Doesn't fail the request —
     // the approve itself (branch, patch, PR, DB) already succeeded by this point.
     try {
       const pooledRows = await client.execute({
-        sql: `SELECT id, scenario_name FROM recipe_submissions WHERE pr_number = ? AND status = 'approved'`,
+        sql: `SELECT id, scenario_name FROM recipe_submissions WHERE pr_number = ? AND status IN ('approved', 'partial')`,
         args: [prNumber],
       })
       const pooled = pooledRows.rows.map((r) => ({
@@ -226,13 +269,7 @@ export const POST: RequestHandler = async ({ params, platform, cookies, getClien
       /* non-fatal */
     }
 
-    const siblings = await client.execute({
-      sql: `SELECT id FROM recipe_submissions WHERE scenario_name = ? AND status = 'pending' AND id != ?`,
-      args: [row.scenario_name, submissionId],
-    })
-    const siblingsToDeny = siblings.rows.map((r) => Number(r.id))
-
-    return new Response(JSON.stringify({ ok: true, prNumber, prUrl, siblingsToDeny }), {
+    return new Response(JSON.stringify({ ok: true, prNumber, prUrl }), {
       status: 200,
       headers: { 'Content-Type': 'application/json' },
     })

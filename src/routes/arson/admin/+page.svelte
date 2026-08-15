@@ -1,21 +1,31 @@
 <script lang="ts">
   import { onMount } from 'svelte'
   import type { PageData } from './$types'
-  import type { RecipeSubmission } from '$lib/recipe-diff'
+  import type { FieldDecisions, RecipeSubmission } from '$lib/recipe-diff'
   import RecipeSubmissionCard from '$lib/components/RecipeSubmissionCard.svelte'
+  import ScenarioCombobox from '$lib/components/ScenarioCombobox.svelte'
   import Button from '$lib/components/Button.svelte'
 
   let { data }: { data: PageData } = $props()
 
   type Submission = RecipeSubmission
 
+  type StatusFilter = 'pending' | 'approved' | 'shipped' | 'denied'
+
+  const TABS: { key: StatusFilter; label: string; statuses: Submission['status'][] }[] = [
+    { key: 'pending', label: 'Pending', statuses: ['pending'] },
+    { key: 'approved', label: 'Approved', statuses: ['approved', 'partial'] },
+    { key: 'shipped', label: 'Shipped', statuses: ['merged'] },
+    { key: 'denied', label: 'Denied', statuses: ['denied'] },
+  ]
+
   let submissions = $state<Submission[]>([])
   let loading = $state(true)
   let loadError = $state('')
   let actionError = $state<Record<number, string>>({})
   let actionBusy = $state<Record<number, boolean>>({})
-  let denyPrompt = $state<{ scenarioName: string; ids: number[] } | null>(null)
-  let denyPromptBusy = $state(false)
+  let statusFilter = $state<StatusFilter>('pending')
+  let scenarioQuery = $state('')
 
   async function load() {
     loading = true
@@ -42,24 +52,23 @@
 
   onMount(load)
 
-  async function act(id: number, action: 'approve' | 'deny', scenarioName?: string) {
+  async function act(id: number, action: 'approve' | 'deny', decisions?: FieldDecisions) {
     actionBusy = { ...actionBusy, [id]: true }
     actionError = { ...actionError, [id]: '' }
     try {
       const res = await fetch(`/api/arson/admin/recipe-submissions/${id}/${action}`, {
         method: 'POST',
+        ...(action === 'approve'
+          ? {
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ decisions: decisions ?? {} }),
+            }
+          : {}),
       })
-      const json = (await res.json()) as {
-        ok?: boolean
-        error?: string
-        siblingsToDeny?: number[]
-      }
+      const json = (await res.json()) as { ok?: boolean; error?: string }
       if (!res.ok || !json.ok) {
         actionError = { ...actionError, [id]: json.error ?? `HTTP ${res.status}` }
         return
-      }
-      if (action === 'approve' && json.siblingsToDeny?.length && scenarioName) {
-        denyPrompt = { scenarioName, ids: json.siblingsToDeny }
       }
       await load()
     } catch {
@@ -69,23 +78,18 @@
     }
   }
 
-  async function denyAllSiblings() {
-    if (!denyPrompt) return
-    denyPromptBusy = true
-    try {
-      await Promise.all(
-        denyPrompt.ids.map((id) =>
-          fetch(`/api/arson/admin/recipe-submissions/${id}/deny`, { method: 'POST' }),
-        ),
-      )
-      denyPrompt = null
-      await load()
-    } finally {
-      denyPromptBusy = false
-    }
-  }
+  let scenarioNames = $derived(Object.keys(data.currentScenarios).sort((a, b) => a.localeCompare(b)))
 
-  let pending = $derived(submissions.filter((s) => s.status === 'pending'))
+  let tabStatuses = $derived(TABS.find((t) => t.key === statusFilter)?.statuses ?? [])
+  let filteredForTab = $derived(
+    submissions.filter((s) => {
+      if (!tabStatuses.includes(s.status)) return false
+      if (!scenarioQuery.trim()) return true
+      return s.scenario_name.toLowerCase().includes(scenarioQuery.trim().toLowerCase())
+    }),
+  )
+
+  let pending = $derived(statusFilter === 'pending' ? filteredForTab : [])
   let grouped = $derived.by(() => {
     const map = new Map<string, Submission[]>()
     for (const s of pending) {
@@ -95,15 +99,21 @@
     }
     return map
   })
-  let others = $derived(submissions.filter((s) => s.status !== 'pending'))
+  let others = $derived(statusFilter === 'pending' ? [] : filteredForTab)
 
   const HISTORY_PAGE_SIZE = 40
   let historyShown = $state(HISTORY_PAGE_SIZE)
   let visibleHistory = $derived(others.slice(0, historyShown))
 
+  $effect(() => {
+    statusFilter
+    historyShown = HISTORY_PAGE_SIZE
+  })
+
   const STATUS_CLASSES: Record<Submission['status'], string> = {
     pending: 'bg-amber-500/15 text-amber-300',
     approved: 'bg-sky-500/15 text-sky-300',
+    partial: 'bg-violet-500/15 text-violet-300',
     merged: 'bg-emerald-500/15 text-emerald-300',
     denied: 'bg-rose-500/15 text-rose-300',
   }
@@ -137,43 +147,33 @@
   </header>
 
   <main class="mx-auto max-w-6xl px-6 py-10">
-    {#if denyPrompt}
-      <div
-        class="mb-6 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-amber-400/40 bg-amber-500/10 px-4 py-3 text-sm text-amber-200"
-      >
-        <span>
-          {denyPrompt.ids.length} other pending submission{denyPrompt.ids.length === 1 ? '' : 's'} for
-          <strong>{denyPrompt.scenarioName}</strong>.
-        </span>
-        <div class="flex gap-2">
+    <div class="mb-8 flex flex-wrap items-center justify-between gap-4">
+      <div class="inline-flex rounded-full border border-ink-700 bg-ink-900 p-1">
+        {#each TABS as tab (tab.key)}
           <button
-            disabled={denyPromptBusy}
-            onclick={denyAllSiblings}
-            class="rounded-md bg-rose-500/20 px-3 py-1.5 text-xs font-medium text-rose-200 transition-colors hover:bg-rose-500/30 active:scale-[0.97] disabled:pointer-events-none disabled:opacity-40"
+            onclick={() => (statusFilter = tab.key)}
+            class="rounded-full px-3.5 py-1.5 text-xs font-medium transition-colors {statusFilter ===
+            tab.key
+              ? 'bg-accent-500 text-ink-950'
+              : 'text-ink-400 hover:text-ink-100'}"
           >
-            {denyPromptBusy ? 'Working…' : 'Deny all'}
+            {tab.label}
           </button>
-          <button
-            onclick={() => (denyPrompt = null)}
-            class="rounded-md px-3 py-1.5 text-xs text-amber-300 transition-colors hover:text-amber-100"
-          >
-            Dismiss
-          </button>
-        </div>
+        {/each}
       </div>
-    {/if}
+
+      <ScenarioCombobox {scenarioNames} bind:value={scenarioQuery} />
+    </div>
 
     {#if loading}
       <p class="text-sm text-ink-400">Loading…</p>
     {:else if loadError}
       <p class="text-sm text-rose-400">{loadError}</p>
     {:else if pending.length === 0 && others.length === 0}
-      <p class="text-sm text-ink-400">No submissions yet.</p>
+      <p class="text-sm text-ink-400">
+        {scenarioQuery ? 'No submissions match that search.' : `No ${statusFilter} submissions.`}
+      </p>
     {:else}
-      {#if pending.length === 0}
-        <p class="mb-8 text-sm text-ink-400">No pending submissions.</p>
-      {/if}
-
       <div class="flex flex-col gap-10">
         {#each [...grouped.entries()] as [scenarioName, group] (scenarioName)}
           <section>
@@ -181,9 +181,9 @@
               <h2 class="text-base font-semibold text-ink-100">{scenarioName}</h2>
               {#if group.length > 1}
                 <span
-                  class="rounded-full border border-amber-400/40 px-2 py-0.5 text-[10px] font-medium tracking-wide text-amber-300 uppercase"
+                  class="rounded-full border border-ink-700 px-2 py-0.5 text-[10px] font-medium tracking-wide text-ink-400 uppercase"
                 >
-                  {group.length} competing
+                  {group.length} submissions
                 </span>
               {/if}
             </div>
@@ -194,10 +194,9 @@
                   submission={s}
                   currentScenarios={data.currentScenarios}
                   variant="admin"
-                  siblings={group.filter((other) => other.id !== s.id)}
                   actionBusy={actionBusy[s.id]}
                   actionError={actionError[s.id]}
-                  onApprove={() => act(s.id, 'approve', s.scenario_name)}
+                  onSubmit={(decisions) => act(s.id, 'approve', decisions)}
                   onDeny={() => act(s.id, 'deny')}
                 />
               {/each}
@@ -207,7 +206,9 @@
 
         {#if others.length > 0}
           <section>
-            <h2 class="mb-3 text-base font-semibold text-ink-100">History</h2>
+            <h2 class="mb-3 text-base font-semibold text-ink-100">
+              {TABS.find((t) => t.key === statusFilter)?.label}
+            </h2>
             <div class="overflow-x-auto rounded-xl border border-ink-700">
               <table class="w-full border-collapse text-[13px]">
                 <thead>

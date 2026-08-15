@@ -2,14 +2,17 @@ import { CATALOG, type ResourceId } from "../../data/catalog.js";
 import {
   ACCELERANT_INFO,
   IGNITER_INFO,
+  DAMPENER_INFO,
   type AccelerantInfo,
   type IgniterInfo,
+  type DampenerInfo,
 } from "../../data/arson-information.js";
 import { BAND_COLOR } from "./colors.js";
 import { el, injectStyleOnce } from "../../lib/shared-ui/dom.js";
 import { buildSegmentTrack } from "../shared/segment-bar.js";
 import { SEL } from "./selectors.js";
-import { buildStatTooltipGroup } from "./tooltip.js";
+import { buildStatTooltipGroup, formatCost } from "./tooltip.js";
+import type { PriceMap } from "./engine.js";
 
 /** Fixed scale every badged stat is plotted against — see plans/arson/material-badges.md decision #6. */
 const SCALE_MAX = 10;
@@ -242,15 +245,24 @@ function buildBarRow(bar: BarSpec, tooltip: TooltipCtx): HTMLElement {
   return row;
 }
 
+/** Single-unit market price, formatted for display — null when the resource has no price data (unpriced or $0). */
+function unitCost(resourceId: ResourceId, prices: PriceMap): string | null {
+  const resource = CATALOG[resourceId];
+  if (!resource) return null;
+  const price = prices[resourceId] ?? resource.defaultPrice;
+  return price > 0 ? `${formatCost(price)}` : null;
+}
+
 function bindMaterialTooltip(
   wrap: HTMLElement,
   name: string,
   advice: string,
+  cost: string | null,
   tooltip: TooltipCtx,
 ): void {
   wrap.addEventListener("mouseenter", () => {
     const content = buildStatTooltipGroup([
-      { title: name, description: advice },
+      { title: name, description: advice, value: cost ?? undefined },
     ]);
     tooltip.show(wrap, content, { position: "top" });
   });
@@ -271,6 +283,7 @@ function buildBarStrip(bars: BarSpec[], tooltip: TooltipCtx): HTMLElement {
 export function scanMaterialPopover(
   tooltip: TooltipCtx,
   config: MaterialBadgeConfig,
+  prices: PriceMap,
 ): void {
   document
     .querySelectorAll<HTMLElement>(SEL.ITEM_SELECTOR)
@@ -287,7 +300,8 @@ export function scanMaterialPopover(
 
           const accelerant = ACCELERANT_INFO[resourceId];
           const igniter = IGNITER_INFO[resourceId];
-          if (!accelerant && !igniter) {
+          const dampener = DAMPENER_INFO[resourceId];
+          if (!accelerant && !igniter && !dampener) {
             wrap.dataset.pyroBadged = "true";
             return;
           }
@@ -297,9 +311,21 @@ export function scanMaterialPopover(
             return;
           }
 
-          const info = accelerant ?? (igniter as IgniterInfo);
+          const info = accelerant ?? igniter ?? (dampener as DampenerInfo);
           const name = CATALOG[resourceId]?.name ?? resourceId;
-          bindMaterialTooltip(wrap, name, info.advice, tooltip);
+          bindMaterialTooltip(
+            wrap,
+            name,
+            info.advice,
+            unitCost(resourceId, prices),
+            tooltip,
+          );
+
+          // Dampeners are differentiated by safety, not by comparable stats — no bar strip (plans/arson/material-badges.md decision #1).
+          if (dampener) {
+            wrap.dataset.pyroBadged = "true";
+            return;
+          }
 
           const bars = (
             accelerant
@@ -330,7 +356,9 @@ export function resetMaterialBadges(): void {
 }
 
 export function injectMaterialBadgeStyles(): void {
-  injectStyleOnce("pyro-mat-badge-styles", `
+  injectStyleOnce(
+    "pyro-mat-badge-styles",
+    `
         .pyro-mat-badges {
             display: flex;
             flex-direction: column;
@@ -381,5 +409,6 @@ export function injectMaterialBadgeStyles(): void {
                 display: block;
             }
         }
-    `);
+    `,
+  );
 }

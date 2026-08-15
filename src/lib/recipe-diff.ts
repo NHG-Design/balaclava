@@ -33,9 +33,27 @@ export interface RecipeSubmission {
   submitter_id: string | null
   submitter_name: string | null
   recipe: string
-  status: 'pending' | 'approved' | 'merged' | 'denied'
+  status: 'pending' | 'approved' | 'partial' | 'merged' | 'denied'
   pr_number: number | null
   created_at: string
+  /** JSON-encoded FieldDecisions, set when status is 'partial' (and optionally 'approved'). */
+  field_decisions?: string | null
+}
+
+export type LineDecision = 'approve' | 'deny'
+
+/** Per-line approve/deny verdicts keyed by 'payout', 'stokeTime', 'dampenTime', or
+ *  `${section}:${resourceId}` for individual ingredient lines. A key absent from this
+ *  map defaults to 'approve' — the admin card starts every line pre-approved. */
+export type FieldDecisions = Record<string, LineDecision>
+
+export function parseFieldDecisions(raw: string | null | undefined): FieldDecisions {
+  if (!raw) return {}
+  try {
+    return JSON.parse(raw) as FieldDecisions
+  } catch {
+    return {}
+  }
 }
 
 export interface FieldDiff {
@@ -173,4 +191,190 @@ export function computeDiff(
   }
 
   return fields
+}
+
+export type RecipeSection = 'place' | 'ignite' | 'stoke' | 'dampen'
+
+export interface ItemDiffRow {
+  /** `${section}:${resourceId}` — the FieldDecisions key for this line. */
+  key: string
+  section: RecipeSection
+  kind: 'added' | 'removed' | 'modified' | 'unchanged'
+  oldItem: ActionItem | null
+  newItem: ActionItem | null
+}
+
+/** Item-level diff between an old and new ingredient list, keyed by resourceId (a recipe
+ *  doesn't repeat the same resource within one list, so it's a stable identity). */
+export function computeItemDiff(
+  section: RecipeSection,
+  oldItems: ActionItem[] | undefined,
+  newItems: ActionItem[] | undefined,
+): ItemDiffRow[] {
+  const oldMap = new Map((oldItems ?? []).map((i) => [i.resourceId, i]))
+  const newMap = new Map((newItems ?? []).map((i) => [i.resourceId, i]))
+  const ids = [...new Set([...oldMap.keys(), ...newMap.keys()])].sort()
+
+  return ids.map((id) => {
+    const oldItem = oldMap.get(id) ?? null
+    const newItem = newMap.get(id) ?? null
+    let kind: ItemDiffRow['kind']
+    if (oldItem && !newItem) kind = 'removed'
+    else if (!oldItem && newItem) kind = 'added'
+    else if (
+      oldItem &&
+      newItem &&
+      (oldItem.qty !== newItem.qty || !!oldItem.optional !== !!newItem.optional)
+    )
+      kind = 'modified'
+    else kind = 'unchanged'
+    return { key: `${section}:${id}`, section, kind, oldItem, newItem }
+  })
+}
+
+export interface LineRow {
+  /** FieldDecisions key: 'payout', 'stokeTime', 'dampenTime', or an ItemDiffRow key. */
+  key: string
+  label: string
+  kind: 'field' | ItemDiffRow['kind']
+  oldText: string
+  newText: string
+}
+
+/** Every changed line between a submission and current scenario data, one row per
+ *  toggle-able decision — used to render the admin card's per-line approve/deny controls. */
+export function computeLineDiffs(
+  s: SubmissionLike,
+  recipe: Recipe,
+  current: CurrentScenario | undefined,
+): LineRow[] {
+  const rows: LineRow[] = []
+
+  const payoutChanged =
+    !current || current.payoutMin !== s.payout_min || current.payoutMax !== s.payout_max
+  if (payoutChanged) {
+    rows.push({
+      key: 'payout',
+      label: 'Payout',
+      kind: 'field',
+      oldText: current
+        ? `${current.payoutMin.toLocaleString()}–${current.payoutMax.toLocaleString()}`
+        : '—',
+      newText: `${s.payout_min.toLocaleString()}–${s.payout_max.toLocaleString()}`,
+    })
+  }
+
+  const sections: Array<[RecipeSection, string]> = [
+    ['place', 'Place'],
+    ['ignite', 'Ignite'],
+    ['stoke', 'Stoke'],
+    ['dampen', 'Dampen'],
+  ]
+  for (const [section, label] of sections) {
+    const oldItems = current?.actions[section]
+    const newItems = recipe[section]
+    if (!oldItems && !newItems) continue
+    for (const item of computeItemDiff(section, oldItems, newItems)) {
+      if (item.kind === 'unchanged') continue
+      rows.push({
+        key: item.key,
+        label,
+        kind: item.kind,
+        oldText: item.oldItem ? formatItems([item.oldItem]) : '—',
+        newText: item.newItem ? formatItems([item.newItem]) : '—',
+      })
+    }
+  }
+
+  const timeFields: Array<['stokeTime' | 'dampenTime', string]> = [
+    ['stokeTime', 'Stoke time'],
+    ['dampenTime', 'Dampen time'],
+  ]
+  for (const [key, label] of timeFields) {
+    const oldVal = current?.actions[key]
+    const newVal = recipe[key]
+    if (oldVal === undefined && newVal === undefined) continue
+    if ((oldVal ?? '') === (newVal ?? '')) continue
+    rows.push({ key, label, kind: 'field', oldText: oldVal ?? '—', newText: newVal ?? '—' })
+  }
+
+  return rows
+}
+
+function mergeItems(
+  section: RecipeSection,
+  oldItems: ActionItem[] | undefined,
+  newItems: ActionItem[] | undefined,
+  decisions: FieldDecisions,
+): ActionItem[] {
+  const result: ActionItem[] = []
+  for (const row of computeItemDiff(section, oldItems, newItems)) {
+    const decision = decisions[row.key] ?? 'approve'
+    if (row.kind === 'unchanged') {
+      result.push((row.newItem ?? row.oldItem)!)
+    } else if (row.kind === 'added') {
+      if (decision === 'approve') result.push(row.newItem!)
+    } else if (row.kind === 'removed') {
+      if (decision === 'deny') result.push(row.oldItem!)
+    } else if (row.kind === 'modified') {
+      result.push(decision === 'approve' ? row.newItem! : row.oldItem!)
+    }
+  }
+  return result
+}
+
+export interface MergedRecipe {
+  payoutMin: number
+  payoutMax: number
+  recipe: Recipe
+}
+
+/** Builds the payout/recipe that should actually ship: the submission's value for every
+ *  approved line, and the scenario's current value for every denied line. A key missing
+ *  from `decisions` defaults to 'approve' (an all-approve decisions map reproduces the
+ *  submission's recipe exactly). */
+export function mergeDecisions(
+  s: SubmissionLike,
+  recipe: Recipe,
+  current: CurrentScenario | undefined,
+  decisions: FieldDecisions,
+): MergedRecipe {
+  const payoutApproved = (decisions['payout'] ?? 'approve') === 'approve'
+  const payoutMin = payoutApproved ? s.payout_min : (current?.payoutMin ?? s.payout_min)
+  const payoutMax = payoutApproved ? s.payout_max : (current?.payoutMax ?? s.payout_max)
+
+  const place = mergeItems('place', current?.actions.place, recipe.place, decisions)
+  const ignite = mergeItems('ignite', current?.actions.ignite, recipe.ignite, decisions)
+  const stoke = mergeItems('stoke', current?.actions.stoke, recipe.stoke, decisions)
+  const dampen = mergeItems('dampen', current?.actions.dampen, recipe.dampen, decisions)
+
+  const stokeTimeApproved = (decisions['stokeTime'] ?? 'approve') === 'approve'
+  const stokeTime = stokeTimeApproved ? recipe.stokeTime : current?.actions.stokeTime
+  const dampenTimeApproved = (decisions['dampenTime'] ?? 'approve') === 'approve'
+  const dampenTime = dampenTimeApproved ? recipe.dampenTime : current?.actions.dampenTime
+
+  return {
+    payoutMin,
+    payoutMax,
+    recipe: {
+      place,
+      ignite,
+      ...(stoke.length ? { stoke } : {}),
+      ...(stokeTime ? { stokeTime } : {}),
+      ...(dampen.length ? { dampen } : {}),
+      ...(dampenTime ? { dampenTime } : {}),
+    },
+  }
+}
+
+/** Whether a decisions map (defaults included) contains any denial — used to tell a
+ *  clean 'approved' from a mixed 'partial' outcome. */
+export function hasAnyDenial(rows: LineRow[], decisions: FieldDecisions): boolean {
+  return rows.some((r) => (decisions[r.key] ?? 'approve') === 'deny')
+}
+
+/** Whether every line was denied — a fully-denied submission is routed through the plain
+ *  deny endpoint instead of being recorded as an empty 'partial' approval. */
+export function isAllDenied(rows: LineRow[], decisions: FieldDecisions): boolean {
+  return rows.length > 0 && rows.every((r) => (decisions[r.key] ?? 'approve') === 'deny')
 }

@@ -274,7 +274,7 @@ async function handler(
   }
 
   const existing = await client.execute({
-    sql: `SELECT payout_min, payout_max, recipe FROM recipe_submissions WHERE scenario_name = ? AND status IN ('pending', 'approved', 'merged')`,
+    sql: `SELECT payout_min, payout_max, recipe FROM recipe_submissions WHERE scenario_name = ? AND status IN ('pending', 'approved', 'partial', 'merged')`,
     args: [payload.scenarioName],
   });
   const isDuplicate = existing.rows.some((row) => {
@@ -334,12 +334,33 @@ export const GET: RequestHandler = async ({ url, platform }) => {
       return new Response("Turso not configured", { status: 500 });
     }
 
+    const client = createClient({ url: dbUrl, authToken });
+
+    const idFilter = Number(url.searchParams.get("id"));
+    if (Number.isInteger(idFilter) && idFilter > 0) {
+      const rows = await client.execute({
+        sql: `
+          SELECT id, scenario_name, payout_min, payout_max, submitter_id, submitter_name, recipe, status, pr_number, created_at, field_decisions
+          FROM recipe_submissions
+          WHERE id = ?
+        `,
+        args: [idFilter],
+      });
+      return new Response(JSON.stringify({ submissions: rows.rows }), {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
+
+    const VALID_STATUSES = ["pending", "approved", "partial", "merged", "denied"];
     const statusFilter = url.searchParams.get("status");
+    const requested = statusFilter
+      ? statusFilter.split(",").filter((s) => VALID_STATUSES.includes(s))
+      : [];
     const statuses =
-      statusFilter &&
-      ["pending", "approved", "merged", "denied"].includes(statusFilter)
-        ? [statusFilter]
-        : ["pending", "approved", "merged"];
+      requested.length > 0
+        ? requested
+        : ["pending", "approved", "partial", "merged"];
 
     const limit = Math.min(
       Math.max(Number(url.searchParams.get("limit")) || 100, 1),
@@ -347,11 +368,10 @@ export const GET: RequestHandler = async ({ url, platform }) => {
     );
     const offset = Math.max(Number(url.searchParams.get("offset")) || 0, 0);
 
-    const client = createClient({ url: dbUrl, authToken });
     const placeholders = statuses.map(() => "?").join(", ");
     const rows = await client.execute({
       sql: `
-        SELECT id, scenario_name, payout_min, payout_max, submitter_id, submitter_name, recipe, status, pr_number, created_at
+        SELECT id, scenario_name, payout_min, payout_max, submitter_id, submitter_name, recipe, status, pr_number, created_at, field_decisions
         FROM recipe_submissions
         WHERE status IN (${placeholders})
         ORDER BY scenario_name ASC, created_at DESC

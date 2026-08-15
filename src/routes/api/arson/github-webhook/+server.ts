@@ -38,7 +38,7 @@ export const POST: RequestHandler = async ({ request, platform }) => {
 
     const client = createClient({ url: dbUrl, authToken })
     const result = await client.execute({
-      sql: `UPDATE recipe_submissions SET status = 'merged' WHERE pr_number = ? AND status = 'approved'`,
+      sql: `UPDATE recipe_submissions SET status = 'merged' WHERE pr_number = ? AND status IN ('approved', 'partial')`,
       args: [payload.pull_request.number],
     })
 
