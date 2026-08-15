@@ -3,17 +3,29 @@
   import type { PageData } from './$types'
   import type { FieldDecisions, RecipeSubmission } from '$lib/recipe-diff'
   import RecipeSubmissionCard from '$lib/components/RecipeSubmissionCard.svelte'
+  import ScenarioCombobox from '$lib/components/ScenarioCombobox.svelte'
   import Button from '$lib/components/Button.svelte'
 
   let { data }: { data: PageData } = $props()
 
   type Submission = RecipeSubmission
 
+  type StatusFilter = 'pending' | 'approved' | 'shipped' | 'denied'
+
+  const TABS: { key: StatusFilter; label: string; statuses: Submission['status'][] }[] = [
+    { key: 'pending', label: 'Pending', statuses: ['pending'] },
+    { key: 'approved', label: 'Approved', statuses: ['approved', 'partial'] },
+    { key: 'shipped', label: 'Shipped', statuses: ['merged'] },
+    { key: 'denied', label: 'Denied', statuses: ['denied'] },
+  ]
+
   let submissions = $state<Submission[]>([])
   let loading = $state(true)
   let loadError = $state('')
   let actionError = $state<Record<number, string>>({})
   let actionBusy = $state<Record<number, boolean>>({})
+  let statusFilter = $state<StatusFilter>('pending')
+  let scenarioQuery = $state('')
 
   async function load() {
     loading = true
@@ -66,7 +78,18 @@
     }
   }
 
-  let pending = $derived(submissions.filter((s) => s.status === 'pending'))
+  let scenarioNames = $derived(Object.keys(data.currentScenarios).sort((a, b) => a.localeCompare(b)))
+
+  let tabStatuses = $derived(TABS.find((t) => t.key === statusFilter)?.statuses ?? [])
+  let filteredForTab = $derived(
+    submissions.filter((s) => {
+      if (!tabStatuses.includes(s.status)) return false
+      if (!scenarioQuery.trim()) return true
+      return s.scenario_name.toLowerCase().includes(scenarioQuery.trim().toLowerCase())
+    }),
+  )
+
+  let pending = $derived(statusFilter === 'pending' ? filteredForTab : [])
   let grouped = $derived.by(() => {
     const map = new Map<string, Submission[]>()
     for (const s of pending) {
@@ -76,11 +99,16 @@
     }
     return map
   })
-  let others = $derived(submissions.filter((s) => s.status !== 'pending'))
+  let others = $derived(statusFilter === 'pending' ? [] : filteredForTab)
 
   const HISTORY_PAGE_SIZE = 40
   let historyShown = $state(HISTORY_PAGE_SIZE)
   let visibleHistory = $derived(others.slice(0, historyShown))
+
+  $effect(() => {
+    statusFilter
+    historyShown = HISTORY_PAGE_SIZE
+  })
 
   const STATUS_CLASSES: Record<Submission['status'], string> = {
     pending: 'bg-amber-500/15 text-amber-300',
@@ -119,17 +147,33 @@
   </header>
 
   <main class="mx-auto max-w-6xl px-6 py-10">
+    <div class="mb-8 flex flex-wrap items-center justify-between gap-4">
+      <div class="inline-flex rounded-full border border-ink-700 bg-ink-900 p-1">
+        {#each TABS as tab (tab.key)}
+          <button
+            onclick={() => (statusFilter = tab.key)}
+            class="rounded-full px-3.5 py-1.5 text-xs font-medium transition-colors {statusFilter ===
+            tab.key
+              ? 'bg-accent-500 text-ink-950'
+              : 'text-ink-400 hover:text-ink-100'}"
+          >
+            {tab.label}
+          </button>
+        {/each}
+      </div>
+
+      <ScenarioCombobox {scenarioNames} bind:value={scenarioQuery} />
+    </div>
+
     {#if loading}
       <p class="text-sm text-ink-400">Loading…</p>
     {:else if loadError}
       <p class="text-sm text-rose-400">{loadError}</p>
     {:else if pending.length === 0 && others.length === 0}
-      <p class="text-sm text-ink-400">No submissions yet.</p>
+      <p class="text-sm text-ink-400">
+        {scenarioQuery ? 'No submissions match that search.' : `No ${statusFilter} submissions.`}
+      </p>
     {:else}
-      {#if pending.length === 0}
-        <p class="mb-8 text-sm text-ink-400">No pending submissions.</p>
-      {/if}
-
       <div class="flex flex-col gap-10">
         {#each [...grouped.entries()] as [scenarioName, group] (scenarioName)}
           <section>
@@ -162,7 +206,9 @@
 
         {#if others.length > 0}
           <section>
-            <h2 class="mb-3 text-base font-semibold text-ink-100">History</h2>
+            <h2 class="mb-3 text-base font-semibold text-ink-100">
+              {TABS.find((t) => t.key === statusFilter)?.label}
+            </h2>
             <div class="overflow-x-auto rounded-xl border border-ink-700">
               <table class="w-full border-collapse text-[13px]">
                 <thead>

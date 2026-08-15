@@ -268,7 +268,7 @@
 
   {#if s.status === 'approved' && s.pr_number}
     <p class="text-xs text-ink-400">
-      Final review in
+      Under final review in
       <a
         href={`https://github.com/NHG-Design/balaclava/pull/${s.pr_number}`}
         target="_blank"
@@ -280,7 +280,7 @@
     </p>
   {:else if s.status === 'partial' && s.pr_number}
     <p class="text-xs text-ink-400">
-      Final review in
+      Under final review in
       <a
         href={`https://github.com/NHG-Design/balaclava/pull/${s.pr_number}`}
         target="_blank"
@@ -315,14 +315,14 @@
         onclick={onDeny}
         class="rounded-md bg-rose-500/15 px-3 py-1.5 text-xs font-medium text-rose-300 transition-colors hover:bg-rose-500/25 active:scale-[0.97] disabled:pointer-events-none disabled:opacity-40"
       >
-        {actionBusy ? 'Working…' : 'Deny'}
+        Deny
       </button>
       <button
         disabled={actionBusy}
         onclick={submit}
         class="rounded-md bg-emerald-500/15 px-3 py-1.5 text-xs font-medium text-emerald-300 transition-colors hover:bg-emerald-500/25 active:scale-[0.97] disabled:pointer-events-none disabled:opacity-40"
       >
-        {actionBusy ? 'Working…' : 'Submit'}
+        Submit
       </button>
     </div>
   {/if}

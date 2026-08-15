@@ -334,13 +334,14 @@ export const GET: RequestHandler = async ({ url, platform }) => {
       return new Response("Turso not configured", { status: 500 });
     }
 
+    const VALID_STATUSES = ["pending", "approved", "partial", "merged", "denied"];
     const statusFilter = url.searchParams.get("status");
+    const requested = statusFilter
+      ? statusFilter.split(",").filter((s) => VALID_STATUSES.includes(s))
+      : [];
     const statuses =
-      statusFilter &&
-      ["pending", "approved", "partial", "merged", "denied"].includes(
-        statusFilter,
-      )
-        ? [statusFilter]
+      requested.length > 0
+        ? requested
         : ["pending", "approved", "partial", "merged"];
 
     const limit = Math.min(
