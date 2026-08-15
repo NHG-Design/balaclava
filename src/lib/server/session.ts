@@ -1,5 +1,8 @@
 export const ADMIN_SESSION_COOKIE = 'pyro_admin_session'
-const PBKDF2_ITERATIONS = 210_000
+// Cloudflare Workers' crypto.subtle PBKDF2 implementation hard-caps at 100,000 iterations
+// (throws NotSupportedError above that) even though Node's WebCrypto allows more — this is
+// the Workers-enforced ceiling, not OWASP's 210k recommendation.
+const PBKDF2_ITERATIONS = 100_000
 
 function bytesToHex(bytes: Uint8Array): string {
   return Array.from(bytes)
