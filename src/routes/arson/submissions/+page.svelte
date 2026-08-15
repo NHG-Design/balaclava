@@ -27,10 +27,12 @@
   let loadError = $state('')
   let statusFilter = $state<StatusFilter>('pending')
   let scenarioQuery = $state('')
+  let idQuery = $state('')
   let offset = $state(0)
   let hasMore = $state(false)
-  let copiedId = $state<number | null>(null)
   let highlightedId = $state<number | null>(null)
+
+  let idSearchActive = $derived(idQuery.trim().length > 0)
 
   async function fetchPage(nextOffset: number) {
     const qs = new URLSearchParams({ limit: String(PAGE_SIZE), offset: String(nextOffset) })
@@ -42,10 +44,23 @@
     return json.submissions ?? []
   }
 
+  async function fetchById(id: string) {
+    const res = await fetch(`/api/arson/recipe-submissions?id=${encodeURIComponent(id)}`)
+    const json = (await res.json()) as { submissions?: Submission[]; error?: string }
+    if (!res.ok) throw new Error(json.error ?? `HTTP ${res.status}`)
+    return json.submissions ?? []
+  }
+
   async function loadSubmissions() {
     loading = true
     loadError = ''
     try {
+      if (idSearchActive) {
+        submissions = await fetchById(idQuery.trim())
+        offset = 0
+        hasMore = false
+        return
+      }
       const page = await fetchPage(0)
       submissions = page
       offset = page.length
@@ -92,21 +107,9 @@
 
   $effect(() => {
     statusFilter
+    idQuery
     void loadSubmissions()
   })
-
-  async function copyLink(id: number) {
-    const url = `${window.location.origin}${window.location.pathname}#submission-${id}`
-    try {
-      await navigator.clipboard.writeText(url)
-      copiedId = id
-      setTimeout(() => {
-        if (copiedId === id) copiedId = null
-      }, 1500)
-    } catch {
-      /* clipboard unavailable — link is still visible in the URL bar after a manual click */
-    }
-  }
 
   function groupByScenario(list: Submission[]): Map<string, Submission[]> {
     const map = new Map<string, Submission[]>()
@@ -149,7 +152,11 @@
 
   <main class="mx-auto max-w-6xl px-6 py-8">
     <div class="mb-6 flex flex-wrap items-center justify-between gap-4">
-      <div class="inline-flex rounded-full border border-ink-700 bg-ink-900 p-1">
+      <div
+        class="inline-flex rounded-full border border-ink-700 bg-ink-900 p-1 {idSearchActive
+          ? 'pointer-events-none opacity-40'
+          : ''}"
+      >
         {#each TABS as tab (tab.key)}
           <button
             onclick={() => (statusFilter = tab.key)}
@@ -163,7 +170,30 @@
         {/each}
       </div>
 
-      <ScenarioCombobox {scenarioNames} bind:value={scenarioQuery} />
+      <div class="flex flex-wrap items-center gap-3">
+        <div class="relative w-32">
+          <input
+            type="text"
+            inputmode="numeric"
+            bind:value={idQuery}
+            placeholder="Submission #"
+            class="w-full rounded-lg border border-ink-700 bg-ink-900 px-3 py-1.5 text-sm text-ink-100 placeholder:text-ink-500 focus:border-accent-500 focus:outline-none"
+          />
+          {#if idQuery}
+            <button
+              type="button"
+              onclick={() => (idQuery = '')}
+              aria-label="Clear ID search"
+              class="absolute top-1/2 right-2 -translate-y-1/2 text-ink-500 hover:text-ink-200"
+            >
+              &times;
+            </button>
+          {/if}
+        </div>
+        <div class={idSearchActive ? 'pointer-events-none opacity-40' : ''}>
+          <ScenarioCombobox {scenarioNames} bind:value={scenarioQuery} />
+        </div>
+      </div>
     </div>
 
     {#snippet scenarioGroups(groups: Map<string, Submission[]>)}
@@ -179,8 +209,6 @@
                   currentScenarios={data.currentScenarios}
                   variant="public"
                   highlighted={highlightedId === s.id}
-                  copied={copiedId === s.id}
-                  onCopyLink={() => copyLink(s.id)}
                 />
               {/each}
             </div>
@@ -195,7 +223,13 @@
       <p class="text-sm text-rose-400">{loadError}</p>
     {:else if groupedCurrent.size === 0}
       <p class="text-sm text-ink-400">
-        {scenarioQuery ? 'No submissions match that search.' : 'No submissions here yet.'}
+        {#if idSearchActive}
+          No submission with that ID.
+        {:else if scenarioQuery}
+          No submissions match that search.
+        {:else}
+          No submissions here yet.
+        {/if}
       </p>
     {:else}
       {@render scenarioGroups(groupedCurrent)}

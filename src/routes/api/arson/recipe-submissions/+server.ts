@@ -334,6 +334,24 @@ export const GET: RequestHandler = async ({ url, platform }) => {
       return new Response("Turso not configured", { status: 500 });
     }
 
+    const client = createClient({ url: dbUrl, authToken });
+
+    const idFilter = Number(url.searchParams.get("id"));
+    if (Number.isInteger(idFilter) && idFilter > 0) {
+      const rows = await client.execute({
+        sql: `
+          SELECT id, scenario_name, payout_min, payout_max, submitter_id, submitter_name, recipe, status, pr_number, created_at, field_decisions
+          FROM recipe_submissions
+          WHERE id = ?
+        `,
+        args: [idFilter],
+      });
+      return new Response(JSON.stringify({ submissions: rows.rows }), {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
+
     const VALID_STATUSES = ["pending", "approved", "partial", "merged", "denied"];
     const statusFilter = url.searchParams.get("status");
     const requested = statusFilter
@@ -350,7 +368,6 @@ export const GET: RequestHandler = async ({ url, platform }) => {
     );
     const offset = Math.max(Number(url.searchParams.get("offset")) || 0, 0);
 
-    const client = createClient({ url: dbUrl, authToken });
     const placeholders = statuses.map(() => "?").join(", ");
     const rows = await client.execute({
       sql: `
