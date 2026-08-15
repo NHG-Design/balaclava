@@ -169,6 +169,10 @@ Capture a disposition for each — confirmed / fixed / accepted-as-is / deferred
   **Instead:** Run the project's type-check/build/tests after each fix; revert or repair before marking it done.
   **Why:** A fix that doesn't compile isn't a fix, and stacking the next one on a broken tree makes the failure impossible to attribute.
 
+- **NEVER treat a green build as verification for a fix that changes runtime behavior**
+  **Instead:** For headers/CSP, auth, middleware, rate limits, or schema changes, exercise a real request — fetch the page, complete the login, run the query — before marking it done.
+  **Why:** Type-check and build pass happily on a CSP that blanks every page in production; compile-time checks cannot see a request-time regression.
+
 - **NEVER skip Phase 1 stack triage**
   **Instead:** Read `package.json` and one config file before scanning anything.
   **Why:** Which IP header to trust, which CSP approach is valid, and which auth model applies all depend on the stack — wrong assumptions cascade into wrong verdicts.

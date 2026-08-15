@@ -47,6 +47,24 @@ If it fails: revert or repair *before* marking the item `[✓]` and before commi
 
 If no verification command exists, say so once and mark subsequent fixes as unverified in the report rather than implying they were checked.
 
+### A green build is not sufficient for runtime-behavior fixes
+
+Security fixes disproportionately change what happens *at request time*, and a type-check and build both pass with flying colours on a policy that breaks every page in production. Compile-time verification cannot see a runtime regression.
+
+When a fix touches any of these, exercise a real request before marking it `[✓]`:
+
+| Fix touches | Failure a build won't catch | Verify by |
+|---|---|---|
+| Response headers / CSP | Policy blocks the app's own scripts, styles, or fonts; page renders blank or unhydrated | Fetch a rendered page; inspect the header *and* confirm the markup it governs still executes |
+| Auth, sessions, cookies | Everyone is logged out, or nobody can log in | Complete one real login and one authenticated request |
+| Middleware / hooks | Applies to routes it shouldn't, or misses routes it should | Hit one affected and one unaffected route |
+| Rate limiting | Limit fires on the first request, or never fires | Send N+1 requests and confirm where it trips |
+| DB schema or query changes | Missing table/column at runtime; query returns nothing | Run the query against the real database |
+
+Framework-managed policies are the classic trap: setting a header by hand that the framework also wants to manage produces a valid build and a broken site, because the framework's own injected content no longer satisfies the policy. Prefer the framework's native configuration for anything it already knows how to emit.
+
+If a fix can't be exercised locally (needs production credentials or deployed infrastructure), say so plainly, mark it verified-by-build-only in the report, and tell the user what to check after deploy. Do not let it pass as fully verified.
+
 ## Commit format
 
 One commit per approved finding — a bad fix stays revertible in isolation, which a bundled security commit does not.
