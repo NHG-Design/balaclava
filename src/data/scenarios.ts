@@ -2580,7 +2580,10 @@ export const SCENARIOS: Scenario[] = [
     scenarioName: "Cut to the Chase",
     payoutMin: 0,
     payoutMax: 0,
-    actions: { place: [{ resourceId: RESOURCE.GASOLINE, qty: 2 }] },
+    actions: {
+      place: [{ resourceId: RESOURCE.GASOLINE, qty: 2 }],
+      ignite: [{ resourceId: RESOURCE.LIGHTER, qty: 1 }],
+    },
     needsVerification: true,
   },
   {
