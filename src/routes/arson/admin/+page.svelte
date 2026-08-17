@@ -52,18 +52,21 @@
 
   onMount(load)
 
-  async function act(id: number, action: 'approve' | 'deny', decisions?: FieldDecisions) {
+  async function act(
+    id: number,
+    action: 'approve' | 'deny',
+    decisions?: FieldDecisions,
+    note?: string,
+  ) {
     actionBusy = { ...actionBusy, [id]: true }
     actionError = { ...actionError, [id]: '' }
     try {
       const res = await fetch(`/api/arson/admin/recipe-submissions/${id}/${action}`, {
         method: 'POST',
-        ...(action === 'approve'
-          ? {
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ decisions: decisions ?? {} }),
-            }
-          : {}),
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(
+          action === 'approve' ? { decisions: decisions ?? {} } : { note: note ?? '' },
+        ),
       })
       const json = (await res.json()) as { ok?: boolean; error?: string }
       if (!res.ok || !json.ok) {
@@ -197,7 +200,7 @@
                   actionBusy={actionBusy[s.id]}
                   actionError={actionError[s.id]}
                   onSubmit={(decisions) => act(s.id, 'approve', decisions)}
-                  onDeny={() => act(s.id, 'deny')}
+                  onDeny={(note) => act(s.id, 'deny', undefined, note)}
                 />
               {/each}
             </div>

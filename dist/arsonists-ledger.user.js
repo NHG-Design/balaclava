@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        Torn Arsonist's Ledger
 // @namespace   https://greasyfork.org/en/users/942572-yukio-mizsima
-// @version     1.2.17
+// @version     1.2.18
 // @description Arson profit-per-nerve calculator and scenario guide for Torn's Crimes page
 // @icon        https://www.google.com/s2/favicons?sz=64&domain=torn.com
 // @author      Yukio [906148]
@@ -18,7 +18,7 @@
 "use strict";
 (() => {
   // src/data/scenarios-version.ts
-  var SCENARIOS_VERSION = "5f483aa57326";
+  var SCENARIOS_VERSION = "d447cbe1eb87";
 
   // src/data/catalog.ts
   var CATALOG_UPDATED = "2026-08-15";
@@ -198,11 +198,11 @@
     },
     {
       scenarioName: "Going Viral",
-      payoutMin: 19e4,
+      payoutMin: 16e4,
       payoutMax: 19e4,
       actions: {
-        ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
-        place: [{ resourceId: RESOURCE.GASOLINE, qty: 3 }]
+        place: [{ resourceId: RESOURCE.GASOLINE, qty: 3 }],
+        ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }]
       }
     },
     {
@@ -403,11 +403,11 @@
     },
     {
       scenarioName: "Flame and Fortune",
-      payoutMin: 68e4,
+      payoutMin: 58e4,
       payoutMax: 7e5,
       actions: {
-        ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
-        place: [{ resourceId: RESOURCE.KEROSENE, qty: 3 }]
+        place: [{ resourceId: RESOURCE.KEROSENE, qty: 3 }],
+        ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }]
       }
     },
     {
@@ -453,11 +453,11 @@
     },
     {
       scenarioName: "A Burnt Child Dreads the Fire",
-      payoutMin: 235e3,
+      payoutMin: 2e5,
       payoutMax: 29e4,
       actions: {
-        ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
         place: [{ resourceId: RESOURCE.HYDROGEN, qty: 1 }],
+        ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
         stoke: [{ resourceId: RESOURCE.HYDROGEN, qty: 1 }],
         stokeTime: "late"
       }
@@ -837,11 +837,11 @@
     },
     {
       scenarioName: "Checking Out",
-      payoutMin: 28e4,
+      payoutMin: 23e4,
       payoutMax: 36e4,
       actions: {
-        ignite: [{ resourceId: RESOURCE.LIGHTER, qty: 1 }],
         place: [{ resourceId: RESOURCE.HYDROGEN, qty: 1 }],
+        ignite: [{ resourceId: RESOURCE.LIGHTER, qty: 1 }],
         stoke: [{ resourceId: RESOURCE.HYDROGEN, qty: 1 }],
         stokeTime: "early"
       }
@@ -2190,8 +2190,8 @@
       payoutMin: 43e4,
       payoutMax: 49e4,
       actions: {
-        ignite: [{ resourceId: RESOURCE.LIGHTER, qty: 1 }],
-        place: [{ resourceId: RESOURCE.KEROSENE, qty: 4 }]
+        place: [{ resourceId: RESOURCE.KEROSENE, qty: 5 }],
+        ignite: [{ resourceId: RESOURCE.LIGHTER, qty: 1 }]
       }
     },
     {

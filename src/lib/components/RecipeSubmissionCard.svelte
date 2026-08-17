@@ -24,7 +24,7 @@
     actionBusy?: boolean
     actionError?: string
     onSubmit?: (decisions: FieldDecisions) => void
-    onDeny?: () => void
+    onDeny?: (note: string) => void
   }
 
   let {
@@ -74,6 +74,8 @@
   let storedDecisions = $derived(parseFieldDecisions(s.field_decisions))
 
   let decisions = $state<FieldDecisions>({})
+  let denyNote = $state('')
+  const DENY_NOTE_MAX = 500
 
   /** Which decisions map reflects "the recipe as currently decided", per variant/status:
    *  live toggles while an admin is reviewing a pending submission, the stored per-line
@@ -100,6 +102,10 @@
 
   function submit() {
     onSubmit?.(decisions)
+  }
+
+  function deny() {
+    onDeny?.(denyNote.trim())
   }
 
   function rowOldText(row: (typeof lineDiffs)[number]): string {
@@ -300,15 +306,31 @@
     </p>
   {/if}
 
+  {#if s.status === 'denied' && s.deny_note}
+    <div class="rounded-md border border-rose-500/20 bg-rose-500/5 px-3 py-2">
+      <p class="text-[10px] font-medium tracking-wide text-rose-400/80 uppercase">Denied — note</p>
+      <p class="mt-0.5 text-[13px] whitespace-pre-wrap text-ink-200">{s.deny_note}</p>
+    </div>
+  {/if}
+
   {#if variant === 'admin' && s.status === 'pending'}
     {#if actionError}
       <p class="text-xs text-rose-400">{actionError}</p>
     {/if}
 
+    <textarea
+      bind:value={denyNote}
+      disabled={actionBusy}
+      maxlength={DENY_NOTE_MAX}
+      placeholder="Optional note (shown to players if denied)…"
+      rows="2"
+      class="w-full resize-none rounded-md border border-ink-700 bg-ink-900 px-2.5 py-1.5 text-[13px] text-ink-100 placeholder:text-ink-500 focus:border-accent-500 focus:outline-none disabled:opacity-40"
+    ></textarea>
+
     <div class="flex gap-2">
       <button
         disabled={actionBusy}
-        onclick={onDeny}
+        onclick={deny}
         class="rounded-md bg-rose-500/15 px-3 py-1.5 text-xs font-medium text-rose-300 transition-colors hover:bg-rose-500/25 active:scale-[0.97] disabled:pointer-events-none disabled:opacity-40"
       >
         Deny

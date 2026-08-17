@@ -3,7 +3,13 @@ import { createClient } from '@libsql/client/web'
 import { isAdminRequest } from '$lib/server/session'
 import { logAdminAction } from '$lib/server/audit'
 
-export const POST: RequestHandler = async ({ params, platform, cookies, getClientAddress }) => {
+export const POST: RequestHandler = async ({
+  params,
+  platform,
+  cookies,
+  getClientAddress,
+  request,
+}) => {
   try {
     if (!(await isAdminRequest(platform?.env?.SCENARIO_ADMIN_SESSION_SECRET, cookies))) {
       return new Response(JSON.stringify({ error: 'Not authorized' }), {
@@ -24,10 +30,27 @@ export const POST: RequestHandler = async ({ params, platform, cookies, getClien
       })
     }
 
+    let note: string | null = null
+    try {
+      const body = (await request.json()) as { note?: unknown }
+      if (typeof body.note === 'string' && body.note.trim() !== '') {
+        const trimmed = body.note.trim()
+        if (trimmed.length > 500) {
+          return new Response(JSON.stringify({ error: 'Note must be 500 characters or fewer' }), {
+            status: 400,
+            headers: { 'Content-Type': 'application/json' },
+          })
+        }
+        note = trimmed
+      }
+    } catch {
+      // no body / not JSON — treat as no note
+    }
+
     const client = createClient({ url: dbUrl, authToken })
     const result = await client.execute({
-      sql: `UPDATE recipe_submissions SET status = 'denied' WHERE id = ? AND status = 'pending'`,
-      args: [submissionId],
+      sql: `UPDATE recipe_submissions SET status = 'denied', deny_note = ? WHERE id = ? AND status = 'pending'`,
+      args: [note, submissionId],
     })
     if (result.rowsAffected === 0) {
       return new Response(JSON.stringify({ error: 'Submission not found or not pending' }), {

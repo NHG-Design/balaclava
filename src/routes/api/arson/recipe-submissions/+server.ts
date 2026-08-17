@@ -340,11 +340,29 @@ export const GET: RequestHandler = async ({ url, platform }) => {
     if (Number.isInteger(idFilter) && idFilter > 0) {
       const rows = await client.execute({
         sql: `
-          SELECT id, scenario_name, payout_min, payout_max, submitter_id, submitter_name, recipe, status, pr_number, created_at, field_decisions
+          SELECT id, scenario_name, payout_min, payout_max, submitter_id, submitter_name, recipe, status, pr_number, created_at, field_decisions, deny_note
           FROM recipe_submissions
           WHERE id = ?
         `,
         args: [idFilter],
+      });
+      return new Response(JSON.stringify({ submissions: rows.rows }), {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
+
+    const playerFilter = url.searchParams.get("player")?.trim();
+    if (playerFilter) {
+      const like = `%${playerFilter}%`;
+      const rows = await client.execute({
+        sql: `
+          SELECT id, scenario_name, payout_min, payout_max, submitter_id, submitter_name, recipe, status, pr_number, created_at, field_decisions, deny_note
+          FROM recipe_submissions
+          WHERE submitter_id LIKE ? OR submitter_name LIKE ?
+          ORDER BY created_at DESC
+        `,
+        args: [like, like],
       });
       return new Response(JSON.stringify({ submissions: rows.rows }), {
         status: 200,
@@ -371,7 +389,7 @@ export const GET: RequestHandler = async ({ url, platform }) => {
     const placeholders = statuses.map(() => "?").join(", ");
     const rows = await client.execute({
       sql: `
-        SELECT id, scenario_name, payout_min, payout_max, submitter_id, submitter_name, recipe, status, pr_number, created_at, field_decisions
+        SELECT id, scenario_name, payout_min, payout_max, submitter_id, submitter_name, recipe, status, pr_number, created_at, field_decisions, deny_note
         FROM recipe_submissions
         WHERE status IN (${placeholders})
         ORDER BY scenario_name ASC, created_at DESC

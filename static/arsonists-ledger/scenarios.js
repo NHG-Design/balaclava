@@ -178,11 +178,11 @@
     },
     {
       scenarioName: "Going Viral",
-      payoutMin: 19e4,
+      payoutMin: 16e4,
       payoutMax: 19e4,
       actions: {
-        ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
-        place: [{ resourceId: RESOURCE.GASOLINE, qty: 3 }]
+        place: [{ resourceId: RESOURCE.GASOLINE, qty: 3 }],
+        ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }]
       }
     },
     {
@@ -383,11 +383,11 @@
     },
     {
       scenarioName: "Flame and Fortune",
-      payoutMin: 68e4,
+      payoutMin: 58e4,
       payoutMax: 7e5,
       actions: {
-        ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
-        place: [{ resourceId: RESOURCE.KEROSENE, qty: 3 }]
+        place: [{ resourceId: RESOURCE.KEROSENE, qty: 3 }],
+        ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }]
       }
     },
     {
@@ -433,11 +433,11 @@
     },
     {
       scenarioName: "A Burnt Child Dreads the Fire",
-      payoutMin: 235e3,
+      payoutMin: 2e5,
       payoutMax: 29e4,
       actions: {
-        ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
         place: [{ resourceId: RESOURCE.HYDROGEN, qty: 1 }],
+        ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
         stoke: [{ resourceId: RESOURCE.HYDROGEN, qty: 1 }],
         stokeTime: "late"
       }
@@ -817,11 +817,11 @@
     },
     {
       scenarioName: "Checking Out",
-      payoutMin: 28e4,
+      payoutMin: 23e4,
       payoutMax: 36e4,
       actions: {
-        ignite: [{ resourceId: RESOURCE.LIGHTER, qty: 1 }],
         place: [{ resourceId: RESOURCE.HYDROGEN, qty: 1 }],
+        ignite: [{ resourceId: RESOURCE.LIGHTER, qty: 1 }],
         stoke: [{ resourceId: RESOURCE.HYDROGEN, qty: 1 }],
         stokeTime: "early"
       }
@@ -2170,8 +2170,8 @@
       payoutMin: 43e4,
       payoutMax: 49e4,
       actions: {
-        ignite: [{ resourceId: RESOURCE.LIGHTER, qty: 1 }],
-        place: [{ resourceId: RESOURCE.KEROSENE, qty: 4 }]
+        place: [{ resourceId: RESOURCE.KEROSENE, qty: 5 }],
+        ignite: [{ resourceId: RESOURCE.LIGHTER, qty: 1 }]
       }
     },
     {

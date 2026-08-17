@@ -28,11 +28,14 @@
   let statusFilter = $state<StatusFilter>('pending')
   let scenarioQuery = $state('')
   let idQuery = $state('')
+  let playerQuery = $state('')
   let offset = $state(0)
   let hasMore = $state(false)
   let highlightedId = $state<number | null>(null)
 
   let idSearchActive = $derived(idQuery.trim().length > 0)
+  let playerSearchActive = $derived(playerQuery.trim().length > 0)
+  let filtersDisabled = $derived(idSearchActive || playerSearchActive)
 
   async function fetchPage(nextOffset: number) {
     const qs = new URLSearchParams({ limit: String(PAGE_SIZE), offset: String(nextOffset) })
@@ -51,12 +54,25 @@
     return json.submissions ?? []
   }
 
+  async function fetchByPlayer(query: string) {
+    const res = await fetch(`/api/arson/recipe-submissions?player=${encodeURIComponent(query)}`)
+    const json = (await res.json()) as { submissions?: Submission[]; error?: string }
+    if (!res.ok) throw new Error(json.error ?? `HTTP ${res.status}`)
+    return json.submissions ?? []
+  }
+
   async function loadSubmissions() {
     loading = true
     loadError = ''
     try {
       if (idSearchActive) {
         submissions = await fetchById(idQuery.trim())
+        offset = 0
+        hasMore = false
+        return
+      }
+      if (playerSearchActive) {
+        submissions = await fetchByPlayer(playerQuery.trim())
         offset = 0
         hasMore = false
         return
@@ -108,6 +124,7 @@
   $effect(() => {
     statusFilter
     idQuery
+    playerQuery
     void loadSubmissions()
   })
 
@@ -153,7 +170,7 @@
   <main class="mx-auto max-w-6xl px-6 py-8">
     <div class="mb-6 flex flex-wrap items-center justify-between gap-4">
       <div
-        class="inline-flex rounded-full border border-ink-700 bg-ink-900 p-1 {idSearchActive
+        class="inline-flex rounded-full border border-ink-700 bg-ink-900 p-1 {filtersDisabled
           ? 'pointer-events-none opacity-40'
           : ''}"
       >
@@ -171,7 +188,9 @@
       </div>
 
       <div class="flex flex-wrap items-center gap-3">
-        <div class="relative w-32">
+        <div
+          class="relative w-32 {playerSearchActive ? 'pointer-events-none opacity-40' : ''}"
+        >
           <input
             type="text"
             inputmode="numeric"
@@ -190,7 +209,25 @@
             </button>
           {/if}
         </div>
-        <div class={idSearchActive ? 'pointer-events-none opacity-40' : ''}>
+        <div class="relative w-44 {idSearchActive ? 'pointer-events-none opacity-40' : ''}">
+          <input
+            type="text"
+            bind:value={playerQuery}
+            placeholder="Player ID or name"
+            class="w-full rounded-lg border border-ink-700 bg-ink-900 px-3 py-1.5 text-sm text-ink-100 placeholder:text-ink-500 focus:border-accent-500 focus:outline-none"
+          />
+          {#if playerQuery}
+            <button
+              type="button"
+              onclick={() => (playerQuery = '')}
+              aria-label="Clear player search"
+              class="absolute top-1/2 right-2 -translate-y-1/2 text-ink-500 hover:text-ink-200"
+            >
+              &times;
+            </button>
+          {/if}
+        </div>
+        <div class={filtersDisabled ? 'pointer-events-none opacity-40' : ''}>
           <ScenarioCombobox {scenarioNames} bind:value={scenarioQuery} />
         </div>
       </div>
@@ -225,6 +262,8 @@
       <p class="text-sm text-ink-400">
         {#if idSearchActive}
           No submission with that ID.
+        {:else if playerSearchActive}
+          No submissions match that player.
         {:else if scenarioQuery}
           No submissions match that search.
         {:else}

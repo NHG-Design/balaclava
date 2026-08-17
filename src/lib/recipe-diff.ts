@@ -47,6 +47,8 @@ export interface RecipeSubmission {
   created_at: string
   /** JSON-encoded FieldDecisions, set when status is 'partial' (and optionally 'approved'). */
   field_decisions?: string | null
+  /** Optional admin-written note, set when status is 'denied'. */
+  deny_note?: string | null
 }
 
 export type LineDecision = 'approve' | 'deny'
