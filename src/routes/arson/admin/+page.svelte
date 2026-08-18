@@ -294,7 +294,7 @@
               {#each group as s (s.id)}
                 <RecipeSubmissionCard
                   submission={s}
-                  currentScenarios={effectiveCurrentScenarios}
+                  currentScenarios={s.status === 'pending' ? effectiveCurrentScenarios : data.currentScenarios}
                   variant="admin"
                   actionBusy={actionBusy[s.id]}
                   actionError={actionError[s.id]}
