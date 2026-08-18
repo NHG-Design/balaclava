@@ -40,14 +40,19 @@
     selectedIds = next
   }
 
-  async function submitMerge(scenarioName: string, selected: Submission[], resolutions: Record<string, number | 'current'>) {
+  async function submitMerge(
+    scenarioName: string,
+    selected: Submission[],
+    resolutions: Record<string, number | 'current'>,
+    notes: Record<number, string>,
+  ) {
     mergeBusy = true
     mergeError = ''
     try {
       const res = await fetch('/api/arson/admin/recipe-submissions/merge', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ submissionIds: selected.map((s) => s.id), resolutions }),
+        body: JSON.stringify({ submissionIds: selected.map((s) => s.id), resolutions, notes }),
       })
       const json = (await res.json()) as { ok?: boolean; error?: string; merged?: CurrentScenario }
       if (!res.ok || !json.ok) {
@@ -280,7 +285,7 @@
                     mergingScenario = null
                     mergeError = ''
                   }}
-                  onSubmit={(resolutions) => submitMerge(scenarioName, selectedInGroup, resolutions)}
+                  onSubmit={(resolutions, notes) => submitMerge(scenarioName, selectedInGroup, resolutions, notes)}
                 />
               </div>
             {/if}

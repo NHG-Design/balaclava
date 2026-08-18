@@ -352,7 +352,7 @@
       bind:value={denyNote}
       disabled={actionBusy}
       maxlength={DENY_NOTE_MAX}
-      placeholder="Optional note (shown to players if denied)…"
+      placeholder="Optional note…"
       rows="2"
       class="w-full resize-none rounded-md border border-ink-700 bg-ink-900 px-2.5 py-1.5 text-[13px] text-ink-100 placeholder:text-ink-500 focus:border-accent-500 focus:outline-none disabled:opacity-40"
     ></textarea>

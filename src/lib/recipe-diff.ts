@@ -275,9 +275,21 @@ export function computeLineDiffs(
     })
   }
 
+  // Exactly one igniter is ever used, unlike place/stoke/dampen which are true multi-item
+  // lists — so a swap (e.g. flamethrower -> lighter) is one decision, compared as a whole
+  // field like payout, not a per-item remove-old + add-new pair.
+  const oldIgnite = current?.actions.ignite
+  const newIgnite = recipe.ignite
+  if (oldIgnite || newIgnite) {
+    const oldText = formatItems(oldIgnite)
+    const newText = formatItems(newIgnite)
+    if (oldText !== newText) {
+      rows.push({ key: 'ignite', label: 'Ignite', kind: 'field', oldText, newText })
+    }
+  }
+
   const sections: Array<[RecipeSection, string]> = [
     ['place', 'Place'],
-    ['ignite', 'Ignite'],
     ['stoke', 'Stoke'],
     ['dampen', 'Dampen'],
   ]
@@ -354,7 +366,8 @@ export function mergeDecisions(
   const payoutMax = payoutApproved ? s.payout_max : (current?.payoutMax ?? s.payout_max)
 
   const place = mergeItems('place', current?.actions.place, recipe.place, decisions)
-  const ignite = mergeItems('ignite', current?.actions.ignite, recipe.ignite, decisions)
+  const igniteApproved = (decisions['ignite'] ?? 'approve') === 'approve'
+  const ignite = (igniteApproved ? recipe.ignite : current?.actions.ignite) ?? []
   const stoke = mergeItems('stoke', current?.actions.stoke, recipe.stoke, decisions)
   const dampen = mergeItems('dampen', current?.actions.dampen, recipe.dampen, decisions)
 
@@ -482,9 +495,13 @@ export function mergeMultiSubmission(
   }
 
   const place = mergeSection('place')
-  const ignite = mergeSection('ignite')
   const stoke = mergeSection('stoke')
   const dampen = mergeSection('dampen')
+
+  // Exactly one igniter is ever used — resolved as a whole field (key 'ignite'), matching
+  // computeLineDiffs, not per-item like place/stoke/dampen.
+  const igniteWinner = winnerFor('ignite')
+  const ignite = (igniteWinner === 'current' ? current?.actions.ignite : igniteWinner.recipe.ignite) ?? []
 
   const stokeTimeWinner = winnerFor('stokeTime')
   const stokeTime = stokeTimeWinner === 'current' ? current?.actions.stokeTime : stokeTimeWinner.recipe.stokeTime

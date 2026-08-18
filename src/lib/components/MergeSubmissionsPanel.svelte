@@ -13,10 +13,13 @@
     busy?: boolean
     error?: string
     onCancel?: () => void
-    onSubmit?: (resolutions: MergeResolutions) => void
+    onSubmit?: (resolutions: MergeResolutions, notes: Record<number, string>) => void
   }
 
   let { submissions, current, busy = false, error = '', onCancel, onSubmit }: Props = $props()
+
+  const NOTE_MAX = 500
+  let denyNotes = $state<Record<number, string>>({})
 
   let mergeable = $derived(
     submissions.flatMap((s) => {
@@ -43,7 +46,7 @@
   }
 
   function submit() {
-    onSubmit?.(resolutions)
+    onSubmit?.(resolutions, denyNotes)
   }
 </script>
 
@@ -79,6 +82,25 @@
       {/each}
     </div>
   {/if}
+
+  <div class="flex flex-col gap-2">
+    {#each submissions as s (s.id)}
+      <div>
+        <p class="mb-1 text-xs text-ink-400">
+          Note for #{s.id}<span class="text-ink-600"> — used only if this submission ends up denied</span>
+        </p>
+        <textarea
+          value={denyNotes[s.id] ?? ''}
+          oninput={(e) => (denyNotes = { ...denyNotes, [s.id]: e.currentTarget.value })}
+          disabled={busy}
+          maxlength={NOTE_MAX}
+          placeholder="Optional note…"
+          rows="2"
+          class="w-full resize-none rounded-md border border-ink-700 bg-ink-900 px-2.5 py-1.5 text-[13px] text-ink-100 placeholder:text-ink-500 focus:border-accent-500 focus:outline-none disabled:opacity-40"
+        ></textarea>
+      </div>
+    {/each}
+  </div>
 
   {#if error}
     <p class="text-xs text-rose-400">{error}</p>

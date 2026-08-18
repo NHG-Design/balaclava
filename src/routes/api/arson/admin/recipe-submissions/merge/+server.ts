@@ -40,7 +40,7 @@ export const POST: RequestHandler = async ({ request, platform, cookies, getClie
       return new Response('Not configured', { status: 500 })
     }
 
-    let body: { submissionIds?: unknown; resolutions?: unknown }
+    let body: { submissionIds?: unknown; resolutions?: unknown; notes?: unknown }
     try {
       body = await request.json()
     } catch {
@@ -62,6 +62,26 @@ export const POST: RequestHandler = async ({ request, platform, cookies, getClie
     const resolutions = (
       body.resolutions && typeof body.resolutions === 'object' ? body.resolutions : {}
     ) as MergeResolutions
+
+    // Optional per-submission deny note (only applied to submissions that end up 'denied').
+    const rawNotes = (body.notes && typeof body.notes === 'object' ? body.notes : {}) as Record<
+      string,
+      unknown
+    >
+    const denyNotes: Record<number, string> = {}
+    for (const [idStr, raw] of Object.entries(rawNotes)) {
+      const id = Number(idStr)
+      if (!Number.isInteger(id) || typeof raw !== 'string') continue
+      const trimmed = raw.trim()
+      if (trimmed === '') continue
+      if (trimmed.length > 500) {
+        return new Response(JSON.stringify({ error: 'Note must be 500 characters or fewer' }), {
+          status: 400,
+          headers: { 'Content-Type': 'application/json' },
+        })
+      }
+      denyNotes[id] = trimmed
+    }
 
     const client = createClient({ url: dbUrl, authToken })
     const placeholders = submissionIds.map(() => '?').join(', ')
@@ -147,11 +167,12 @@ export const POST: RequestHandler = async ({ request, platform, cookies, getClie
           ? 'partial'
           : 'approved'
       await client.execute({
-        sql: `UPDATE recipe_submissions SET status = ?, pr_number = ?, field_decisions = ? WHERE id = ?`,
+        sql: `UPDATE recipe_submissions SET status = ?, pr_number = ?, field_decisions = ?, deny_note = ? WHERE id = ?`,
         args: [
           status,
           status === 'denied' ? null : prNumber,
           status === 'denied' ? null : JSON.stringify(decisions),
+          status === 'denied' ? (denyNotes[sub.id] ?? null) : null,
           sub.id,
         ],
       })
