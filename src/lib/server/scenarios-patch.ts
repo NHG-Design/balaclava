@@ -58,6 +58,31 @@ function serializeActions(recipe: RecipePayload): string {
  * left untouched. Throws if the scenario or its actions block can't be found, so a caller
  * can surface that as an admin-facing error rather than silently corrupting the file.
  */
+/** Locates a scenario's full object-literal block in scenarios.ts source text by its unique
+ *  `scenarioName: "X",` anchor line. Returns null (never throws) if the scenario isn't found
+ *  or the anchor isn't unique — callers that need a hard failure should check for null
+ *  themselves; read-only callers (e.g. best-effort parsing) can treat null as "no data". */
+export function extractScenarioEntryBlock(source: string, scenarioName: string): string | null {
+  const anchor = `scenarioName: ${JSON.stringify(scenarioName)},`
+  const anchorIndex = source.indexOf(anchor)
+  if (anchorIndex === -1) return null
+  if (source.indexOf(anchor, anchorIndex + 1) !== -1) return null
+
+  let entryStart = anchorIndex
+  let depth = 0
+  while (entryStart > 0) {
+    entryStart--
+    if (source[entryStart] === '}') depth++
+    else if (source[entryStart] === '{') {
+      if (depth === 0) break
+      depth--
+    }
+  }
+  if (source[entryStart] !== '{') return null
+  const entryEnd = findMatchingBrace(source, entryStart)
+  return source.slice(entryStart, entryEnd + 1)
+}
+
 export function patchScenarioSource(
   source: string,
   scenarioName: string,

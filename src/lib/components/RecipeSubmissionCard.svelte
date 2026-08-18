@@ -25,6 +25,10 @@
     actionError?: string
     onSubmit?: (decisions: FieldDecisions) => void
     onDeny?: (note: string) => void
+    /** admin only — shows a selection checkbox for the multi-select merge flow */
+    selectable?: boolean
+    selected?: boolean
+    onToggleSelect?: () => void
   }
 
   let {
@@ -36,6 +40,9 @@
     actionError = '',
     onSubmit,
     onDeny,
+    selectable = false,
+    selected = false,
+    onToggleSelect,
   }: Props = $props()
 
   const STATUS_CLASSES: Record<RecipeSubmission['status'], string> = {
@@ -127,6 +134,15 @@
 >
   <div class="flex flex-wrap items-center justify-between gap-x-3 gap-y-1">
     <span class="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-ink-400">
+      {#if selectable}
+        <input
+          type="checkbox"
+          checked={selected}
+          onchange={onToggleSelect}
+          aria-label={`Select submission #${s.id} for merge`}
+          class="size-3.5 rounded border-ink-600 bg-ink-900 accent-accent-500"
+        />
+      {/if}
       <span
         class="rounded px-1.5 py-0.5 text-[10px] font-medium tracking-wide uppercase {STATUS_CLASSES[
           s.status

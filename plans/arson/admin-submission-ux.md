@@ -1,10 +1,12 @@
 # Arson admin/submissions UX: non-competing merges + partial field approval
 
-> Meridian map · Status: implemented (unverified against live admin flow) · Started: 2026-08-15
+> Meridian map · Status: implemented (unverified against live admin flow) · Started: 2026-08-15 · Reopened: 2026-08-18
 
 ## Destination
 
 Admin can approve/deny a recipe submission field-by-field (payout, place, ignite, stoke, dampen) instead of only whole-submission approve/deny, sibling submissions that touch disjoint fields no longer get funneled into "deny all siblings", the redundant "vs #N: XYZ" line is removed, and cards reflect a "Partially approved" state when only some fields were accepted.
+
+**Reopened 2026-08-18:** live use with 3 real pending submissions for "Beat the Odds" showed it's still not intuitive — extending the destination to also cover: (a) sibling cards showing stale diffs after an earlier approval/an already-open pool PR, and (b) a way to select several sibling submissions and merge them into one combined approval instead of acting on each card in isolation.
 
 ## Bearings
 
@@ -31,6 +33,15 @@ Admin can approve/deny a recipe submission field-by-field (payout, place, ignite
 | 6 | What happens to denied lines/fields? | Discarded — no separate audit log entry; `field_decisions` JSON (which records every line's verdict) is itself the record. | J |
 | 7 | Public `/arson/submissions` page display | Shows partial status too, with the same per-line breakdown (✓/✗ per line) reusing `field_decisions` — not admin-only. | J |
 | 8 | "vs #N: XYZ" sibling delta line | Remove outright, no replacement. The scenario-level submission-count badge plus each card's own diff already convey what's needed. | J |
+| 9 | Root cause of "unclear what approving does to the others" | Confirmed: each sibling card diffs against deployed `SCENARIOS` (`admin/+page.server.ts`), not against the open pool PR that already contains this session's earlier approvals — approving A leaves B's card looking exactly as if A never happened. | J |
+| 10 | Fix for stale-sibling-diff | Client-side session tracking: `approve`/`deny` endpoints already return the merged recipe/payout; `admin/+page.svelte` keeps a local per-scenario override, fed into sibling cards' diff baseline immediately after each action. Does not by itself cover a pool PR left open from a prior session. | J |
+| 11 | Pool-PR-from-a-prior-session gap | Real gap, confirmed by user: session-only tracking misses a pool PR that was already open before this page load. Fix: one GitHub read on page load (if an open pool PR exists, fetch its file content) to seed the baseline; session tracking (#10) covers everything after that. Doesn't cover a second admin concurrently approving in another tab — accepted as rare/acceptable. | J |
+| 12 | Multi-select merge vs. per-card sequential approve | Do both: keep per-card approve/deny (hardened by #10/#11), and add a multi-select-and-merge path for combining several sibling submissions into one action. | J |
+| 17 | How is "an open pool PR already exists" fetched server-side for #11? | `github.ts` already exposes `findOpenPullRequest` + `getFileContent` (used today in `approve/+server.ts` against `POOL_BRANCH`); a new lightweight admin endpoint calls the same pair — `findOpenPullRequest(POOL_BRANCH)`, then if found `getFileContent(SCENARIOS_PATH, POOL_BRANCH)` and parse it into the same `{payoutMin, payoutMax, actions}` shape `+page.server.ts` already builds from deployed `SCENARIOS` — no new GitHub client code, no new env var. | R |
+| 18 | How does the admin enter "multi-select merge" mode? | Checkbox in each card's header; selecting 2+ within a scenario group reveals a "Merge N selected" action above that group. Per-card Approve/Deny stays as-is for the single-submission case. | J |
+| 19 | Multi-way conflict picker | Per-line radio group: one option per candidate value (current + one per selected submission touching that line), admin picks the winner. Lines touched by only one selected submission keep today's binary Approve/Deny. Lines untouched by any selected submission are shown as unchanged context (per the recent [[unchanged-ingredients]] fix). | J |
+| 20 | Non-selected siblings after a merge | Stay pending, untouched — the merge action only affects checked submissions; the admin decides unchecked siblings separately later. | J |
+| 21 | How is a merge outcome recorded per submission? | No new schema — reuse today's per-row `status`/`field_decisions` machinery. Each selected submission independently ends up `approved` (all its lines won) or `partial` (some lines lost to current or a sibling), with its own `field_decisions`; existing badges and public-page rendering already handle this shape unchanged. | J |
 
 ## Fog
 
@@ -52,4 +63,15 @@ Admin can approve/deny a recipe submission field-by-field (payout, place, ignite
 6. [x] **Partial status badge + public display**: add `'partial'` to `STATUS_CLASSES` in both the card and admin page (e.g. amber/blue blend, label "Partially approved"), and render the per-line ✓/✗ breakdown from `field_decisions` for `status === 'partial'` submissions in both `variant="admin"` and `variant="public"` card modes. — acceptance: a partially-approved submission shows the correct badge and per-line breakdown on both `/arson/admin` and `/arson/submissions` — from decisions #4, #7
 7. [x] **Verify**: `pnpm check` and `pnpm build` pass (both green). Manual runthrough against live Turso/GitHub not performed this session — flagged below as follow-up. — from all decisions
 
-**First move:** Route #1 (DB schema: `status: 'partial'` + `field_decisions` column) — everything else (diff helper, card, endpoint, badges) depends on this shape existing first.
+---
+
+### Reopened 2026-08-18: stale sibling diffs + multi-select merge
+
+8. [x] **Pool-PR-baseline endpoint**: new admin-only server endpoint (e.g. `GET /api/arson/admin/recipe-submissions/pool-scenarios`) calling `findOpenPullRequest(githubToken, POOL_BRANCH)`, and if found, `getFileContent(githubToken, SCENARIOS_PATH, POOL_BRANCH)` parsed into the same `{payoutMin, payoutMax, actions}` shape `admin/+page.server.ts` builds from deployed `SCENARIOS`; returns `null`/empty if no pool PR is open. — acceptance: with an open pool PR that already changed a scenario, the endpoint returns that scenario's pool-branch values, not the deployed ones — from decisions #11, #17
+9. [x] **Admin page baseline wiring**: `admin/+page.svelte` fetches the pool-PR baseline on mount and merges it over `data.currentScenarios` (pool values win where present) before passing to cards; after each successful approve/partial action, merges that submission's returned merged recipe/payout into the same local override so subsequent sibling cards reflect it immediately. — acceptance: approving submission A for a scenario, then viewing sibling B's card (no reload), shows B's diff against A's merged result, not stale deployed data — from decisions #9, #10, #11
+10. [x] **Multi-select checkboxes + action bar**: `RecipeSubmissionCard.svelte` (admin variant) gains a header checkbox; `admin/+page.svelte` tracks selected submission IDs per scenario group and renders a "Merge N selected" action above any group with 2+ selected. — acceptance: checking 2+ cards in one scenario group surfaces the merge action; unchecked/other groups unaffected — from decision #18
+11. [x] **Merge view**: selecting "Merge N selected" opens a combined view listing every line touched by any selected submission — contested lines (touched by 2+) render as a radio group (current + one option per touching submission), single-touch lines keep the existing binary Approve/Deny, untouched lines show as plain unchanged context. — acceptance: a line touched by 2 of 3 selected submissions shows exactly 3 radio options and no toggle buttons; a line touched by only 1 shows Approve/Deny — from decision #19
+12. [x] **Merge submit endpoint**: extend (or add alongside) `approve/+server.ts` to accept `{submissionIds: number[], resolutions: Record<lineKey, submissionId | 'current'>}`, build each selected submission's own merged payload from the shared resolution set, call `patchScenarioSource` once with the combined result, and set each submission's own row to `approved`/`partial` with its own `field_decisions` (per decision #21) — reusing `mergeDecisions`/`hasAnyDenial`/`isAllDenied` from `recipe-diff.ts` per submission. Non-selected siblings are untouched (decision #20). — acceptance: merging 2 submissions with one contested line produces a single PR patch reflecting the winning value, and both rows individually show correct status/field_decisions — from decisions #14 (via #19), #15/#21, #20
+13. [x] **Verify**: `pnpm check` and `pnpm build` pass (both green). Manual runthrough against the live 3-submission Beat the Odds case not performed this session — flagged as follow-up. — from all reopened decisions
+
+**First move:** Route #8 (pool-PR-baseline endpoint) — it's the smallest self-contained piece, and #9 (baseline wiring) can't be built without it existing first.

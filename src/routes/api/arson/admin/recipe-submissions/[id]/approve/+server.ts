@@ -2,18 +2,8 @@ import type { RequestHandler } from './$types'
 import { createClient } from '@libsql/client/web'
 import { isAdminRequest } from '$lib/server/session'
 import { logAdminAction } from '$lib/server/audit'
-import { patchScenarioSource, type RecipePayload } from '$lib/server/scenarios-patch'
-import { bumpPatch } from '$lib/server/version-bump'
-import {
-  getBranchSha,
-  createBranch,
-  deleteBranch,
-  getFileContent,
-  updateFile,
-  createPullRequest,
-  findOpenPullRequest,
-  updatePullRequestBody,
-} from '$lib/server/github'
+import { type RecipePayload } from '$lib/server/scenarios-patch'
+import { writeToPool, refreshPoolPrBody } from '$lib/server/pr-pool'
 import { SCENARIOS } from '../../../../../../../data/scenarios'
 import {
   computeLineDiffs,
@@ -24,11 +14,6 @@ import {
   type Recipe,
 } from '$lib/recipe-diff'
 
-const SCENARIOS_PATH = 'src/data/scenarios.ts'
-const VERSIONS_PATH = 'versions.json'
-const BASE_BRANCH = 'main'
-const POOL_BRANCH = 'recipe-pool'
-
 interface SubmissionRow {
   id: number
   scenario_name: string
@@ -36,52 +21,6 @@ interface SubmissionRow {
   payout_max: number
   recipe: string
   status: string
-}
-
-interface PooledSubmission {
-  id: number
-  scenario_name: string
-}
-
-function buildPrBody(pooled: PooledSubmission[]): string {
-  // Link the scenario name to its submission page instead of showing a bare "#N" —
-  // GitHub auto-links "#N" text to issues/PRs in this repo, which have nothing to do
-  // with these submission ids.
-  const list = pooled
-    .map((p) => `- [${p.scenario_name}](https://balaclava.app/arson/submissions#submission-${p.id})`)
-    .join('\n')
-  return (
-    `Auto-generated from approved community submission(s) on balaclava.app.\n\n` +
-    `Pooled submissions:\n${list}\n\n` +
-    `Also bumps the userscript's patch version, since this changes shipped recipe data.\n\n` +
-    `Review the diff, then merge to ship this to all userscript users.`
-  )
-}
-
-/** Pushes a fresh version bump to a branch if it doesn't already match, computed from
- *  `main`'s current version (not incrementally off the branch) — the recipe-pool PR always
- *  stays exactly one patch version ahead of main, however much main has moved since. */
-async function refreshVersionBump(githubToken: string, branch: string): Promise<void> {
-  const [mainVersions, branchVersions] = await Promise.all([
-    getFileContent(githubToken, VERSIONS_PATH, BASE_BRANCH),
-    getFileContent(githubToken, VERSIONS_PATH, branch),
-  ])
-  const mainParsed = JSON.parse(mainVersions.content) as Record<string, string>
-  const targetVersion = bumpPatch(mainParsed['arsonists-ledger'])
-
-  const branchParsed = JSON.parse(branchVersions.content) as Record<string, string>
-  if (branchParsed['arsonists-ledger'] === targetVersion) return // already fresh
-
-  branchParsed['arsonists-ledger'] = targetVersion
-  const updated = JSON.stringify(branchParsed, null, 2) + '\n'
-  await updateFile(
-    githubToken,
-    VERSIONS_PATH,
-    updated,
-    `chore(arson): bump arsonists-ledger to ${targetVersion}`,
-    branch,
-    branchVersions.sha,
-  )
 }
 
 export const POST: RequestHandler = async ({ params, request, platform, cookies, getClientAddress }) => {
@@ -160,80 +99,20 @@ export const POST: RequestHandler = async ({ params, request, platform, cookies,
 
     let prNumber: number
     let prUrl: string
-    let branchCreated = false
     try {
-      const openPool = await findOpenPullRequest(githubToken, POOL_BRANCH)
-
-      if (openPool) {
-        // Add this approval's patch to the already-open pool PR/branch.
-        const file = await getFileContent(githubToken, SCENARIOS_PATH, POOL_BRANCH)
-        const patched = patchScenarioSource(
-          file.content,
-          row.scenario_name,
-          merged.payoutMin,
-          merged.payoutMax,
-          recipe,
-        )
-        await updateFile(
-          githubToken,
-          SCENARIOS_PATH,
-          patched,
-          `feat(arson): approve community recipe for "${row.scenario_name}" (submission #${submissionId})`,
-          POOL_BRANCH,
-          file.sha,
-        )
-        await refreshVersionBump(githubToken, POOL_BRANCH)
-
-        prNumber = openPool.number
-        prUrl = openPool.htmlUrl
-      } else {
-        // No pool currently open — start a fresh one on the same fixed branch name.
-        try {
-          await deleteBranch(githubToken, POOL_BRANCH)
-        } catch {
-          /* branch may not exist yet — fine */
-        }
-
-        const mainSha = await getBranchSha(githubToken, BASE_BRANCH)
-        await createBranch(githubToken, POOL_BRANCH, mainSha)
-        branchCreated = true
-
-        const file = await getFileContent(githubToken, SCENARIOS_PATH, POOL_BRANCH)
-        const patched = patchScenarioSource(
-          file.content,
-          row.scenario_name,
-          merged.payoutMin,
-          merged.payoutMax,
-          recipe,
-        )
-        await updateFile(
-          githubToken,
-          SCENARIOS_PATH,
-          patched,
-          `feat(arson): approve community recipe for "${row.scenario_name}" (submission #${submissionId})`,
-          POOL_BRANCH,
-          file.sha,
-        )
-        await refreshVersionBump(githubToken, POOL_BRANCH)
-
-        const pr = await createPullRequest(
-          githubToken,
-          'Approve community recipes',
-          POOL_BRANCH,
-          BASE_BRANCH,
-          buildPrBody([{ id: submissionId, scenario_name: row.scenario_name }]),
-        )
-        prNumber = pr.number
-        prUrl = pr.htmlUrl
-      }
+      const result = await writeToPool(
+        githubToken,
+        row.scenario_name,
+        `feat(arson): approve community recipe for "${row.scenario_name}" (submission #${submissionId})`,
+        merged.payoutMin,
+        merged.payoutMax,
+        recipe,
+        'Approve community recipes',
+        [{ id: submissionId, scenario_name: row.scenario_name }],
+      )
+      prNumber = result.prNumber
+      prUrl = result.prUrl
     } catch (err) {
-      if (branchCreated) {
-        try {
-          await deleteBranch(githubToken, POOL_BRANCH)
-        } catch {
-          /* best-effort cleanup */
-        }
-      }
       const msg = err instanceof Error ? err.message : String(err)
       return new Response(JSON.stringify({ error: `Failed to open/update PR: ${msg}` }), {
         status: 502,
@@ -264,15 +143,25 @@ export const POST: RequestHandler = async ({ params, request, platform, cookies,
         id: Number(r.id),
         scenario_name: String(r.scenario_name),
       }))
-      await updatePullRequestBody(githubToken, prNumber, buildPrBody(pooled))
+      await refreshPoolPrBody(githubToken, prNumber, pooled)
     } catch {
       /* non-fatal */
     }
 
-    return new Response(JSON.stringify({ ok: true, prNumber, prUrl }), {
-      status: 200,
-      headers: { 'Content-Type': 'application/json' },
-    })
+    return new Response(
+      JSON.stringify({
+        ok: true,
+        prNumber,
+        prUrl,
+        // So the admin page can immediately correct sibling cards' diff baseline for this
+        // scenario without waiting on a page reload or a pool-PR refetch.
+        merged: { payoutMin: merged.payoutMin, payoutMax: merged.payoutMax, actions: merged.recipe },
+      }),
+      {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' },
+      },
+    )
   } catch (err) {
     console.error('recipe-submissions approve failed', err)
     return new Response(JSON.stringify({ error: 'Internal server error' }), {

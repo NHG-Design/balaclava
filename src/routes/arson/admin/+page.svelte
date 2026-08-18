@@ -1,8 +1,9 @@
 <script lang="ts">
   import { onMount } from 'svelte'
   import type { PageData } from './$types'
-  import type { FieldDecisions, RecipeSubmission } from '$lib/recipe-diff'
+  import type { CurrentScenario, FieldDecisions, RecipeSubmission } from '$lib/recipe-diff'
   import RecipeSubmissionCard from '$lib/components/RecipeSubmissionCard.svelte'
+  import MergeSubmissionsPanel from '$lib/components/MergeSubmissionsPanel.svelte'
   import ScenarioCombobox from '$lib/components/ScenarioCombobox.svelte'
   import Button from '$lib/components/Button.svelte'
 
@@ -27,6 +28,63 @@
   let statusFilter = $state<StatusFilter>('pending')
   let scenarioQuery = $state('')
 
+  let selectedIds = $state<Set<number>>(new Set())
+  let mergingScenario = $state<string | null>(null)
+  let mergeBusy = $state(false)
+  let mergeError = $state('')
+
+  function toggleSelect(id: number) {
+    const next = new Set(selectedIds)
+    if (next.has(id)) next.delete(id)
+    else next.add(id)
+    selectedIds = next
+  }
+
+  async function submitMerge(scenarioName: string, selected: Submission[], resolutions: Record<string, number | 'current'>) {
+    mergeBusy = true
+    mergeError = ''
+    try {
+      const res = await fetch('/api/arson/admin/recipe-submissions/merge', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ submissionIds: selected.map((s) => s.id), resolutions }),
+      })
+      const json = (await res.json()) as { ok?: boolean; error?: string; merged?: CurrentScenario }
+      if (!res.ok || !json.ok) {
+        mergeError = json.error ?? `HTTP ${res.status}`
+        return
+      }
+      if (json.merged) poolOverrides = { ...poolOverrides, [scenarioName]: json.merged }
+      const mergedIds = new Set(selected.map((s) => s.id))
+      selectedIds = new Set([...selectedIds].filter((id) => !mergedIds.has(id)))
+      mergingScenario = null
+      await load()
+    } catch {
+      mergeError = 'Network error'
+    } finally {
+      mergeBusy = false
+    }
+  }
+
+  /** Per-scenario overrides layered on top of `data.currentScenarios` — seeded once from the
+   *  open recipe-pool PR (if any) on mount, then kept fresh from each approve/merge action's
+   *  own response, so sibling cards for the same scenario never diff against stale data. */
+  let poolOverrides = $state<Record<string, CurrentScenario>>({})
+  let effectiveCurrentScenarios = $derived({ ...data.currentScenarios, ...poolOverrides })
+
+  async function loadPoolBaseline() {
+    const names = [...new Set(submissions.filter((s) => s.status === 'pending').map((s) => s.scenario_name))]
+    if (names.length === 0) return
+    try {
+      const res = await fetch(`/api/arson/admin/recipe-submissions/pool-scenarios?names=${encodeURIComponent(names.join(','))}`)
+      if (!res.ok) return
+      const json = (await res.json()) as { scenarios?: Record<string, CurrentScenario> }
+      if (json.scenarios) poolOverrides = { ...poolOverrides, ...json.scenarios }
+    } catch {
+      /* best-effort — deployed data is still a reasonable fallback baseline */
+    }
+  }
+
   async function load() {
     loading = true
     loadError = ''
@@ -50,7 +108,10 @@
     }
   }
 
-  onMount(load)
+  onMount(async () => {
+    await load()
+    void loadPoolBaseline()
+  })
 
   async function act(
     id: number,
@@ -68,10 +129,18 @@
           action === 'approve' ? { decisions: decisions ?? {} } : { note: note ?? '' },
         ),
       })
-      const json = (await res.json()) as { ok?: boolean; error?: string }
+      const json = (await res.json()) as {
+        ok?: boolean
+        error?: string
+        merged?: CurrentScenario
+      }
       if (!res.ok || !json.ok) {
         actionError = { ...actionError, [id]: json.error ?? `HTTP ${res.status}` }
         return
+      }
+      if (action === 'approve' && json.merged) {
+        const sub = submissions.find((s) => s.id === id)
+        if (sub) poolOverrides = { ...poolOverrides, [sub.scenario_name]: json.merged }
       }
       await load()
     } catch {
@@ -179,6 +248,7 @@
     {:else}
       <div class="flex flex-col gap-10">
         {#each [...grouped.entries()] as [scenarioName, group] (scenarioName)}
+          {@const selectedInGroup = group.filter((s) => selectedIds.has(s.id))}
           <section>
             <div class="mb-3 flex items-center gap-2.5">
               <h2 class="text-base font-semibold text-ink-100">{scenarioName}</h2>
@@ -189,18 +259,45 @@
                   {group.length} submissions
                 </span>
               {/if}
+              {#if selectedInGroup.length >= 2 && mergingScenario !== scenarioName}
+                <button
+                  onclick={() => (mergingScenario = scenarioName)}
+                  class="rounded-full bg-accent-500/15 px-2.5 py-0.5 text-[10px] font-medium tracking-wide text-accent-300 uppercase transition-colors hover:bg-accent-500/25"
+                >
+                  Merge {selectedInGroup.length} selected →
+                </button>
+              {/if}
             </div>
+
+            {#if mergingScenario === scenarioName}
+              <div class="mb-4">
+                <MergeSubmissionsPanel
+                  submissions={selectedInGroup}
+                  current={effectiveCurrentScenarios[scenarioName]}
+                  busy={mergeBusy}
+                  error={mergeError}
+                  onCancel={() => {
+                    mergingScenario = null
+                    mergeError = ''
+                  }}
+                  onSubmit={(resolutions) => submitMerge(scenarioName, selectedInGroup, resolutions)}
+                />
+              </div>
+            {/if}
 
             <div class="grid grid-cols-1 gap-4 lg:grid-cols-2">
               {#each group as s (s.id)}
                 <RecipeSubmissionCard
                   submission={s}
-                  currentScenarios={data.currentScenarios}
+                  currentScenarios={effectiveCurrentScenarios}
                   variant="admin"
                   actionBusy={actionBusy[s.id]}
                   actionError={actionError[s.id]}
                   onSubmit={(decisions) => act(s.id, 'approve', decisions)}
                   onDeny={(note) => act(s.id, 'deny', undefined, note)}
+                  selectable={group.length > 1}
+                  selected={selectedIds.has(s.id)}
+                  onToggleSelect={() => toggleSelect(s.id)}
                 />
               {/each}
             </div>

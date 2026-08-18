@@ -255,7 +255,7 @@ export interface LineRow {
 /** Every changed line between a submission and current scenario data, one row per
  *  toggle-able decision — used to render the admin card's per-line approve/deny controls. */
 export function computeLineDiffs(
-  s: SubmissionLike,
+  s: Pick<SubmissionLike, 'payout_min' | 'payout_max'>,
   recipe: Recipe,
   current: CurrentScenario | undefined,
 ): LineRow[] {
@@ -391,6 +391,137 @@ export function hasAnyDenial(rows: LineRow[], decisions: FieldDecisions): boolea
 export function isAllDenied(rows: LineRow[], decisions: FieldDecisions): boolean {
   const actionable = rows.filter((r) => r.kind !== 'unchanged')
   return actionable.length > 0 && actionable.every((r) => (decisions[r.key] ?? 'approve') === 'deny')
+}
+
+export interface MergeCandidate {
+  /** 'current' or a submission id. */
+  source: 'current' | number
+  text: string
+}
+
+export interface MergeLineRow {
+  key: string
+  label: string
+  candidates: MergeCandidate[]
+}
+
+export interface MergeableSubmission {
+  id: number
+  payout_min: number
+  payout_max: number
+  recipe: Recipe
+}
+
+/** Union of every changed line across a set of sibling submissions being merged together,
+ *  each line listing "current" plus one candidate value per submission that touches it —
+ *  used to render the multi-select merge view's per-line picker. Lines untouched by every
+ *  selected submission are omitted (nothing to pick between). */
+export function computeMergeLines(
+  submissions: MergeableSubmission[],
+  current: CurrentScenario | undefined,
+): MergeLineRow[] {
+  const byKey = new Map<string, { label: string; oldText: string; candidates: MergeCandidate[] }>()
+  for (const sub of submissions) {
+    const rows = computeLineDiffs(sub, sub.recipe, current)
+    for (const row of rows) {
+      if (row.kind === 'unchanged') continue
+      let entry = byKey.get(row.key)
+      if (!entry) {
+        entry = { label: row.label, oldText: row.oldText, candidates: [{ source: 'current', text: row.oldText }] }
+        byKey.set(row.key, entry)
+      }
+      entry.candidates.push({ source: sub.id, text: row.newText })
+    }
+  }
+  return [...byKey.entries()].map(([key, entry]) => ({ key, label: entry.label, candidates: entry.candidates }))
+}
+
+export type MergeResolutions = Record<string, number | 'current'>
+
+/** Resolves a merge: for every contested/changed line, picks the winning submission's raw
+ *  value (or current's, if 'current' won or no resolution was given for that line), and
+ *  assembles the single Recipe that should ship. Unlike `mergeDecisions` (one submission vs.
+ *  current), this chooses among N submissions per line. */
+export function mergeMultiSubmission(
+  current: CurrentScenario | undefined,
+  submissions: MergeableSubmission[],
+  resolutions: MergeResolutions,
+): MergedRecipe {
+  const byId = new Map(submissions.map((s) => [s.id, s]))
+
+  function winnerFor(key: string): MergeableSubmission | 'current' {
+    const w = resolutions[key]
+    if (w === undefined || w === 'current') return 'current'
+    return byId.get(w) ?? 'current'
+  }
+
+  const payoutWinner = winnerFor('payout')
+  const payoutMin =
+    payoutWinner === 'current' ? (current?.payoutMin ?? submissions[0].payout_min) : payoutWinner.payout_min
+  const payoutMax =
+    payoutWinner === 'current' ? (current?.payoutMax ?? submissions[0].payout_max) : payoutWinner.payout_max
+
+  function mergeSection(section: RecipeSection): ActionItem[] {
+    const ids = new Set<string>()
+    for (const sub of submissions) {
+      for (const item of computeItemDiff(section, current?.actions[section], sub.recipe[section])) {
+        ids.add(item.key)
+      }
+    }
+    const result: ActionItem[] = []
+    for (const key of ids) {
+      const resourceId = key.slice(section.length + 1)
+      const winner = winnerFor(key)
+      const item =
+        winner === 'current'
+          ? (current?.actions[section] ?? []).find((i) => i.resourceId === resourceId)
+          : winner.recipe[section]?.find((i) => i.resourceId === resourceId)
+      if (item) result.push(item)
+    }
+    return result
+  }
+
+  const place = mergeSection('place')
+  const ignite = mergeSection('ignite')
+  const stoke = mergeSection('stoke')
+  const dampen = mergeSection('dampen')
+
+  const stokeTimeWinner = winnerFor('stokeTime')
+  const stokeTime = stokeTimeWinner === 'current' ? current?.actions.stokeTime : stokeTimeWinner.recipe.stokeTime
+  const dampenTimeWinner = winnerFor('dampenTime')
+  const dampenTime =
+    dampenTimeWinner === 'current' ? current?.actions.dampenTime : dampenTimeWinner.recipe.dampenTime
+
+  return {
+    payoutMin,
+    payoutMax,
+    recipe: {
+      place,
+      ignite,
+      ...(stoke.length ? { stoke } : {}),
+      ...(stokeTime ? { stokeTime } : {}),
+      ...(dampen.length ? { dampen } : {}),
+      ...(dampenTime ? { dampenTime } : {}),
+    },
+  }
+}
+
+/** Per-submission FieldDecisions derived from a resolved merge — a submission's own touched
+ *  lines become 'approve' where it won, 'deny' where a sibling (or current) won instead. Used
+ *  to persist each merged submission's individual status/field_decisions (decision #21: no new
+ *  schema for merges — every submission still gets its own record). */
+export function fieldDecisionsForMerge(
+  sub: MergeableSubmission,
+  current: CurrentScenario | undefined,
+  resolutions: MergeResolutions,
+): FieldDecisions {
+  const rows = computeLineDiffs(sub, sub.recipe, current).filter((r) => r.kind !== 'unchanged')
+  const decisions: FieldDecisions = {}
+  for (const row of rows) {
+    const winner = resolutions[row.key]
+    decisions[row.key] = winner === sub.id ? 'approve' : 'deny'
+  }
+  return decisions
 }
 
 export interface SubmissionPpn {
