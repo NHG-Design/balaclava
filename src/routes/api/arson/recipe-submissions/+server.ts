@@ -7,6 +7,9 @@ import { recipeSignature } from "$lib/recipe-diff";
 const RATE_LIMIT_MAX = 20;
 const RATE_LIMIT_WINDOW_MINUTES = 60;
 
+const SEARCH_RATE_LIMIT_MAX = 30;
+const SEARCH_RATE_LIMIT_WINDOW_MINUTES = 5;
+
 function formatRetryAfter(seconds: number): string {
   if (seconds < 60) return `${seconds}s`;
   const minutes = Math.ceil(seconds / 60);
@@ -324,9 +327,38 @@ async function handler(
   );
 }
 
+async function checkSearchRateLimit(
+  client: ReturnType<typeof createClient>,
+  clientIp: string,
+): Promise<Response | null> {
+  const recent = await client.execute({
+    sql: `SELECT COUNT(*) as count FROM search_rate_limit WHERE ip = ? AND created_at >= datetime('now', ?)`,
+    args: [clientIp, `-${SEARCH_RATE_LIMIT_WINDOW_MINUTES} minutes`],
+  });
+  if (Number(recent.rows[0]?.count ?? 0) >= SEARCH_RATE_LIMIT_MAX) {
+    return new Response(
+      JSON.stringify({
+        error: `Rate limit exceeded: max ${SEARCH_RATE_LIMIT_MAX} searches per ${SEARCH_RATE_LIMIT_WINDOW_MINUTES} minutes per IP. Try again shortly.`,
+      }),
+      {
+        status: 429,
+        headers: {
+          "Content-Type": "application/json",
+          "Retry-After": String(SEARCH_RATE_LIMIT_WINDOW_MINUTES * 60),
+        },
+      },
+    );
+  }
+  await client.execute({
+    sql: `INSERT INTO search_rate_limit (ip) VALUES (?)`,
+    args: [clientIp],
+  });
+  return null;
+}
+
 /** Public listing: pending/approved/merged submissions by default. Denied submissions are
  *  only included via ?status=denied. */
-export const GET: RequestHandler = async ({ url, platform }) => {
+export const GET: RequestHandler = async ({ url, platform, getClientAddress }) => {
   try {
     const dbUrl = platform?.env?.TURSO_DATABASE_URL;
     const authToken = platform?.env?.TURSO_AUTH_TOKEN;
@@ -337,6 +369,12 @@ export const GET: RequestHandler = async ({ url, platform }) => {
     const client = createClient({ url: dbUrl, authToken });
 
     const idFilter = Number(url.searchParams.get("id"));
+    const playerFilter = url.searchParams.get("player")?.trim();
+    if ((Number.isInteger(idFilter) && idFilter > 0) || playerFilter) {
+      const limited = await checkSearchRateLimit(client, getClientAddress());
+      if (limited) return limited;
+    }
+
     if (Number.isInteger(idFilter) && idFilter > 0) {
       const rows = await client.execute({
         sql: `
@@ -352,15 +390,16 @@ export const GET: RequestHandler = async ({ url, platform }) => {
       });
     }
 
-    const playerFilter = url.searchParams.get("player")?.trim();
     if (playerFilter) {
-      const like = `%${playerFilter}%`;
+      const escaped = playerFilter.replace(/[%_\\]/g, (c) => `\\${c}`);
+      const like = `%${escaped}%`;
       const rows = await client.execute({
         sql: `
           SELECT id, scenario_name, payout_min, payout_max, submitter_id, submitter_name, recipe, status, pr_number, created_at, field_decisions, deny_note
           FROM recipe_submissions
-          WHERE submitter_id LIKE ? OR submitter_name LIKE ?
+          WHERE submitter_id LIKE ? ESCAPE '\\' OR submitter_name LIKE ? ESCAPE '\\'
           ORDER BY created_at DESC
+          LIMIT 200
         `,
         args: [like, like],
       });
