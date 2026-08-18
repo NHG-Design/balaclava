@@ -182,24 +182,31 @@
     <!-- Decided outcome: show what was actually accepted vs. rejected, line by line. -->
     <div class="flex flex-col gap-1 text-[13px]">
       {#each lineDiffs as row (row.key)}
-        {@const approved = (storedDecisions[row.key] ?? 'approve') === 'approve'}
-        <p class="flex items-center gap-1.5">
-          <span class={approved ? 'text-emerald-400' : 'text-rose-400'}>
-            {approved ? '✓' : '✗'}
-          </span>
-          <span class="text-ink-400">{row.label}:</span>
-          {#if rowOldText(row)}
-            <span class="text-ink-500 line-through">{rowOldText(row)}</span>
-          {/if}
-          {#if rowOldText(row) && rowNewText(row)}
-            <span class="text-ink-600">→</span>
-          {/if}
-          {#if rowNewText(row)}
-            <span class="font-medium {approved ? 'text-ink-200' : 'text-ink-500 line-through'}"
-              >{rowNewText(row)}</span
-            >
-          {/if}
-        </p>
+        {#if row.kind === 'unchanged'}
+          <p class="flex items-center gap-1.5">
+            <span class="text-ink-400">{row.label}:</span>
+            <span class="text-ink-300">{row.newText}</span>
+          </p>
+        {:else}
+          {@const approved = (storedDecisions[row.key] ?? 'approve') === 'approve'}
+          <p class="flex items-center gap-1.5">
+            <span class={approved ? 'text-emerald-400' : 'text-rose-400'}>
+              {approved ? '✓' : '✗'}
+            </span>
+            <span class="text-ink-400">{row.label}:</span>
+            {#if rowOldText(row)}
+              <span class="text-ink-500 line-through">{rowOldText(row)}</span>
+            {/if}
+            {#if rowOldText(row) && rowNewText(row)}
+              <span class="text-ink-600">→</span>
+            {/if}
+            {#if rowNewText(row)}
+              <span class="font-medium {approved ? 'text-ink-200' : 'text-ink-500 line-through'}"
+                >{rowNewText(row)}</span
+              >
+            {/if}
+          </p>
+        {/if}
       {/each}
     </div>
   {:else if diff && !hasChanges}
@@ -208,46 +215,53 @@
     <!-- Pending: per-line Approve/Deny toggles feeding the Submit action below. -->
     <div class="flex flex-col gap-1.5 text-[13px]">
       {#each lineDiffs as row (row.key)}
-        <div class="flex flex-wrap items-center justify-between gap-x-3 gap-y-1">
-          <p>
+        {#if row.kind === 'unchanged'}
+          <p class="flex items-center gap-1.5">
             <span class="text-ink-400">{row.label}:</span>
-            {#if rowOldText(row)}
-              <span class="text-rose-400 line-through">{rowOldText(row)}</span>
-            {/if}
-            {#if rowOldText(row) && rowNewText(row)}
-              <span class="text-ink-600">→</span>
-            {/if}
-            {#if rowNewText(row)}
-              <span class="font-medium text-emerald-400">{rowNewText(row)}</span>
-            {/if}
+            <span class="text-ink-300">{row.newText}</span>
           </p>
-          <div class="inline-flex overflow-hidden rounded-md border border-ink-700 text-[11px]">
-            <button
-              disabled={actionBusy}
-              onclick={() => toggle(row.key, 'approve')}
-              class="px-2 py-1 font-medium transition-colors disabled:pointer-events-none disabled:opacity-40 {decisionFor(
-                row.key,
-              ) === 'approve'
-                ? 'bg-emerald-500/25 text-emerald-300'
-                : 'text-ink-400 hover:text-ink-200'}"
-            >
-              Approve
-            </button>
-            <button
-              disabled={actionBusy}
-              onclick={() => toggle(row.key, 'deny')}
-              class="px-2 py-1 font-medium transition-colors disabled:pointer-events-none disabled:opacity-40 {decisionFor(
-                row.key,
-              ) === 'deny'
-                ? 'bg-rose-500/25 text-rose-300'
-                : 'text-ink-400 hover:text-ink-200'}"
-            >
-              Deny
-            </button>
+        {:else}
+          <div class="flex flex-wrap items-center justify-between gap-x-3 gap-y-1">
+            <p>
+              <span class="text-ink-400">{row.label}:</span>
+              {#if rowOldText(row)}
+                <span class="text-rose-400 line-through">{rowOldText(row)}</span>
+              {/if}
+              {#if rowOldText(row) && rowNewText(row)}
+                <span class="text-ink-600">→</span>
+              {/if}
+              {#if rowNewText(row)}
+                <span class="font-medium text-emerald-400">{rowNewText(row)}</span>
+              {/if}
+            </p>
+            <div class="inline-flex overflow-hidden rounded-md border border-ink-700 text-[11px]">
+              <button
+                disabled={actionBusy}
+                onclick={() => toggle(row.key, 'approve')}
+                class="px-2 py-1 font-medium transition-colors disabled:pointer-events-none disabled:opacity-40 {decisionFor(
+                  row.key,
+                ) === 'approve'
+                  ? 'bg-emerald-500/25 text-emerald-300'
+                  : 'text-ink-400 hover:text-ink-200'}"
+              >
+                Approve
+              </button>
+              <button
+                disabled={actionBusy}
+                onclick={() => toggle(row.key, 'deny')}
+                class="px-2 py-1 font-medium transition-colors disabled:pointer-events-none disabled:opacity-40 {decisionFor(
+                  row.key,
+                ) === 'deny'
+                  ? 'bg-rose-500/25 text-rose-300'
+                  : 'text-ink-400 hover:text-ink-200'}"
+              >
+                Deny
+              </button>
+            </div>
           </div>
-        </div>
+        {/if}
       {/each}
-      {#if lineDiffs.length === 0}
+      {#if lineDiffs.every((r) => r.kind === 'unchanged')}
         <p class="text-sm text-ink-400">No changes from current data.</p>
       {/if}
     </div>

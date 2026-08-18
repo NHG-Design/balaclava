@@ -286,7 +286,6 @@ export function computeLineDiffs(
     const newItems = recipe[section]
     if (!oldItems && !newItems) continue
     for (const item of computeItemDiff(section, oldItems, newItems)) {
-      if (item.kind === 'unchanged') continue
       rows.push({
         key: item.key,
         label,
@@ -381,13 +380,17 @@ export function mergeDecisions(
 /** Whether a decisions map (defaults included) contains any denial — used to tell a
  *  clean 'approved' from a mixed 'partial' outcome. */
 export function hasAnyDenial(rows: LineRow[], decisions: FieldDecisions): boolean {
-  return rows.some((r) => (decisions[r.key] ?? 'approve') === 'deny')
+  return rows
+    .filter((r) => r.kind !== 'unchanged')
+    .some((r) => (decisions[r.key] ?? 'approve') === 'deny')
 }
 
 /** Whether every line was denied — a fully-denied submission is routed through the plain
- *  deny endpoint instead of being recorded as an empty 'partial' approval. */
+ *  deny endpoint instead of being recorded as an empty 'partial' approval. Unchanged lines
+ *  aren't toggle-able, so they're excluded from this check. */
 export function isAllDenied(rows: LineRow[], decisions: FieldDecisions): boolean {
-  return rows.length > 0 && rows.every((r) => (decisions[r.key] ?? 'approve') === 'deny')
+  const actionable = rows.filter((r) => r.kind !== 'unchanged')
+  return actionable.length > 0 && actionable.every((r) => (decisions[r.key] ?? 'approve') === 'deny')
 }
 
 export interface SubmissionPpn {
