@@ -601,11 +601,11 @@ export const SCENARIOS: Scenario[] = [
 
   {
     scenarioName: "Beat the Odds",
-    payoutMin: 330_000,
+    payoutMin: 300_000,
     payoutMax: 350_000,
     actions: {
-      ignite: [{ resourceId: RESOURCE.LIGHTER, qty: 1 }],
-      place: [{ resourceId: RESOURCE.GASOLINE, qty: 4 }],
+      place: [{ resourceId: RESOURCE.GASOLINE, qty: 5 }],
+      ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
     },
   },
 
