@@ -56,11 +56,11 @@ export const SCENARIOS: Scenario[] = [
   },
   {
     scenarioName: "A Thong of Lice and Fire",
-    payoutMin: 220_000,
+    payoutMin: 130_000,
     payoutMax: 220_000,
     actions: {
-      ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
       place: [{ resourceId: RESOURCE.HYDROGEN, qty: 1 }],
+      ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
       stoke: [{ resourceId: RESOURCE.METHANE, qty: 1 }],
       stokeTime: "early",
     },
