@@ -28,6 +28,11 @@ import {
   ICON_EXTERNAL_LINK,
   ICON_RESET,
   ICON_REFRESH,
+  ICON_TAB_PRICES,
+  ICON_TAB_THRESHOLDS,
+  ICON_TAB_VISUALS,
+  ICON_TAB_API,
+  ICON_TAB_SUBMIT,
 } from "./icons.js";
 
 // ---------------------------------------------------------------------------
@@ -47,6 +52,8 @@ export interface SettingsCtx {
   getShowResourcePrices(): boolean;
   getShowScenarioName(): boolean;
   getStackResources(): boolean;
+  getShowMaterialIcons(): boolean;
+  getShowMaterialTextColor(): boolean;
   getPpnBarPosition(): PpnBarPosition;
   getPayoutBasis(): PayoutBasis;
   getShowBuildingStats(): boolean;
@@ -73,6 +80,8 @@ export interface SettingsCtx {
   setShowResourcePrices(show: boolean): void;
   setShowScenarioName(show: boolean): void;
   setStackResources(stack: boolean): void;
+  setShowMaterialIcons(show: boolean): void;
+  setShowMaterialTextColor(show: boolean): void;
   setPpnBarPosition(position: PpnBarPosition): void;
   setPayoutBasis(basis: PayoutBasis): void;
   setShowBuildingStats(show: boolean): void;
@@ -105,7 +114,9 @@ function setErrStatus(statusEl: HTMLElement, message: string): void {
 // ---------------------------------------------------------------------------
 
 export function injectSettingsStyles(): void {
-  injectStyleOnce("pyro-settings-styles", `
+  injectStyleOnce(
+    "pyro-settings-styles",
+    `
 .pyro-settings-wrap {
     margin-left: 8px;
 }
@@ -116,16 +127,33 @@ export function injectSettingsStyles(): void {
 }
 .pyro-tab-bar { display: flex; border-bottom: 1px solid var(--shared-border); }
 .pyro-tab {
-    flex: 1;
+    flex: 0 0 auto;
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
     background: none;
     border: none;
     border-bottom: 1px solid transparent;
     color: var(--shared-text-muted);
     cursor: pointer;
-    padding: 8px 16px;
+    padding: 8px 12px;
     font: inherit;
     font-size: 14px;
     transition: color 120ms ease-out;
+}
+.pyro-tab svg { display: none; width: 20px; height: 20px; flex-shrink: 0; }
+.pyro-tab-label {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    min-width: 0;
+}
+@media (max-width: 480px) {
+    .pyro-tab { flex: 1; padding: 8px 6px; }
+    .pyro-tab svg { display: block; }
+    .pyro-tab-label { display: none; }
 }
 @media (hover: hover) and (pointer: fine) {
     .pyro-tab:hover { color: var(--shared-text); }
@@ -278,7 +306,8 @@ ${toggleRowCss(BAND_COLOR.excellent)}
 .pyro-s-section-note a svg { width: 10px; height: 10px; flex-shrink: 0; }
 .pyro-s-missing-header { font-size: 10px; color: var(--shared-text-muted); margin: 8px 0 4px; }
 .pyro-s-missing-list { font-size: 10px; color: var(--shared-text-muted); padding-left: 14px; margin: 0; }
-`);
+`,
+  );
 }
 
 // ---------------------------------------------------------------------------
@@ -733,6 +762,21 @@ function buildVisualsTab(ctx: SettingsCtx): HTMLElement {
     ),
   );
 
+  materialsGroup.appendChild(
+    checkboxRow(
+      "Show material icons",
+      ctx.getShowMaterialIcons,
+      ctx.setShowMaterialIcons,
+    ),
+  );
+  materialsGroup.appendChild(
+    checkboxRow(
+      "Color material text",
+      ctx.getShowMaterialTextColor,
+      ctx.setShowMaterialTextColor,
+    ),
+  );
+
   root.appendChild(materialsGroup);
 
   return root;
@@ -825,12 +869,12 @@ function buildTabBar(
   activeId: string,
   onSwitch: (id: TabId) => void,
 ): HTMLElement {
-  const tabs: Array<{ value: TabId; label: string }> = [
-    { value: "prices", label: "Prices" },
-    { value: "thresholds", label: "Thresholds" },
-    { value: "visuals", label: "Visuals" },
-    { value: "api", label: "API" },
-    { value: "submit", label: "Submit" },
+  const tabs: Array<{ value: TabId; label: string; icon: string }> = [
+    { value: "prices", label: "Prices", icon: ICON_TAB_PRICES },
+    { value: "thresholds", label: "Thresholds", icon: ICON_TAB_THRESHOLDS },
+    { value: "visuals", label: "Visuals", icon: ICON_TAB_VISUALS },
+    { value: "api", label: "API", icon: ICON_TAB_API },
+    { value: "submit", label: "Submit", icon: ICON_TAB_SUBMIT },
   ];
   let current = activeId as TabId;
   const { wrap } = buildButtonGroup(
@@ -839,6 +883,9 @@ function buildTabBar(
       btnClassName: "pyro-tab",
       onButtonCreated(btn, option) {
         btn.dataset.tab = option.value;
+        const tab = tabs.find((t) => t.value === option.value);
+        btn.setAttribute("aria-label", option.label);
+        btn.innerHTML = `${tab?.icon ?? ""}<span class="pyro-tab-label">${option.label}</span>`;
       },
     },
     tabs,

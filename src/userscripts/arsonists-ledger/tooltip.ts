@@ -1,7 +1,7 @@
 import { CATALOG, RESOURCE } from "../../data/catalog.js";
 import type { ActionItem, ActionTime } from "../../data/scenarios.js";
 import { type RankedScenario, type PriceMap, formatPpn } from "./engine.js";
-import { BAND_COLOR } from "./colors.js";
+import { BAND_COLOR, MATERIAL_COLOR } from "./colors.js";
 import { el } from "../../lib/shared-ui/dom.js";
 import { buildSegmentTrack } from "../shared/segment-bar.js";
 
@@ -17,6 +17,16 @@ function row(label: string, value: string, highlight?: boolean): HTMLElement {
   div.appendChild(l);
   div.appendChild(v);
   return div;
+}
+
+function isFuelMaterial(resourceId: ActionItem["resourceId"]): boolean {
+  const category = CATALOG[resourceId]?.category;
+  return category === "liquid" || category === "solid" || category === "gaseous";
+}
+
+function materialIconUrl(resourceId: ActionItem["resourceId"]): string | null {
+  const tornId = CATALOG[resourceId]?.tornId;
+  return tornId ? `https://www.torn.com/images/items/${tornId}/medium.png` : null;
 }
 
 function itemCost(item: ActionItem, prices: PriceMap): number | null {
@@ -46,6 +56,8 @@ function actionSection(
   showOptionalBadges = true,
   showResourcePrices = true,
   stackResources = true,
+  showMaterialIcons = false,
+  showMaterialTextColor = false,
 ): HTMLElement | null {
   if (!items || items.length === 0) return null;
   const div = el("div", "pyro-tt-action");
@@ -60,6 +72,16 @@ function actionSection(
   items.forEach((item, i) => {
     const itemEl = el("span", "pyro-tt-item");
     const name = CATALOG[item.resourceId]?.name ?? item.resourceId;
+    const isFuel = isFuelMaterial(item.resourceId);
+    if (showMaterialIcons) {
+      const iconUrl = materialIconUrl(item.resourceId);
+      if (iconUrl) {
+        const iconEl = el("img", "pyro-tt-item-icon") as HTMLImageElement;
+        iconEl.src = iconUrl;
+        iconEl.alt = "";
+        itemEl.appendChild(iconEl);
+      }
+    }
     const nameEl = el(
       "span",
       item.optional
@@ -67,6 +89,10 @@ function actionSection(
         : "pyro-tt-item-name",
     );
     nameEl.textContent = `${item.qty}× ${name}`;
+    if (showMaterialTextColor && isFuel) {
+      const color = MATERIAL_COLOR[item.resourceId];
+      if (color) nameEl.style.color = color;
+    }
     itemEl.appendChild(nameEl);
     const cost = showResourcePrices ? itemCost(item, prices) : null;
     if (cost !== null) {
@@ -100,6 +126,8 @@ function buildPrimaryBlock(
     showResourcePrices?: boolean;
     showScenarioName?: boolean;
     stackResources?: boolean;
+    showMaterialIcons?: boolean;
+    showMaterialTextColor?: boolean;
   },
 ): DocumentFragment {
   const frag = document.createDocumentFragment();
@@ -154,6 +182,8 @@ function buildPrimaryBlock(
   const showOptionalBadges = options?.showOptionalBadges !== false;
   const showResourcePrices = options?.showResourcePrices !== false;
   const stackResources = options?.stackResources !== false;
+  const showMaterialIcons = options?.showMaterialIcons === true;
+  const showMaterialTextColor = options?.showMaterialTextColor === true;
   for (const [label, items, timing] of actionOrder) {
     const s = actionSection(
       label,
@@ -163,6 +193,8 @@ function buildPrimaryBlock(
       showOptionalBadges,
       showResourcePrices,
       stackResources,
+      showMaterialIcons,
+      showMaterialTextColor,
     );
     if (s) frag.appendChild(s);
   }
@@ -185,6 +217,8 @@ export function buildTooltipContent(
     showResourcePrices?: boolean;
     showScenarioName?: boolean;
     stackResources?: boolean;
+    showMaterialIcons?: boolean;
+    showMaterialTextColor?: boolean;
   },
 ): HTMLElement {
   const root = el("div", "pyro-tt");
@@ -426,6 +460,15 @@ export function buildTooltipStyles(): string {
 }
 .pyro-tt-action-value {
     font-size: 12px;
+}
+.pyro-tt-item-icon {
+    width: 12px;
+    height: 12px;
+    object-fit: cover;
+    object-position: center;
+    border-radius: 2px;
+    margin-right: 3px;
+    vertical-align: -2px;
 }
 .pyro-tt-item-cost {
     color: oklch(66% 0 0);

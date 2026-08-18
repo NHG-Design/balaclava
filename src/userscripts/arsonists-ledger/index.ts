@@ -76,6 +76,8 @@ const KEY_SHOW_MATERIAL_SUSPICION = "pyroLedger.v1.showMaterialSuspicion";
 const KEY_SHOW_MATERIAL_IGNITION_RISK =
   "pyroLedger.v1.showMaterialIgnitionRisk";
 const KEY_SHOW_MATERIAL_STOKING_RISK = "pyroLedger.v1.showMaterialStokingRisk";
+const KEY_SHOW_MATERIAL_ICONS = "pyroLedger.v1.showMaterialIcons";
+const KEY_SHOW_MATERIAL_TEXT_COLOR = "pyroLedger.v1.showMaterialTextColor";
 
 // ---------------------------------------------------------------------------
 // Minimal GM storage shim (falls back to localStorage in dev/non-GM contexts)
@@ -159,6 +161,8 @@ let showOptionalBadges = true;
 let showResourcePrices = true;
 let showScenarioName = true;
 let stackResources = true;
+let showMaterialIcons = false;
+let showMaterialTextColor = false;
 let ppnBarPosition: "left" | "right" = "right";
 let payoutBasis: PayoutBasis = "average";
 let showBuildingStats = false;
@@ -198,6 +202,9 @@ function loadState(): void {
   showResourcePrices = store_get(KEY_SHOW_RESOURCE_PRICES, "1") !== "0";
   showScenarioName = store_get(KEY_SHOW_SCENARIO_NAME, "1") !== "0";
   stackResources = store_get(KEY_STACK_RESOURCES, "1") !== "0";
+  showMaterialIcons = store_get(KEY_SHOW_MATERIAL_ICONS, "0") !== "0";
+  showMaterialTextColor =
+    store_get(KEY_SHOW_MATERIAL_TEXT_COLOR, "0") !== "0";
   ppnBarPosition =
     store_get(KEY_PPN_BAR_POSITION, "right") === "left" ? "left" : "right";
   payoutBasis =
@@ -274,6 +281,18 @@ function setShowOptionalBadgesEnabled(show: boolean): void {
 function setShowResourcePricesEnabled(show: boolean): void {
   showResourcePrices = show;
   store_set(KEY_SHOW_RESOURCE_PRICES, show ? "1" : "0");
+  resetScans();
+}
+
+function setShowMaterialIconsEnabled(show: boolean): void {
+  showMaterialIcons = show;
+  store_set(KEY_SHOW_MATERIAL_ICONS, show ? "1" : "0");
+  resetScans();
+}
+
+function setShowMaterialTextColorEnabled(show: boolean): void {
+  showMaterialTextColor = show;
+  store_set(KEY_SHOW_MATERIAL_TEXT_COLOR, show ? "1" : "0");
   resetScans();
 }
 
@@ -947,6 +966,8 @@ function applyToSection(
       showResourcePrices,
       showScenarioName,
       stackResources,
+      showMaterialIcons,
+      showMaterialTextColor,
     );
   });
 }
@@ -1031,12 +1052,16 @@ function buildTooltipContentWithStyles(
   showResourcePrices = true,
   showScenarioName = true,
   stackResources = true,
+  showMaterialIcons = false,
+  showMaterialTextColor = false,
 ): HTMLElement {
   const node = buildTooltipContent(ranked, prices, statsOnly, {
     showOptionalBadges,
     showResourcePrices,
     showScenarioName,
     stackResources,
+    showMaterialIcons,
+    showMaterialTextColor,
   });
   const style = el("style");
   style.textContent = buildTooltipStyles();
@@ -1102,6 +1127,8 @@ const settingsCtx: SettingsCtx = {
   getShowResourcePrices: () => showResourcePrices,
   getShowScenarioName: () => showScenarioName,
   getStackResources: () => stackResources,
+  getShowMaterialIcons: () => showMaterialIcons,
+  getShowMaterialTextColor: () => showMaterialTextColor,
   getPpnBarPosition: () => ppnBarPosition,
   getPayoutBasis: () => payoutBasis,
   getShowBuildingStats: () => showBuildingStats,
@@ -1128,6 +1155,8 @@ const settingsCtx: SettingsCtx = {
   setShowResourcePrices: setShowResourcePricesEnabled,
   setShowScenarioName: setShowScenarioNameEnabled,
   setStackResources: setStackResourcesEnabled,
+  setShowMaterialIcons: setShowMaterialIconsEnabled,
+  setShowMaterialTextColor: setShowMaterialTextColorEnabled,
   setPpnBarPosition,
   setPayoutBasis,
   setShowBuildingStats: setShowBuildingStatsEnabled,

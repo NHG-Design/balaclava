@@ -58,8 +58,8 @@ export function injectPopoverStyles(): void {
     border: var(--mini-profile-border);
     box-shadow: var(--mini-profile-box-shadow);
     border-radius: var(--pyro-tooltip-radius);
-    min-width: 290px;
-    max-width: 360px;
+    min-width: min(290px, calc(100vw - 24px));
+    max-width: min(420px, calc(100vw - 24px));
     overflow: visible;
     transform-origin: calc(100% - (var(--pyro-popover-btn-size) / 2)) calc(0px - var(--pyro-tooltip-arrow-size));
     transform: scale(0.95);

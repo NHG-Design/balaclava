@@ -1,1 +1,1 @@
-export const MATERIALS_VERSION = 'e7cf608c9e71';
+export const MATERIALS_VERSION = '8326ec1597b7';
