@@ -560,11 +560,11 @@ export const SCENARIOS: Scenario[] = [
 
   {
     scenarioName: "Baewatch",
-    payoutMin: 13_000,
+    payoutMin: 8_300,
     payoutMax: 16_000,
     actions: {
+      place: [{ resourceId: RESOURCE.GASOLINE, qty: 2 }],
       ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
-      place: [{ resourceId: RESOURCE.GASOLINE, qty: 1 }],
     },
   },
 
