@@ -365,11 +365,11 @@ export const SCENARIOS: Scenario[] = [
 
   {
     scenarioName: "Cache and Burn",
-    payoutMin: 490_000,
-    payoutMax: 510_000,
+    payoutMin: 420_000,
+    payoutMax: 550_000,
     actions: {
-      ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
       place: [{ resourceId: RESOURCE.KEROSENE, qty: 4 }],
+      ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
     },
   },
 
@@ -601,10 +601,10 @@ export const SCENARIOS: Scenario[] = [
 
   {
     scenarioName: "Beat the Odds",
-    payoutMin: 300_000,
+    payoutMin: 330_000,
     payoutMax: 350_000,
     actions: {
-      place: [{ resourceId: RESOURCE.GASOLINE, qty: 5 }],
+      place: [{ resourceId: RESOURCE.GASOLINE, qty: 4 }],
       ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
     },
   },
@@ -748,11 +748,13 @@ export const SCENARIOS: Scenario[] = [
 
   {
     scenarioName: "Burning Through Cash",
-    payoutMin: 105_000,
-    payoutMax: 120_000,
+    payoutMin: 250_000,
+    payoutMax: 250_000,
     actions: {
+      place: [{ resourceId: RESOURCE.GASOLINE, qty: 1 }],
       ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
-      place: [{ resourceId: RESOURCE.HYDROGEN, qty: 1 }],
+      stoke: [{ resourceId: RESOURCE.METHANE, qty: 2 }],
+      stokeTime: "early",
     },
   },
 
@@ -832,12 +834,12 @@ export const SCENARIOS: Scenario[] = [
 
   {
     scenarioName: "Checking Out",
-    payoutMin: 230_000,
+    payoutMin: 250_000,
     payoutMax: 360_000,
     actions: {
-      place: [{ resourceId: RESOURCE.HYDROGEN, qty: 1 }],
-      ignite: [{ resourceId: RESOURCE.LIGHTER, qty: 1 }],
-      stoke: [{ resourceId: RESOURCE.HYDROGEN, qty: 1 }],
+      place: [{ resourceId: RESOURCE.GASOLINE, qty: 1 }, { resourceId: RESOURCE.HYDROGEN, qty: 1 }],
+      ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
+      stoke: [{ resourceId: RESOURCE.METHANE, qty: 1 }],
       stokeTime: "early",
     },
   },
@@ -1336,11 +1338,11 @@ export const SCENARIOS: Scenario[] = [
 
   {
     scenarioName: "Holy Smokes",
-    payoutMin: 56_500,
+    payoutMin: 43_000,
     payoutMax: 73_000,
     actions: {
-      ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
       place: [{ resourceId: RESOURCE.HYDROGEN, qty: 1 }],
+      ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
     },
   },
 
@@ -1460,23 +1462,25 @@ export const SCENARIOS: Scenario[] = [
 
   {
     scenarioName: "In Your Debt",
-    payoutMin: 33_000,
-    payoutMax: 46_000,
+    payoutMin: 170_000,
+    payoutMax: 170_000,
     actions: {
-      ignite: [{ resourceId: RESOURCE.LIGHTER, qty: 1 }],
-      place: [{ resourceId: RESOURCE.HYDROGEN, qty: 1 }],
+      place: [{ resourceId: RESOURCE.KEROSENE, qty: 1 }],
+      ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
+      stoke: [{ resourceId: RESOURCE.METHANE, qty: 2 }],
+      stokeTime: "early",
     },
   },
 
   {
     scenarioName: "Insert Coin to Continue",
-    payoutMin: 120_000,
-    payoutMax: 120_000,
+    payoutMin: 170_000,
+    payoutMax: 180_000,
     actions: {
-      ignite: [{ resourceId: RESOURCE.LIGHTER, qty: 1 }],
-      place: [{ resourceId: RESOURCE.HYDROGEN, qty: 2 }],
-      stoke: [{ resourceId: RESOURCE.HYDROGEN, qty: 1 }],
-      stokeTime: "late",
+      place: [{ resourceId: RESOURCE.GASOLINE, qty: 2 }],
+      ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
+      stoke: [{ resourceId: RESOURCE.METHANE, qty: 2 }],
+      stokeTime: "early",
     },
   },
 
@@ -1610,7 +1614,7 @@ export const SCENARIOS: Scenario[] = [
 
   {
     scenarioName: "Low Rent",
-    payoutMin: 41_000,
+    payoutMin: 180_000,
     payoutMax: 210_000,
     actions: {
       place: [{ resourceId: RESOURCE.GASOLINE, qty: 1 }],
@@ -1622,7 +1626,7 @@ export const SCENARIOS: Scenario[] = [
 
   {
     scenarioName: "Make a Killing",
-    payoutMin: 340_000,
+    payoutMin: 290_000,
     payoutMax: 480_000,
     actions: {
       place: [{ resourceId: RESOURCE.KEROSENE, qty: 3 }],
@@ -1678,14 +1682,11 @@ export const SCENARIOS: Scenario[] = [
 
   {
     scenarioName: "Mental Block",
-    payoutMin: 580_000,
+    payoutMin: 490_000,
     payoutMax: 580_000,
     actions: {
+      place: [{ resourceId: RESOURCE.GASOLINE, qty: 4 }, { resourceId: RESOURCE.THERMITE, qty: 1 }],
       ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
-      place: [
-        { resourceId: RESOURCE.GASOLINE, qty: 5 },
-        { resourceId: RESOURCE.THERMITE, qty: 1 },
-      ],
     },
     needsVerification: true,
   },
