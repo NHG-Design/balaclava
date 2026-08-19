@@ -365,11 +365,11 @@ export const SCENARIOS: Scenario[] = [
 
   {
     scenarioName: "Cache and Burn",
-    payoutMin: 490_000,
-    payoutMax: 510_000,
+    payoutMin: 420_000,
+    payoutMax: 550_000,
     actions: {
-      ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
       place: [{ resourceId: RESOURCE.KEROSENE, qty: 4 }],
+      ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
     },
   },
 
