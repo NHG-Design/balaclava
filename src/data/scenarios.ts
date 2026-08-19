@@ -56,11 +56,11 @@ export const SCENARIOS: Scenario[] = [
   },
   {
     scenarioName: "A Thong of Lice and Fire",
-    payoutMin: 220_000,
+    payoutMin: 130_000,
     payoutMax: 220_000,
     actions: {
-      ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
       place: [{ resourceId: RESOURCE.HYDROGEN, qty: 1 }],
+      ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
       stoke: [{ resourceId: RESOURCE.METHANE, qty: 1 }],
       stokeTime: "early",
     },
@@ -560,11 +560,11 @@ export const SCENARIOS: Scenario[] = [
 
   {
     scenarioName: "Baewatch",
-    payoutMin: 13_000,
+    payoutMin: 8_300,
     payoutMax: 16_000,
     actions: {
+      place: [{ resourceId: RESOURCE.GASOLINE, qty: 2 }],
       ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
-      place: [{ resourceId: RESOURCE.GASOLINE, qty: 1 }],
     },
   },
 
@@ -601,11 +601,11 @@ export const SCENARIOS: Scenario[] = [
 
   {
     scenarioName: "Beat the Odds",
-    payoutMin: 330_000,
+    payoutMin: 300_000,
     payoutMax: 350_000,
     actions: {
-      ignite: [{ resourceId: RESOURCE.LIGHTER, qty: 1 }],
-      place: [{ resourceId: RESOURCE.GASOLINE, qty: 4 }],
+      place: [{ resourceId: RESOURCE.GASOLINE, qty: 5 }],
+      ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
     },
   },
 
@@ -2580,7 +2580,10 @@ export const SCENARIOS: Scenario[] = [
     scenarioName: "Cut to the Chase",
     payoutMin: 0,
     payoutMax: 0,
-    actions: { place: [{ resourceId: RESOURCE.GASOLINE, qty: 2 }] },
+    actions: {
+      place: [{ resourceId: RESOURCE.GASOLINE, qty: 2 }],
+      ignite: [{ resourceId: RESOURCE.LIGHTER, qty: 1 }],
+    },
     needsVerification: true,
   },
   {
