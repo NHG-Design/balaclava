@@ -1682,14 +1682,11 @@ export const SCENARIOS: Scenario[] = [
 
   {
     scenarioName: "Mental Block",
-    payoutMin: 580_000,
+    payoutMin: 490_000,
     payoutMax: 580_000,
     actions: {
+      place: [{ resourceId: RESOURCE.GASOLINE, qty: 4 }, { resourceId: RESOURCE.THERMITE, qty: 1 }],
       ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
-      place: [
-        { resourceId: RESOURCE.GASOLINE, qty: 5 },
-        { resourceId: RESOURCE.THERMITE, qty: 1 },
-      ],
     },
     needsVerification: true,
   },
