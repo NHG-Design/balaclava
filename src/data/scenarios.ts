@@ -1474,13 +1474,13 @@ export const SCENARIOS: Scenario[] = [
 
   {
     scenarioName: "Insert Coin to Continue",
-    payoutMin: 120_000,
-    payoutMax: 120_000,
+    payoutMin: 170_000,
+    payoutMax: 180_000,
     actions: {
-      ignite: [{ resourceId: RESOURCE.LIGHTER, qty: 1 }],
-      place: [{ resourceId: RESOURCE.HYDROGEN, qty: 2 }],
-      stoke: [{ resourceId: RESOURCE.HYDROGEN, qty: 1 }],
-      stokeTime: "late",
+      place: [{ resourceId: RESOURCE.GASOLINE, qty: 2 }],
+      ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
+      stoke: [{ resourceId: RESOURCE.METHANE, qty: 2 }],
+      stokeTime: "early",
     },
   },
 
