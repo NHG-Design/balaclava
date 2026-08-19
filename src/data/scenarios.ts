@@ -834,12 +834,12 @@ export const SCENARIOS: Scenario[] = [
 
   {
     scenarioName: "Checking Out",
-    payoutMin: 230_000,
+    payoutMin: 250_000,
     payoutMax: 360_000,
     actions: {
-      place: [{ resourceId: RESOURCE.HYDROGEN, qty: 1 }],
-      ignite: [{ resourceId: RESOURCE.LIGHTER, qty: 1 }],
-      stoke: [{ resourceId: RESOURCE.HYDROGEN, qty: 1 }],
+      place: [{ resourceId: RESOURCE.GASOLINE, qty: 1 }, { resourceId: RESOURCE.HYDROGEN, qty: 1 }],
+      ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
+      stoke: [{ resourceId: RESOURCE.METHANE, qty: 1 }],
       stokeTime: "early",
     },
   },
