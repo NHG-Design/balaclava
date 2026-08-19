@@ -1462,11 +1462,13 @@ export const SCENARIOS: Scenario[] = [
 
   {
     scenarioName: "In Your Debt",
-    payoutMin: 33_000,
-    payoutMax: 46_000,
+    payoutMin: 170_000,
+    payoutMax: 170_000,
     actions: {
-      ignite: [{ resourceId: RESOURCE.LIGHTER, qty: 1 }],
-      place: [{ resourceId: RESOURCE.HYDROGEN, qty: 1 }],
+      place: [{ resourceId: RESOURCE.KEROSENE, qty: 1 }],
+      ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
+      stoke: [{ resourceId: RESOURCE.METHANE, qty: 2 }],
+      stokeTime: "early",
     },
   },
 
