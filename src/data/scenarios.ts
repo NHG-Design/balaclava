@@ -1614,7 +1614,7 @@ export const SCENARIOS: Scenario[] = [
 
   {
     scenarioName: "Low Rent",
-    payoutMin: 41_000,
+    payoutMin: 180_000,
     payoutMax: 210_000,
     actions: {
       place: [{ resourceId: RESOURCE.GASOLINE, qty: 1 }],
