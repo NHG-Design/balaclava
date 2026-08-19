@@ -1626,7 +1626,7 @@ export const SCENARIOS: Scenario[] = [
 
   {
     scenarioName: "Make a Killing",
-    payoutMin: 340_000,
+    payoutMin: 290_000,
     payoutMax: 480_000,
     actions: {
       place: [{ resourceId: RESOURCE.KEROSENE, qty: 3 }],
