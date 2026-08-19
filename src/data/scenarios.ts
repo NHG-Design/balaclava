@@ -1338,11 +1338,11 @@ export const SCENARIOS: Scenario[] = [
 
   {
     scenarioName: "Holy Smokes",
-    payoutMin: 56_500,
+    payoutMin: 43_000,
     payoutMax: 73_000,
     actions: {
-      ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
       place: [{ resourceId: RESOURCE.HYDROGEN, qty: 1 }],
+      ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
     },
   },
 
