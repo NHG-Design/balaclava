@@ -748,11 +748,11 @@ export const SCENARIOS: Scenario[] = [
 
   {
     scenarioName: "Burning Through Cash",
-    payoutMin: 105_000,
+    payoutMin: 81_000,
     payoutMax: 120_000,
     actions: {
-      ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
       place: [{ resourceId: RESOURCE.HYDROGEN, qty: 1 }],
+      ignite: [{ resourceId: RESOURCE.FLAMETHROWER, qty: 1 }],
     },
   },
 
